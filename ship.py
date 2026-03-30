@@ -6,3 +6,5 @@ class Ship:
         self.x, self.y = x, y
         self.width, self.height = width, height
         self.velocity = 8
+        self.state = "move"
+        self.moving = False
