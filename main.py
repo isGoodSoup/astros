@@ -15,6 +15,7 @@ class Game:
         self.screen_size = (pygame.display.Info().current_w/4,
                             pygame.display.Info().current_h/1.5)
         self.screen = pygame.display.set_mode(self.screen_size, pygame.SCALED, vsync=1)
+        pygame.display.set_caption("Astros")
         self.clock = pygame.time.Clock()
         self.running = True
         self.fps = 60
@@ -100,7 +101,7 @@ class Game:
                     self.ship_x + img.get_width() // 2,
                     self.ship_y
                 )
-                self.projectiles.add(projectile)
+                self.projectiles.add(projectile)  # type: ignore
             elif self.ship.moving:
                 self.ship.state = "move"
             else:
