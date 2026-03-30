@@ -2,6 +2,7 @@ import random
 
 import pygame
 
+from meteor import Meteor
 from proj import Projectile
 from ship import Ship
 from sprites import SpriteSheet
@@ -12,8 +13,8 @@ animation_cooldown = 100
 class Game:
     def __init__(self):
         pygame.init()
-        self.screen_size = (pygame.display.Info().current_w/4,
-                            pygame.display.Info().current_h/1.5)
+        self.screen_size = (int(pygame.display.Info().current_w / 4),
+                            int(pygame.display.Info().current_h / 1.5))
         self.screen = pygame.display.set_mode(self.screen_size, pygame.SCALED, vsync=1)
         pygame.display.set_caption("Astros")
         self.clock = pygame.time.Clock()
@@ -22,6 +23,7 @@ class Game:
         self.frame = 0
         self.scale = 3
         self.projectiles = pygame.sprite.Group()
+        self.meteors = pygame.sprite.Group()
         self.sprite_sheet = SpriteSheet("assets/ship.png")
         framew = self.sprite_sheet.sheet.get_width() // cols
         frameh = self.sprite_sheet.sheet.get_height()
@@ -45,6 +47,9 @@ class Game:
                        random.randint(0, int(self.screen_size[1])),
                        random.randint(1, 3)] for _ in range(100)]
         self.last_update = pygame.time.get_ticks()
+
+        self.last_meteor_spawn = 0
+        self.meteor_spawn_interval = 800
         self.last_shot_time = 0
         self.shot_cooldown = 300
 
@@ -62,6 +67,20 @@ class Game:
                     i[0] = random.randint(0, int(self.screen_size[0]))
 
             current_time = pygame.time.get_ticks()
+            if current_time - self.last_meteor_spawn > self.meteor_spawn_interval:
+                self.last_meteor_spawn = current_time
+                for _ in range(random.randint(1, 4)):
+                    for _ in range(10):
+                        new_meteor = Meteor(self.screen_size[0], min_y=-200,
+                                            max_y=-50)
+                        too_close = any(
+                            abs(new_meteor.rect.y - m.rect.y) < 60 for m in
+                            self.meteors)
+                        if not too_close:
+                            self.meteors.add(new_meteor) # type: ignore
+                            break
+
+            current_time = pygame.time.get_ticks()
             if current_time - self.last_update >= animation_cooldown:
                 self.last_update = current_time
                 self.frame += 1
@@ -76,6 +95,9 @@ class Game:
                     self.frame % len(self.frames_shooting)]
             else:
                 img = self.frame_idle
+
+            self.meteors.update()
+            self.meteors.draw(self.screen)
 
             self.screen.blit(img, [self.ship_x, self.ship_y])
             key_pressed = pygame.key.get_pressed()
@@ -113,6 +135,7 @@ class Game:
 
             self.projectiles.update()
             self.projectiles.draw(self.screen)
+
             pygame.display.update()
         pygame.quit()
 
