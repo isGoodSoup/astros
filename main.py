@@ -6,6 +6,7 @@ from explode import Explosion
 from meteor import Meteor
 from proj import Projectile
 from ship import Ship
+from soundlib import load_sounds, load_ost
 from sprites import SpriteSheet
 
 cols = 20
@@ -25,6 +26,9 @@ class Game:
         self.fps = 60
         self.frame = 0
         self.scale = 3
+        self.sounds = load_sounds()
+        self.theme = load_ost()
+        pygame.mixer.music.play(-1)
         self.projectiles = pygame.sprite.Group()
         self.meteors = pygame.sprite.Group()
         self.explosions = pygame.sprite.Group()
@@ -59,6 +63,7 @@ class Game:
         self.last_shot_time = 0
         self.shot_cooldown = 300
         self.score = 0
+        self.game_over = False
 
     def run(self):
         while self.running:
@@ -110,67 +115,88 @@ class Game:
                 self.ship.image = img
                 self.screen.blit(self.ship.image, [self.ship_x, self.ship_y])
 
-            key_pressed = pygame.key.get_pressed()
-            if key_pressed[pygame.K_LEFT] and self.ship_x > 0:
-                self.ship_x -= self.ship.velocity
-                self.ship.moving = True
-            if key_pressed[pygame.K_RIGHT] and self.ship_x < self.screen_size[0] - img.get_width():
-                self.ship_x += self.ship.velocity
-                self.ship.moving = True
-            if key_pressed[pygame.K_UP] and self.ship_y > 0:
-                self.ship_y -= self.ship.velocity
-                self.ship.moving = True
-            if (key_pressed[pygame.K_DOWN] and self.ship_y < self.screen_size[1]
-                    - self.ship.image.get_height()):
-                self.ship_y += self.ship.velocity
-                self.ship.moving = False
+            if not self.game_over:
+                key_pressed = pygame.key.get_pressed()
+                if key_pressed[pygame.K_LEFT] and self.ship_x > 0:
+                    self.ship_x -= self.ship.velocity
+                    self.ship.moving = True
+                if key_pressed[pygame.K_RIGHT] and self.ship_x < \
+                        self.screen_size[0] - img.get_width():
+                    self.ship_x += self.ship.velocity
+                    self.ship.moving = True
+                if key_pressed[pygame.K_UP] and self.ship_y > 0:
+                    self.ship_y -= self.ship.velocity
+                    self.ship.moving = True
+                if (key_pressed[pygame.K_DOWN] and self.ship_y <
+                        self.screen_size[1]
+                        - self.ship.image.get_height()):
+                    self.ship_y += self.ship.velocity
+                    self.ship.moving = False
 
-            if key_pressed[
-                pygame.K_SPACE] and current_time - self.last_shot_time >= self.shot_cooldown:
-                self.last_shot_time = current_time
-                self.ship.state = "shoot"
-                projectile = Projectile(self.ship_x + img.get_width() // 2,self.ship_y)
-                self.projectiles.add(projectile)  # type: ignore
-            elif self.ship.moving:
-                self.ship.state = "move"
-            else:
-                self.ship.state = "idle"
+                if self.ship_alive:
+                    if key_pressed[
+                        pygame.K_SPACE] and current_time - self.last_shot_time >= self.shot_cooldown:
+                        self.last_shot_time = current_time
+                        self.ship.state = "shoot"
+                        projectile = Projectile(
+                            self.ship_x + img.get_width() // 2,
+                            self.ship_y)
+                        self.projectiles.add(projectile)  # type: ignore
+                        self.sounds[0].play()
+                    elif self.ship.moving:
+                        self.ship.state = "move"
+                    else:
+                        self.ship.state = "idle"
 
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        self.running = False
 
-            self.projectiles.update()
-            self.projectiles.draw(self.screen)
+                self.projectiles.update()
+                self.projectiles.draw(self.screen)
 
-            if self.ship_alive:
-                self.ship.update_position(self.ship_x, self.ship_y)
-            meteor_hit = pygame.sprite.spritecollideany(self.ship, self.meteors)  # type: ignore
-            if meteor_hit:
-                explosion = Explosion(self.ship_x + img.get_width() // 2,
-                                      self.ship_y + img.get_height() // 2,
-                                      self.frame_explode)
-                self.explosions.add(explosion)  # type: ignore
-                meteor_hit.kill()
-                self.ship.kill()
-                self.ship_alive = False
+                if self.ship_alive:
+                    self.ship.update_position(self.ship_x, self.ship_y)
+                meteor_hit = pygame.sprite.spritecollideany(self.ship,self.meteors)  # type: ignore
+                if meteor_hit and not self.game_over:
+                    explosion = Explosion(self.ship_x + img.get_width() // 2,
+                                          self.ship_y + img.get_height() // 2,
+                                          self.frame_explode)
+                    self.explosions.add(explosion)  # type: ignore
+                    meteor_hit.kill()
+                    self.sounds[1].play()
+                    self.ship.kill()
+                    self.ship_alive = False
 
-            hits = pygame.sprite.groupcollide(self.projectiles, self.meteors,
-                                              True, False)
-            for meteor in hits.values():
-                explosion = Explosion(meteor[0].rect.centerx,
-                                      meteor[0].rect.centery,
-                                      self.frame_explode)
-                self.explosions.add(explosion)  # type: ignore
-                meteor[0].kill()
-                self.score += 1
+                    pygame.mixer.music.stop()
+                    self.game_over = True
 
-            self.explosions.update()
-            self.explosions.draw(self.screen)
+                hits = pygame.sprite.groupcollide(self.projectiles,
+                                                  self.meteors,
+                                                  True, False)
+                for meteor in hits.values():
+                    explosion = Explosion(meteor[0].rect.centerx,
+                                          meteor[0].rect.centery,
+                                          self.frame_explode)
+                    self.explosions.add(explosion)  # type: ignore
+                    meteor[0].kill()
+                    self.sounds[1].play()
+                    self.score += 10
 
-            text_surface = self.game_font.render(str(self.score), True, "WHITE")
-            self.screen.blit(text_surface, [self.screen_size[0]/2, 100])
-            pygame.display.update()
+                self.explosions.update()
+                self.explosions.draw(self.screen)
+
+                text_surface = self.game_font.render(str(self.score), True,
+                                                     "WHITE")
+                self.screen.blit(text_surface, [self.screen_size[0] / 2, 100])
+                pygame.display.update()
+
+            if self.game_over:
+                game_over_text = self.game_font.render("GAME OVER", True, "RED")
+                self.screen.blit(
+                    game_over_text,
+                    [self.screen_size[0] // 2 - 150, self.screen_size[1] // 2]
+                )
         pygame.quit()
 
 if __name__ == '__main__':
