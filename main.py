@@ -51,17 +51,20 @@ class Game:
     def __init__(self, screen_size):
         self.fps = 60
         self.frame = 0
+        self.anim_frame = 0
+        self.prev_state = None
         self.scale = 3
         self.sounds = load_sounds()
         self.theme = load_ost()
         pg.mixer.music.play(-1)
+        pg.mixer.music.set_volume(0.5)
 
         self.projectiles = pg.sprite.Group()
         self.meteors = pg.sprite.Group()
         self.explosions = pg.sprite.Group()
         self.upgrades = pg.sprite.Group()
 
-        self.cols = 20
+        self.cols = 15
         self.sprite_sheet = SpriteSheet("assets/ship.png")
         framew = self.sprite_sheet.sheet.get_width() // self.cols
         frameh = self.sprite_sheet.sheet.get_height()
@@ -79,10 +82,10 @@ class Game:
                                               columns=self.cols)
             self.frames.append(img)
 
-        self.frames_movement = self.frames[0:8]
-        self.frames_shooting = self.frames[8:12]
-        self.frame_idle = self.frames[12]
-        self.frame_explode = self.frames[13:20]
+        self.frames_movement = self.frames[0:4]
+        self.frames_shooting = self.frames[4:8]
+        self.frame_idle = self.frames[8]
+        self.frame_explode = self.frames[9:15]
 
         self.stars = [[random.randint(0, screen_size[0]),
                        random.randint(0, screen_size[1]),
@@ -143,19 +146,18 @@ class Game:
                 new_upgrade = Upgrade(upgd.get_upgrade(), -200, -50)
                 self.upgrades.add(new_upgrade) # type: ignore
 
-            current_time = pg.time.get_ticks()
-            if current_time - self.last_update >= self.animation_cooldown:
-                self.last_update = current_time
-                self.frame += 1
-                if self.frame >= len(self.frames):
-                    self.frame = 0
+            if self.ship.state != self.prev_state:
+                self.anim_frame = 0
+                self.prev_state = self.ship.state
+
+            self.anim_frame += 1
 
             if self.ship.state == "move":
                 img = self.frames_movement[
-                    self.frame % len(self.frames_movement)]
+                    self.anim_frame % len(self.frames_movement)]
             elif self.ship.state == "shoot":
                 img = self.frames_shooting[
-                    self.frame % len(self.frames_shooting)]
+                    self.anim_frame % len(self.frames_shooting)]
             else:
                 img = self.frame_idle
 
@@ -167,10 +169,11 @@ class Game:
                     pg.draw.rect(screen, (255, 0, 0),i.hitbox, 2)
 
             if self.ship_alive:
-                self.ship.image = img
-                screen.blit(self.ship.image, [self.ship_x, self.ship_y])
+                self.ship.rect.topleft = (self.ship_x, self.ship_y)
+                screen.blit(self.ship.image, self.ship.rect)
                 if self.debugging:
                     pg.draw.rect(screen, (255, 0, 0), self.ship.hitbox,2)
+
             if not self.game_over:
                 self.upgrades.update()
                 self.upgrades.draw(screen)
