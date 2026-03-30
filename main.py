@@ -210,7 +210,8 @@ class Game:
                 if self.ship_alive:
                     self.ship.update_position(self.ship_x, self.ship_y)
                 meteor_hit = pg.sprite.spritecollideany(self.ship, self.meteors, # type: ignore
-                                                            collided=lambda s, m: s.hitbox.colliderect(m.rect))
+                                                            collided=lambda s, m:
+                                                            s.hitbox.colliderect(m.rect))
                 if meteor_hit and not self.game_over:
                     explosion = Explosion(self.ship_x + img.get_width() // 2,
                                           self.ship_y + img.get_height() // 2,
@@ -235,6 +236,13 @@ class Game:
                     meteor[0].kill()
                     self.sounds[1].play()
                     self.score += 10
+
+                upgrade_hit = pg.sprite.spritecollide(self.ship, self.upgrades,False,  # type: ignore
+                                                      collided=lambda s,u: s.hitbox.colliderect(u.rect))
+                if upgrade_hit:
+                    for upgrade in upgrade_hit:
+                        upgrade.kill()
+
 
             self.explosions.update()
             self.explosions.draw(screen)
