@@ -13,9 +13,11 @@ animation_cooldown = 100
 class Game:
     def __init__(self):
         pygame.init()
+        pygame.font.init()
         self.screen_size = (int(pygame.display.Info().current_w / 4),
                             int(pygame.display.Info().current_h / 1.5))
         self.screen = pygame.display.set_mode(self.screen_size, pygame.SCALED, vsync=1)
+        self.game_font = pygame.font.Font("assets/PressStart2P.ttf", 24)
         pygame.display.set_caption("Astros")
         self.clock = pygame.time.Clock()
         self.running = True
@@ -43,8 +45,8 @@ class Game:
         self.frames_shooting = self.frames[8:12]
         self.frame_idle = self.frames[12]
 
-        self.stars = [[random.randint(0, int(self.screen_size[0])),
-                       random.randint(0, int(self.screen_size[1])),
+        self.stars = [[random.randint(0, self.screen_size[0]),
+                       random.randint(0, self.screen_size[1]),
                        random.randint(1, 3)] for _ in range(100)]
         self.last_update = pygame.time.get_ticks()
 
@@ -52,6 +54,7 @@ class Game:
         self.meteor_spawn_interval = 800
         self.last_shot_time = 0
         self.shot_cooldown = 300
+        self.score = 0
 
     def run(self):
         while self.running:
@@ -64,7 +67,7 @@ class Game:
                 i[1] += 2
                 if i[1] > self.screen_size[1]:
                     i[1] = 0
-                    i[0] = random.randint(0, int(self.screen_size[0]))
+                    i[0] = random.randint(0, self.screen_size[0])
 
             current_time = pygame.time.get_ticks()
             if current_time - self.last_meteor_spawn > self.meteor_spawn_interval:
@@ -111,7 +114,8 @@ class Game:
             if key_pressed[pygame.K_UP] and self.ship_y > 0:
                 self.ship_y -= self.ship.velocity
                 self.ship.moving = True
-            if key_pressed[pygame.K_DOWN] and self.ship_y < self.screen_size[1] - self.ship.sprite.get_height():
+            if (key_pressed[pygame.K_DOWN] and self.ship_y < self.screen_size[1]
+                    - self.ship.sprite.get_height()):
                 self.ship_y += self.ship.velocity
                 self.ship.moving = False
 
@@ -119,10 +123,7 @@ class Game:
                 pygame.K_SPACE] and current_time - self.last_shot_time >= self.shot_cooldown:
                 self.last_shot_time = current_time
                 self.ship.state = "shoot"
-                projectile = Projectile(
-                    self.ship_x + img.get_width() // 2,
-                    self.ship_y
-                )
+                projectile = Projectile(self.ship_x + img.get_width() // 2,self.ship_y)
                 self.projectiles.add(projectile)  # type: ignore
             elif self.ship.moving:
                 self.ship.state = "move"
@@ -136,6 +137,13 @@ class Game:
             self.projectiles.update()
             self.projectiles.draw(self.screen)
 
+            hits = pygame.sprite.groupcollide(self.projectiles, self.meteors,
+                                              True, True)
+            if hits:
+                self.score += len(hits)
+
+            text_surface = self.game_font.render(str(self.score), True, "WHITE")
+            self.screen.blit(text_surface, [self.screen_size[0]/2, 100])
             pygame.display.update()
         pygame.quit()
 
