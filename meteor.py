@@ -12,6 +12,7 @@ class Meteor(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = random.randint(0, screen_width - self.rect.width)
         self.rect.y = random.randint(min_y, max_y)
+        self.hitbox = self.rect.copy()
         self.speed = speed
 
     @override
@@ -19,3 +20,4 @@ class Meteor(pygame.sprite.Sprite):
         self.rect.y += self.speed
         if self.rect.top > pygame.display.get_surface().get_height():
             self.kill()
+        self.hitbox.topleft = self.rect.topleft
