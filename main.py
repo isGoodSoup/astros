@@ -13,17 +13,42 @@ from sprites import SpriteSheet
 cols = 20
 animation_cooldown = 100
 
-class Game:
+class Menu:
     def __init__(self):
         pg.init()
         pg.font.init()
         self.screen_size = (int(pg.display.Info().current_w / 4),
                             int(pg.display.Info().current_h / 1.5))
         self.screen = pg.display.set_mode(self.screen_size, pg.SCALED, vsync=1)
-        self.game_font = pg.font.Font("assets/ui/PressStart2P.ttf", 24)
+        self.game_font = pg.font.Font("assets/ui/PressStart2P.ttf", 56)
+        self.text_font = pg.font.Font("assets/ui/PressStart2P.ttf", 24)
         pg.display.set_caption("Astros")
         self.clock = pg.time.Clock()
         self.running = True
+
+    def run(self):
+        while self.running:
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    self.running = False
+                elif event.type == pg.KEYDOWN:
+                    if event.key == pg.K_RETURN:
+                        game = Game(self.screen_size)
+                        game.run(self.running, self.clock, self.screen,
+                                 self.screen_size, self.text_font)
+                    elif event.key == pg.K_ESCAPE:
+                        self.running = False
+
+            self.screen.fill((0, 0, 0))
+            title = self.game_font.render("ASTROS", True, (255, 220, 50))
+            start = self.text_font.render("Press Enter", True,"WHITE")
+            self.screen.blit(title, (self.screen_size[0]//2 - title.get_width()//2, 100))
+            self.screen.blit(start, (self.screen_size[0]//2 - start.get_width()//2, 500))
+            pg.display.update()
+            self.clock.tick(60)
+
+class Game:
+    def __init__(self, screen_size):
         self.fps = 60
         self.frame = 0
         self.scale = 3
@@ -40,8 +65,8 @@ class Game:
         self.ship = Ship(self.sprite_sheet, 0, 0, self.frame,
                          framew, frameh, columns=cols)
         self.ship_alive = True
-        self.ship_x = self.screen_size[0] // 2 - framew // 2 - 25
-        self.ship_y = self.screen_size[1] // 2 + 200
+        self.ship_x = screen_size[0] // 2 - framew // 2 - 25
+        self.ship_y = screen_size[1] // 2 + 200
 
         self.frames_movement = []
         self.frames = []
@@ -54,8 +79,8 @@ class Game:
         self.frame_idle = self.frames[12]
         self.frame_explode = self.frames[13:20]
 
-        self.stars = [[random.randint(0, self.screen_size[0]),
-                       random.randint(0, self.screen_size[1]),
+        self.stars = [[random.randint(0, screen_size[0]),
+                       random.randint(0, screen_size[1]),
                        random.randint(1, 3)] for _ in range(100)]
         self.last_update = pg.time.get_ticks()
 
@@ -69,37 +94,37 @@ class Game:
         self.debugging = False
         self.cursor = True
 
-    def run(self):
-        while self.running:
+    def run(self, running, clock, screen, screen_size, game_font):
+        while running:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
-                    self.running = False
+                    running = False
                 elif event.type == pg.KEYDOWN:
                     if self.game_over and event.key == pg.K_r:
-                        self.reset()
+                        self.reset(screen_size)
                     if event.key == pg.K_F2:
                         self.debug()
                     if event.key == pg.K_F1:
                         toggle_fullscreen()
                         self.toggle_cursor()
 
-            self.clock.tick(self.fps)
-            self.screen.fill((0,0,0))
+            clock.tick(self.fps)
+            screen.fill((0,0,0))
 
             for i in self.stars:
-                pg.draw.circle(self.screen, (255, 255, 255),
+                pg.draw.circle(screen, (255, 255, 255),
                                    (int(i[0]), int(i[1])), i[2])
                 i[1] += 2
-                if i[1] > self.screen_size[1]:
+                if i[1] > screen_size[1]:
                     i[1] = 0
-                    i[0] = random.randint(0, self.screen_size[0])
+                    i[0] = random.randint(0, screen_size[0])
 
             current_time = pg.time.get_ticks()
             if current_time - self.last_meteor_spawn > self.meteor_spawn_interval:
                 self.last_meteor_spawn = current_time
                 for _ in range(random.randint(1, 4)):
                     for _ in range(10):
-                        new_meteor = Meteor(self.screen_size[0], min_y=-200,max_y=-50)
+                        new_meteor = Meteor(screen_size[0], min_y=-200,max_y=-50)
                         too_close = any(abs(new_meteor.rect.y - m.rect.y) < 60 for m in self.meteors)
                         if not too_close:
                             self.meteors.add(new_meteor) # type: ignore
@@ -122,30 +147,30 @@ class Game:
                 img = self.frame_idle
 
             self.meteors.update()
-            self.meteors.draw(self.screen)
+            self.meteors.draw(screen)
             if self.debugging:
                 for i in self.meteors:
-                    pg.draw.rect(self.screen, (255, 0, 0),i.hitbox, 2)
+                    pg.draw.rect(screen, (255, 0, 0),i.hitbox, 2)
 
             if self.ship_alive:
                 self.ship.image = img
-                self.screen.blit(self.ship.image, [self.ship_x, self.ship_y])
+                screen.blit(self.ship.image, [self.ship_x, self.ship_y])
                 if self.debugging:
-                    pg.draw.rect(self.screen, (255, 0, 0), self.ship.hitbox,2)
+                    pg.draw.rect(screen, (255, 0, 0), self.ship.hitbox,2)
             if not self.game_over:
                 key_pressed = pg.key.get_pressed()
                 if key_pressed[pg.K_LEFT] and self.ship_x > 0:
                     self.ship_x -= self.ship.velocity
                     self.ship.moving = True
                 if key_pressed[pg.K_RIGHT] and self.ship_x < \
-                        self.screen_size[0] - img.get_width():
+                        screen_size[0] - img.get_width():
                     self.ship_x += self.ship.velocity
                     self.ship.moving = True
                 if key_pressed[pg.K_UP] and self.ship_y > 0:
                     self.ship_y -= self.ship.velocity
                     self.ship.moving = True
                 if (key_pressed[pg.K_DOWN] and self.ship_y <
-                        self.screen_size[1] - self.ship.image.get_height()):
+                        screen_size[1] - self.ship.image.get_height()):
                     self.ship_y += self.ship.velocity
                     self.ship.moving = False
 
@@ -164,7 +189,7 @@ class Game:
                         self.ship.state = "idle"
 
                 self.projectiles.update()
-                self.projectiles.draw(self.screen)
+                self.projectiles.draw(screen)
 
                 if self.ship_alive:
                     self.ship.update_position(self.ship_x, self.ship_y)
@@ -196,20 +221,19 @@ class Game:
                     self.score += 10
 
             self.explosions.update()
-            self.explosions.draw(self.screen)
+            self.explosions.draw(screen)
 
             score_text = f"{self.score:05}"
-            text_surface = self.game_font.render(score_text, True, "WHITE")
-            self.screen.blit(text_surface, [self.screen_size[0] - 160, 50])
+            text_surface = game_font.render(score_text, True, "WHITE")
+            screen.blit(text_surface, [screen_size[0] - 160, 50])
             pg.display.update()
 
             if self.game_over:
-                game_over = self.game_font.render("GAME OVER", True, "RED")
-                self.screen.blit(game_over,[self.screen_size[0] // 2 - 150,
-                                            self.screen_size[1] // 2])
+                game_over = game_font.render("GAME OVER", True, "RED")
+                screen.blit(game_over,[screen_size[0] // 2 - 150,screen_size[1] // 2])
         pg.quit()
 
-    def reset(self):
+    def reset(self, screen_size):
         self.projectiles.empty()
         self.meteors.empty()
         self.explosions.empty()
@@ -218,8 +242,8 @@ class Game:
                          self.sprite_sheet.sheet.get_width(),
                          self.sprite_sheet.sheet.get_height(), columns=4)
         self.ship_alive = True
-        self.ship_x = self.screen_size[0] // 2 - framew // 2 - 25
-        self.ship_y = self.screen_size[1] // 2 + 200
+        self.ship_x = screen_size[0] // 2 - framew // 2 - 25
+        self.ship_y = screen_size[1] // 2 + 200
 
         self.frame = 0
         self.last_update = pg.time.get_ticks()
@@ -243,5 +267,5 @@ class Game:
         pg.mouse.set_visible(self.cursor)
 
 if __name__ == '__main__':
-    game = Game()
-    game.run()
+    menu = Menu()
+    menu.run()
