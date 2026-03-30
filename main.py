@@ -5,7 +5,6 @@ from sprites import SpriteSheet
 
 
 animation_steps = 4
-last_update = pygame.time.get_ticks()
 animation_cooldown = 100
 
 class Game:
@@ -31,16 +30,16 @@ class Game:
         for i in range(animation_steps):
             img = self.sprite_sheet.get_image(i, framew, frameh, scale=3, columns=4)
             self.frames.append(img)
+        self.last_update = pygame.time.get_ticks()
 
     def run(self):
-        global last_update
         while self.running:
             self.clock.tick(self.fps)
             self.screen.fill((0,0,0))
 
             current_time = pygame.time.get_ticks()
-            if current_time - last_update >= animation_cooldown:
-                last_update = current_time
+            if current_time - self.last_update >= animation_cooldown:
+                self.last_update = current_time
                 self.frame += 1
                 if self.frame >= len(self.frames):
                     self.frame = 0
@@ -49,8 +48,17 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
-            self.screen.blit(self.ship.sprite, [self.screen_size[0]/2,
-                                                self.screen_size[1]/2])
+
+            self.screen.blit(self.ship.sprite, [self.ship_x, self.ship_y])
+            key_pressed = pygame.key.get_pressed()
+            if key_pressed[pygame.K_LEFT] and self.ship_x > 0:
+                self.ship_x -= self.ship.velocity
+            if key_pressed[pygame.K_RIGHT] and self.ship_x < self.screen_size[0] - self.ship.sprite.get_width():
+                self.ship_x += self.ship.velocity
+            if key_pressed[pygame.K_UP] and self.ship_y > 0:
+                self.ship_y -= self.ship.velocity
+            if key_pressed[pygame.K_DOWN] and self.ship_y < self.screen_size[1] - self.ship.sprite.get_height():
+                self.ship_y += self.ship.velocity
             pygame.display.update()
         pygame.quit()
 
