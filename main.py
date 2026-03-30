@@ -41,8 +41,9 @@ class Menu:
             self.screen.fill((0, 0, 0))
             title = self.game_font.render("ASTROS", True, (255, 220, 50))
             start = self.text_font.render("Press Enter", True,"WHITE")
-            self.screen.blit(title, (self.screen_size[0]//2 - title.get_width()//2, 100))
-            self.screen.blit(start, (self.screen_size[0]//2 - start.get_width()//2, 500))
+            title_y = 200
+            self.screen.blit(title, (self.screen_size[0]//2 - title.get_width()//2, title_y))
+            self.screen.blit(start, (self.screen_size[0]//2 - start.get_width()//2, title_y + 200))
             pg.display.update()
             self.clock.tick(60)
 
