@@ -217,10 +217,11 @@ class Game:
                                                             collided=lambda s, m:
                                                             s.hitbox.colliderect(m.rect))
                 if meteor_hit and not self.game_over:
-                    explosion = Explosion(self.ship_x + img.get_width() // 2,
-                                          self.ship_y + img.get_height() // 2,
-                                          self.frame_explode)
-                    self.explosions.add(explosion)  # type: ignore
+                    frame = self.frame_explode[0]
+                    explosion_x = self.ship_x + img.get_width() // 2 - frame.get_width() // 2
+                    explosion_y = self.ship_y + img.get_height() // 2 - frame.get_height() // 2
+                    explosion = Explosion(explosion_x, explosion_y, self.frame_explode)
+                    self.explosions.add(explosion) # type: ignore
                     meteor_hit.kill()
                     self.sounds[1].play()
                     self.ship.kill()
@@ -233,10 +234,11 @@ class Game:
                                                   self.meteors,
                                                   True, False)
                 for meteor in hits.values():
-                    explosion = Explosion(meteor[0].rect.centerx,
-                                          meteor[0].rect.centery,
-                                          self.frame_explode)
-                    self.explosions.add(explosion)  # type: ignore
+                    meteor_frame = self.frame_explode[0]
+                    explosion_x = meteor[0].rect.centerx - meteor_frame.get_width() // 2
+                    explosion_y = meteor[0].rect.centery - meteor_frame.get_height() // 2
+                    explosion = Explosion(explosion_x, explosion_y, self.frame_explode)
+                    self.explosions.add(explosion) # type: ignore
                     meteor[0].kill()
                     self.sounds[1].play()
                     self.score += 10
