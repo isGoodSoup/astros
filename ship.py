@@ -4,4 +4,5 @@ class Ship:
                  columns=1):
         self.sprite = sprite_sheet.get_image(frame, width, height, scale, columns)
         self.x, self.y = x, y
-        self.velocity = 10
+        self.width, self.height = width, height
+        self.velocity = 8

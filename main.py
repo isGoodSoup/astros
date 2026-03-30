@@ -10,25 +10,28 @@ animation_cooldown = 100
 class Game:
     def __init__(self):
         pygame.init()
-        self.screen_size = (pygame.display.Info().current_w,
-                            pygame.display.Info().current_h)
-        self.screen = pygame.display.set_mode(self.screen_size)
+        self.screen_size = (pygame.display.Info().current_w/4,
+                            pygame.display.Info().current_h/1.5)
+        self.screen = pygame.display.set_mode(self.screen_size, pygame.SCALED, vsync=1)
         self.clock = pygame.time.Clock()
         self.running = True
         self.fps = 60
         self.frame = 0
 
         self.sprite_sheet = SpriteSheet("assets/ship.png")
-        self.ship_x, self.ship_y = 0, 0
-        self.ship = Ship(self.sprite_sheet, self.ship_x, self.ship_y,
-                         self.frame, self.sprite_sheet.sheet.get_width(),
+        self.ship = Ship(self.sprite_sheet, 0, 0, self.frame,
+                         self.sprite_sheet.sheet.get_width(),
                          self.sprite_sheet.sheet.get_height(), columns=4)
+        self.ship_x, self.ship_y = (self.screen_size[0]/2 -
+                                    self.ship.width/2, self.screen_size[1] - 200)
 
+        self.cols = 8
         self.frames = []
-        framew = self.sprite_sheet.sheet.get_width() // 4
+        framew = self.sprite_sheet.sheet.get_width() // self.cols
         frameh = self.sprite_sheet.sheet.get_height()
         for i in range(animation_steps):
-            img = self.sprite_sheet.get_image(i, framew, frameh, scale=3, columns=4)
+            img = self.sprite_sheet.get_image(i, framew, frameh, scale=2,
+                                              columns=self.cols)
             self.frames.append(img)
         self.last_update = pygame.time.get_ticks()
 
