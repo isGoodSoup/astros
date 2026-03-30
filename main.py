@@ -18,7 +18,7 @@ class Game:
         self.screen_size = (int(pygame.display.Info().current_w / 4),
                             int(pygame.display.Info().current_h / 1.5))
         self.screen = pygame.display.set_mode(self.screen_size, pygame.SCALED, vsync=1)
-        self.game_font = pygame.font.Font("assets/PressStart2P.ttf", 24)
+        self.game_font = pygame.font.Font("assets/ui/PressStart2P.ttf", 24)
         pygame.display.set_caption("Astros")
         self.clock = pygame.time.Clock()
         self.running = True
@@ -34,6 +34,7 @@ class Game:
         self.ship = Ship(self.sprite_sheet, 0, 0, self.frame,
                          self.sprite_sheet.sheet.get_width(),
                          self.sprite_sheet.sheet.get_height(), columns=4)
+        self.ship_alive = True
         self.ship_x = self.screen_size[0] // 2 - framew // 2 - 25
         self.ship_y = self.screen_size[1] // 2 + 200
 
@@ -105,8 +106,9 @@ class Game:
             self.meteors.update()
             self.meteors.draw(self.screen)
 
-            if self.ship.alive():
-                self.screen.blit(img, [self.ship_x, self.ship_y])
+            if self.ship_alive:
+                self.ship.image = img
+                self.screen.blit(self.ship.image, [self.ship_x, self.ship_y])
 
             key_pressed = pygame.key.get_pressed()
             if key_pressed[pygame.K_LEFT] and self.ship_x > 0:
@@ -141,7 +143,8 @@ class Game:
             self.projectiles.update()
             self.projectiles.draw(self.screen)
 
-            self.ship.update_position(self.ship_x, self.ship_y)
+            if self.ship_alive:
+                self.ship.update_position(self.ship_x, self.ship_y)
             meteor_hit = pygame.sprite.spritecollideany(self.ship, self.meteors)  # type: ignore
             if meteor_hit:
                 explosion = Explosion(self.ship_x + img.get_width() // 2,
@@ -150,6 +153,7 @@ class Game:
                 self.explosions.add(explosion)  # type: ignore
                 meteor_hit.kill()
                 self.ship.kill()
+                self.ship_alive = False
 
             hits = pygame.sprite.groupcollide(self.projectiles, self.meteors,
                                               True, False)
