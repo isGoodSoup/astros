@@ -3,15 +3,14 @@ import random
 import pygame as pg
 from pygame.display import toggle_fullscreen
 
+import upgd
 from explode import Explosion
 from meteor import Meteor
 from proj import Projectile
 from ship import Ship
 from soundlib import load_sounds, load_ost
 from sprites import SpriteSheet
-
-cols = 20
-animation_cooldown = 100
+from upgd import Upgrade
 
 class Menu:
     def __init__(self):
@@ -55,23 +54,28 @@ class Game:
         self.sounds = load_sounds()
         self.theme = load_ost()
         pg.mixer.music.play(-1)
+
         self.projectiles = pg.sprite.Group()
         self.meteors = pg.sprite.Group()
         self.explosions = pg.sprite.Group()
+        self.upgrades = pg.sprite.Group()
 
+        self.cols = 20
         self.sprite_sheet = SpriteSheet("assets/ship.png")
-        framew = self.sprite_sheet.sheet.get_width() // cols
+        framew = self.sprite_sheet.sheet.get_width() // self.cols
         frameh = self.sprite_sheet.sheet.get_height()
         self.ship = Ship(self.sprite_sheet, 0, 0, self.frame,
-                         framew, frameh, columns=cols)
+                         framew, frameh, columns=self.cols)
         self.ship_alive = True
         self.ship_x = screen_size[0] // 2 - framew // 2 - 25
         self.ship_y = screen_size[1] // 2 + 200
 
+        self.animation_cooldown = 100
         self.frames_movement = []
         self.frames = []
-        for i in range(cols):
-            img = self.sprite_sheet.get_image(i, framew, frameh, scale=self.scale,columns=cols)
+        for i in range(self.cols):
+            img = self.sprite_sheet.get_image(i, framew, frameh, scale=self.scale,
+                                              columns=self.cols)
             self.frames.append(img)
 
         self.frames_movement = self.frames[0:8]
@@ -86,6 +90,8 @@ class Game:
 
         self.last_meteor_spawn = 0
         self.meteor_spawn_interval = 800
+        self.last_upgrade_spawn = 0
+        self.upgrade_spawn_interval = 60000
         self.last_shot_time = 0
         self.shot_cooldown = 300
         self.score = 0
@@ -131,7 +137,13 @@ class Game:
                             break
 
             current_time = pg.time.get_ticks()
-            if current_time - self.last_update >= animation_cooldown:
+            if current_time - self.last_upgrade_spawn > self.upgrade_spawn_interval:
+                self.last_upgrade_spawn = current_time
+                new_upgrade = Upgrade(upgd.get_upgrade(), -200, -50)
+                self.upgrades.add(new_upgrade) # type: ignore
+
+            current_time = pg.time.get_ticks()
+            if current_time - self.last_update >= self.animation_cooldown:
                 self.last_update = current_time
                 self.frame += 1
                 if self.frame >= len(self.frames):
@@ -148,6 +160,7 @@ class Game:
 
             self.meteors.update()
             self.meteors.draw(screen)
+
             if self.debugging:
                 for i in self.meteors:
                     pg.draw.rect(screen, (255, 0, 0),i.hitbox, 2)
@@ -158,6 +171,9 @@ class Game:
                 if self.debugging:
                     pg.draw.rect(screen, (255, 0, 0), self.ship.hitbox,2)
             if not self.game_over:
+                self.upgrades.update()
+                self.upgrades.draw(screen)
+
                 key_pressed = pg.key.get_pressed()
                 if key_pressed[pg.K_LEFT] and self.ship_x > 0:
                     self.ship_x -= self.ship.velocity
@@ -237,7 +253,7 @@ class Game:
         self.projectiles.empty()
         self.meteors.empty()
         self.explosions.empty()
-        framew = self.sprite_sheet.sheet.get_width() // cols
+        framew = self.sprite_sheet.sheet.get_width() // self.cols
         self.ship = Ship(self.sprite_sheet, 0, 0, self.frame,
                          self.sprite_sheet.sheet.get_width(),
                          self.sprite_sheet.sheet.get_height(), columns=4)
