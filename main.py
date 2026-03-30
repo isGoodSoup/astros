@@ -67,6 +67,10 @@ class Game:
 
     def run(self):
         while self.running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.running = False
+
             self.clock.tick(self.fps)
             self.screen.fill((0,0,0))
 
@@ -148,10 +152,6 @@ class Game:
                     else:
                         self.ship.state = "idle"
 
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        self.running = False
-
                 self.projectiles.update()
                 self.projectiles.draw(self.screen)
 
@@ -183,20 +183,17 @@ class Game:
                     self.sounds[1].play()
                     self.score += 10
 
-                self.explosions.update()
-                self.explosions.draw(self.screen)
+            self.explosions.update()
+            self.explosions.draw(self.screen)
 
-                text_surface = self.game_font.render(str(self.score), True,
-                                                     "WHITE")
-                self.screen.blit(text_surface, [self.screen_size[0] / 2, 100])
-                pygame.display.update()
+            text_surface = self.game_font.render(str(self.score), True,
+                                                 "WHITE")
+            self.screen.blit(text_surface, [self.screen_size[0] / 2, 100])
+            pygame.display.update()
 
             if self.game_over:
-                game_over_text = self.game_font.render("GAME OVER", True, "RED")
-                self.screen.blit(
-                    game_over_text,
-                    [self.screen_size[0] // 2 - 150, self.screen_size[1] // 2]
-                )
+                game_over = self.game_font.render("GAME OVER", True, "RED")
+                self.screen.blit(game_over,[self.screen_size[0] // 2 - 150, self.screen_size[1] // 2])
         pygame.quit()
 
 if __name__ == '__main__':
