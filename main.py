@@ -91,7 +91,7 @@ class Game:
         self.last_meteor_spawn = 0
         self.meteor_spawn_interval = 800
         self.last_upgrade_spawn = 0
-        self.upgrade_spawn_interval = 60000
+        self.upgrade_spawn_interval = 60_000
         self.last_shot_time = 0
         self.shot_cooldown = 300
         self.score = 0
