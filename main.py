@@ -81,7 +81,7 @@ class Game:
                         self.debug()
                     if event.key == pg.K_F1:
                         toggle_fullscreen()
-                        self.hide_cursor(self.cursor)
+                        self.toggle_cursor()
 
             self.clock.tick(self.fps)
             self.screen.fill((0,0,0))
@@ -238,8 +238,9 @@ class Game:
             self.debugging = True
             return
 
-    def hide_cursor(self, cursor):
-        pg.mouse.set_visible(cursor)
+    def toggle_cursor(self):
+        self.cursor = not self.cursor
+        pg.mouse.set_visible(self.cursor)
 
 if __name__ == '__main__':
     game = Game()
