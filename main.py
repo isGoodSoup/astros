@@ -1,6 +1,7 @@
 import random
 
-import pygame
+import pygame as pg
+from pygame.display import toggle_fullscreen
 
 from explode import Explosion
 from meteor import Meteor
@@ -14,30 +15,30 @@ animation_cooldown = 100
 
 class Game:
     def __init__(self):
-        pygame.init()
-        pygame.font.init()
-        self.screen_size = (int(pygame.display.Info().current_w / 4),
-                            int(pygame.display.Info().current_h / 1.5))
-        self.screen = pygame.display.set_mode(self.screen_size, pygame.SCALED, vsync=1)
-        self.game_font = pygame.font.Font("assets/ui/PressStart2P.ttf", 24)
-        pygame.display.set_caption("Astros")
-        self.clock = pygame.time.Clock()
+        pg.init()
+        pg.font.init()
+        self.screen_size = (int(pg.display.Info().current_w / 4),
+                            int(pg.display.Info().current_h / 1.5))
+        self.screen = pg.display.set_mode(self.screen_size, pg.SCALED, vsync=1)
+        self.game_font = pg.font.Font("assets/ui/PressStart2P.ttf", 24)
+        pg.display.set_caption("Astros")
+        self.clock = pg.time.Clock()
         self.running = True
         self.fps = 60
         self.frame = 0
         self.scale = 3
         self.sounds = load_sounds()
         self.theme = load_ost()
-        pygame.mixer.music.play(-1)
-        self.projectiles = pygame.sprite.Group()
-        self.meteors = pygame.sprite.Group()
-        self.explosions = pygame.sprite.Group()
+        pg.mixer.music.play(-1)
+        self.projectiles = pg.sprite.Group()
+        self.meteors = pg.sprite.Group()
+        self.explosions = pg.sprite.Group()
+
         self.sprite_sheet = SpriteSheet("assets/ship.png")
         framew = self.sprite_sheet.sheet.get_width() // cols
         frameh = self.sprite_sheet.sheet.get_height()
         self.ship = Ship(self.sprite_sheet, 0, 0, self.frame,
-                         self.sprite_sheet.sheet.get_width(),
-                         self.sprite_sheet.sheet.get_height(), columns=4)
+                         framew, frameh, columns=cols)
         self.ship_alive = True
         self.ship_x = self.screen_size[0] // 2 - framew // 2 - 25
         self.ship_y = self.screen_size[1] // 2 + 200
@@ -56,7 +57,7 @@ class Game:
         self.stars = [[random.randint(0, self.screen_size[0]),
                        random.randint(0, self.screen_size[1]),
                        random.randint(1, 3)] for _ in range(100)]
-        self.last_update = pygame.time.get_ticks()
+        self.last_update = pg.time.get_ticks()
 
         self.last_meteor_spawn = 0
         self.meteor_spawn_interval = 800
@@ -65,38 +66,46 @@ class Game:
         self.score = 0
         self.game_over = False
 
+        self.debugging = False
+        self.cursor = True
+
     def run(self):
         while self.running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
                     self.running = False
+                elif event.type == pg.KEYDOWN:
+                    if self.game_over and event.key == pg.K_r:
+                        self.reset()
+                    if event.key == pg.K_F2:
+                        self.debug()
+                    if event.key == pg.K_F1:
+                        toggle_fullscreen()
+                        self.hide_cursor(self.cursor)
 
             self.clock.tick(self.fps)
             self.screen.fill((0,0,0))
 
             for i in self.stars:
-                pygame.draw.circle(self.screen, (255, 255, 255),
+                pg.draw.circle(self.screen, (255, 255, 255),
                                    (int(i[0]), int(i[1])), i[2])
                 i[1] += 2
                 if i[1] > self.screen_size[1]:
                     i[1] = 0
                     i[0] = random.randint(0, self.screen_size[0])
 
-            current_time = pygame.time.get_ticks()
+            current_time = pg.time.get_ticks()
             if current_time - self.last_meteor_spawn > self.meteor_spawn_interval:
                 self.last_meteor_spawn = current_time
                 for _ in range(random.randint(1, 4)):
                     for _ in range(10):
-                        new_meteor = Meteor(self.screen_size[0], min_y=-200,
-                                            max_y=-50)
-                        too_close = any(
-                            abs(new_meteor.rect.y - m.rect.y) < 60 for m in
-                            self.meteors)
+                        new_meteor = Meteor(self.screen_size[0], min_y=-200,max_y=-50)
+                        too_close = any(abs(new_meteor.rect.y - m.rect.y) < 60 for m in self.meteors)
                         if not too_close:
                             self.meteors.add(new_meteor) # type: ignore
                             break
 
-            current_time = pygame.time.get_ticks()
+            current_time = pg.time.get_ticks()
             if current_time - self.last_update >= animation_cooldown:
                 self.last_update = current_time
                 self.frame += 1
@@ -114,32 +123,34 @@ class Game:
 
             self.meteors.update()
             self.meteors.draw(self.screen)
+            if self.debugging:
+                for i in self.meteors:
+                    pg.draw.rect(self.screen, (255, 0, 0),i.hitbox, 2)
 
             if self.ship_alive:
                 self.ship.image = img
                 self.screen.blit(self.ship.image, [self.ship_x, self.ship_y])
-
+                if self.debugging:
+                    pg.draw.rect(self.screen, (255, 0, 0), self.ship.hitbox,2)
             if not self.game_over:
-                key_pressed = pygame.key.get_pressed()
-                if key_pressed[pygame.K_LEFT] and self.ship_x > 0:
+                key_pressed = pg.key.get_pressed()
+                if key_pressed[pg.K_LEFT] and self.ship_x > 0:
                     self.ship_x -= self.ship.velocity
                     self.ship.moving = True
-                if key_pressed[pygame.K_RIGHT] and self.ship_x < \
+                if key_pressed[pg.K_RIGHT] and self.ship_x < \
                         self.screen_size[0] - img.get_width():
                     self.ship_x += self.ship.velocity
                     self.ship.moving = True
-                if key_pressed[pygame.K_UP] and self.ship_y > 0:
+                if key_pressed[pg.K_UP] and self.ship_y > 0:
                     self.ship_y -= self.ship.velocity
                     self.ship.moving = True
-                if (key_pressed[pygame.K_DOWN] and self.ship_y <
-                        self.screen_size[1]
-                        - self.ship.image.get_height()):
+                if (key_pressed[pg.K_DOWN] and self.ship_y <
+                        self.screen_size[1] - self.ship.image.get_height()):
                     self.ship_y += self.ship.velocity
                     self.ship.moving = False
 
                 if self.ship_alive:
-                    if key_pressed[
-                        pygame.K_SPACE] and current_time - self.last_shot_time >= self.shot_cooldown:
+                    if key_pressed[pg.K_SPACE] and current_time - self.last_shot_time >= self.shot_cooldown:
                         self.last_shot_time = current_time
                         self.ship.state = "shoot"
                         projectile = Projectile(
@@ -157,7 +168,8 @@ class Game:
 
                 if self.ship_alive:
                     self.ship.update_position(self.ship_x, self.ship_y)
-                meteor_hit = pygame.sprite.spritecollideany(self.ship,self.meteors)  # type: ignore
+                meteor_hit = pg.sprite.spritecollideany(self.ship, self.meteors, # type: ignore
+                                                            collided=lambda s, m: s.hitbox.colliderect(m.rect))
                 if meteor_hit and not self.game_over:
                     explosion = Explosion(self.ship_x + img.get_width() // 2,
                                           self.ship_y + img.get_height() // 2,
@@ -168,10 +180,10 @@ class Game:
                     self.ship.kill()
                     self.ship_alive = False
 
-                    pygame.mixer.music.stop()
+                    pg.mixer.music.stop()
                     self.game_over = True
 
-                hits = pygame.sprite.groupcollide(self.projectiles,
+                hits = pg.sprite.groupcollide(self.projectiles,
                                                   self.meteors,
                                                   True, False)
                 for meteor in hits.values():
@@ -186,15 +198,48 @@ class Game:
             self.explosions.update()
             self.explosions.draw(self.screen)
 
-            text_surface = self.game_font.render(str(self.score), True,
-                                                 "WHITE")
-            self.screen.blit(text_surface, [self.screen_size[0] / 2, 100])
-            pygame.display.update()
+            score_text = f"{self.score:05}"
+            text_surface = self.game_font.render(score_text, True, "WHITE")
+            self.screen.blit(text_surface, [self.screen_size[0] - 160, 50])
+            pg.display.update()
 
             if self.game_over:
                 game_over = self.game_font.render("GAME OVER", True, "RED")
-                self.screen.blit(game_over,[self.screen_size[0] // 2 - 150, self.screen_size[1] // 2])
-        pygame.quit()
+                self.screen.blit(game_over,[self.screen_size[0] // 2 - 150,
+                                            self.screen_size[1] // 2])
+        pg.quit()
+
+    def reset(self):
+        self.projectiles.empty()
+        self.meteors.empty()
+        self.explosions.empty()
+        framew = self.sprite_sheet.sheet.get_width() // cols
+        self.ship = Ship(self.sprite_sheet, 0, 0, self.frame,
+                         self.sprite_sheet.sheet.get_width(),
+                         self.sprite_sheet.sheet.get_height(), columns=4)
+        self.ship_alive = True
+        self.ship_x = self.screen_size[0] // 2 - framew // 2 - 25
+        self.ship_y = self.screen_size[1] // 2 + 200
+
+        self.frame = 0
+        self.last_update = pg.time.get_ticks()
+        self.last_meteor_spawn = 0
+        self.last_shot_time = 0
+        self.score = 0
+        self.game_over = False
+        pg.mixer.music.play(-1)
+
+    def debug(self):
+        if self.debugging:
+            self.debugging = False
+            return
+
+        if not self.debugging:
+            self.debugging = True
+            return
+
+    def hide_cursor(self, cursor):
+        pg.mouse.set_visible(cursor)
 
 if __name__ == '__main__':
     game = Game()
