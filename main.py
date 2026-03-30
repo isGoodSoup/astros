@@ -2,12 +2,13 @@ import random
 
 import pygame
 
+from explode import Explosion
 from meteor import Meteor
 from proj import Projectile
 from ship import Ship
 from sprites import SpriteSheet
 
-cols = 13
+cols = 20
 animation_cooldown = 100
 
 class Game:
@@ -26,6 +27,7 @@ class Game:
         self.scale = 3
         self.projectiles = pygame.sprite.Group()
         self.meteors = pygame.sprite.Group()
+        self.explosions = pygame.sprite.Group()
         self.sprite_sheet = SpriteSheet("assets/ship.png")
         framew = self.sprite_sheet.sheet.get_width() // cols
         frameh = self.sprite_sheet.sheet.get_height()
@@ -44,6 +46,7 @@ class Game:
         self.frames_movement = self.frames[0:8]
         self.frames_shooting = self.frames[8:12]
         self.frame_idle = self.frames[12]
+        self.frame_explode = self.frames[13:20]
 
         self.stars = [[random.randint(0, self.screen_size[0]),
                        random.randint(0, self.screen_size[1]),
@@ -102,9 +105,10 @@ class Game:
             self.meteors.update()
             self.meteors.draw(self.screen)
 
-            self.screen.blit(img, [self.ship_x, self.ship_y])
-            key_pressed = pygame.key.get_pressed()
+            if self.ship.alive():
+                self.screen.blit(img, [self.ship_x, self.ship_y])
 
+            key_pressed = pygame.key.get_pressed()
             if key_pressed[pygame.K_LEFT] and self.ship_x > 0:
                 self.ship_x -= self.ship.velocity
                 self.ship.moving = True
@@ -115,7 +119,7 @@ class Game:
                 self.ship_y -= self.ship.velocity
                 self.ship.moving = True
             if (key_pressed[pygame.K_DOWN] and self.ship_y < self.screen_size[1]
-                    - self.ship.sprite.get_height()):
+                    - self.ship.image.get_height()):
                 self.ship_y += self.ship.velocity
                 self.ship.moving = False
 
@@ -137,10 +141,28 @@ class Game:
             self.projectiles.update()
             self.projectiles.draw(self.screen)
 
+            self.ship.update_position(self.ship_x, self.ship_y)
+            meteor_hit = pygame.sprite.spritecollideany(self.ship, self.meteors)  # type: ignore
+            if meteor_hit:
+                explosion = Explosion(self.ship_x + img.get_width() // 2,
+                                      self.ship_y + img.get_height() // 2,
+                                      self.frame_explode)
+                self.explosions.add(explosion)  # type: ignore
+                meteor_hit.kill()
+                self.ship.kill()
+
             hits = pygame.sprite.groupcollide(self.projectiles, self.meteors,
-                                              True, True)
-            if hits:
-                self.score += len(hits)
+                                              True, False)
+            for meteor in hits.values():
+                explosion = Explosion(meteor[0].rect.centerx,
+                                      meteor[0].rect.centery,
+                                      self.frame_explode)
+                self.explosions.add(explosion)  # type: ignore
+                meteor[0].kill()
+                self.score += 1
+
+            self.explosions.update()
+            self.explosions.draw(self.screen)
 
             text_surface = self.game_font.render(str(self.score), True, "WHITE")
             self.screen.blit(text_surface, [self.screen_size[0]/2, 100])

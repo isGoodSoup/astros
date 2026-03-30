@@ -1,10 +1,13 @@
+import pygame
 
-class Ship:
-    def __init__(self, sprite_sheet, x, y, frame, width, height, scale=3,
-                 columns=1):
-        self.sprite = sprite_sheet.get_image(frame, width, height, scale, columns)
-        self.x, self.y = x, y
-        self.width, self.height = width, height
+class Ship(pygame.sprite.Sprite):
+    def __init__(self, sprite_sheet, x, y, frame, width, height, scale=3, columns=1):
+        super().__init__()
+        self.image = sprite_sheet.get_image(frame, width, height, scale, columns)
+        self.rect = self.image.get_rect(topleft=(x, y))
         self.velocity = 8
         self.state = "move"
         self.moving = False
+
+    def update_position(self, x, y):
+        self.rect.topleft = (x, y)
