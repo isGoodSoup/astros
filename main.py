@@ -2,6 +2,7 @@ import random
 
 import pygame
 
+from proj import Projectile
 from ship import Ship
 from sprites import SpriteSheet
 
@@ -19,6 +20,7 @@ class Game:
         self.fps = 60
         self.frame = 0
         self.scale = 3
+        self.projectiles = pygame.sprite.Group()
         self.sprite_sheet = SpriteSheet("assets/ship.png")
         framew = self.sprite_sheet.sheet.get_width() // cols
         frameh = self.sprite_sheet.sheet.get_height()
@@ -42,6 +44,8 @@ class Game:
                        random.randint(0, int(self.screen_size[1])),
                        random.randint(1, 3)] for _ in range(100)]
         self.last_update = pygame.time.get_ticks()
+        self.last_shot_time = 0
+        self.shot_cooldown = 300
 
     def run(self):
         while self.running:
@@ -88,8 +92,15 @@ class Game:
                 self.ship_y += self.ship.velocity
                 self.ship.moving = False
 
-            if key_pressed[pygame.K_SPACE]:
+            if key_pressed[
+                pygame.K_SPACE] and current_time - self.last_shot_time >= self.shot_cooldown:
+                self.last_shot_time = current_time
                 self.ship.state = "shoot"
+                projectile = Projectile(
+                    self.ship_x + img.get_width() // 2,
+                    self.ship_y
+                )
+                self.projectiles.add(projectile)
             elif self.ship.moving:
                 self.ship.state = "move"
             else:
@@ -99,6 +110,8 @@ class Game:
                 if event.type == pygame.QUIT:
                     self.running = False
 
+            self.projectiles.update()
+            self.projectiles.draw(self.screen)
             pygame.display.update()
         pygame.quit()
 
