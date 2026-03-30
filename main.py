@@ -51,11 +51,10 @@ class Game:
             for i in self.stars:
                 pygame.draw.circle(self.screen, (255, 255, 255),
                                    (int(i[0]), int(i[1])), i[2])
-                i[1] -= 2
-                if i[1] < 0:
-                    (i[1]) = self.screen_size[1]
+                i[1] += 2
+                if i[1] > self.screen_size[1]:
+                    i[1] = 0
                     i[0] = random.randint(0, int(self.screen_size[0]))
-                i[2] = random.randint(1, 3)
 
             current_time = pygame.time.get_ticks()
             if current_time - self.last_update >= animation_cooldown:
