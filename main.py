@@ -189,7 +189,7 @@ class Game:
                 for _ in range(random.randint(1, 4)):
                     for _ in range(10):
                         new_celestial = random_celestial()
-                        if is_valid_spawn(new_celestial, self.celestials, 200):
+                        if new_celestial and is_valid_spawn(new_celestial, self.celestials, 200):
                             self.celestials.add(new_celestial)
                             break
 
@@ -277,8 +277,7 @@ class Game:
                     self.ship.direction = "left"
                     self.ship.moving = True
                     direction_set = True
-                if key_pressed[pg.K_RIGHT] and self.ship_x < screen_size[
-                    0] - img.get_width():
+                if key_pressed[pg.K_RIGHT] and self.ship_x < screen_size[0] - img.get_width():
                     self.ship_x += self.ship.velocity
                     self.ship.direction = "right"
                     self.ship.moving = True
@@ -384,7 +383,8 @@ class Game:
 
             if self.game_over:
                 game_over = font.render("GAME OVER", True, "RED")
-                screen.blit(game_over,[screen_size[0] // 2, screen_size[1] // 2])
+                screen.blit(game_over,[screen_size[0] // 2, screen_size[1]
+                                       // 2])
 
             pg.display.update()
 

@@ -52,7 +52,12 @@ def random_celestial():
     return None
 
 def is_valid_spawn(new, group, min_dist):
+    if new is None:
+        return False
+
     for obj in group:
+        if obj is None:
+            continue
         dx = new.rect.centerx - obj.rect.centerx
         dy = new.rect.centery - obj.rect.centery
         if dx*dx + dy*dy < min_dist * min_dist:
