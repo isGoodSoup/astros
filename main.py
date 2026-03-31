@@ -135,6 +135,8 @@ class Game:
         self.survival_bonus = 0
         self.game_over = False
 
+        self.play_sound = True
+        self.pause = False
         self.debugging = False
         self.cursor = True
 
@@ -144,7 +146,10 @@ class Game:
         self.milliseconds = 0
         self.stopwatch = None
 
-    def run(self, running, clock, screen, screen_size, font):
+        self.screen_shake = 0
+
+    def run(self, running, clock, screen,
+            screen_size, font):
         while running:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -154,6 +159,13 @@ class Game:
                         self.reset(screen_size)
                     if event.key == pg.K_F2:
                         self.debug()
+                    if event.key == pg.K_ESCAPE:
+                        self.pause = not self.pause
+                    if event.key == pg.K_q and (event.mod & pg.KMOD_CTRL):
+                        running = False
+
+            if not running:
+                break
 
             clock.tick(self.fps)
             screen.fill((0,0,0))
@@ -161,7 +173,8 @@ class Game:
             for i in self.stars:
                 pg.draw.circle(screen, (255, 255, 255),
                                    (int(i[0]), int(i[1])), i[2])
-                i[1] += 2
+                if not self.pause:
+                    i[1] += 2
                 if i[1] > screen_size[1]:
                     i[1] = 0
                     i[0] = random.randint(0, screen_size[0])
@@ -179,9 +192,11 @@ class Game:
 
             current_time = pg.time.get_ticks()
             if current_time - self.last_upgrade_spawn > self.upgrade_spawn_interval:
-                self.last_upgrade_spawn = current_time
-                new_upgrade = Upgrade(upgd.get_upgrade(), -200, -50)
-                self.upgrades.add(new_upgrade) # type: ignore
+                for _ in range(random.randint(1, 2)):
+                    for _ in range(5):
+                        self.last_upgrade_spawn = current_time
+                        new_upgrade = Upgrade(upgd.get_upgrade(), -200, -50)
+                        self.upgrades.add(new_upgrade) # type: ignore
 
             current_time = pg.time.get_ticks()
             if current_time - self.last_celestial_spawn > self.celestial_spawn_interval:
@@ -193,7 +208,8 @@ class Game:
                             self.celestials.add(new_celestial)
                             break
 
-            self.celestials.update()
+            if not self.pause:
+                self.celestials.update()
             self.celestials.draw(screen)
 
             now = pg.time.get_ticks()
@@ -205,7 +221,6 @@ class Game:
                 self.anim_frame_overlay += 1
                 self.last_update_overlay = now
 
-            now = pg.time.get_ticks()
             if self.ship.direction in ["left", "right"]:
                 if self.ship.direction == "left":
                     frames = self.left_frames_movement
@@ -235,7 +250,6 @@ class Game:
                     base = frames[self.anim_index_right]
             else:
                 base = self.frame_idle
-                self.last_direction = None
 
             img = base.copy()
 
@@ -251,7 +265,8 @@ class Game:
                 shoot_frame = self.frames_shooting[shoot_index]
                 img.blit(shoot_frame, (0, 0))
 
-            self.asteroids.update()
+            if not self.pause:
+                self.asteroids.update()
             self.asteroids.draw(screen)
 
             if self.debugging:
@@ -264,11 +279,11 @@ class Game:
                 if self.debugging:
                     pg.draw.rect(screen, (255, 0, 0), self.ship.hitbox,2)
 
-            if not self.game_over:
+            key_pressed = pg.key.get_pressed()
+            if not self.game_over and not self.pause:
                 self.upgrades.update()
                 self.upgrades.draw(screen)
 
-                key_pressed = pg.key.get_pressed()
                 self.ship.moving = False
                 direction_set = False
 
@@ -277,7 +292,7 @@ class Game:
                     self.ship.direction = "left"
                     self.ship.moving = True
                     direction_set = True
-                if key_pressed[pg.K_RIGHT] and self.ship_x < screen_size[0] - img.get_width():
+                elif key_pressed[pg.K_RIGHT] and self.ship_x < screen_size[0] - img.get_width():
                     self.ship_x += self.ship.velocity
                     self.ship.direction = "right"
                     self.ship.moving = True
@@ -285,8 +300,7 @@ class Game:
                 if key_pressed[pg.K_UP] and self.ship_y > 0:
                     self.ship_y -= self.ship.velocity
                     self.ship.moving = True
-                if key_pressed[pg.K_DOWN] and self.ship_y < screen_size[
-                    1] - self.ship.image.get_height():
+                if key_pressed[pg.K_DOWN] and self.ship_y < screen_size[1] - self.ship.image.get_height():
                     self.ship_y += self.ship.velocity
 
                 if not direction_set:
@@ -294,13 +308,16 @@ class Game:
 
                 if self.ship_alive:
                     self.ship.shooting = False
-                    if key_pressed[
-                        pg.K_SPACE] and current_time - self.last_shot_time >= self.shot_cooldown:
+                    if key_pressed[pg.K_SPACE] and current_time - self.last_shot_time >= self.shot_cooldown:
                         self.last_shot_time = current_time
                         self.ship.shooting = True
                         projectile = Projectile(self.ship_x + img.get_width() // 2,self.ship_y)
                         self.projectiles.add(projectile) # type: ignore
-                        self.sounds[0].play()
+                        if self.play_sound:
+                            self.sounds[0].play()
+
+                if key_pressed[pg.K_m]:
+                    self.play_sound = not self.play_sound
 
                 self.projectiles.update()
                 self.projectiles.draw(screen)
@@ -316,8 +333,10 @@ class Game:
                     explosion = Explosion(ship_center_x, ship_center_y, self.frame_explode)
                     self.explosions.add(explosion) # type: ignore
                     asteroid_hit.kill()
-                    self.sounds[1].play()
+                    if self.play_sound:
+                        self.sounds[1].play()
                     self.ship.hitpoints -= self.ship.max_hitpoints // 28
+                    self.screen_shake = 20
                     if self.ship.hitpoints <= 0:
                         self.game_over = True
                         self.ship.kill()
@@ -334,7 +353,8 @@ class Game:
                                           self.frame_explode)
                     self.explosions.add(explosion) # type: ignore
                     asteroid[0].kill()
-                    self.sounds[1].play()
+                    if self.play_sound:
+                        self.sounds[1].play()
                     self.score += 10
 
                 upgrade_hit = pg.sprite.spritecollide(self.ship, self.upgrades,False,  # type: ignore
@@ -348,24 +368,28 @@ class Game:
                     self.survival_bonus = 0
                     self.score += 1
 
-            self.explosions.update()
+            if not self.pause:
+                self.explosions.update()
             self.explosions.draw(screen)
 
             score_text = f"{self.score:05}"
             text_surface = font.render(score_text, True, "WHITE")
             screen.blit(text_surface, [screen_size[0] - 160, 50])
 
-            if not self.game_over:
-                self.milliseconds += 1
-                if self.milliseconds >= 60:
-                    self.milliseconds = 0
-                    self.seconds += 1
-                    if self.seconds >= 60:
-                        self.seconds = 0
-                        self.minutes += 1
-                        if self.minutes >= 60:
-                            self.minutes = 0
-                            self.hours += 1
+            if not self.pause:
+                if not self.game_over:
+                    self.milliseconds += 1
+                    if self.milliseconds >= 60:
+                        self.milliseconds = 0
+                        self.seconds += 1
+                        if self.seconds == 30:
+                            pass # TODO difficulty increasing logic
+                        if self.seconds >= 60:
+                            self.seconds = 0
+                            self.minutes += 1
+                            if self.minutes >= 60:
+                                self.minutes = 0
+                                self.hours += 1
 
             self.stopwatch = font.render(f"{self.hours:02}:"
             f"{self.minutes:02}:{self.seconds:02}", True, "WHITE")
@@ -386,8 +410,14 @@ class Game:
                 screen.blit(game_over,[screen_size[0] // 2, screen_size[1]
                                        // 2])
 
-            pg.display.update()
+            if self.screen_shake > 0:
+                self.screen_shake -= 1
 
+            render = [0,0]
+            if self.screen_shake:
+                render = self.ship.taken_damage()
+            screen.blit(pg.transform.scale(screen, screen_size), render)
+            pg.display.update()
         pg.quit()
 
     def reset(self, screen_size):
@@ -408,7 +438,8 @@ class Game:
         self.last_shot_time = 0
         self.score = 0
         self.game_over = False
-        pg.mixer.music.play(-1)
+        if self.play_sound:
+            pg.mixer.music.play(-1)
 
     def debug(self):
         if self.debugging:

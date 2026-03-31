@@ -1,3 +1,5 @@
+import random
+
 import pygame
 
 from scripts.sheet import SpriteSheet
@@ -24,3 +26,6 @@ class Ship(pygame.sprite.Sprite):
     def update_position(self, x, y):
         self.rect.topleft = (x, y)
         self.hitbox.center = self.rect.center
+
+    def taken_damage(self):
+        return [random.randint(0,10) - 4, random.randint(0,10) - 4]
