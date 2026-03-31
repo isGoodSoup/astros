@@ -47,3 +47,11 @@ def random_celestial():
         return Galaxy(x, y)
     else:
         return BlackHole(x, y)
+
+def is_valid_spawn(new, group, min_dist):
+    for obj in group:
+        dx = new.rect.centerx - obj.rect.centerx
+        dy = new.rect.centery - obj.rect.centery
+        if dx*dx + dy*dy < min_dist * min_dist:
+            return False
+    return True

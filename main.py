@@ -124,7 +124,7 @@ class Game:
                        random.randint(0, screen_size[1]),
                        random.randint(1, 3)] for _ in range(100)]
         self.last_celestial_spawn = 0
-        self.celestial_spawn_interval = 10000
+        self.celestial_spawn_interval = random.randint(8000, 14000)
         self.last_asteroid_spawn = 0
         self.asteroid_spawn_interval = 800
         self.last_upgrade_spawn = 0
@@ -189,9 +189,8 @@ class Game:
                 for _ in range(random.randint(1, 4)):
                     for _ in range(10):
                         new_celestial = random_celestial()
-                        too_close = any(abs(new_celestial.rect.y - m.rect.y) < 120 for m in self.celestials)
-                        if not too_close:
-                            self.celestials.add(new_celestial) # type: ignore
+                        if is_valid_spawn(new_celestial, self.celestials, 200):
+                            self.celestials.add(new_celestial)
                             break
 
             self.celestials.update()
