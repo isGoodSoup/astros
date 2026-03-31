@@ -5,7 +5,7 @@ from pygame.display import toggle_fullscreen
 
 import upgd
 from explode import Explosion
-from meteor import Meteor
+from asteroid import Asteroid
 from proj import Projectile
 from ship import Ship
 from soundlib import load_sounds, load_ost
@@ -59,7 +59,7 @@ class Game:
         pg.mixer.music.set_volume(0.5)
 
         self.projectiles = pg.sprite.Group()
-        self.meteors = pg.sprite.Group()
+        self.asteroids = pg.sprite.Group()
         self.explosions = pg.sprite.Group()
         self.upgrades = pg.sprite.Group()
 
@@ -106,8 +106,8 @@ class Game:
         self.stars = [[random.randint(0, screen_size[0]),
                        random.randint(0, screen_size[1]),
                        random.randint(1, 3)] for _ in range(100)]
-        self.last_meteor_spawn = 0
-        self.meteor_spawn_interval = 800
+        self.last_asteroid_spawn = 0
+        self.asteroid_spawn_interval = 800
         self.last_upgrade_spawn = 0
         self.upgrade_spawn_interval = 60_000
         self.last_shot_time = 0
@@ -144,14 +144,14 @@ class Game:
                     i[0] = random.randint(0, screen_size[0])
 
             current_time = pg.time.get_ticks()
-            if current_time - self.last_meteor_spawn > self.meteor_spawn_interval:
-                self.last_meteor_spawn = current_time
+            if current_time - self.last_asteroid_spawn > self.asteroid_spawn_interval:
+                self.last_asteroid_spawn = current_time
                 for _ in range(random.randint(1, 4)):
                     for _ in range(10):
-                        new_meteor = Meteor(screen_size[0], min_y=-200,max_y=-50)
-                        too_close = any(abs(new_meteor.rect.y - m.rect.y) < 60 for m in self.meteors)
+                        new_asteroid = Asteroid(screen_size[0], min_y=-200, max_y=-50)
+                        too_close = any(abs(new_asteroid.rect.y - m.rect.y) < 60 for m in self.asteroids)
                         if not too_close:
-                            self.meteors.add(new_meteor) # type: ignore
+                            self.asteroids.add(new_asteroid) # type: ignore
                             break
 
             current_time = pg.time.get_ticks()
@@ -195,11 +195,11 @@ class Game:
                 self.last_direction = None
             img = base.copy()
 
-            self.meteors.update()
-            self.meteors.draw(screen)
+            self.asteroids.update()
+            self.asteroids.draw(screen)
 
             if self.debugging:
-                for i in self.meteors:
+                for i in self.asteroids:
                     pg.draw.rect(screen, (255, 0, 0),i.hitbox, 2)
 
             if self.ship_alive:
@@ -247,16 +247,16 @@ class Game:
 
                 if self.ship_alive:
                     self.ship.update_position(self.ship_x, self.ship_y)
-                meteor_hit = pg.sprite.spritecollideany(self.ship, self.meteors, # type: ignore
-                                                            collided=lambda s, m:
+                asteroid_hit = pg.sprite.spritecollideany(self.ship, self.asteroids,  # type: ignore
+                                                        collided=lambda s, m:
                                                             s.hitbox.colliderect(m.rect))
-                if meteor_hit and not self.game_over:
+                if asteroid_hit and not self.game_over:
                     frame = self.frame_explode[0]
                     explosion_x = self.ship_x + img.get_width() // 2 - frame.get_width() // 2
                     explosion_y = self.ship_y + img.get_height() // 2 - frame.get_height() // 2
                     explosion = Explosion(explosion_x, explosion_y, self.frame_explode)
                     self.explosions.add(explosion) # type: ignore
-                    meteor_hit.kill()
+                    asteroid_hit.kill()
                     self.sounds[1].play()
                     self.ship.kill()
                     self.ship_alive = False
@@ -265,15 +265,15 @@ class Game:
                     self.game_over = True
 
                 hits = pg.sprite.groupcollide(self.projectiles,
-                                                  self.meteors,
-                                                  True, False)
-                for meteor in hits.values():
-                    meteor_frame = self.frame_explode[0]
-                    explosion_x = meteor[0].rect.centerx - meteor_frame.get_width() // 2
-                    explosion_y = meteor[0].rect.centery - meteor_frame.get_height() // 2
+                                              self.asteroids,
+                                              True, False)
+                for asteroid in hits.values():
+                    asteroid_frame = self.frame_explode[0]
+                    explosion_x = asteroid[0].rect.centerx - asteroid_frame.get_width() // 2
+                    explosion_y = asteroid[0].rect.centery - asteroid_frame.get_height() // 2
                     explosion = Explosion(explosion_x, explosion_y, self.frame_explode)
                     self.explosions.add(explosion) # type: ignore
-                    meteor[0].kill()
+                    asteroid[0].kill()
                     self.sounds[1].play()
                     self.score += 10
 
@@ -299,7 +299,7 @@ class Game:
 
     def reset(self, screen_size):
         self.projectiles.empty()
-        self.meteors.empty()
+        self.asteroids.empty()
         self.explosions.empty()
         framew = self.sprite_sheet.sheet.get_width() // self.cols
         frameh = self.sprite_sheet.sheet.get_height()
@@ -311,7 +311,7 @@ class Game:
 
         self.frame = 0
         self.last_update = pg.time.get_ticks()
-        self.last_meteor_spawn = 0
+        self.last_asteroid_spawn = 0
         self.last_shot_time = 0
         self.score = 0
         self.game_over = False
