@@ -51,9 +51,8 @@ class Game:
     def __init__(self, screen_size):
         self.fps = 60
         self.frame = 0
-        self.anim_frame = 0
         self.prev_state = None
-        self.scale = 3
+        self.scale = 4
         self.sounds = load_sounds()
         self.theme = load_ost()
         pg.mixer.music.play(-1)
@@ -64,8 +63,10 @@ class Game:
         self.explosions = pg.sprite.Group()
         self.upgrades = pg.sprite.Group()
 
-        self.cols = 15
+        self.cols = 12
+        self.explosion_frames = 7
         self.sprite_sheet = SpriteSheet("assets/ship.png")
+        self.explosion_sheet = SpriteSheet("assets/explosion.png")
         framew = self.sprite_sheet.sheet.get_width() // self.cols
         frameh = self.sprite_sheet.sheet.get_height()
         self.ship = Ship(self.sprite_sheet, 0, 0, self.frame,
@@ -74,24 +75,37 @@ class Game:
         self.ship_x = screen_size[0] // 2 - framew // 2 - 25
         self.ship_y = screen_size[1] // 2 + 200
 
-        self.animation_cooldown = 100
-        self.frames_movement = []
+        self.anim_frame_base = 0
+        self.anim_frame_overlay = 0
+        self.cooldown_base = 100
+        self.cooldown_overlay = 50
+        self.anim_base_index = 0
+        self.anim_base_direction = 1
+        self.cooldown_base = 100
+        self.last_update_base = pg.time.get_ticks()
+        self.last_update_overlay = pg.time.get_ticks()
+        self.last_update = pg.time.get_ticks()
+        self.last_direction = None
         self.frames = []
         for i in range(self.cols):
             img = self.sprite_sheet.get_image(i, framew, frameh, scale=self.scale,
                                               columns=self.cols)
             self.frames.append(img)
 
-        self.frames_movement = self.frames[0:4]
-        self.frames_shooting = self.frames[4:8]
-        self.frame_idle = self.frames[8]
-        self.frame_explode = self.frames[9:15]
+        self.left_frames_movement = self.frames[0:2]
+        self.frame_idle = self.frames[2]
+        self.right_frames_movement = self.frames[3:5]
+        self.frames_flying = self.frames[5:9]
+        self.frames_shooting = self.frames[9:12]
 
+        framew = self.explosion_sheet.sheet.get_width() // self.explosion_frames
+        frameh = self.explosion_sheet.sheet.get_height()
+        self.frame_explode = [self.explosion_sheet.get_image(i, framew, frameh, scale=self.scale,
+                                                            columns=self.explosion_frames)
+                                                            for i in range(self.explosion_frames)]
         self.stars = [[random.randint(0, screen_size[0]),
                        random.randint(0, screen_size[1]),
                        random.randint(1, 3)] for _ in range(100)]
-        self.last_update = pg.time.get_ticks()
-
         self.last_meteor_spawn = 0
         self.meteor_spawn_interval = 800
         self.last_upgrade_spawn = 0
@@ -146,20 +160,40 @@ class Game:
                 new_upgrade = Upgrade(upgd.get_upgrade(), -200, -50)
                 self.upgrades.add(new_upgrade) # type: ignore
 
-            if self.ship.state != self.prev_state:
-                self.anim_frame = 0
-                self.prev_state = self.ship.state
+            now = pg.time.get_ticks()
+            if now - self.last_update_base > self.cooldown_base:
+                self.anim_frame_base += 1
+                self.last_update_base = now
 
-            self.anim_frame += 1
+            if now - self.last_update_overlay > self.cooldown_overlay:
+                self.anim_frame_overlay += 1
+                self.last_update_overlay = now
 
-            if self.ship.state == "move":
-                img = self.frames_movement[
-                    self.anim_frame % len(self.frames_movement)]
-            elif self.ship.state == "shoot":
-                img = self.frames_shooting[
-                    self.anim_frame % len(self.frames_shooting)]
+            if self.ship.direction in ["left", "right"]:
+                if self.ship.direction != self.last_direction:
+                    self.anim_base_index = 0
+                    self.anim_base_direction = 1
+                    self.last_direction = self.ship.direction
+
+                if now - self.last_update_base > self.cooldown_base:
+                    self.anim_base_index += self.anim_base_direction
+                    self.last_update_base = now
+
+                    if self.anim_base_index >= len(self.left_frames_movement) - 1:
+                        self.anim_base_index = len(self.left_frames_movement) - 1
+                        self.anim_base_direction = 0
+                    elif self.anim_base_index <= 0:
+                        self.anim_base_index = 0
+                        self.anim_base_direction = 1
+
+                if self.ship.direction == "left":
+                    base = self.left_frames_movement[self.anim_base_index]
+                else:
+                    base = self.right_frames_movement[self.anim_base_index]
             else:
-                img = self.frame_idle
+                base = self.frame_idle
+                self.last_direction = None
+            img = base.copy()
 
             self.meteors.update()
             self.meteors.draw(screen)
@@ -170,7 +204,7 @@ class Game:
 
             if self.ship_alive:
                 self.ship.rect.topleft = (self.ship_x, self.ship_y)
-                screen.blit(self.ship.image, self.ship.rect)
+                screen.blit(img, self.ship.rect)
                 if self.debugging:
                     pg.draw.rect(screen, (255, 0, 0), self.ship.hitbox,2)
 
@@ -179,34 +213,34 @@ class Game:
                 self.upgrades.draw(screen)
 
                 key_pressed = pg.key.get_pressed()
+                self.ship.moving = False
+                self.ship.direction = "idle"
+
                 if key_pressed[pg.K_LEFT] and self.ship_x > 0:
                     self.ship_x -= self.ship.velocity
+                    self.ship.direction = "left"
                     self.ship.moving = True
-                if key_pressed[pg.K_RIGHT] and self.ship_x < \
-                        screen_size[0] - img.get_width():
+                if key_pressed[pg.K_RIGHT] and self.ship_x < screen_size[
+                    0] - img.get_width():
                     self.ship_x += self.ship.velocity
+                    self.ship.direction = "right"
                     self.ship.moving = True
                 if key_pressed[pg.K_UP] and self.ship_y > 0:
                     self.ship_y -= self.ship.velocity
                     self.ship.moving = True
-                if (key_pressed[pg.K_DOWN] and self.ship_y <
-                        screen_size[1] - self.ship.image.get_height()):
+                if key_pressed[pg.K_DOWN] and self.ship_y < screen_size[
+                    1] - self.ship.image.get_height():
                     self.ship_y += self.ship.velocity
-                    self.ship.moving = False
 
                 if self.ship_alive:
-                    if key_pressed[pg.K_SPACE] and current_time - self.last_shot_time >= self.shot_cooldown:
+                    self.ship.shooting = False
+                    if key_pressed[
+                        pg.K_SPACE] and current_time - self.last_shot_time >= self.shot_cooldown:
                         self.last_shot_time = current_time
-                        self.ship.state = "shoot"
-                        projectile = Projectile(
-                            self.ship_x + img.get_width() // 2,
-                            self.ship_y)
-                        self.projectiles.add(projectile)  # type: ignore
+                        self.ship.shooting = True
+                        projectile = Projectile(self.ship_x + img.get_width() // 2,self.ship_y)
+                        self.projectiles.add(projectile) # type: ignore
                         self.sounds[0].play()
-                    elif self.ship.moving:
-                        self.ship.state = "move"
-                    else:
-                        self.ship.state = "idle"
 
                 self.projectiles.update()
                 self.projectiles.draw(screen)
@@ -268,9 +302,9 @@ class Game:
         self.meteors.empty()
         self.explosions.empty()
         framew = self.sprite_sheet.sheet.get_width() // self.cols
+        frameh = self.sprite_sheet.sheet.get_height()
         self.ship = Ship(self.sprite_sheet, 0, 0, self.frame,
-                         self.sprite_sheet.sheet.get_width(),
-                         self.sprite_sheet.sheet.get_height(), columns=4)
+                         framew, frameh, columns=self.cols)
         self.ship_alive = True
         self.ship_x = screen_size[0] // 2 - framew // 2 - 25
         self.ship_y = screen_size[1] // 2 + 200
