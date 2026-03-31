@@ -28,12 +28,12 @@ class Planet(Celestial):
 class Galaxy(Celestial):
     def __init__(self, x, y):
         super().__init__(f"assets/galaxies/galaxy_"
-                                       f"{random.randint(1, 2)}.png", x, y, speed=int(0.5))
+                                       f"{random.randint(1, 2)}.png", x, y)
 
 class BlackHole(Celestial):
     def __init__(self, x, y):
         super().__init__(f"assets/galaxies/black_hole_"
-                         f"{random.randint(1, 2)}.png", x, y, speed=int(0.5))
+                         f"{random.randint(1, 2)}.png", x, y)
 
 def random_celestial():
     screen_w = pygame.display.Info().current_w
@@ -41,10 +41,9 @@ def random_celestial():
     y = random.randint(-200, -50)
 
     r = random.random()
-
     if r < 0.6:
         return Planet(x, y)
-    elif r < 0.9:
+    elif r < 0.8:
         return Galaxy(x, y)
     else:
         return BlackHole(x, y)
