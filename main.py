@@ -16,14 +16,18 @@ class Menu:
     def __init__(self):
         pg.init()
         pg.font.init()
-        self.screen_size = (int(pg.display.Info().current_w / 4),
-                            int(pg.display.Info().current_h / 1.5))
+        self.width = int(pg.display.Info().current_w)
+        self.height = int(pg.display.Info().current_h)
+        self.screen_size = (self.width, self.height)
         self.screen = pg.display.set_mode(self.screen_size, pg.SCALED, vsync=1)
         self.game_font = pg.font.Font("assets/ui/PressStart2P.ttf", 56)
         self.text_font = pg.font.Font("assets/ui/PressStart2P.ttf", 24)
         pg.display.set_caption("Astros")
         self.clock = pg.time.Clock()
         self.running = True
+        self.cursor = False
+        pg.mouse.set_visible(self.cursor)
+        toggle_fullscreen()
 
     def run(self):
         while self.running:
@@ -43,7 +47,7 @@ class Menu:
             start = self.text_font.render("Press Enter", True,"WHITE")
             title_y = 200
             self.screen.blit(title, (self.screen_size[0]//2 - title.get_width()//2, title_y))
-            self.screen.blit(start, (self.screen_size[0]//2 - start.get_width()//2, title_y + 200))
+            self.screen.blit(start, (self.screen_size[0]//2 - start.get_width()//2, title_y + 600))
             pg.display.update()
             self.clock.tick(60)
 
@@ -128,9 +132,6 @@ class Game:
                         self.reset(screen_size)
                     if event.key == pg.K_F2:
                         self.debug()
-                    if event.key == pg.K_F1:
-                        toggle_fullscreen()
-                        self.toggle_cursor()
 
             clock.tick(self.fps)
             screen.fill((0,0,0))
@@ -325,10 +326,6 @@ class Game:
         if not self.debugging:
             self.debugging = True
             return
-
-    def toggle_cursor(self):
-        self.cursor = not self.cursor
-        pg.mouse.set_visible(self.cursor)
 
 if __name__ == '__main__':
     menu = Menu()
