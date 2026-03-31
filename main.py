@@ -1,16 +1,16 @@
-import random
-
 import pygame as pg
 from pygame.display import toggle_fullscreen
 
 from scripts import upgd
-from scripts.explode import Explosion
 from scripts.asteroid import Asteroid
+from scripts.celestial import *
+from scripts.explode import Explosion
 from scripts.proj import Projectile
+from scripts.sheet import SpriteSheet
 from scripts.ship import Ship
 from scripts.soundlib import load_sounds, load_ost
-from scripts.sheet import SpriteSheet
 from scripts.upgd import Upgrade
+
 
 class Menu:
     def __init__(self):
@@ -111,6 +111,8 @@ class Game:
         self.stars = [[random.randint(0, screen_size[0]),
                        random.randint(0, screen_size[1]),
                        random.randint(1, 3)] for _ in range(100)]
+        self.last_celestial_spawn = 0
+        self.celestial_spawn_interval = 10000
         self.last_asteroid_spawn = 0
         self.asteroid_spawn_interval = 800
         self.last_upgrade_spawn = 0
@@ -161,6 +163,20 @@ class Game:
                 self.last_upgrade_spawn = current_time
                 new_upgrade = Upgrade(upgd.get_upgrade(), -200, -50)
                 self.upgrades.add(new_upgrade) # type: ignore
+
+            current_time = pg.time.get_ticks()
+            if current_time - self.last_celestial_spawn > self.celestial_spawn_interval:
+                self.last_celestial_spawn = current_time
+                for _ in range(random.randint(1, 4)):
+                    for _ in range(10):
+                        new_celestial = random_celestial()
+                        too_close = any(abs(new_celestial.rect.y - m.rect.y) < 120 for m in self.celestials)
+                        if not too_close:
+                            self.celestials.add(new_celestial) # type: ignore
+                            break
+
+            self.celestials.update()
+            self.celestials.draw(screen)
 
             now = pg.time.get_ticks()
             if now - self.last_update_base > self.cooldown_base:
