@@ -5,7 +5,7 @@ class Celestial(pygame.sprite.Sprite):
     def __init__(self, path, x, y, speed=1):
         super().__init__()
         self.image = pygame.image.load(path).convert_alpha()
-        self.scale = random.uniform(0.5, 1.5)
+        self.scale = random.uniform(1, 4)
         self.image = pygame.transform.scale(
             self.image,
             (int(self.image.get_width() * self.scale),
@@ -28,12 +28,12 @@ class Planet(Celestial):
 class Galaxy(Celestial):
     def __init__(self, x, y):
         super().__init__(f"assets/galaxies/galaxy_"
-                                       f"{random.randint(1, 2)}.png", x, y)
+                                       f"{random.randint(1, 2)}.png", x, y, speed=int(0.5))
 
 class BlackHole(Celestial):
     def __init__(self, x, y):
         super().__init__(f"assets/galaxies/black_hole_"
-                         f"{random.randint(1, 2)}.png", x, y)
+                         f"{random.randint(1, 2)}.png", x, y, speed=int(0.5))
 
 def random_celestial():
     screen_w = pygame.display.Info().current_w
