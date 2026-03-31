@@ -41,12 +41,15 @@ def random_celestial():
     y = random.randint(-200, -50)
 
     r = random.random()
-    if r < 0.6:
+    r2 = random.random()
+
+    if r > 0.5:
         return Planet(x, y)
-    elif r < 0.8:
+    elif r > 0.8:
         return Galaxy(x, y)
-    else:
+    elif r > 0.9 and r2 > 0.9:
         return BlackHole(x, y)
+    return None
 
 def is_valid_spawn(new, group, min_dist):
     for obj in group:
