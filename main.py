@@ -5,6 +5,7 @@ from scripts import upgd
 from scripts.asteroid import Asteroid
 from scripts.celestial import *
 from scripts.explode import Explosion
+from scripts.hud import Interface
 from scripts.proj import Projectile
 from scripts.sheet import SpriteSheet
 from scripts.ship import Ship
@@ -20,8 +21,9 @@ class Menu:
         self.height = int(pg.display.Info().current_h)
         self.screen_size = (self.width, self.height)
         self.screen = pg.display.set_mode(self.screen_size, pg.SCALED, vsync=1)
-        self.game_font = pg.font.Font("assets/ui/PressStart2P.ttf", 56)
-        self.text_font = pg.font.Font("assets/ui/PressStart2P.ttf", 24)
+        self.font = "assets/ui/PressStart2P.ttf"
+        self.game_font = pg.font.Font(self.font, 56)
+        self.text_font = pg.font.Font(self.font, 24)
         pg.display.set_caption("Astros")
         self.clock = pg.time.Clock()
         self.running = True
@@ -80,6 +82,8 @@ class Game:
         self.ship_x = screen_size[0] // 2 - framew // 2 - 25
         self.ship_y = screen_size[1] // 2 + 200
 
+        self.hud = Interface(screen_size, 0, 40, 40)
+
         self.anim_frame_base = 0
         self.anim_frame_overlay = 0
         self.anim_index_left = 0
@@ -130,7 +134,8 @@ class Game:
         self.debugging = False
         self.cursor = True
 
-    def run(self, running, clock, screen, screen_size, game_font):
+    def run(self, running, clock, screen, screen_size,
+            game_font):
         while running:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -192,38 +197,38 @@ class Game:
                 self.anim_frame_overlay += 1
                 self.last_update_overlay = now
 
+            now = pg.time.get_ticks()
             if self.ship.direction in ["left", "right"]:
                 if self.ship.direction == "left":
                     frames = self.left_frames_movement
                     if self.last_direction != "left":
                         self.anim_index_left = 0
-                        self.last_update_left = pg.time.get_ticks()
+                        self.last_update_left = now
                         self.last_direction = "left"
 
-                    if pg.time.get_ticks() - self.last_update_left > self.cooldown_base:
+                    if now - self.last_update_left > self.cooldown_base:
                         self.anim_index_left += 1
                         if self.anim_index_left >= len(frames):
                             self.anim_index_left = len(frames) - 1
-                        self.last_update_left = pg.time.get_ticks()
-
+                        self.last_update_left = now
                     base = frames[self.anim_index_left]
-
                 else:
                     frames = self.right_frames_movement
                     if self.last_direction != "right":
                         self.anim_index_right = 0
-                        self.last_update_right = pg.time.get_ticks()
+                        self.last_update_right = now
                         self.last_direction = "right"
 
-                    if pg.time.get_ticks() - self.last_update_right > self.cooldown_base:
+                    if now - self.last_update_right > self.cooldown_base:
                         self.anim_index_right += 1
                         if self.anim_index_right >= len(frames):
                             self.anim_index_right = len(frames) - 1
-                        self.last_update_right = pg.time.get_ticks()
+                        self.last_update_right = now
                     base = frames[self.anim_index_right]
             else:
                 base = self.frame_idle
                 self.last_direction = None
+
             img = base.copy()
 
             if self.ship.moving:
@@ -257,23 +262,28 @@ class Game:
 
                 key_pressed = pg.key.get_pressed()
                 self.ship.moving = False
-                self.ship.direction = "idle"
+                direction_set = False
 
                 if key_pressed[pg.K_LEFT] and self.ship_x > 0:
                     self.ship_x -= self.ship.velocity
                     self.ship.direction = "left"
                     self.ship.moving = True
+                    direction_set = True
                 if key_pressed[pg.K_RIGHT] and self.ship_x < screen_size[
                     0] - img.get_width():
                     self.ship_x += self.ship.velocity
                     self.ship.direction = "right"
                     self.ship.moving = True
+                    direction_set = True
                 if key_pressed[pg.K_UP] and self.ship_y > 0:
                     self.ship_y -= self.ship.velocity
                     self.ship.moving = True
                 if key_pressed[pg.K_DOWN] and self.ship_y < screen_size[
                     1] - self.ship.image.get_height():
                     self.ship_y += self.ship.velocity
+
+                if not direction_set:
+                    self.ship.direction = "idle"
 
                 if self.ship_alive:
                     self.ship.shooting = False
@@ -300,11 +310,13 @@ class Game:
                     self.explosions.add(explosion) # type: ignore
                     asteroid_hit.kill()
                     self.sounds[1].play()
-                    self.ship.kill()
-                    self.ship_alive = False
-
-                    pg.mixer.music.stop()
-                    self.game_over = True
+                    self.ship.hitpoints -= self.ship.max_hitpoints // 28
+                    if self.ship.hitpoints <= 0:
+                        self.game_over = True
+                        self.ship.kill()
+                        self.ship_alive = False
+                        pg.mixer.music.stop()
+                        self.game_over = True
 
                 hits = pg.sprite.groupcollide(self.projectiles,
                                               self.asteroids,
@@ -335,11 +347,21 @@ class Game:
             score_text = f"{self.score:05}"
             text_surface = game_font.render(score_text, True, "WHITE")
             screen.blit(text_surface, [screen_size[0] - 160, 50])
+
+            total_frames = len(self.hud.frames) - 1
+            if self.ship.hitpoints <= 0:
+                hitpoints_frame = total_frames
+            else:
+                hitpoints_frame = (total_frames -
+                (self.ship.hitpoints * total_frames) // self.ship.max_hitpoints)
+
+            self.hud.update(self.ship, hitpoints_frame, screen)
             pg.display.update()
 
             if self.game_over:
                 game_over = game_font.render("GAME OVER", True, "RED")
-                screen.blit(game_over,[screen_size[0] // 2 - 150, screen_size[1] // 2])
+                screen.blit(game_over,[screen_size[0] // 2 - 150,
+                                       screen_size[1] // 2])
 
         pg.quit()
 
