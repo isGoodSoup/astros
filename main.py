@@ -120,6 +120,7 @@ class Game:
         self.last_shot_time = 0
         self.shot_cooldown = 300
         self.score = 0
+        self.survival_bonus = 0
         self.game_over = False
 
         self.debugging = False
@@ -167,7 +168,7 @@ class Game:
             current_time = pg.time.get_ticks()
             if current_time - self.last_celestial_spawn > self.celestial_spawn_interval:
                 self.last_celestial_spawn = current_time
-                for _ in range(random.randint(1, 4)):
+                for _ in range(random.randint(1, 6)):
                     for _ in range(10):
                         new_celestial = random_celestial()
                         too_close = any(abs(new_celestial.rect.y - m.rect.y) < 120 for m in self.celestials)
@@ -311,6 +312,10 @@ class Game:
                     for upgrade in upgrade_hit:
                         upgrade.kill()
 
+                self.survival_bonus += 1
+                if self.survival_bonus >= 60:
+                    self.survival_bonus = 0
+                    self.score += 1
 
             self.explosions.update()
             self.explosions.draw(screen)
@@ -322,7 +327,8 @@ class Game:
 
             if self.game_over:
                 game_over = game_font.render("GAME OVER", True, "RED")
-                screen.blit(game_over,[screen_size[0] // 2 - 150,screen_size[1] // 2])
+                screen.blit(game_over,[screen_size[0] // 2 - 150, screen_size[1] // 2])
+
         pg.quit()
 
     def reset(self, screen_size):
