@@ -14,6 +14,7 @@ class Ship(pygame.sprite.Sprite):
         self.moving = False
         self.hitpoints = 400
         self.shield = 200
+        self.damage = 4
 
     def update_position(self, x, y):
         self.rect.topleft = (x, y)
