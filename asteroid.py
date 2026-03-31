@@ -14,7 +14,7 @@ class Asteroid(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = random.randint(0, screen_width - self.rect.width)
         self.rect.y = random.randint(min_y, max_y)
-        self.hitbox = self.rect.copy()
+        self.hitbox = self.rect.inflate(self.rect.width * -0.6,self.rect.height * -0.6)
         self.speed = speed
 
     @override
@@ -22,4 +22,4 @@ class Asteroid(pygame.sprite.Sprite):
         self.rect.y += self.speed
         if self.rect.top > pygame.display.get_surface().get_height():
             self.kill()
-        self.hitbox.topleft = self.rect.topleft
+        self.hitbox.center = self.rect.center

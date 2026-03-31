@@ -249,7 +249,7 @@ class Game:
                     self.ship.update_position(self.ship_x, self.ship_y)
                 asteroid_hit = pg.sprite.spritecollideany(self.ship, self.asteroids,  # type: ignore
                                                         collided=lambda s, m:
-                                                            s.hitbox.colliderect(m.rect))
+                                                            s.hitbox.colliderect(m.hitbox))
                 if asteroid_hit and not self.game_over:
                     frame = self.frame_explode[0]
                     explosion_x = self.ship_x + img.get_width() // 2 - frame.get_width() // 2
