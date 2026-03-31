@@ -12,7 +12,9 @@ class Ship(pygame.sprite.Sprite):
         self.direction = "idle"
         self.shooting = False
         self.moving = False
+        self.hitpoints = 400
+        self.shield = 200
 
     def update_position(self, x, y):
         self.rect.topleft = (x, y)
-        self.hitbox.topleft = self.rect.topleft
+        self.hitbox.center = self.rect.center
