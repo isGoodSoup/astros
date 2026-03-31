@@ -1,6 +1,5 @@
 import pygame
 
-
 class Explosion(pygame.sprite.Sprite):
     def __init__(self, x, y, frames, cooldown=50):
         super().__init__()
@@ -16,7 +15,10 @@ class Explosion(pygame.sprite.Sprite):
         if now - self.last_update > self.cooldown:
             self.last_update = now
             self.frame_index += 1
+
             if self.frame_index >= len(self.frames):
                 self.kill()
             else:
+                center = self.rect.center
                 self.image = self.frames[self.frame_index]
+                self.rect = self.image.get_rect(center=center)
