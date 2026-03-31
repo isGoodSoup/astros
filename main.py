@@ -82,6 +82,8 @@ class Game:
 
         self.anim_frame_base = 0
         self.anim_frame_overlay = 0
+        self.anim_index_left = 0
+        self.anim_index_right = 0
         self.cooldown_base = 100
         self.cooldown_overlay = 50
         self.anim_base_index = 0
@@ -90,6 +92,8 @@ class Game:
         self.last_update_base = pg.time.get_ticks()
         self.last_update_overlay = pg.time.get_ticks()
         self.last_update = pg.time.get_ticks()
+        self.last_update_left = pg.time.get_ticks()
+        self.last_update_right = pg.time.get_ticks()
         self.last_direction = None
         self.frames = []
         for i in range(self.cols):
@@ -168,7 +172,7 @@ class Game:
             current_time = pg.time.get_ticks()
             if current_time - self.last_celestial_spawn > self.celestial_spawn_interval:
                 self.last_celestial_spawn = current_time
-                for _ in range(random.randint(1, 6)):
+                for _ in range(random.randint(1, 4)):
                     for _ in range(10):
                         new_celestial = random_celestial()
                         too_close = any(abs(new_celestial.rect.y - m.rect.y) < 120 for m in self.celestials)
@@ -189,26 +193,34 @@ class Game:
                 self.last_update_overlay = now
 
             if self.ship.direction in ["left", "right"]:
-                if self.ship.direction != self.last_direction:
-                    self.anim_base_index = 0
-                    self.anim_base_direction = 1
-                    self.last_direction = self.ship.direction
-
-                if now - self.last_update_base > self.cooldown_base:
-                    self.anim_base_index += self.anim_base_direction
-                    self.last_update_base = now
-
-                    if self.anim_base_index >= len(self.left_frames_movement) - 1:
-                        self.anim_base_index = len(self.left_frames_movement) - 1
-                        self.anim_base_direction = 0
-                    elif self.anim_base_index <= 0:
-                        self.anim_base_index = 0
-                        self.anim_base_direction = 1
-
                 if self.ship.direction == "left":
-                    base = self.left_frames_movement[self.anim_base_index]
+                    frames = self.left_frames_movement
+                    if self.last_direction != "left":
+                        self.anim_index_left = 0
+                        self.last_update_left = pg.time.get_ticks()
+                        self.last_direction = "left"
+
+                    if pg.time.get_ticks() - self.last_update_left > self.cooldown_base:
+                        self.anim_index_left += 1
+                        if self.anim_index_left >= len(frames):
+                            self.anim_index_left = len(frames) - 1
+                        self.last_update_left = pg.time.get_ticks()
+
+                    base = frames[self.anim_index_left]
+
                 else:
-                    base = self.right_frames_movement[self.anim_base_index]
+                    frames = self.right_frames_movement
+                    if self.last_direction != "right":
+                        self.anim_index_right = 0
+                        self.last_update_right = pg.time.get_ticks()
+                        self.last_direction = "right"
+
+                    if pg.time.get_ticks() - self.last_update_right > self.cooldown_base:
+                        self.anim_index_right += 1
+                        if self.anim_index_right >= len(frames):
+                            self.anim_index_right = len(frames) - 1
+                        self.last_update_right = pg.time.get_ticks()
+                    base = frames[self.anim_index_right]
             else:
                 base = self.frame_idle
                 self.last_direction = None
