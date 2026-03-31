@@ -32,6 +32,7 @@ class Menu:
         toggle_fullscreen()
 
     def run(self):
+        count = 0
         while self.running:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -45,13 +46,16 @@ class Menu:
                         self.running = False
 
             self.screen.fill((0, 0, 0))
+
+            colors = ["WHITE", (0,0,0,0)]
+            count += 1
             title = self.game_font.render("ASTROS", True, (255, 220, 50))
-            start = self.text_font.render("Press Enter", True,"WHITE")
+            start = self.text_font.render("Press Enter", True, colors[count%2])
             title_y = 200
             self.screen.blit(title, (self.screen_size[0]//2 - title.get_width()//2, title_y))
-            self.screen.blit(start, (self.screen_size[0]//2 - start.get_width()//2, title_y + 600))
+            self.screen.blit(start,(self.screen_size[0] // 2 - start.get_width() // 2,title_y + 600))
             pg.display.update()
-            self.clock.tick(60)
+            self.clock.tick(2)
 
 class Game:
     def __init__(self, screen_size):
@@ -134,8 +138,13 @@ class Game:
         self.debugging = False
         self.cursor = True
 
-    def run(self, running, clock, screen, screen_size,
-            game_font):
+        self.hours = 0
+        self.minutes = 0
+        self.seconds = 0
+        self.milliseconds = 0
+        self.stopwatch = None
+
+    def run(self, running, clock, screen, screen_size, font):
         while running:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -345,8 +354,25 @@ class Game:
             self.explosions.draw(screen)
 
             score_text = f"{self.score:05}"
-            text_surface = game_font.render(score_text, True, "WHITE")
+            text_surface = font.render(score_text, True, "WHITE")
             screen.blit(text_surface, [screen_size[0] - 160, 50])
+
+            if not self.game_over:
+                self.milliseconds += 1
+                if self.milliseconds >= 60:
+                    self.milliseconds = 0
+                    self.seconds += 1
+                    if self.seconds >= 60:
+                        self.seconds = 0
+                        self.minutes += 1
+                        if self.minutes >= 60:
+                            self.minutes = 0
+                            self.hours += 1
+
+            self.stopwatch = font.render(f"{self.hours:02}:"
+            f"{self.minutes:02}:{self.seconds:02}", True, "WHITE")
+            screen.blit(self.stopwatch, [screen_size[0]/2 -
+                                         self.stopwatch.get_width()/2, 50])
 
             total_frames = len(self.hud.frames) - 1
             if self.ship.hitpoints <= 0:
@@ -356,12 +382,12 @@ class Game:
                 (self.ship.hitpoints * total_frames) // self.ship.max_hitpoints)
 
             self.hud.update(self.ship, hitpoints_frame, screen)
-            pg.display.update()
 
             if self.game_over:
-                game_over = game_font.render("GAME OVER", True, "RED")
-                screen.blit(game_over,[screen_size[0] // 2 - 150,
-                                       screen_size[1] // 2])
+                game_over = font.render("GAME OVER", True, "RED")
+                screen.blit(game_over,[screen_size[0] // 2, screen_size[1] // 2])
+
+            pg.display.update()
 
         pg.quit()
 
