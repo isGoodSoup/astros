@@ -1,9 +1,9 @@
 import pygame
-from sprites import SpriteSheet
+from .sheet import SpriteSheet
 
 class Projectile(pygame.sprite.Sprite):
     def __init__(self, x, y, sprite_sheet_path="assets/projectile.png",
-                 cols=4, scale=2, speed=15, anim_cooldown=100):
+                 cols=4, scale=2, speed=16, anim_cooldown=100):
         super().__init__()
         self.sprite_sheet = SpriteSheet(sprite_sheet_path)
         sheet_width = self.sprite_sheet.sheet.get_width()

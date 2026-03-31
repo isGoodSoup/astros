@@ -9,7 +9,7 @@ from scripts.asteroid import Asteroid
 from scripts.proj import Projectile
 from scripts.ship import Ship
 from scripts.soundlib import load_sounds, load_ost
-from scripts.sprites import SpriteSheet
+from scripts.sheet import SpriteSheet
 from scripts.upgd import Upgrade
 
 class Menu:
@@ -62,6 +62,7 @@ class Game:
         pg.mixer.music.play(-1)
         pg.mixer.music.set_volume(0.5)
 
+        self.celestials = pg.sprite.Group()
         self.projectiles = pg.sprite.Group()
         self.asteroids = pg.sprite.Group()
         self.explosions = pg.sprite.Group()
