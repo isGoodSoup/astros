@@ -5,7 +5,7 @@ class Celestial(pygame.sprite.Sprite):
     def __init__(self, path, x, y, speed=1):
         super().__init__()
         self.image = pygame.image.load(path).convert_alpha()
-        self.scale = random.uniform(1, 4)
+        self.scale = random.uniform(2, 4)
         self.image = pygame.transform.scale(
             self.image,
             (int(self.image.get_width() * self.scale),
