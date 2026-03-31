@@ -3,14 +3,14 @@ import random
 import pygame as pg
 from pygame.display import toggle_fullscreen
 
-import upgd
-from explode import Explosion
-from asteroid import Asteroid
-from proj import Projectile
-from ship import Ship
-from soundlib import load_sounds, load_ost
-from sprites import SpriteSheet
-from upgd import Upgrade
+from scripts import upgd
+from scripts.explode import Explosion
+from scripts.asteroid import Asteroid
+from scripts.proj import Projectile
+from scripts.ship import Ship
+from scripts.soundlib import load_sounds, load_ost
+from scripts.sprites import SpriteSheet
+from scripts.upgd import Upgrade
 
 class Menu:
     def __init__(self):
