@@ -3,10 +3,12 @@ from typing import override
 
 import pygame
 
-class Meteor(pygame.sprite.Sprite):
-    def __init__(self, screen_width, min_y=-150, max_y=0, scale=3, speed=8):
+class Asteroid(pygame.sprite.Sprite):
+    def __init__(self, screen_width, min_y=-150, max_y=0, scale=2, speed=8):
         super().__init__()
-        self.image = pygame.image.load("assets/meteor.png").convert_alpha()
+        self.asteroids = [1,2,3,4,5,7,8]
+        self.image = pygame.image.load(f"assets/asteroids/asteroid"
+                                       f"_{random.choice(self.asteroids)}.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, [self.image.get_width() * scale,
                                                          self.image.get_height() * scale])
         self.rect = self.image.get_rect()
