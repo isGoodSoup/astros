@@ -196,6 +196,18 @@ class Game:
                 self.last_direction = None
             img = base.copy()
 
+            if self.ship.moving:
+                overlay_index = self.anim_frame_overlay % len(
+                    self.frames_flying)
+                overlay_frame = self.frames_flying[overlay_index]
+                img.blit(overlay_frame, (0, 0))
+
+            if self.ship.shooting:
+                shoot_index = self.anim_frame_overlay % len(
+                    self.frames_shooting)
+                shoot_frame = self.frames_shooting[shoot_index]
+                img.blit(shoot_frame, (0, 0))
+
             self.asteroids.update()
             self.asteroids.draw(screen)
 
@@ -252,10 +264,9 @@ class Game:
                                                         collided=lambda s, m:
                                                             s.hitbox.colliderect(m.hitbox))
                 if asteroid_hit and not self.game_over:
-                    frame = self.frame_explode[0]
-                    explosion_x = self.ship_x + img.get_width() // 2 - frame.get_width() // 2
-                    explosion_y = self.ship_y + img.get_height() // 2 - frame.get_height() // 2
-                    explosion = Explosion(explosion_x, explosion_y, self.frame_explode)
+                    ship_center_x = self.ship.rect.centerx
+                    ship_center_y = self.ship.rect.centery
+                    explosion = Explosion(ship_center_x, ship_center_y, self.frame_explode)
                     self.explosions.add(explosion) # type: ignore
                     asteroid_hit.kill()
                     self.sounds[1].play()
@@ -269,10 +280,9 @@ class Game:
                                               self.asteroids,
                                               True, False)
                 for asteroid in hits.values():
-                    asteroid_frame = self.frame_explode[0]
-                    explosion_x = asteroid[0].rect.centerx - asteroid_frame.get_width() // 2
-                    explosion_y = asteroid[0].rect.centery - asteroid_frame.get_height() // 2
-                    explosion = Explosion(explosion_x, explosion_y, self.frame_explode)
+                    explosion = Explosion(asteroid[0].rect.centerx,
+                                          asteroid[0].rect.centery,
+                                          self.frame_explode)
                     self.explosions.add(explosion) # type: ignore
                     asteroid[0].kill()
                     self.sounds[1].play()
