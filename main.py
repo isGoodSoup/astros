@@ -14,6 +14,7 @@ from scripts.particle import Particle
 from scripts.proj import Projectile
 from scripts.sheet import SpriteSheet
 from scripts.ship import Ship
+from scripts.skill_tab import SkillTab
 from scripts.soundlib import load_sounds, load_ost
 from scripts.upgd import Upgrade
 
@@ -163,11 +164,12 @@ class Game:
         self.upgrade_duration = 16_000
         self.base_damage = self.ship.damage
 
-        self.xp_gain = 15
         self.score = 0
         self.high_score = 0
         self.survival_bonus = 0
         self.game_over = False
+
+        self.skill_tab = SkillTab()
 
         self.play_sound = True
         self.pause = False
@@ -304,6 +306,7 @@ class Game:
                 pg.draw.rect(screen, (255, 0, 0), self.ship.hitbox, 2)
 
         self.explosions.draw(screen)
+        self.skill_tab.render(screen)
 
     @staticmethod
     def set_hud(screen_size, padding):
@@ -357,6 +360,7 @@ class Game:
         else:
             hitpoints_frame = (total_frames - (self.ship.hitpoints * total_frames)
                         // self.ship.max_hitpoints)
+            hitpoints_frame = max(0, min(hitpoints_frame, total_frames))
         self.hitpoints.update(self.ship, hud_ratio, hitpoints_frame, screen)
 
         shield_total_frames = len(self.shield.frames) - 1
@@ -606,13 +610,13 @@ class Game:
             self.milliseconds -= 1000
             self.seconds += 1
             if self.seconds % 48 == 0:
-                self.asteroid_spawn_interval = max(100, self.asteroid_spawn_interval - 10)
-                self.asteroid_spawn_count = min(32,self.asteroid_spawn_count + 1)
+                self.asteroid_spawn_interval = max(100,self.asteroid_spawn_interval - 10)
+                self.asteroid_spawn_count = min(32, self.asteroid_spawn_count + 1)
                 self.ship.velocity = min(24, self.ship.velocity + 1)
-            if self.seconds <= 60:
+            if self.seconds >= 60:
                 self.seconds = 0
                 self.minutes += 1
-                if self.minutes % 60 == 0:
+                if self.minutes >= 60:
                     self.minutes = 0
                     self.hours += 1
 
@@ -658,7 +662,7 @@ class Game:
         game_over = font.render("GAME OVER", True, colors[self.count % 2])
 
         if self.play_sound:
-            self.sounds[-1].play()
+            self.sounds[-1].play(1)
 
         if self.score > self.high_score:
             self.high_score = self.score
@@ -668,10 +672,8 @@ class Game:
         game_over_x = self.center(game_over, screen_size)
         game_over_y = screen_size[1] // 2
         screen.blit(game_over, [game_over_x, game_over_y])
-        screen.blit(score_text,
-                    [self.center(score_text, screen_size), game_over_y + 25])
-        screen.blit(stopwatch,
-                    [self.center(stopwatch, screen_size), game_over_y + 50])
+        screen.blit(score_text, [self.center(score_text, screen_size),  game_over_y + 25])
+        screen.blit(stopwatch, [self.center(stopwatch, screen_size), game_over_y + 50])
 
     def debug(self):
         if self.debugging:
