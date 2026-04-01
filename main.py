@@ -7,13 +7,13 @@ from scripts.asteroid import Asteroid
 from scripts.celestial import *
 from scripts.crt import CRT
 from scripts.explode import Explosion
+from scripts.floaty import FloatingNumber
 from scripts.hud import Interface
 from scripts.proj import Projectile
 from scripts.sheet import SpriteSheet
 from scripts.ship import Ship
 from scripts.soundlib import load_sounds, load_ost
 from scripts.upgd import Upgrade
-
 
 class Menu:
     def __init__(self):
@@ -86,6 +86,7 @@ class Game:
         self.asteroids = pg.sprite.Group()
         self.explosions = pg.sprite.Group()
         self.upgrades = pg.sprite.Group()
+        self.floating_numbers = pg.sprite.Group()
 
         self.cols = 12
         self.explosion_frames = 7
@@ -100,9 +101,11 @@ class Game:
         self.ship_y = screen_size[1] // 2 + 200
         self.base = None
 
-        self.hp_bar = Interface("assets/ui/status.png", 0, 40, 40, hud_ratio)
+        self.hitpoints = Interface("assets/ui/status.png", 0, 40, 40, hud_ratio)
         self.shield = Interface("assets/ui/shield_bar.png", 0, 40, 40,
-                                hud_ratio, 33, [0, -50])
+            hud_ratio, 33, [0, -50])
+        self.xp = Interface("assets/ui/xp.png", -1, 40, 40,
+            hud_ratio, 33, [0,-100])
 
         self.anim_frame_base = 0
         self.anim_frame_overlay = 0
@@ -154,8 +157,9 @@ class Game:
         self.active_upgrade = None
         self.upgrade_start_time = 0
         self.upgrade_duration = 16_000
-        self.base_velocity = self.ship.velocity
+        self.base_damage = self.ship.damage
 
+        self.xp_gain = 15
         self.score = 0
         self.high_score = 0
         self.survival_bonus = 0
@@ -212,6 +216,12 @@ class Game:
                         self.pause = not self.pause
                     if event.key == pg.K_q and (event.mod & pg.KMOD_CTRL):
                         running = False
+                    if event.key == pg.K_m:
+                        self.play_sound = not self.play_sound
+                        if not self.play_sound:
+                            pg.mixer.music.stop()
+                        else:
+                            pg.mixer.music.play(-1)
 
             if not running:
                 break
@@ -260,6 +270,8 @@ class Game:
         self.asteroids.draw(screen)
         self.projectiles.draw(screen)
         self.upgrades.draw(screen)
+        self.floating_numbers.draw(screen)
+
         img = self.base.copy()
         if self.ship.moving:
             overlay_index = self.anim_frame_overlay % len(self.frames_flying)
@@ -333,20 +345,24 @@ class Game:
             y_pos += line_surf.get_height() + 2
         screen.blit(high_score_surface, [x_pos, y_pos])
 
-        total_frames = len(self.hp_bar.frames) - 1
+        total_frames = len(self.hitpoints.frames) - 1
         if self.ship.hitpoints <= 0:
             hitpoints_frame = total_frames
         else:
-            hitpoints_frame = (
-                        total_frames - (self.ship.hitpoints * total_frames)
+            hitpoints_frame = (total_frames - (self.ship.hitpoints * total_frames)
                         // self.ship.max_hitpoints)
-        self.hp_bar.update(self.ship, hud_ratio, hitpoints_frame, screen)
+        self.hitpoints.update(self.ship, hud_ratio, hitpoints_frame, screen)
 
         shield_total_frames = len(self.shield.frames) - 1
-        shield_frame = (shield_total_frames - (
-                    self.ship.shield * shield_total_frames)
+        shield_frame = (shield_total_frames - (self.ship.shield * shield_total_frames)
                         // self.ship.max_shield)
+        shield_frame = max(0, min(shield_total_frames, shield_frame))
         self.shield.update(self.ship, hud_ratio, shield_frame, screen)
+
+        experience_total_frames = len(self.xp.frames) - 1
+        xp_frame = (experience_total_frames - (experience_total_frames * self.ship.xp)
+                    // self.ship.xp_to_next_level)
+        self.xp.update(self.ship, hud_ratio, xp_frame, screen)
 
     def update_game(self, screen_size):
         for i in self.stars:
@@ -438,6 +454,7 @@ class Game:
         self.projectiles.update()
         self.explosions.update()
         self.upgrades.update()
+        self.floating_numbers.update()
 
         key_pressed = pg.key.get_pressed()
         self.ship.moving = False
@@ -456,8 +473,8 @@ class Game:
         if key_pressed[pg.K_UP] and self.ship_y > 0:
             self.ship_y -= self.ship.velocity
             self.ship.moving = True
-        if key_pressed[pg.K_DOWN] and self.ship_y < screen_size[
-            1] - self.ship.image.get_height():
+        if (key_pressed[pg.K_DOWN] and self.ship_y < screen_size[1]
+                - self.ship.image.get_height()):
             self.ship_y += self.ship.velocity
 
         if not direction_set:
@@ -465,8 +482,7 @@ class Game:
 
         if self.ship_alive:
             self.ship.shooting = False
-            if key_pressed[
-                pg.K_SPACE] and current_time - self.last_shot_time >= self.shot_cooldown:
+            if key_pressed[pg.K_SPACE] and current_time - self.last_shot_time >= self.shot_cooldown:
                 self.last_shot_time = current_time
                 self.ship.shooting = True
                 projectile = Projectile(
@@ -475,13 +491,6 @@ class Game:
                 self.projectiles.add(projectile)  # type: ignore
                 if self.play_sound:
                     self.sounds[0].play()
-
-        if key_pressed[pg.K_m]:
-            self.play_sound = not self.play_sound
-            if not self.play_sound:
-                pg.mixer.music.stop()
-            else:
-                pg.mixer.music.play(-1)
 
         if self.ship_alive:
             self.ship.update_position(self.ship_x, self.ship_y)
@@ -512,14 +521,19 @@ class Game:
                                       self.asteroids,
                                       True, False)
         for asteroid in hits.values():
-            explosion = Explosion(asteroid[0].rect.centerx,
-                                  asteroid[0].rect.centery,
-                                  self.frame_explode)
-            self.explosions.add(explosion)  # type: ignore
-            asteroid[0].kill()
-            if self.play_sound:
-                self.sounds[1].play()
-            self.score += 10
+            asteroid[0].hitpoints -= self.ship.damage
+            x, y = asteroid[0].rect.center
+            self.floating_numbers.add(FloatingNumber(x, y, self.ship.damage, color=(255, 200, 0))) # type: ignore
+            if asteroid[0].hitpoints <= 0:
+                explosion = Explosion(asteroid[0].rect.centerx,
+                                      asteroid[0].rect.centery,
+                                      self.frame_explode)
+                self.explosions.add(explosion)  # type: ignore
+                asteroid[0].kill()
+                if self.play_sound:
+                    self.sounds[1].play()
+                self.score += 10
+                self.ship.gain_xp(15, self.sounds)
 
         upgrade_hit = pg.sprite.spritecollide(self.ship, self.upgrades, False, # type: ignore
                                               collided=lambda s, u: s.hitbox.colliderect(u.rect))
@@ -532,14 +546,14 @@ class Game:
                     self.active_upgrade = "power_up"
                     self.upgrade_start_time = pg.time.get_ticks()
                 elif self.last_upgrade == "shield":
-                    self.ship.shield += 10
+                    self.ship.shield = min(self.ship.shield + 10, self.ship.max_shield)
 
         current_time = pg.time.get_ticks()
         if self.active_upgrade == "power_up":
-            self.ship.velocity = self.base_velocity * 2
+            self.ship.damage = self.base_damage * 2
             if current_time - self.upgrade_start_time >= self.upgrade_duration:
                 self.active_upgrade = None
-                self.ship.velocity = self.base_velocity
+                self.ship.velocity = self.base_damage
 
         self.survival_bonus += 1
         if self.survival_bonus >= 60:
