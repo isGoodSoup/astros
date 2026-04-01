@@ -1,9 +1,11 @@
 import pygame as pg
+from pygame.constants import OPENGL, DOUBLEBUF
 from pygame.display import toggle_fullscreen
 
 from scripts import upgd
 from scripts.asteroid import Asteroid
 from scripts.celestial import *
+from scripts.crt import CRT
 from scripts.explode import Explosion
 from scripts.hud import Interface
 from scripts.proj import Projectile
@@ -12,7 +14,6 @@ from scripts.ship import Ship
 from scripts.soundlib import load_sounds, load_ost
 from scripts.upgd import Upgrade
 
-
 class Menu:
     def __init__(self):
         pg.init()
@@ -20,7 +21,10 @@ class Menu:
         self.width = int(pg.display.Info().current_w)
         self.height = int(pg.display.Info().current_h)
         self.screen_size = (self.width, self.height)
-        self.screen = pg.display.set_mode(self.screen_size, pg.SCALED, vsync=1)
+        self.virtual_screen = pg.display.set_mode(self.screen_size)
+        self.render_surface = pg.Surface((1920, 1080))
+        self.screen = pg.display.set_mode(self.screen_size, DOUBLEBUF|OPENGL, vsync=1)
+        self.crt = CRT(self.screen, style=1, virtual_resolution=(1920, 1080),cpu_only=False)
         self.font = "assets/ui/PressStart2P.ttf"
         self.game_font = pg.font.Font(self.font, 56)
         self.text_font = pg.font.Font(self.font, 24)
@@ -41,7 +45,7 @@ class Menu:
                     if event.key == pg.K_RETURN:
                         game = Game(self.screen_size)
                         game.run(self.running, self.clock, self.screen,
-                                 self.screen_size, self.text_font)
+                                 self.screen_size, self.crt, self.text_font)
                     elif event.key == pg.K_ESCAPE:
                         self.running = False
 
@@ -52,9 +56,14 @@ class Menu:
             title = self.game_font.render("ASTROS", True, (255, 220, 50))
             start = self.text_font.render("Press Enter", True, colors[count%2])
             title_y = 200
-            self.screen.blit(title, (self.screen_size[0]//2 - title.get_width()//2, title_y))
-            self.screen.blit(start,(self.screen_size[0] // 2 - start.get_width() // 2,title_y + 600))
-            pg.display.update()
+            self.render_surface.fill((0, 0, 0))
+            surface_width, surface_height = self.render_surface.get_size()
+            title_x = surface_width // 2 - title.get_width() // 2
+            start_x = surface_width // 2 - start.get_width() // 2
+            self.render_surface.blit(title, (title_x, title_y))
+            self.render_surface.blit(start, (start_x, title_y + 600))
+            self.screen.blit(pg.transform.scale(self.render_surface, self.screen_size),(0, 0))
+            self.crt.render(self.render_surface)
             self.clock.tick(2)
 
 class Game:
@@ -153,12 +162,14 @@ class Game:
         self.last_blink = 0
 
     def run(self, running, clock, screen,
-            screen_size, font):
+            screen_size, crt, font):
         while running:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     running = False
                 elif event.type == pg.KEYDOWN:
+                    if event.key == pg.K_TAB:
+                        crt.change_shader()
                     if self.game_over and event.key == pg.K_r:
                         self.reset(screen_size)
                     if event.key == pg.K_F2:
@@ -340,10 +351,8 @@ class Game:
                     self.survival_bonus = 0
                     self.score += 1
 
-                score_text = f"{self.score:05}"
-                text_surface = font.render(score_text, True, "WHITE")
-                screen.blit(text_surface, [screen_size[0] - 160, 50])
                 self.update_time()
+
             for i in self.stars:
                 pg.draw.circle(screen, (255, 255, 255), (int(i[0]), int(i[1])),i[2])
 
@@ -389,6 +398,9 @@ class Game:
                 else:
                     hitpoints_frame = (total_frames -(self.ship.hitpoints * total_frames)
                                        // self.ship.max_hitpoints)
+                score_text = f"{self.score:05}"
+                text_surface = font.render(score_text, True, "WHITE")
+                screen.blit(text_surface, [screen_size[0] - 160, 50])
                 self.hud.update(self.ship, hitpoints_frame, screen)
 
             if self.game_over:
@@ -415,7 +427,7 @@ class Game:
                 render = self.ship.taken_damage()
             if not self.game_over:
                 screen.blit(pg.transform.scale(screen, screen_size), render)
-            pg.display.update()
+            crt.render(screen)
         pg.quit()
 
     def update_time(self):
