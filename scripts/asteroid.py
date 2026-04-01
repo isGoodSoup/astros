@@ -4,7 +4,8 @@ from typing import override
 import pygame
 
 class Asteroid(pygame.sprite.Sprite):
-    def __init__(self, screen_width, min_y=-150, max_y=0, scale=4, speed=8):
+    def __init__(self, screen_width, min_y=-150, max_y=0,
+                 scale=random.randint(2, 4), speed=8):
         super().__init__()
         self.asteroids = [1,2,3,4,5,7,8]
         self.image = pygame.image.load(f"assets/asteroids/asteroid"

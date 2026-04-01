@@ -517,36 +517,7 @@ class Game:
                 pg.mixer.music.stop()
                 self.game_over = True
 
-        hits = pg.sprite.groupcollide(self.projectiles,
-                                      self.asteroids,
-                                      True, False)
-        for asteroid in hits.values():
-            asteroid[0].hitpoints -= self.ship.damage
-            x, y = asteroid[0].rect.center
-            self.floating_numbers.add(FloatingNumber(x, y, self.ship.damage, color=(255, 200, 0))) # type: ignore
-            if asteroid[0].hitpoints <= 0:
-                explosion = Explosion(asteroid[0].rect.centerx,
-                                      asteroid[0].rect.centery,
-                                      self.frame_explode)
-                self.explosions.add(explosion)  # type: ignore
-                asteroid[0].kill()
-                if self.play_sound:
-                    self.sounds[1].play()
-                self.score += 10
-                self.ship.gain_xp(15, self.sounds)
-
-        upgrade_hit = pg.sprite.spritecollide(self.ship, self.upgrades, False, # type: ignore
-                                              collided=lambda s, u: s.hitbox.colliderect(u.rect))
-        if upgrade_hit:
-            for upgrade in upgrade_hit:
-                upgrade.kill()
-                if self.play_sound:
-                    self.sounds[2].play()
-                if self.last_upgrade == "power_up":
-                    self.active_upgrade = "power_up"
-                    self.upgrade_start_time = pg.time.get_ticks()
-                elif self.last_upgrade == "shield":
-                    self.ship.shield = min(self.ship.shield + 10, self.ship.max_shield)
+        self.check_collision()
 
         current_time = pg.time.get_ticks()
         if self.active_upgrade == "power_up":
@@ -559,6 +530,47 @@ class Game:
         if self.survival_bonus >= 60:
             self.survival_bonus = 0
             self.score += 1
+
+    def check_collision(self):
+        hits = pg.sprite.groupcollide(self.projectiles, self.asteroids,
+                                      True, False)
+        for asteroid in hits.values():
+            if random.random() > 0.9:
+                damage = self.ship.crit
+                color = (255, 50, 50)
+                size = 36
+            else:
+                damage = self.ship.damage
+                color = (255, 200, 0)
+                size = 24
+
+            asteroid[0].hitpoints -= damage
+            x, y = asteroid[0].rect.center
+            self.floating_numbers.add(FloatingNumber(x, y, damage, color=color,font_size=size))  # type: ignore
+            if asteroid[0].hitpoints <= 0:
+                explosion = Explosion(asteroid[0].rect.centerx,
+                                      asteroid[0].rect.centery,
+                                      self.frame_explode)
+                self.explosions.add(explosion)  # type: ignore
+                asteroid[0].kill()
+                if self.play_sound:
+                    self.sounds[1].play()
+                self.score += 10
+                self.ship.gain_xp(15, self.sounds)
+
+        upgrade_hit = pg.sprite.spritecollide(self.ship, self.upgrades, False,# type: ignore
+                                              collided=lambda s,u: s.hitbox.colliderect(u.rect))
+        if upgrade_hit:
+            for upgrade in upgrade_hit:
+                upgrade.kill()
+                if self.play_sound:
+                    self.sounds[2].play()
+                if self.last_upgrade == "power_up":
+                    self.active_upgrade = "power_up"
+                    self.upgrade_start_time = pg.time.get_ticks()
+                elif self.last_upgrade == "shield":
+                    self.ship.shield = min(self.ship.shield + 10,
+                                           self.ship.max_shield)
 
     def update_time(self):
         current_time = pg.time.get_ticks()

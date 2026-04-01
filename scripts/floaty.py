@@ -1,9 +1,9 @@
 import pygame
 
 class FloatingNumber(pygame.sprite.Sprite):
-    def __init__(self, x, y, text, color=(255, 255, 0), lifetime=800, speed=-1):
+    def __init__(self, x, y, text, color=(255, 255, 0), lifetime=800, speed=-1, font_size=24):
         super().__init__()
-        self.font = pygame.font.Font("assets/ui/PressStart2P.ttf", 24)
+        self.font = pygame.font.Font("assets/ui/PressStart2P.ttf", font_size)
         self.image = self.font.render(str(text), True, color)
         self.rect = self.image.get_rect(center=(x, y))
         self.lifetime = lifetime
