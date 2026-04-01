@@ -318,7 +318,7 @@ class Game:
                 asteroid_hit = pg.sprite.spritecollideany(self.ship, self.asteroids,  # type: ignore
                                                         collided=lambda s, m:
                                                             s.hitbox.colliderect(m.hitbox))
-                if asteroid_hit and not self.game_over:
+                if asteroid_hit:
                     ship_center_x = self.ship.rect.centerx
                     ship_center_y = self.ship.rect.centery
                     explosion = Explosion(ship_center_x, ship_center_y, self.frame_explode)
