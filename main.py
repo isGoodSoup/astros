@@ -85,7 +85,7 @@ class Game:
         self.ship_alive = True
         self.ship_x = screen_size[0] // 2 - framew // 2 - 25
         self.ship_y = screen_size[1] // 2 + 200
-
+        self.base = None
         self.hud = Interface(screen_size, 0, 40, 40)
 
         self.anim_frame_base = 0
@@ -96,13 +96,14 @@ class Game:
         self.cooldown_overlay = 50
         self.anim_base_index = 0
         self.anim_base_direction = 1
-        self.cooldown_base = 100
+
         self.last_update_base = pg.time.get_ticks()
         self.last_update_overlay = pg.time.get_ticks()
         self.last_update = pg.time.get_ticks()
         self.last_update_left = pg.time.get_ticks()
         self.last_update_right = pg.time.get_ticks()
         self.last_direction = None
+
         self.frames = []
         for i in range(self.cols):
             img = self.sprite_sheet.get_image(i, framew, frameh, scale=self.scale,
@@ -234,7 +235,7 @@ class Game:
                             if self.anim_index_left >= len(frames):
                                 self.anim_index_left = len(frames) - 1
                             self.last_update_left = now
-                        base = frames[self.anim_index_left]
+                        self.base = frames[self.anim_index_left]
                     else:
                         frames = self.right_frames_movement
                         if self.last_direction != "right":
@@ -247,33 +248,9 @@ class Game:
                             if self.anim_index_right >= len(frames):
                                 self.anim_index_right = len(frames) - 1
                             self.last_update_right = now
-                        base = frames[self.anim_index_right]
+                        self.base = frames[self.anim_index_right]
                 else:
-                    base = self.frame_idle
-
-                img = base.copy()
-
-                if self.ship.moving:
-                    overlay_index = self.anim_frame_overlay % len(
-                        self.frames_flying)
-                    overlay_frame = self.frames_flying[overlay_index]
-                    img.blit(overlay_frame, (0, 0))
-
-                if self.ship.shooting:
-                    shoot_index = self.anim_frame_overlay % len(
-                        self.frames_shooting)
-                    shoot_frame = self.frames_shooting[shoot_index]
-                    img.blit(shoot_frame, (0, 0))
-
-                if self.debugging:
-                    for i in self.asteroids:
-                        pg.draw.rect(screen, (255, 0, 0),i.hitbox, 2)
-
-                if self.ship_alive:
-                    self.ship.rect.topleft = (self.ship_x, self.ship_y)
-                    screen.blit(img, self.ship.rect)
-                    if self.debugging:
-                        pg.draw.rect(screen, (255, 0, 0), self.ship.hitbox,2)
+                    self.base = self.frame_idle
 
                 self.celestials.update()
                 self.asteroids.update()
@@ -289,7 +266,8 @@ class Game:
                     self.ship.direction = "left"
                     self.ship.moving = True
                     direction_set = True
-                elif key_pressed[pg.K_RIGHT] and self.ship_x < screen_size[0] - img.get_width():
+                elif (key_pressed[pg.K_RIGHT] and self.ship_x < screen_size[0]
+                      - self.base.copy().get_width()):
                     self.ship_x += self.ship.velocity
                     self.ship.direction = "right"
                     self.ship.moving = True
@@ -308,7 +286,7 @@ class Game:
                     if key_pressed[pg.K_SPACE] and current_time - self.last_shot_time >= self.shot_cooldown:
                         self.last_shot_time = current_time
                         self.ship.shooting = True
-                        projectile = Projectile(self.ship_x + img.get_width() // 2,self.ship_y)
+                        projectile = Projectile(self.ship_x + self.base.copy().get_width() // 2, self.ship_y)
                         self.projectiles.add(projectile) # type: ignore
                         if self.play_sound:
                             self.sounds[0].play()
@@ -375,6 +353,29 @@ class Game:
             self.upgrades.draw(screen)
             self.explosions.draw(screen)
 
+            img = self.base.copy()
+            if self.ship.moving:
+                overlay_index = self.anim_frame_overlay % len(
+                    self.frames_flying)
+                overlay_frame = self.frames_flying[overlay_index]
+                img.blit(overlay_frame, (0, 0))
+
+            if self.ship.shooting:
+                shoot_index = self.anim_frame_overlay % len(
+                    self.frames_shooting)
+                shoot_frame = self.frames_shooting[shoot_index]
+                img.blit(shoot_frame, (0, 0))
+
+            if self.debugging:
+                for i in self.asteroids:
+                    pg.draw.rect(screen, (255, 0, 0), i.hitbox, 2)
+
+            if self.ship_alive:
+                self.ship.rect.topleft = (self.ship_x, self.ship_y)
+                screen.blit(img, self.ship.rect)
+                if self.debugging:
+                    pg.draw.rect(screen, (255, 0, 0), self.ship.hitbox, 2)
+
             if not self.game_over:
                 self.stopwatch = font.render(f"{self.hours:02}:"
                                              f"{self.minutes:02}:{self.seconds:02}",
@@ -432,6 +433,10 @@ class Game:
                         self.asteroid_spawn_count = 32
                     else:
                         self.asteroid_spawn_count += 1
+                    if self.ship.velocity >= 24:
+                        self.ship.velocity = 24
+                    else:
+                        self.ship.velocity += 1
                 if self.seconds >= 60:
                     self.seconds = 0
                     self.minutes += 1
@@ -456,6 +461,11 @@ class Game:
         self.last_asteroid_spawn = 0
         self.last_shot_time = 0
         self.score = 0
+        self.hours = 0
+        self.minutes = 0
+        self.seconds = 0
+        self.milliseconds = 0
+        self.stopwatch = None
         self.game_over = False
         if self.play_sound:
             pg.mixer.music.play(-1)
