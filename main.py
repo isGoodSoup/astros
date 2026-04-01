@@ -14,7 +14,7 @@ from scripts.particle import Particle
 from scripts.proj import Projectile
 from scripts.sheet import SpriteSheet
 from scripts.ship import Ship
-from scripts.skill import Skill
+from scripts.skill import SkillManager
 from scripts.skill_tab import SkillTab
 from scripts.soundlib import load_sounds, load_ost
 from scripts.upgd import Upgrade
@@ -93,10 +93,6 @@ class Game:
         self.upgrades = pg.sprite.Group()
         self.floating_numbers = pg.sprite.Group()
         self.particles = []
-        self.skills = []
-
-        for _ in range(28):
-            self.skills.append(Skill(None, None, None))
 
         self.cols = 12
         self.explosion_frames = 7
@@ -175,6 +171,7 @@ class Game:
         self.game_over = False
 
         self.skill_tab = SkillTab()
+        self.skills = SkillManager()
 
         self.play_sound = True
         self.pause = False
@@ -249,7 +246,7 @@ class Game:
                 self.cursor_visible = False
 
             if not self.pause and not self.game_over:
-                self.update_game(screen_size)
+                self.update_game(screen_size, hud_padding)
                 self.update_time()
 
             self.render(screen, font)
@@ -313,7 +310,7 @@ class Game:
                 pg.draw.rect(screen, (255, 0, 0), self.ship.hitbox, 2)
 
         self.explosions.draw(screen)
-        self.skill_tab.render(screen, font, self.ship)
+        self.skill_tab.render(screen, font, self.ship, self.skills)
 
     @staticmethod
     def set_hud(screen_size, padding):
@@ -381,7 +378,7 @@ class Game:
                     // self.ship.xp_to_next_level)
         self.xp.update(self.ship, hud_ratio, xp_frame, screen)
 
-    def update_game(self, screen_size):
+    def update_game(self, screen_size, hud_padding):
         for i in self.stars:
             if not self.pause:
                 i[1] += 2
@@ -472,7 +469,7 @@ class Game:
         self.explosions.update()
         self.upgrades.update()
         self.floating_numbers.update()
-        self.skill_tab.update()
+        self.skill_tab.update(hud_padding)
 
         for particle in self.particles[:]:
             particle.update()
