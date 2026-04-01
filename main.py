@@ -22,6 +22,8 @@ class Menu:
         self.width = int(pg.display.Info().current_w)
         self.height = int(pg.display.Info().current_h)
         self.screen_size = (self.width, self.height)
+        self.hud_padding = 100
+        self.hud_ratio = Game.set_hud(self.screen_size, self.hud_padding)
         self.virtual_screen = pg.display.set_mode(self.screen_size)
         self.render_surface = pg.Surface((1920, 1080))
         self.screen = pg.display.set_mode(self.screen_size, DOUBLEBUF|OPENGL, vsync=1)
@@ -29,7 +31,7 @@ class Menu:
         self.crt.prog['curvature'].value = 0.7
         self.font = "assets/ui/PressStart2P.ttf"
         self.cursor_sprite = pg.image.load("assets/ui/cursor.png")
-        self.game_font = pg.font.Font(self.font, 56)
+        self.game_font = pg.font.Font(self.font, 80)
         self.text_font = pg.font.Font(self.font, 24)
         pg.display.set_caption("Astros")
         self.clock = pg.time.Clock()
@@ -45,9 +47,9 @@ class Menu:
                     self.running = False
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_RETURN:
-                        game = Game(self.screen_size)
+                        game = Game(self.screen_size, self.hud_ratio)
                         game.run(self.running, self.clock, self.screen, self.screen_size,
-                                 self.crt, self.text_font)
+                                 self.hud_padding, self.hud_ratio, self.crt, self.text_font)
                     elif event.key == pg.K_ESCAPE:
                         self.running = False
 
@@ -69,7 +71,7 @@ class Menu:
             self.clock.tick(2)
 
 class Game:
-    def __init__(self, screen_size):
+    def __init__(self, screen_size, hud_ratio):
         self.fps = 60
         self.frame = 0
         self.prev_state = None
@@ -97,7 +99,7 @@ class Game:
         self.ship_x = screen_size[0] // 2 - framew // 2 - 25
         self.ship_y = screen_size[1] // 2 + 200
         self.base = None
-        self.hud = Interface(screen_size, 0, 40, 40)
+        self.hud = Interface(0, 40, 40,hud_ratio)
 
         self.anim_frame_base = 0
         self.anim_frame_overlay = 0
@@ -146,6 +148,7 @@ class Game:
         self.last_shot_time = 0
         self.shot_cooldown = 300
         self.score = 0
+        self.high_score = 0
         self.survival_bonus = 0
         self.game_over = False
 
@@ -171,7 +174,7 @@ class Game:
         self.cursor_hide_delay = 3000
 
     def run(self, running, clock, screen,
-            screen_size, crt, font):
+            screen_size, hud_padding, hud_ratio, crt, font):
         while running:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -183,6 +186,15 @@ class Game:
                             crt.prog['curvature'].value - 0.5)
                         else:
                             crt.prog['curvature'].value += 0.5
+                    if event.key == pg.K_KP_PLUS:
+                        hud_padding += 5
+                        hud_ratio = Game.set_hud(screen_size, hud_padding)
+                    if event.key == pg.K_KP_MINUS:
+                        hud_padding -= 5
+                        if hud_padding < 0:
+                            hud_padding = 0
+                        hud_ratio = Game.set_hud(screen_size, hud_padding)
+
                     if self.game_over and event.key == pg.K_r:
                         self.reset(screen_size)
                     if event.key == pg.K_F2:
@@ -330,8 +342,7 @@ class Game:
                 if self.ship_alive:
                     self.ship.update_position(self.ship_x, self.ship_y)
                 asteroid_hit = pg.sprite.spritecollideany(self.ship, self.asteroids,  # type: ignore
-                                                        collided=lambda s, m:
-                                                            s.hitbox.colliderect(m.hitbox))
+                                                        collided=lambda s, m:s.hitbox.colliderect(m.hitbox))
                 if asteroid_hit:
                     ship_center_x = self.ship.rect.centerx
                     ship_center_y = self.ship.rect.centery
@@ -408,22 +419,42 @@ class Game:
             self.explosions.draw(screen)
 
             if not self.game_over:
-                self.stopwatch = font.render(f"{self.hours:02}:"
-                                             f"{self.minutes:02}:{self.seconds:02}",
-                                             True, "WHITE")
-                screen.blit(self.stopwatch, [
-                    screen_size[0] / 2 - self.stopwatch.get_width() / 2, 50])
+                self.stopwatch = font.render(f"{self.hours:02}:{self.minutes:02}:{self.seconds:02}",
+                    True, "WHITE")
+                screen.blit(self.stopwatch, [hud_ratio['left'] + hud_ratio['width'] // 2 -
+                    self.stopwatch.get_width() // 2, hud_ratio['top']])
 
                 total_frames = len(self.hud.frames) - 1
                 if self.ship.hitpoints <= 0:
                     hitpoints_frame = total_frames
                 else:
-                    hitpoints_frame = (total_frames -(self.ship.hitpoints * total_frames)
+                    hitpoints_frame = (total_frames - (self.ship.hitpoints * total_frames)
                                        // self.ship.max_hitpoints)
+
                 score_text = f"{self.score:05}"
-                text_surface = font.render(score_text, True, "WHITE")
-                screen.blit(text_surface, [screen_size[0] - 160, 50])
-                self.hud.update(self.ship, hitpoints_frame, screen)
+                high_score = f"{self.high_score:05}"
+                score_title = "SCORE"
+                high_score_title = "HIGH\nSCORE"
+
+                score_surface = font.render(score_text, True, "WHITE")
+                score_title_surface = font.render(score_title, True, "WHITE")
+                high_score_surfaces = [ font.render(line, True, "WHITE")
+                    for line in high_score_title.split('\n')]
+                high_score_surface = font.render(high_score, True, "WHITE")
+
+                score_x = hud_ratio['left']
+                score_y = hud_ratio['top']
+                screen.blit(score_title_surface, [score_x,score_y - score_title_surface.get_height() - 5])
+                screen.blit(score_surface, [score_x, score_y])
+
+                y_pos = hud_ratio['top']
+                x_pos = hud_ratio['right'] - max(s.get_width()
+                    for s in high_score_surfaces + [high_score_surface])
+                for line_surf in high_score_surfaces:
+                    screen.blit(line_surf, [x_pos, y_pos])
+                    y_pos += line_surf.get_height() + 2
+                screen.blit(high_score_surface, [x_pos, y_pos])
+                self.hud.update(self.ship, hud_ratio, hitpoints_frame, screen)
 
             if self.cursor_visible:
                 screen.blit(self.cursor_sprite, mouse_pos)
@@ -436,6 +467,10 @@ class Game:
 
                 colors = ["RED", (0,0,0,0)]
                 game_over = font.render("GAME OVER", True, colors[self.count%2])
+
+                if self.score > self.high_score:
+                    self.high_score = self.score
+
                 score_text = font.render(f"{self.score:05}", True, "WHITE")
                 stopwatch = self.stopwatch
                 game_over_x = self.center(game_over, screen_size)
@@ -454,6 +489,18 @@ class Game:
                 screen.blit(pg.transform.scale(screen, screen_size), render)
             crt.render(screen)
         pg.quit()
+
+    @staticmethod
+    def set_hud(screen_size, padding):
+        width, height = screen_size
+        return {
+            'left': padding,
+            'top': padding,
+            'right': width - padding,
+            'bottom': height - padding,
+            'width': width - 2 * padding,
+            'height': height - 2 * padding
+        }
 
     def update_time(self):
         current_time = pg.time.get_ticks()
