@@ -502,12 +502,12 @@ class Game:
 
         if self.ship_alive:
             self.ship.shooting = False
-            if key_pressed[pg.K_SPACE] and current_time - self.last_shot_time >= self.shot_cooldown:
+            if (key_pressed[pg.K_SPACE] and current_time -
+                    self.last_shot_time >= self.shot_cooldown):
                 self.last_shot_time = current_time
                 self.ship.shooting = True
-                projectile = Projectile(
-                    self.ship_x + self.base.copy().get_width() // 2,
-                    self.ship_y)
+                projectile = Projectile(self.ship_x +
+                            self.base.copy().get_width() // 2,self.ship_y)
                 self.projectiles.add(projectile)  # type: ignore
                 if self.play_sound:
                     self.sounds[0].play()

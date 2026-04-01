@@ -15,6 +15,9 @@ class SkillTab(pygame.sprite.Sprite):
         self.height = self.image.get_height()
         self.speed = 10
         self.active = False
+        self.nodes = [
+
+        ]
 
     def update(self, hud_padding):
         if self.active:
@@ -29,14 +32,16 @@ class SkillTab(pygame.sprite.Sprite):
 
     def render(self, screen, font, ship, skill_manager):
         screen.blit(self.image, self.rect)
+        padding = 75
         perk_points = font.render(f"Perk Points: {ship.perk_points}", True,
                                   (255, 255, 255))
-        padding = 75
         screen.blit(perk_points, (self.x + padding, self.y + padding // 2))
 
         for i, skill in enumerate(skill_manager.skills):
-            skill_icon = pygame.image.load(skill.icon)
-            skill_icon = pygame.transform.scale(skill_icon, (64, 64))
-            skill_frame = pygame.transform.scale(skill.frame, (64, 64))
-            screen.blit(skill_icon, (self.width//2, self.y + padding + (i * 80)))
-            screen.blit(skill_frame, (self.width//2, self.y + padding + (i * 80)))
+            y_pos = self.y + padding + (i * 80)
+            x_pos = self.x + self.width // 2
+            skill.rect.topleft = (x_pos, y_pos)
+            skill.is_hovered(pygame.mouse)
+            frame = pygame.transform.scale(skill.current_frame(), (64, 64))
+            screen.blit(frame, (x_pos, y_pos))
+            screen.blit(skill.icon_image, (x_pos, y_pos))
