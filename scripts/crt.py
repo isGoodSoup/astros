@@ -49,7 +49,7 @@ class CRT:
             self.vao = self.ctx.vertex_array(self.prog, self.vao_content,
                                              index_buffer=self.ibo)
         else:
-            self.diaplay = pygame.display.get_surface()
+            self.display = pygame.display.get_surface()
 
     def change_shader(self):
         if not self.cpu_only:
@@ -64,7 +64,7 @@ class CRT:
             self.vao.render()
             pygame.display.flip()
         else:
-            self.diaplay.blit(self.screen, (0, 0))
+            self.display.blit(self.screen, (0, 0))
             pygame.display.update()
 
     def fullscreen(self, real_resolution):

@@ -14,6 +14,7 @@ from scripts.ship import Ship
 from scripts.soundlib import load_sounds, load_ost
 from scripts.upgd import Upgrade
 
+
 class Menu:
     def __init__(self):
         pg.init()
@@ -45,8 +46,8 @@ class Menu:
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_RETURN:
                         game = Game(self.screen_size)
-                        game.run(self.running, self.clock, self.screen,
-                                 self.screen_size, self.crt, self.text_font)
+                        game.run(self.running, self.clock, self.screen, self.screen_size,
+                                 self.crt, self.text_font)
                     elif event.key == pg.K_ESCAPE:
                         self.running = False
 
