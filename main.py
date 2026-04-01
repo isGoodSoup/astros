@@ -14,6 +14,7 @@ from scripts.particle import Particle
 from scripts.proj import Projectile
 from scripts.sheet import SpriteSheet
 from scripts.ship import Ship
+from scripts.skill import Skill
 from scripts.skill_tab import SkillTab
 from scripts.soundlib import load_sounds, load_ost
 from scripts.upgd import Upgrade
@@ -92,6 +93,10 @@ class Game:
         self.upgrades = pg.sprite.Group()
         self.floating_numbers = pg.sprite.Group()
         self.particles = []
+        self.skills = []
+
+        for _ in range(28):
+            self.skills.append(Skill(None, None, None))
 
         self.cols = 12
         self.explosion_frames = 7
@@ -200,6 +205,8 @@ class Game:
                     running = False
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_TAB:
+                        self.skill_tab.active = not self.skill_tab.active
+                    if event.key == pg.K_a:
                         if event.mod & pg.KMOD_SHIFT:
                             crt.prog['curvature'].value = max(0.0,
                             crt.prog['curvature'].value - 0.5)
@@ -245,7 +252,7 @@ class Game:
                 self.update_game(screen_size)
                 self.update_time()
 
-            self.render(screen)
+            self.render(screen, font)
 
             if not self.game_over:
                 self.update_hud(font, screen, hud_ratio)
@@ -267,7 +274,7 @@ class Game:
             crt.render(screen)
         pg.quit()
 
-    def render(self, screen):
+    def render(self, screen, font):
         for i in self.stars:
             pg.draw.circle(screen, (255, 255, 255), (int(i[0]), int(i[1])),
                            i[2])
@@ -306,7 +313,7 @@ class Game:
                 pg.draw.rect(screen, (255, 0, 0), self.ship.hitbox, 2)
 
         self.explosions.draw(screen)
-        self.skill_tab.render(screen)
+        self.skill_tab.render(screen, font, self.ship)
 
     @staticmethod
     def set_hud(screen_size, padding):
@@ -465,6 +472,7 @@ class Game:
         self.explosions.update()
         self.upgrades.update()
         self.floating_numbers.update()
+        self.skill_tab.update()
 
         for particle in self.particles[:]:
             particle.update()
