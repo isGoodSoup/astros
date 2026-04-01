@@ -99,7 +99,10 @@ class Game:
         self.ship_x = screen_size[0] // 2 - framew // 2 - 25
         self.ship_y = screen_size[1] // 2 + 200
         self.base = None
-        self.hud = Interface(0, 40, 40,hud_ratio)
+
+        self.hp_bar = Interface("assets/ui/status.png", 0, 40, 40, hud_ratio)
+        self.shield = Interface("assets/ui/shield_bar.png", 0, 40, 40,
+                                hud_ratio, 33, [0, -50])
 
         self.anim_frame_base = 0
         self.anim_frame_overlay = 0
@@ -144,9 +147,15 @@ class Game:
         self.asteroid_spawn_interval = 800
         self.asteroid_spawn_count = 4
         self.last_upgrade_spawn = 0
-        self.upgrade_spawn_interval = 20_000
+        self.upgrade_spawn_interval = 24_000
         self.last_shot_time = 0
         self.shot_cooldown = 300
+        self.last_upgrade = None
+        self.active_upgrade = None
+        self.upgrade_start_time = 0
+        self.upgrade_duration = 16_000
+        self.base_velocity = self.ship.velocity
+
         self.score = 0
         self.high_score = 0
         self.survival_bonus = 0
@@ -246,7 +255,9 @@ class Game:
                         x = random.randint(0, screen_size[0])
                         y = random.randint(-200, -50)
 
-                        new_upgrade = Upgrade(upgd.get_upgrade(), x, y)
+                        self.last_upgrade = upgd.get_upgrade()
+                        upgrade = f"assets/{self.last_upgrade}.png"
+                        new_upgrade = Upgrade(upgrade, x, y)
                         self.upgrades.add(new_upgrade) # type: ignore
 
                 current_time = pg.time.get_ticks()
@@ -340,6 +351,10 @@ class Game:
 
                 if key_pressed[pg.K_m]:
                     self.play_sound = not self.play_sound
+                    if not self.play_sound:
+                        pg.mixer.music.stop()
+                    else:
+                        pg.mixer.music.play(-1)
 
                 if self.ship_alive:
                     self.ship.update_position(self.ship_x, self.ship_y)
@@ -353,7 +368,10 @@ class Game:
                     asteroid_hit.kill()
                     if self.play_sound:
                         self.sounds[1].play()
-                    self.ship.hitpoints -= self.ship.max_hitpoints // 28
+                    if self.ship.shield > 0:
+                        self.ship.shield -= self.ship.max_shield // 33
+                    else:
+                        self.ship.hitpoints -= self.ship.max_hitpoints // 28
                     self.screen_shake = 20
                     if self.ship.hitpoints <= 0:
                         self.game_over = True
@@ -380,6 +398,20 @@ class Game:
                 if upgrade_hit:
                     for upgrade in upgrade_hit:
                         upgrade.kill()
+                        if self.play_sound:
+                            self.sounds[2].play()
+                        if self.last_upgrade == "power_up":
+                            self.active_upgrade = "power_up"
+                            self.upgrade_start_time = pg.time.get_ticks()
+                        elif self.last_upgrade == "shield":
+                            self.ship.shield += 10
+
+                current_time = pg.time.get_ticks()
+                if self.active_upgrade == "power_up":
+                    self.ship.velocity = self.base_velocity * 2
+                    if current_time - self.upgrade_start_time >= self.upgrade_duration:
+                        self.active_upgrade = None
+                        self.ship.velocity = self.base_velocity
 
                 self.survival_bonus += 1
                 if self.survival_bonus >= 60:
@@ -397,8 +429,7 @@ class Game:
             self.upgrades.draw(screen)
             img = self.base.copy()
             if self.ship.moving:
-                overlay_index = self.anim_frame_overlay % len(
-                    self.frames_flying)
+                overlay_index = self.anim_frame_overlay % len(self.frames_flying)
                 overlay_frame = self.frames_flying[overlay_index]
                 img.blit(overlay_frame, (0, 0))
 
@@ -429,13 +460,6 @@ class Game:
                 screen.blit(self.stopwatch, [hud_ratio['left'] + hud_ratio['width'] // 2 -
                     self.stopwatch.get_width() // 2, hud_ratio['top']])
 
-                total_frames = len(self.hud.frames) - 1
-                if self.ship.hitpoints <= 0:
-                    hitpoints_frame = total_frames
-                else:
-                    hitpoints_frame = (total_frames - (self.ship.hitpoints * total_frames)
-                                       // self.ship.max_hitpoints)
-
                 score_text = f"{self.score:05}"
                 high_score = f"{self.high_score:05}"
                 score_title = "SCORE"
@@ -459,7 +483,19 @@ class Game:
                     screen.blit(line_surf, [x_pos, y_pos])
                     y_pos += line_surf.get_height() + 2
                 screen.blit(high_score_surface, [x_pos, y_pos])
-                self.hud.update(self.ship, hud_ratio, hitpoints_frame, screen)
+
+                total_frames = len(self.hp_bar.frames) - 1
+                if self.ship.hitpoints <= 0:
+                    hitpoints_frame = total_frames
+                else:
+                    hitpoints_frame = (total_frames - (self.ship.hitpoints * total_frames)
+                                       // self.ship.max_hitpoints)
+                self.hp_bar.update(self.ship, hud_ratio, hitpoints_frame, screen)
+
+                shield_total_frames = len(self.shield.frames) - 1
+                shield_frame = (shield_total_frames - (self.ship.shield * shield_total_frames)
+                                // self.ship.max_shield)
+                self.shield.update(self.ship, hud_ratio, shield_frame, screen)
 
             if self.cursor_visible:
                 screen.blit(self.cursor_sprite, mouse_pos)
@@ -472,6 +508,9 @@ class Game:
 
                 colors = ["RED", (0,0,0,0)]
                 game_over = font.render("GAME OVER", True, colors[self.count%2])
+
+                if self.play_sound:
+                    self.sounds[-1].play()
 
                 if self.score > self.high_score:
                     self.high_score = self.score
@@ -520,7 +559,6 @@ class Game:
         if self.milliseconds >= 1000:
             self.milliseconds -= 1000
             self.seconds += 1
-
             if self.seconds % 48 == 0:
                 self.asteroid_spawn_interval = max(100, self.asteroid_spawn_interval - 10)
                 self.asteroid_spawn_count = min(32,self.asteroid_spawn_count + 1)

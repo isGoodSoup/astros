@@ -4,7 +4,6 @@ import pygame
 
 from scripts.sheet import SpriteSheet
 
-
 class Ship(pygame.sprite.Sprite):
     def __init__(self, sprite_sheet, x, y, frame, width, height, scale=4,
                  columns=1):
@@ -19,8 +18,9 @@ class Ship(pygame.sprite.Sprite):
         self.shooting = False
         self.moving = False
         self.max_hitpoints = 280
+        self.max_shield = 25
         self.hitpoints = self.max_hitpoints
-        self.shield = 100
+        self.shield = self.max_shield
         self.damage = 4
 
     def update_position(self, x, y):
