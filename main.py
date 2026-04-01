@@ -127,6 +127,7 @@ class Game:
         self.celestial_spawn_interval = random.randint(8000, 14000)
         self.last_asteroid_spawn = 0
         self.asteroid_spawn_interval = 800
+        self.asteroid_spawn_count = 4
         self.last_upgrade_spawn = 0
         self.upgrade_spawn_interval = 60_000
         self.last_shot_time = 0
@@ -181,14 +182,15 @@ class Game:
                         i[0] = random.randint(0, screen_size[0])
 
                 current_time = pg.time.get_ticks()
-                if current_time - self.last_asteroid_spawn > self.asteroid_spawn_interval:
-                    self.last_asteroid_spawn = current_time
+                if current_time - self.last_celestial_spawn > self.celestial_spawn_interval:
+                    self.last_celestial_spawn = current_time
                     for _ in range(random.randint(1, 4)):
                         for _ in range(10):
-                            new_asteroid = Asteroid(screen_size[0], min_y=-200, max_y=-50)
-                            too_close = any(abs(new_asteroid.rect.y - m.rect.y) < 60 for m in self.asteroids)
-                            if not too_close:
-                                self.asteroids.add(new_asteroid) # type: ignore
+                            new_celestial = random_celestial()
+                            if new_celestial and is_valid_spawn(new_celestial,
+                                                                self.celestials,
+                                                                200):
+                                self.celestials.add(new_celestial)
                                 break
 
                 current_time = pg.time.get_ticks()
@@ -200,13 +202,14 @@ class Game:
                             self.upgrades.add(new_upgrade) # type: ignore
 
                 current_time = pg.time.get_ticks()
-                if current_time - self.last_celestial_spawn > self.celestial_spawn_interval:
-                    self.last_celestial_spawn = current_time
-                    for _ in range(random.randint(1, 4)):
+                if current_time - self.last_asteroid_spawn > self.asteroid_spawn_interval:
+                    self.last_asteroid_spawn = current_time
+                    for _ in range(random.randint(1, self.asteroid_spawn_count)):
                         for _ in range(10):
-                            new_celestial = random_celestial()
-                            if new_celestial and is_valid_spawn(new_celestial, self.celestials, 200):
-                                self.celestials.add(new_celestial)
+                            new_asteroid = Asteroid(screen_size[0], min_y=-200, max_y=-50)
+                            too_close = any(abs(new_asteroid.rect.y - m.rect.y) < 60 for m in self.asteroids)
+                            if not too_close:
+                                self.asteroids.add(new_asteroid)  # type: ignore
                                 break
 
                 now = pg.time.get_ticks()
@@ -362,21 +365,7 @@ class Game:
                 score_text = f"{self.score:05}"
                 text_surface = font.render(score_text, True, "WHITE")
                 screen.blit(text_surface, [screen_size[0] - 160, 50])
-
-                if not self.game_over:
-                    self.milliseconds += 1
-                    if self.milliseconds >= 60:
-                        self.milliseconds = 0
-                        self.seconds += 1
-                        if self.seconds == 30:
-                            pass # TODO difficulty increasing logic
-                        if self.seconds >= 60:
-                            self.seconds = 0
-                            self.minutes += 1
-                            if self.minutes >= 60:
-                                self.minutes = 0
-                                self.hours += 1
-
+                self.update_time()
             for i in self.stars:
                 pg.draw.circle(screen, (255, 255, 255), (int(i[0]), int(i[1])),i[2])
 
@@ -427,6 +416,28 @@ class Game:
                 screen.blit(pg.transform.scale(screen, screen_size), render)
             pg.display.update()
         pg.quit()
+
+    def update_time(self):
+        if not self.game_over:
+            self.milliseconds += 1
+            if self.milliseconds >= 60:
+                self.milliseconds = 0
+                self.seconds += 1
+                if self.seconds == 48:
+                    if self.asteroid_spawn_interval <= 100:
+                        self.asteroid_spawn_interval = 100
+                    else:
+                        self.asteroid_spawn_interval -= 10
+                    if self.asteroid_spawn_count >= 32:
+                        self.asteroid_spawn_count = 32
+                    else:
+                        self.asteroid_spawn_count += 1
+                if self.seconds >= 60:
+                    self.seconds = 0
+                    self.minutes += 1
+                    if self.minutes >= 60:
+                        self.minutes = 0
+                        self.hours += 1
 
     def reset(self, screen_size):
         self.projectiles.empty()
