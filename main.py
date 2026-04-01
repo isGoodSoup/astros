@@ -147,6 +147,7 @@ class Game:
         self.stopwatch = None
 
         self.screen_shake = 0
+        self.count = 0
 
     def run(self, running, clock, screen,
             screen_size, font):
@@ -393,8 +394,8 @@ class Game:
 
             self.stopwatch = font.render(f"{self.hours:02}:"
             f"{self.minutes:02}:{self.seconds:02}", True, "WHITE")
-            screen.blit(self.stopwatch, [screen_size[0]/2 -
-                                         self.stopwatch.get_width()/2, 50])
+            if not self.game_over:
+                screen.blit(self.stopwatch, [screen_size[0] / 2 - self.stopwatch.get_width() / 2,50])
 
             total_frames = len(self.hud.frames) - 1
             if self.ship.hitpoints <= 0:
@@ -406,9 +407,17 @@ class Game:
             self.hud.update(self.ship, hitpoints_frame, screen)
 
             if self.game_over:
-                game_over = font.render("GAME OVER", True, "RED")
-                screen.blit(game_over,[screen_size[0] // 2, screen_size[1]
-                                       // 2])
+                clock.tick(2)
+                self.count += 1
+                colors = ["RED", (0,0,0,0)]
+                game_over = font.render("GAME OVER", True, colors[self.count%2])
+                score_text = font.render(f"{self.score:05}", True, "WHITE")
+                stopwatch = self.stopwatch
+                game_over_x = self.center(game_over, screen_size)
+                game_over_y = screen_size[1]// 2
+                screen.blit(game_over,[game_over_x, game_over_y])
+                screen.blit(score_text, [self.center(score_text, screen_size), game_over_y + 25])
+                screen.blit(stopwatch, [self.center(stopwatch, screen_size), game_over_y + 50])
 
             if self.screen_shake > 0:
                 self.screen_shake -= 1
@@ -449,6 +458,9 @@ class Game:
         if not self.debugging:
             self.debugging = True
             return
+
+    def center(self, text, screen_size):
+        return screen_size[0] // 2 - text.get_width() // 2
 
 if __name__ == '__main__':
     menu = Menu()
