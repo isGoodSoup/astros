@@ -25,14 +25,15 @@ class Menu:
         self.render_surface = pg.Surface((1920, 1080))
         self.screen = pg.display.set_mode(self.screen_size, DOUBLEBUF|OPENGL, vsync=1)
         self.crt = CRT(self.screen, style=1, virtual_resolution=(1920, 1080),cpu_only=False)
+        self.crt.prog['curvature'].value = 0.7
         self.font = "assets/ui/PressStart2P.ttf"
+        self.cursor_sprite = pg.image.load("assets/ui/cursor.png")
         self.game_font = pg.font.Font(self.font, 56)
         self.text_font = pg.font.Font(self.font, 24)
         pg.display.set_caption("Astros")
         self.clock = pg.time.Clock()
         self.running = True
-        self.cursor = False
-        pg.mouse.set_visible(self.cursor)
+        pg.mouse.set_visible(False)
         toggle_fullscreen()
 
     def run(self):
@@ -112,6 +113,7 @@ class Game:
         self.last_update_left = pg.time.get_ticks()
         self.last_update_right = pg.time.get_ticks()
         self.last_direction = None
+        self.last_time = pg.time.get_ticks()
 
         self.frames = []
         for i in range(self.cols):
@@ -161,6 +163,12 @@ class Game:
         self.count = 0
         self.last_blink = 0
 
+        self.cursor_sprite = pg.image.load("assets/ui/cursor.png").convert_alpha()
+        self.cursor_visible = False
+        self.last_cursor_pos = pg.mouse.get_pos()
+        self.last_move_time = pg.time.get_ticks()
+        self.cursor_hide_delay = 3000
+
     def run(self, running, clock, screen,
             screen_size, crt, font):
         while running:
@@ -169,7 +177,11 @@ class Game:
                     running = False
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_TAB:
-                        crt.change_shader()
+                        if event.mod & pg.KMOD_SHIFT:
+                            crt.prog['curvature'].value = max(0.0,
+                            crt.prog['curvature'].value - 0.5)
+                        else:
+                            crt.prog['curvature'].value += 0.5
                     if self.game_over and event.key == pg.K_r:
                         self.reset(screen_size)
                     if event.key == pg.K_F2:
@@ -184,6 +196,15 @@ class Game:
 
             clock.tick(self.fps)
             screen.fill((0,0,0))
+
+            mouse_pos = pg.mouse.get_pos()
+            if mouse_pos != self.last_cursor_pos:
+                self.last_cursor_pos = mouse_pos
+                self.last_move_time = pg.time.get_ticks()
+                self.cursor_visible = True
+
+            if pg.time.get_ticks() - self.last_move_time > self.cursor_hide_delay:
+                self.cursor_visible = False
 
             if not self.pause and not self.game_over:
                 for i in self.stars:
@@ -360,8 +381,6 @@ class Game:
             self.asteroids.draw(screen)
             self.projectiles.draw(screen)
             self.upgrades.draw(screen)
-            self.explosions.draw(screen)
-
             img = self.base.copy()
             if self.ship.moving:
                 overlay_index = self.anim_frame_overlay % len(
@@ -385,6 +404,8 @@ class Game:
                 if self.debugging:
                     pg.draw.rect(screen, (255, 0, 0), self.ship.hitbox, 2)
 
+            self.explosions.draw(screen)
+
             if not self.game_over:
                 self.stopwatch = font.render(f"{self.hours:02}:"
                                              f"{self.minutes:02}:{self.seconds:02}",
@@ -402,6 +423,9 @@ class Game:
                 text_surface = font.render(score_text, True, "WHITE")
                 screen.blit(text_surface, [screen_size[0] - 160, 50])
                 self.hud.update(self.ship, hitpoints_frame, screen)
+
+            if self.cursor_visible:
+                screen.blit(self.cursor_sprite, mouse_pos)
 
             if self.game_over:
                 now = pg.time.get_ticks()
@@ -431,30 +455,23 @@ class Game:
         pg.quit()
 
     def update_time(self):
-        if not self.game_over:
-            self.milliseconds += 1
-            if self.milliseconds >= 60:
-                self.milliseconds = 0
-                self.seconds += 1
-                if self.seconds == 48:
-                    if self.asteroid_spawn_interval <= 100:
-                        self.asteroid_spawn_interval = 100
-                    else:
-                        self.asteroid_spawn_interval -= 10
-                    if self.asteroid_spawn_count >= 32:
-                        self.asteroid_spawn_count = 32
-                    else:
-                        self.asteroid_spawn_count += 1
-                    if self.ship.velocity >= 24:
-                        self.ship.velocity = 24
-                    else:
-                        self.ship.velocity += 1
-                if self.seconds >= 60:
-                    self.seconds = 0
-                    self.minutes += 1
-                    if self.minutes >= 60:
-                        self.minutes = 0
-                        self.hours += 1
+        current_time = pg.time.get_ticks()
+        elapsed = current_time - getattr(self, 'last_time', 0)
+        if not hasattr(self, 'last_time'):
+            self.last_time = current_time
+            return
+
+        self.milliseconds += elapsed
+        self.last_time = current_time
+
+        if self.milliseconds >= 1000:
+            self.milliseconds -= 1000
+            self.seconds += 1
+
+            if self.seconds % 48 == 0:
+                self.asteroid_spawn_interval = max(100, self.asteroid_spawn_interval - 10)
+                self.asteroid_spawn_count = min(32,self.asteroid_spawn_count + 1)
+                self.ship.velocity = min(24, self.ship.velocity + 1)
 
     def reset(self, screen_size):
         self.projectiles.empty()
