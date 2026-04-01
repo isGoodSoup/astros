@@ -144,7 +144,7 @@ class Game:
         self.asteroid_spawn_interval = 800
         self.asteroid_spawn_count = 4
         self.last_upgrade_spawn = 0
-        self.upgrade_spawn_interval = 60_000
+        self.upgrade_spawn_interval = 20_000
         self.last_shot_time = 0
         self.shot_cooldown = 300
         self.score = 0
@@ -239,13 +239,15 @@ class Game:
                                 self.celestials.add(new_celestial)
                                 break
 
-                current_time = pg.time.get_ticks()
                 if current_time - self.last_upgrade_spawn > self.upgrade_spawn_interval:
+                    self.last_upgrade_spawn = current_time
+
                     for _ in range(random.randint(1, 2)):
-                        for _ in range(5):
-                            self.last_upgrade_spawn = current_time
-                            new_upgrade = Upgrade(upgd.get_upgrade(), -200, -50)
-                            self.upgrades.add(new_upgrade) # type: ignore
+                        x = random.randint(0, screen_size[0])
+                        y = random.randint(-200, -50)
+
+                        new_upgrade = Upgrade(upgd.get_upgrade(), x, y)
+                        self.upgrades.add(new_upgrade) # type: ignore
 
                 current_time = pg.time.get_ticks()
                 if current_time - self.last_asteroid_spawn > self.asteroid_spawn_interval:
@@ -409,6 +411,9 @@ class Game:
             if self.debugging:
                 for i in self.asteroids:
                     pg.draw.rect(screen, (255, 0, 0), i.hitbox, 2)
+
+                for u in self.upgrades:
+                    pg.draw.rect(screen, (0, 255, 0), u.rect, 2)
 
             if self.ship_alive:
                 self.ship.rect.topleft = (self.ship_x, self.ship_y)
