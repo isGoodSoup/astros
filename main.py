@@ -148,6 +148,7 @@ class Game:
 
         self.screen_shake = 0
         self.count = 0
+        self.last_blink = 0
 
     def run(self, running, clock, screen,
             screen_size, font):
@@ -171,123 +172,115 @@ class Game:
             clock.tick(self.fps)
             screen.fill((0,0,0))
 
-            for i in self.stars:
-                pg.draw.circle(screen, (255, 255, 255),
-                                   (int(i[0]), int(i[1])), i[2])
-                if not self.pause:
-                    i[1] += 2
-                if i[1] > screen_size[1]:
-                    i[1] = 0
-                    i[0] = random.randint(0, screen_size[0])
+            if not self.pause and not self.game_over:
+                for i in self.stars:
+                    if not self.pause:
+                        i[1] += 2
+                    if i[1] > screen_size[1]:
+                        i[1] = 0
+                        i[0] = random.randint(0, screen_size[0])
 
-            current_time = pg.time.get_ticks()
-            if current_time - self.last_asteroid_spawn > self.asteroid_spawn_interval:
-                self.last_asteroid_spawn = current_time
-                for _ in range(random.randint(1, 4)):
-                    for _ in range(10):
-                        new_asteroid = Asteroid(screen_size[0], min_y=-200, max_y=-50)
-                        too_close = any(abs(new_asteroid.rect.y - m.rect.y) < 60 for m in self.asteroids)
-                        if not too_close:
-                            self.asteroids.add(new_asteroid) # type: ignore
-                            break
+                current_time = pg.time.get_ticks()
+                if current_time - self.last_asteroid_spawn > self.asteroid_spawn_interval:
+                    self.last_asteroid_spawn = current_time
+                    for _ in range(random.randint(1, 4)):
+                        for _ in range(10):
+                            new_asteroid = Asteroid(screen_size[0], min_y=-200, max_y=-50)
+                            too_close = any(abs(new_asteroid.rect.y - m.rect.y) < 60 for m in self.asteroids)
+                            if not too_close:
+                                self.asteroids.add(new_asteroid) # type: ignore
+                                break
 
-            current_time = pg.time.get_ticks()
-            if current_time - self.last_upgrade_spawn > self.upgrade_spawn_interval:
-                for _ in range(random.randint(1, 2)):
-                    for _ in range(5):
-                        self.last_upgrade_spawn = current_time
-                        new_upgrade = Upgrade(upgd.get_upgrade(), -200, -50)
-                        self.upgrades.add(new_upgrade) # type: ignore
+                current_time = pg.time.get_ticks()
+                if current_time - self.last_upgrade_spawn > self.upgrade_spawn_interval:
+                    for _ in range(random.randint(1, 2)):
+                        for _ in range(5):
+                            self.last_upgrade_spawn = current_time
+                            new_upgrade = Upgrade(upgd.get_upgrade(), -200, -50)
+                            self.upgrades.add(new_upgrade) # type: ignore
 
-            current_time = pg.time.get_ticks()
-            if current_time - self.last_celestial_spawn > self.celestial_spawn_interval:
-                self.last_celestial_spawn = current_time
-                for _ in range(random.randint(1, 4)):
-                    for _ in range(10):
-                        new_celestial = random_celestial()
-                        if new_celestial and is_valid_spawn(new_celestial, self.celestials, 200):
-                            self.celestials.add(new_celestial)
-                            break
+                current_time = pg.time.get_ticks()
+                if current_time - self.last_celestial_spawn > self.celestial_spawn_interval:
+                    self.last_celestial_spawn = current_time
+                    for _ in range(random.randint(1, 4)):
+                        for _ in range(10):
+                            new_celestial = random_celestial()
+                            if new_celestial and is_valid_spawn(new_celestial, self.celestials, 200):
+                                self.celestials.add(new_celestial)
+                                break
 
-            if not self.pause:
-                self.celestials.update()
-            self.celestials.draw(screen)
+                now = pg.time.get_ticks()
+                if now - self.last_update_base > self.cooldown_base:
+                    self.anim_frame_base += 1
+                    self.last_update_base = now
 
-            now = pg.time.get_ticks()
-            if now - self.last_update_base > self.cooldown_base:
-                self.anim_frame_base += 1
-                self.last_update_base = now
+                if now - self.last_update_overlay > self.cooldown_overlay:
+                    self.anim_frame_overlay += 1
+                    self.last_update_overlay = now
 
-            if now - self.last_update_overlay > self.cooldown_overlay:
-                self.anim_frame_overlay += 1
-                self.last_update_overlay = now
+                if self.ship.direction in ["left", "right"]:
+                    if self.ship.direction == "left":
+                        frames = self.left_frames_movement
+                        if self.last_direction != "left":
+                            self.anim_index_left = 0
+                            self.last_update_left = now
+                            self.last_direction = "left"
 
-            if self.ship.direction in ["left", "right"]:
-                if self.ship.direction == "left":
-                    frames = self.left_frames_movement
-                    if self.last_direction != "left":
-                        self.anim_index_left = 0
-                        self.last_update_left = now
-                        self.last_direction = "left"
+                        if now - self.last_update_left > self.cooldown_base:
+                            self.anim_index_left += 1
+                            if self.anim_index_left >= len(frames):
+                                self.anim_index_left = len(frames) - 1
+                            self.last_update_left = now
+                        base = frames[self.anim_index_left]
+                    else:
+                        frames = self.right_frames_movement
+                        if self.last_direction != "right":
+                            self.anim_index_right = 0
+                            self.last_update_right = now
+                            self.last_direction = "right"
 
-                    if now - self.last_update_left > self.cooldown_base:
-                        self.anim_index_left += 1
-                        if self.anim_index_left >= len(frames):
-                            self.anim_index_left = len(frames) - 1
-                        self.last_update_left = now
-                    base = frames[self.anim_index_left]
+                        if now - self.last_update_right > self.cooldown_base:
+                            self.anim_index_right += 1
+                            if self.anim_index_right >= len(frames):
+                                self.anim_index_right = len(frames) - 1
+                            self.last_update_right = now
+                        base = frames[self.anim_index_right]
                 else:
-                    frames = self.right_frames_movement
-                    if self.last_direction != "right":
-                        self.anim_index_right = 0
-                        self.last_update_right = now
-                        self.last_direction = "right"
+                    base = self.frame_idle
 
-                    if now - self.last_update_right > self.cooldown_base:
-                        self.anim_index_right += 1
-                        if self.anim_index_right >= len(frames):
-                            self.anim_index_right = len(frames) - 1
-                        self.last_update_right = now
-                    base = frames[self.anim_index_right]
-            else:
-                base = self.frame_idle
+                img = base.copy()
 
-            img = base.copy()
+                if self.ship.moving:
+                    overlay_index = self.anim_frame_overlay % len(
+                        self.frames_flying)
+                    overlay_frame = self.frames_flying[overlay_index]
+                    img.blit(overlay_frame, (0, 0))
 
-            if self.ship.moving:
-                overlay_index = self.anim_frame_overlay % len(
-                    self.frames_flying)
-                overlay_frame = self.frames_flying[overlay_index]
-                img.blit(overlay_frame, (0, 0))
+                if self.ship.shooting:
+                    shoot_index = self.anim_frame_overlay % len(
+                        self.frames_shooting)
+                    shoot_frame = self.frames_shooting[shoot_index]
+                    img.blit(shoot_frame, (0, 0))
 
-            if self.ship.shooting:
-                shoot_index = self.anim_frame_overlay % len(
-                    self.frames_shooting)
-                shoot_frame = self.frames_shooting[shoot_index]
-                img.blit(shoot_frame, (0, 0))
-
-            if not self.pause:
-                self.asteroids.update()
-            self.asteroids.draw(screen)
-
-            if self.debugging:
-                for i in self.asteroids:
-                    pg.draw.rect(screen, (255, 0, 0),i.hitbox, 2)
-
-            if self.ship_alive:
-                self.ship.rect.topleft = (self.ship_x, self.ship_y)
-                screen.blit(img, self.ship.rect)
                 if self.debugging:
-                    pg.draw.rect(screen, (255, 0, 0), self.ship.hitbox,2)
+                    for i in self.asteroids:
+                        pg.draw.rect(screen, (255, 0, 0),i.hitbox, 2)
 
-            key_pressed = pg.key.get_pressed()
-            if not self.game_over and not self.pause:
+                if self.ship_alive:
+                    self.ship.rect.topleft = (self.ship_x, self.ship_y)
+                    screen.blit(img, self.ship.rect)
+                    if self.debugging:
+                        pg.draw.rect(screen, (255, 0, 0), self.ship.hitbox,2)
+
+                self.celestials.update()
+                self.asteroids.update()
+                self.projectiles.update()
+                self.explosions.update()
                 self.upgrades.update()
-                self.upgrades.draw(screen)
 
+                key_pressed = pg.key.get_pressed()
                 self.ship.moving = False
                 direction_set = False
-
                 if key_pressed[pg.K_LEFT] and self.ship_x > 0:
                     self.ship_x -= self.ship.velocity
                     self.ship.direction = "left"
@@ -319,9 +312,6 @@ class Game:
 
                 if key_pressed[pg.K_m]:
                     self.play_sound = not self.play_sound
-
-                self.projectiles.update()
-                self.projectiles.draw(screen)
 
                 if self.ship_alive:
                     self.ship.update_position(self.ship_x, self.ship_y)
@@ -369,15 +359,10 @@ class Game:
                     self.survival_bonus = 0
                     self.score += 1
 
-            if not self.pause:
-                self.explosions.update()
-            self.explosions.draw(screen)
+                score_text = f"{self.score:05}"
+                text_surface = font.render(score_text, True, "WHITE")
+                screen.blit(text_surface, [screen_size[0] - 160, 50])
 
-            score_text = f"{self.score:05}"
-            text_surface = font.render(score_text, True, "WHITE")
-            screen.blit(text_surface, [screen_size[0] - 160, 50])
-
-            if not self.pause:
                 if not self.game_over:
                     self.milliseconds += 1
                     if self.milliseconds >= 60:
@@ -392,23 +377,36 @@ class Game:
                                 self.minutes = 0
                                 self.hours += 1
 
-            self.stopwatch = font.render(f"{self.hours:02}:"
-            f"{self.minutes:02}:{self.seconds:02}", True, "WHITE")
+            for i in self.stars:
+                pg.draw.circle(screen, (255, 255, 255), (int(i[0]), int(i[1])),i[2])
+
+            self.celestials.draw(screen)
+            self.asteroids.draw(screen)
+            self.projectiles.draw(screen)
+            self.upgrades.draw(screen)
+            self.explosions.draw(screen)
+
             if not self.game_over:
-                screen.blit(self.stopwatch, [screen_size[0] / 2 - self.stopwatch.get_width() / 2,50])
+                self.stopwatch = font.render(f"{self.hours:02}:"
+                                             f"{self.minutes:02}:{self.seconds:02}",
+                                             True, "WHITE")
+                screen.blit(self.stopwatch, [
+                    screen_size[0] / 2 - self.stopwatch.get_width() / 2, 50])
 
-            total_frames = len(self.hud.frames) - 1
-            if self.ship.hitpoints <= 0:
-                hitpoints_frame = total_frames
-            else:
-                hitpoints_frame = (total_frames -
-                (self.ship.hitpoints * total_frames) // self.ship.max_hitpoints)
-
-            self.hud.update(self.ship, hitpoints_frame, screen)
+                total_frames = len(self.hud.frames) - 1
+                if self.ship.hitpoints <= 0:
+                    hitpoints_frame = total_frames
+                else:
+                    hitpoints_frame = (total_frames -(self.ship.hitpoints * total_frames)
+                                       // self.ship.max_hitpoints)
+                self.hud.update(self.ship, hitpoints_frame, screen)
 
             if self.game_over:
-                clock.tick(2)
-                self.count += 1
+                now = pg.time.get_ticks()
+                if now - self.last_blink > 500:
+                    self.count += 1
+                    self.last_blink = now
+
                 colors = ["RED", (0,0,0,0)]
                 game_over = font.render("GAME OVER", True, colors[self.count%2])
                 score_text = font.render(f"{self.score:05}", True, "WHITE")
@@ -425,7 +423,8 @@ class Game:
             render = [0,0]
             if self.screen_shake:
                 render = self.ship.taken_damage()
-            screen.blit(pg.transform.scale(screen, screen_size), render)
+            if not self.game_over:
+                screen.blit(pg.transform.scale(screen, screen_size), render)
             pg.display.update()
         pg.quit()
 
