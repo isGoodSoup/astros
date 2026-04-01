@@ -46,6 +46,8 @@ class Ship(pygame.sprite.Sprite):
     def level_up(self, sound):
         self.level += 1
         self.damage += 1
+        self.hitpoints += 10
+        self.shield += 10
         self.perk_points += 1
         self.xp_to_next_level = int(self.xp_to_next_level * self.xp_growth)
         sound[3].play()

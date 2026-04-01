@@ -9,11 +9,14 @@ from scripts.crt import CRT
 from scripts.explode import Explosion
 from scripts.floaty import FloatingNumber
 from scripts.hud import Interface
+from scripts.impact import ImpactFrame
+from scripts.particle import Particle
 from scripts.proj import Projectile
 from scripts.sheet import SpriteSheet
 from scripts.ship import Ship
 from scripts.soundlib import load_sounds, load_ost
 from scripts.upgd import Upgrade
+
 
 class Menu:
     def __init__(self):
@@ -87,6 +90,7 @@ class Game:
         self.explosions = pg.sprite.Group()
         self.upgrades = pg.sprite.Group()
         self.floating_numbers = pg.sprite.Group()
+        self.particles = []
 
         self.cols = 12
         self.explosion_frames = 7
@@ -271,6 +275,8 @@ class Game:
         self.projectiles.draw(screen)
         self.upgrades.draw(screen)
         self.floating_numbers.draw(screen)
+        for particle in self.particles:
+            particle.draw(screen)
 
         img = self.base.copy()
         if self.ship.moving:
@@ -456,6 +462,11 @@ class Game:
         self.upgrades.update()
         self.floating_numbers.update()
 
+        for particle in self.particles[:]:
+            particle.update()
+            if particle.timer <= 0:
+                self.particles.remove(particle)
+
         key_pressed = pg.key.get_pressed()
         self.ship.moving = False
         direction_set = False
@@ -517,6 +528,11 @@ class Game:
             explosion = Explosion(ship_center_x, ship_center_y,
                                   self.frame_explode)
             self.explosions.add(explosion)  # type: ignore
+
+            for _ in range(10):
+                vel = [random.uniform(-2, 2), random.uniform(-2, 2)]
+                self.particles.append(Particle((ship_center_x, ship_center_y),vel))
+
             asteroid_hit.kill()
             if self.play_sound:
                 self.sounds[1].play()
@@ -547,6 +563,10 @@ class Game:
             asteroid[0].hitpoints -= damage
             x, y = asteroid[0].rect.center
             self.floating_numbers.add(FloatingNumber(x, y, damage, color=color,font_size=size))  # type: ignore
+            impact = ImpactFrame(asteroid[0].rect.centerx,
+                                 asteroid[0].rect.centery,
+                                 self.frame_explode[0])
+            self.explosions.add(impact) # type: ignore
             if asteroid[0].hitpoints <= 0:
                 explosion = Explosion(asteroid[0].rect.centerx,
                                       asteroid[0].rect.centery,
@@ -589,6 +609,12 @@ class Game:
                 self.asteroid_spawn_interval = max(100, self.asteroid_spawn_interval - 10)
                 self.asteroid_spawn_count = min(32,self.asteroid_spawn_count + 1)
                 self.ship.velocity = min(24, self.ship.velocity + 1)
+            if self.seconds <= 60:
+                self.seconds = 0
+                self.minutes += 1
+                if self.minutes % 60 == 0:
+                    self.minutes = 0
+                    self.hours += 1
 
     def hide_cursor(self, mouse_pos):
         if mouse_pos != self.last_cursor_pos:

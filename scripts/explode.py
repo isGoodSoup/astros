@@ -7,7 +7,7 @@ class Explosion(pygame.sprite.Sprite):
         self.frame_index = 0
         self.image = self.frames[self.frame_index]
         self.rect = self.image.get_rect(center=(x, y))
-        self.center = self.rect.center  # store original center
+        self.center = self.rect.center
         self.last_update = pygame.time.get_ticks()
         self.cooldown = cooldown
 
@@ -22,3 +22,6 @@ class Explosion(pygame.sprite.Sprite):
             else:
                 self.image = self.frames[self.frame_index]
                 self.rect = self.image.get_rect(center=self.center)
+
+    def hit(self):
+        return self.frames[0]
