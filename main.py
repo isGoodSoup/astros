@@ -494,7 +494,22 @@ class Game:
 
         if self.ship_alive:
             self.ship.update_position(self.ship_x, self.ship_y)
-        asteroid_hit = pg.sprite.spritecollideany(self.ship, self.asteroids, # type: ignore
+
+        self.check_collision()
+        current_time = pg.time.get_ticks()
+        if self.active_upgrade == "power_up":
+            self.ship.damage = self.base_damage * 2
+            if current_time - self.upgrade_start_time >= self.upgrade_duration:
+                self.active_upgrade = None
+                self.ship.damage = self.base_damage
+
+        self.survival_bonus += 1
+        if self.survival_bonus >= 60:
+            self.survival_bonus = 0
+            self.score += 1
+
+    def check_collision(self):
+        asteroid_hit = pg.sprite.spritecollideany(self.ship, self.asteroids,# type: ignore
                                                   collided=lambda s,m: s.hitbox.colliderect(m.hitbox))
         if asteroid_hit:
             ship_center_x = self.ship.rect.centerx
@@ -506,9 +521,9 @@ class Game:
             if self.play_sound:
                 self.sounds[1].play()
             if self.ship.shield > 0:
-                self.ship.shield -= self.ship.max_shield // 33
+                self.ship.shield -= max(1, self.ship.max_shield // 33)
             else:
-                self.ship.hitpoints -= self.ship.max_hitpoints // 28
+                self.ship.hitpoints -= max(1, self.ship.max_hitpoints // 28)
             self.screen_shake = 20
             if self.ship.hitpoints <= 0:
                 self.game_over = True
@@ -517,21 +532,6 @@ class Game:
                 pg.mixer.music.stop()
                 self.game_over = True
 
-        self.check_collision()
-
-        current_time = pg.time.get_ticks()
-        if self.active_upgrade == "power_up":
-            self.ship.damage = self.base_damage * 2
-            if current_time - self.upgrade_start_time >= self.upgrade_duration:
-                self.active_upgrade = None
-                self.ship.velocity = self.base_damage
-
-        self.survival_bonus += 1
-        if self.survival_bonus >= 60:
-            self.survival_bonus = 0
-            self.score += 1
-
-    def check_collision(self):
         hits = pg.sprite.groupcollide(self.projectiles, self.asteroids,
                                       True, False)
         for asteroid in hits.values():
