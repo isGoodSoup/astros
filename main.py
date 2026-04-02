@@ -19,7 +19,6 @@ from scripts.skill_tab import Tab
 from scripts.soundlib import load_sounds, load_ost
 from scripts.upgd import Upgrade
 
-
 class Menu:
     def __init__(self):
         pg.init()
@@ -355,9 +354,12 @@ class Game:
 
     def render_stats_tab(self, screen, rect, game_font):
         stats = [
-            f"HP: {self.ship.hitpoints}/{self.ship.max_hitpoints}",
-            f"Shield: {self.ship.shield}/{self.ship.max_shield}",
-            f"XP: {self.ship.xp}/{self.ship.xp_to_next_level}"
+            f"Hitpoints: {int(self.ship.hitpoints)}/{int(self.ship.max_hitpoints)}",
+            f"Shield: {int(self.ship.shield)}/{int(self.ship.max_shield)}",
+            f"Level: {int(self.ship.level)}",
+            f"XP: {int(self.ship.xp)}/{int(self.ship.xp_to_next_level)}"
+            f"Crit Chance: {int(self.ship.crit_chance)}%",
+            f"Crit Multiplier: {int(self.ship.crit_multiplier)}",
         ]
         y_offset = 40
         for stat in stats:

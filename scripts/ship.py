@@ -17,9 +17,9 @@ class Ship(pygame.sprite.Sprite):
         self.direction = "idle"
         self.shooting = False
         self.moving = False
-        self.max_hitpoints = 280
-        self.max_shield = 25
+        self.max_hitpoints = 200
         self.hitpoints = self.max_hitpoints
+        self.max_shield = 25
         self.shield = self.max_shield
         self.damage = 4
         self.crit_chance = 0.1
@@ -51,8 +51,10 @@ class Ship(pygame.sprite.Sprite):
     def level_up(self, sound):
         self.level += 1
         self.damage += 1
-        self.hitpoints += 10
-        self.shield += 10
+        self.max_hitpoints += 10
+        self.hitpoints = self.max_hitpoints
+        self.max_shield += 10
+        self.shield = self.max_shield
         self.perk_points += 1
         self.xp_to_next_level = int(self.xp_to_next_level * self.xp_growth)
         sound[3].play()

@@ -7,8 +7,10 @@ from scripts.ability import Ability
 class Explorer(Ability):
     @override
     def apply(self, ship, level):
-        ship.hitpoints += ship.hitpoints * (level * 0.2)
-        ship.shield += ship.shield * (level * 0.2)
+        ship.max_hitpoints += ship.max_hitpoints * (level * 0.2)
+        ship.hitpoints = ship.max_hitpoints
+        ship.max_shield += ship.max_shield * (level * 0.2)
+        ship.shield = ship.max_shield
         return [ship.hitpoints, ship.shield]
 
 class DamageBoost(Ability):
@@ -35,7 +37,8 @@ class Madness(Ability):
 class Survival(Ability):
     @override
     def apply(self, ship, level):
-        ship.shield = ship.max_shield * (1 + 0.2 * level)
+        ship.max_shield += ship.max_shield * (0.2 * level)
+        ship.shield = ship.max_shield
         ship.evasion += 0.01 * level
         return [ship.shield]
 
@@ -50,10 +53,13 @@ class Pilot(Ability):
     @override
     def apply(self, ship, level):
         ship.evasion += 0.03 * level
-        ship.hitpoints += ship.hitpoints * (level * 0.2)
+        ship.max_hitpoints += ship.max_hitpoints * (level * 0.2)
+        ship.hitpoints = ship.max_hitpoints
+        return [ship.hitpoints]
 
 class Tank(Ability):
     @override
     def apply(self, ship, level):
-        ship.hitpoints = ship.hitpoints * (1 + 0.5 * level)
+        ship.max_hitpoints += ship.max_hitpoints * (level * 0.7)
+        ship.hitpoints = ship.max_hitpoints
         return [ship.hitpoints]
