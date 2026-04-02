@@ -111,7 +111,7 @@ class Game:
         self.shield = Interface("assets/ui/shield_bar.png", 0, 40, 40,
             hud_ratio, 33, [0, -50])
         self.xp = Interface("assets/ui/xp.png", -1, 40, 40,
-            hud_ratio, 33, [0,-100])
+            hud_ratio, 33, [0,-75])
 
         self.anim_frame_base = 0
         self.anim_frame_overlay = 0
@@ -237,10 +237,7 @@ class Game:
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     for skill in self.skills.skills:
                         if skill.is_hovered(pygame.mouse.get_pos()):
-                            if not skill.unlocked:
-                                self.skills.unlock(skill)
-                            else:
-                                self.skills.upgrade(skill, self.ship)
+                            self.skills.unlock_or_upgrade(skill, self.ship)
             if not running:
                 break
 

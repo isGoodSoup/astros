@@ -15,7 +15,7 @@ class Skill:
 
         self.frames = {
             "locked": self.spritesheet.get_image(0, frame_width, frame_height, 4, cols),
-            "unlocked": self.spritesheet.get_image(1, frame_width, frame_height, 4, cols),
+            "unlocked1": self.spritesheet.get_image(1, frame_width, frame_height, 4, cols),
             "unlocked2": self.spritesheet.get_image(2, frame_width, frame_height, 4, cols),
             "unlocked3": self.spritesheet.get_image(3, frame_width, frame_height, 4, cols),
             "unlocked4": self.spritesheet.get_image(4, frame_width, frame_height, 4, cols),
@@ -55,8 +55,8 @@ class Skill:
 
         if self.unlocked:
             if self.level > 0:
-                return self.frames.get(f"level{self.level}",self.frames["unlocked"])
-            return self.frames["unlocked"]
+                return self.frames.get(f"unlocked{self.level}", self.frames["unlocked1"])
+            return self.frames["unlocked1"]
 
         if all(parent.level > 0 for parent in self.parents):
             return self.frames["unlockable"]
@@ -70,18 +70,21 @@ class SkillManager:
     def add_skill(self, skill):
         self.skills.append(skill)
 
-    def unlock(self, skill):
-        if self.can_unlock(skill) and not skill.unlocked:
-            skill.unlocked = True
-
     def can_unlock(self, skill, ship):
         return ship.perk_points > 0 and all(req.level > 0 for req in skill.parents)
 
-    def upgrade(self, skill, ship):
+    def unlock_or_upgrade(self, skill, ship):
         if ship.perk_points <= 0:
             return
 
-        if skill.unlocked and skill.level < skill.max_level:
+        if not skill.unlocked:
+            if all(req.level > 0 for req in skill.parents):
+                skill.unlocked = True
+                skill.level = 1
+                ship.perk_points -= 1
+                if skill.ability:
+                    skill.ability.apply(ship, skill.level)
+        elif skill.level < skill.max_level:
             skill.level += 1
             ship.perk_points -= 1
             if skill.ability:
@@ -96,12 +99,14 @@ class SkillManager:
         maniac = Skill("Maniac", Maniac(), "02a_maniac")
 
         survivor = Skill("Survivor", Survival(), "03_survivor")
+        adventurer = Skill("Adventurer", Adventurer(), "03a_adventurer")
 
         tank = Skill("Tank", Tank(), "04_tank")
 
         explorer.parents = []
         berserk.parents = [explorer]
         maniac.parents = [berserk]
+        adventurer.parents = [survivor]
 
         survivor.parents = [explorer]
 
@@ -109,12 +114,14 @@ class SkillManager:
 
         explorer.children = [berserk, survivor, tank]
         berserk.children = [maniac]
+        survivor.children = [adventurer]
 
-        explorer.pos = (skill_tab.padding + 200, skill_tab.padding)
+        explorer.pos = (skill_tab.padding + 180, skill_tab.padding)
         padding = 80
-        berserk.pos = (explorer.pos[0] - 100, explorer.pos[1] + padding)
+        berserk.pos = (explorer.pos[0] - 120, explorer.pos[1] + padding)
         survivor.pos = (explorer.pos[0], explorer.pos[1] + padding)
-        tank.pos = (explorer.pos[0] + 100, explorer.pos[1] + padding)
+        tank.pos = (explorer.pos[0] + 120, explorer.pos[1] + padding)
 
         maniac.pos = (berserk.pos[0], berserk.pos[1] + padding)
-        self.skills = [explorer, berserk, survivor, tank, maniac]
+        adventurer.pos = (survivor.pos[0], berserk.pos[1] + padding)
+        self.skills = [explorer, berserk, survivor, tank, maniac, adventurer]

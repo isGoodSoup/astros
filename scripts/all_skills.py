@@ -29,9 +29,16 @@ class Maniac(Ability):
 class Survival(Ability):
     @override
     def apply(self, ship, level):
-        ship.shield = ship.base_shield * (1 + 0.2 * level)
+        ship.shield = ship.max_shield * (1 + 0.2 * level)
         ship.evasion += 0.01 * level
         return [ship.shield]
+
+class Adventurer(Ability):
+    @override
+    def apply(self, ship, level):
+        ship.evasion += 0.02 * level
+        ship.speed += 0.05 * level * ship.base_speed
+        return [ship.evasion, ship.speed]
 
 class Tank(Ability):
     @override
