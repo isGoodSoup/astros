@@ -74,8 +74,8 @@ class SkillManager:
         if self.can_unlock(skill) and not skill.unlocked:
             skill.unlocked = True
 
-    def can_unlock(self, skill):
-        return all(req.level > 0 for req in skill.parents)
+    def can_unlock(self, skill, ship):
+        return ship.perk_points > 0 and all(req.level > 0 for req in skill.parents)
 
     def upgrade(self, skill, ship):
         if ship.perk_points <= 0:
