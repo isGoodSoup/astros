@@ -115,7 +115,6 @@ class Game:
         self.ship_x = screen_size[0] // 2 - framew // 2 - 25
         self.ship_y = screen_size[1] // 2 + 200
         self.ship_pos = [self.ship_x, self.ship_y]
-        self.base = None
         self.joy_axis = [0.0, 0.0]
         self.deadzone = 0.2
 
@@ -145,8 +144,7 @@ class Game:
 
         self.frames = []
         for i in range(self.cols):
-            img = self.sprite_sheet.get_image(i, framew, frameh, scale=self.scale,
-                                              columns=self.cols)
+            img = self.sprite_sheet.get_image(i, framew, frameh, scale=self.scale,columns=self.cols)
             self.frames.append(img)
 
         self.left_frames_movement = self.frames[0:2]
@@ -154,6 +152,7 @@ class Game:
         self.right_frames_movement = self.frames[3:5]
         self.frames_flying = self.frames[5:9]
         self.frames_shooting = self.frames[9:12]
+        self.base = self.frame_idle
 
         framew = self.explosion_sheet.sheet.get_width() // self.explosion_frames
         frameh = self.explosion_sheet.sheet.get_height()
@@ -289,7 +288,6 @@ class Game:
             dt = clock.get_time()/1000
 
             self.update_movement(dt, screen_size)
-            self.update_controller(dt, screen_size)
 
             mouse_pos = pg.mouse.get_pos()
             self.hide_cursor(mouse_pos)
@@ -324,28 +322,37 @@ class Game:
         pg.quit()
 
     def update_movement(self, delta, screen_size):
-        self.ship.moving = False
-        self.direction_set = False
         key_pressed = pg.key.get_pressed()
-        if key_pressed[K_LEFT] and self.ship_x > 0:
-            self.ship_x -= self.ship.velocity * delta * 60
+        joy_x = self.joy_axis[0]
+
+        movement_x = 0
+        movement_y = 0
+
+        if key_pressed[K_LEFT]:
+            movement_x -= self.ship.velocity * delta * 60
+        if key_pressed[K_RIGHT]:
+            movement_x += self.ship.velocity * delta * 60
+
+        if key_pressed[K_UP]:
+            movement_y -= self.ship.velocity * delta * 60
+        if key_pressed[K_DOWN]:
+            movement_y += self.ship.velocity * delta * 60
+
+        movement_x += joy_x * self.ship.velocity * delta * 60
+        movement_y += self.joy_axis[1] * self.ship.velocity * delta * 60
+
+        self.ship_x = max(0, min(screen_size[0] - self.base.get_width(),
+                                 self.ship_x + movement_x))
+        self.ship_y = max(0, min(screen_size[1] - self.base.get_height(),
+                                 self.ship_y + movement_y))
+
+        if movement_x < 0:
             self.ship.direction = "left"
-            self.ship.moving = True
-            self.direction_set = True
-
-        elif (key_pressed[K_RIGHT] and self.ship_x < screen_size[0] -
-              self.base.copy().get_width()):
-            self.ship_x += self.ship.velocity * delta * 60
+        elif movement_x > 0:
             self.ship.direction = "right"
-            self.ship.moving = True
-            self.direction_set = True
-
-        if key_pressed[K_UP] and self.ship_y > 0:
-            self.ship_y -= self.ship.velocity * delta * 60
-            self.ship.moving = True
-
-        if key_pressed[K_DOWN] and self.ship_y < screen_size[1] - self.ship.image.get_height():
-            self.ship_y += self.ship.velocity * delta * 60
+        else:
+            self.ship.direction = "idle"
+        self.ship.moving = movement_x != 0 or movement_y != 0
 
         if key_pressed[K_SPACE]:
             current_time = pg.time.get_ticks()
@@ -353,18 +360,6 @@ class Game:
                 self.projectiles = self.ship.shoot(self.base, self.last_shot_time, self.shot_cooldown,
                                                    self.play_sound, self.sounds)
                 self.last_shot_time = current_time
-
-    def update_controller(self, delta, screen_size):
-        self.ship_x += self.joy_axis[0] * self.ship.velocity * delta * 60
-        if self.joy_axis[0] > 0 and self.ship_x < screen_size[0] - self.base.copy().get_width():
-            self.ship.direction = "right"
-        elif self.joy_axis[0] < 0 and self.ship_x > 0:
-            self.ship.direction = "left"
-        else:
-            self.ship.direction = "idle"
-
-        self.ship_y += self.joy_axis[1] * self.ship.velocity * delta * 60 if self.ship_y > 0 else 0
-        self.ship.moving = any(abs(v) > 0 for v in self.joy_axis)
 
     def render(self, screen, font):
         for i in self.stars:
