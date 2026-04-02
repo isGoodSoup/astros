@@ -14,7 +14,7 @@ class Ship(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=(x, y))
         self.hitbox = self.rect.inflate(self.rect.width * -0.6,
                                         self.rect.height * -0.6)
-        self.velocity = 0.5
+        self.velocity = 12
         self.direction = "idle"
         self.shooting = False
         self.moving = False
