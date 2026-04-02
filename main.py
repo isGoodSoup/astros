@@ -154,8 +154,8 @@ class Game:
         self.last_celestial_spawn = 0
         self.celestial_spawn_interval = random.randint(8000, 14000)
         self.last_asteroid_spawn = 0
-        self.asteroid_spawn_interval = 800
-        self.asteroid_spawn_count = 4
+        self.asteroid_spawn_interval = 600
+        self.asteroid_spawn_count = 6
         self.last_upgrade_spawn = 0
         self.upgrade_spawn_interval = 24_000
         self.last_shot_time = 0
@@ -357,7 +357,7 @@ class Game:
             f"Hitpoints: {int(self.ship.hitpoints)}/{int(self.ship.max_hitpoints)}",
             f"Shield: {int(self.ship.shield)}/{int(self.ship.max_shield)}",
             f"Level: {int(self.ship.level)}",
-            f"XP: {int(self.ship.xp)}/{int(self.ship.xp_to_next_level)}"
+            f"XP: {int(self.ship.xp)}/{int(self.ship.xp_to_next_level)}",
             f"Crit Chance: {int(self.ship.crit_chance)}%",
             f"Crit Multiplier: {int(self.ship.crit_multiplier)}",
         ]
@@ -584,6 +584,11 @@ class Game:
             self.survival_bonus = 0
             self.score += 1
 
+    def level_enemies(self):
+        for asteroid in self.asteroids:
+            asteroid.hitpoints += 0.8 * self.ship.level
+            asteroid.speed += 1
+
     def check_collision(self):
         asteroid_hit = pg.sprite.spritecollideany(self.ship, self.asteroids,# type: ignore
                                                   collided=lambda s,m: s.hitbox.colliderect(m.hitbox))
@@ -622,12 +627,10 @@ class Game:
                                       True, False)
         for asteroid in hits.values():
             current_time = pg.time.get_ticks()
-            # Expire boost if time passed
             if current_time > self.ship.maniac_boost_end:
                 self.ship.maniac_boost = 0
 
-            effective_crit_chance = (self.ship.crit_chance +
-                                     self.ship.maniac_boost)
+            effective_crit_chance = min(1.0, (self.ship.crit_chance/100) + self.ship.maniac_boost)
             if random.random() < effective_crit_chance:
                 damage = self.ship.damage * self.ship.crit_multiplier
                 color = (255, 50, 50)
@@ -639,9 +642,8 @@ class Game:
 
             asteroid[0].hitpoints -= damage
             x, y = asteroid[0].rect.center
-            self.floating_numbers.add(FloatingNumber(x, y, damage, color=color,font_size=size))  # type: ignore
-            impact = ImpactFrame(asteroid[0].rect.centerx,
-                                 asteroid[0].rect.centery,
+            self.floating_numbers.add(FloatingNumber(x, y, int(damage), color=color,font_size=size))  # type: ignore
+            impact = ImpactFrame(asteroid[0].rect.centerx,asteroid[0].rect.centery,
                                  self.frame_explode[0])
             self.explosions.add(impact) # type: ignore
             if asteroid[0].hitpoints <= 0:
@@ -656,8 +658,8 @@ class Game:
                 asteroid[0].kill()
                 if self.play_sound:
                     self.sounds[1].play()
-                self.score += 10
-                self.ship.gain_xp(15, self.sounds)
+                self.score += self.ship.level * 10
+                self.ship.gain_xp(self.formulize(self.ship.level), self.sounds)
 
         upgrade_hit = pg.sprite.spritecollide(self.ship, self.upgrades, False,# type: ignore
                                               collided=lambda s,u: s.hitbox.colliderect(u.rect))
@@ -691,11 +693,16 @@ class Game:
                 self.asteroid_spawn_count = min(32, self.asteroid_spawn_count + 1)
                 self.ship.velocity = min(24, self.ship.velocity + 1)
             if self.seconds >= 60:
+                self.level_enemies()
                 self.seconds = 0
                 self.minutes += 1
                 if self.minutes >= 60:
                     self.minutes = 0
                     self.hours += 1
+
+    def formulize(self, level, base_xp=10):
+        score_factor = self.score ** 0.5
+        return int(base_xp * (level ** 1.2) + score_factor)
 
     def hide_cursor(self, mouse_pos):
         if mouse_pos != self.last_cursor_pos:
