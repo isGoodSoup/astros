@@ -7,6 +7,7 @@ from scripts.asteroid import Asteroid
 from scripts.celestial import *
 from scripts.crt import CRT
 from scripts.explode import Explosion
+from scripts.fade import Fade
 from scripts.floaty import FloatingNumber
 from scripts.hud import Interface
 from scripts.impact import ImpactFrame
@@ -21,6 +22,8 @@ from scripts.upgd import Upgrade
 pg.joystick.init()
 joysticks = [pg.joystick.Joystick(i) for i in range(pg.joystick.get_count())]
 for j in joysticks: j.init()
+
+fade = Fade()
 
 class Menu:
     def __init__(self):
@@ -43,6 +46,7 @@ class Menu:
         pg.display.set_caption("Astros")
         self.clock = pg.time.Clock()
         self.running = True
+        self.transitioning = False
         pg.mouse.set_visible(False)
         toggle_fullscreen()
 
@@ -53,12 +57,15 @@ class Menu:
                 if event.type == pg.QUIT:
                     self.running = False
                 elif event.type == pg.KEYDOWN:
-                    if event.key == pg.K_RETURN:
-                        self.init_game()
+                    if event.key == pg.K_RETURN and not self.transitioning:
+                        fade.start("out")
+                        self.transitioning = True
                 elif event.type == JOYBUTTONDOWN:
                     if event.button in range(0, 9):
-                        self.init_game()
+                        fade.start("out")
+                        self.transitioning = True
 
+            alpha = fade.update()
             self.screen.fill((0, 0, 0))
 
             colors = ["WHITE", (0,0,0,0)]
@@ -73,8 +80,18 @@ class Menu:
             self.render_surface.blit(title, (title_x, title_y))
             self.render_surface.blit(start, (start_x, title_y + 600))
             self.screen.blit(pg.transform.scale(self.render_surface, self.screen_size),(0, 0))
+            if alpha > 0:
+                fade_surface = pg.Surface((1920, 1080))
+                fade_surface.fill((0, 0, 0))
+                fade_surface.set_alpha(alpha)
+                self.render_surface.blit(fade_surface, (0, 0))
+
             self.crt.render(self.render_surface)
-            self.clock.tick(2)
+            dt = self.clock.tick(60) / 1000
+
+            if self.transitioning and not fade.active:
+                self.init_game()
+                return
 
     def init_game(self):
         game = Game(self.screen, self.screen_size,
@@ -222,9 +239,11 @@ class Game:
         self.cursor_hide_delay = 3000
 
         self.game_over_fx = True
+        fade.start("in")
 
     def run(self, running, clock, screen,
             screen_size, hud_padding, hud_ratio, crt, font):
+        clock.tick()
         while running:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -284,8 +303,8 @@ class Game:
             if not running:
                 break
 
-            screen.fill((0,0,0))
-            dt = clock.get_time()/1000
+            screen.fill((0, 0, 0))
+            dt = clock.tick(self.fps) / 1000
 
             self.update_movement(dt, screen_size)
 
@@ -316,8 +335,18 @@ class Game:
             render = [0,0]
             if self.screen_shake:
                 render = self.ship.taken_damage()
+                if joysticks:
+                    joysticks[0].rumble(0.5, 1, 20)
             if not self.game_over:
                 screen.blit(pg.transform.scale(screen, screen_size), render)
+
+            alpha = fade.update()
+            if alpha > 0:
+                fade_surface = pg.Surface(screen_size)
+                fade_surface.fill((0, 0, 0))
+                fade_surface.set_alpha(alpha)
+                screen.blit(fade_surface, (0, 0))
+
             crt.render(screen)
         pg.quit()
 
@@ -726,7 +755,6 @@ class Game:
             if self.seconds % 48 == 0:
                 self.asteroid_spawn_interval = max(100,self.asteroid_spawn_interval - 10)
                 self.asteroid_spawn_count = min(32, self.asteroid_spawn_count + 1)
-                self.ship.velocity = min(24, int(self.ship.velocity) + 1)
             if self.seconds >= 60:
                 self.level_enemies()
                 self.seconds = 0
