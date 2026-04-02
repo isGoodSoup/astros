@@ -47,11 +47,12 @@ class Menu:
         self.clock = pg.time.Clock()
         self.running = True
         self.transitioning = False
+        self.count = 0
+        self.last_blink = 0
         pg.mouse.set_visible(False)
         toggle_fullscreen()
 
     def run(self):
-        count = 0
         while self.running:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -68,10 +69,15 @@ class Menu:
             alpha = fade.update()
             self.screen.fill((0, 0, 0))
 
-            colors = ["WHITE", (0,0,0,0)]
-            count += 1
+            now = pg.time.get_ticks()
+            if now - self.last_blink > 500:
+                self.count += 1
+                self.last_blink = now
+
+            colors = [(255, 255, 255), (0, 0, 0, 0)]
             title = self.game_font.render("ASTROS<>", True, (255, 220, 50))
-            start = self.text_font.render("Press any key to start", True, colors[count%2])
+            start = self.text_font.render("Press any key to start", True,
+                                          colors[self.count % 2])
             title_y = 200
             self.render_surface.fill((0, 0, 0))
             surface_width, surface_height = self.render_surface.get_size()
@@ -135,11 +141,12 @@ class Game:
         self.joy_axis = [0.0, 0.0]
         self.deadzone = 0.2
 
-        self.hitpoints = Interface("assets/ui/status.png", 0, 40, 40, hud_ratio)
+        self.hitpoints = Interface("assets/ui/status.png", 0, 40, 40,
+            hud_ratio, ['right', 'bottom'])
         self.shield = Interface("assets/ui/shield_bar.png", 0, 40, 40,
-            hud_ratio, 33, [0, -50])
+            hud_ratio, ['right', 'bottom'], 33, [0, -50])
         self.xp = Interface("assets/ui/xp.png", -1, 40, 40,
-            hud_ratio, 33, [0,-75])
+            hud_ratio, ['right', 'bottom'], 33, [0,-75])
 
         self.anim_frame_base = 0
         self.anim_frame_overlay = 0
@@ -237,6 +244,8 @@ class Game:
         self.last_cursor_pos = pg.mouse.get_pos()
         self.last_move_time = pg.time.get_ticks()
         self.cursor_hide_delay = 3000
+
+        self.tutorial_active = True
 
         self.game_over_fx = True
         fade.start("in")
@@ -518,18 +527,18 @@ class Game:
             hitpoints_frame = (total_frames - (self.ship.hitpoints * total_frames)
                         // self.ship.max_hitpoints)
             hitpoints_frame = max(0, min(hitpoints_frame, total_frames))
-        self.hitpoints.update(self.ship, hud_ratio, hitpoints_frame, screen)
+        self.hitpoints.update(self.ship, hud_ratio, ['right', 'bottom'], hitpoints_frame, screen)
 
         shield_total_frames = len(self.shield.frames) - 1
         shield_frame = (shield_total_frames - (self.ship.shield * shield_total_frames)
                         // self.ship.max_shield)
         shield_frame = max(0, min(shield_total_frames, shield_frame))
-        self.shield.update(self.ship, hud_ratio, shield_frame, screen)
+        self.shield.update(self.ship, hud_ratio, ['right', 'bottom'], shield_frame, screen)
 
         experience_total_frames = len(self.xp.frames) - 1
         xp_frame = (experience_total_frames - (experience_total_frames * self.ship.xp)
                     // self.ship.xp_to_next_level)
-        self.xp.update(self.ship, hud_ratio, xp_frame, screen)
+        self.xp.update(self.ship, hud_ratio, ['right', 'bottom'], xp_frame, screen)
 
     def update_game(self, screen_size, hud_padding):
         for i in self.stars:
@@ -539,43 +548,44 @@ class Game:
                 i[1] = 0
                 i[0] = random.randint(0, screen_size[0])
 
-        current_time = pg.time.get_ticks()
-        if current_time - self.last_celestial_spawn > self.celestial_spawn_interval:
-            self.last_celestial_spawn = current_time
-            for _ in range(random.randint(1, 4)):
-                for _ in range(10):
-                    new_celestial = random_celestial()
-                    if new_celestial and is_valid_spawn(new_celestial,
-                                                        self.celestials,
-                                                        200):
-                        self.celestials.add(new_celestial)
-                        break
+        if not self.tutorial_active:
+            current_time = pg.time.get_ticks()
+            if current_time - self.last_celestial_spawn > self.celestial_spawn_interval:
+                self.last_celestial_spawn = current_time
+                for _ in range(random.randint(1, 4)):
+                    for _ in range(10):
+                        new_celestial = random_celestial()
+                        if new_celestial and is_valid_spawn(new_celestial,
+                                                            self.celestials,
+                                                            200):
+                            self.celestials.add(new_celestial)
+                            break
 
-        if current_time - self.last_upgrade_spawn > self.upgrade_spawn_interval:
-            self.last_upgrade_spawn = current_time
+            if current_time - self.last_upgrade_spawn > self.upgrade_spawn_interval:
+                self.last_upgrade_spawn = current_time
 
-            for _ in range(random.randint(1, 2)):
-                x = random.randint(0, screen_size[0])
-                y = random.randint(-200, -50)
+                for _ in range(random.randint(1, 2)):
+                    x = random.randint(0, screen_size[0])
+                    y = random.randint(-200, -50)
 
-                self.last_upgrade = upgd.get_upgrade()
-                upgrade = f"assets/{self.last_upgrade}.png"
-                new_upgrade = Upgrade(upgrade, x, y)
-                self.upgrades.add(new_upgrade)  # type: ignore
+                    self.last_upgrade = upgd.get_upgrade()
+                    upgrade = f"assets/{self.last_upgrade}.png"
+                    new_upgrade = Upgrade(upgrade, x, y)
+                    self.upgrades.add(new_upgrade)  # type: ignore
 
-        current_time = pg.time.get_ticks()
-        if current_time - self.last_asteroid_spawn > self.asteroid_spawn_interval:
-            self.last_asteroid_spawn = current_time
-            for _ in range(random.randint(1, self.asteroid_spawn_count)):
-                for _ in range(10):
-                    new_asteroid = Asteroid(screen_size[0], min_y=-200,
-                                            max_y=-50)
-                    too_close = any(
-                        abs(new_asteroid.rect.y - m.rect.y) < 60 for m in
-                        self.asteroids)
-                    if not too_close:
-                        self.asteroids.add(new_asteroid)  # type: ignore
-                        break
+            current_time = pg.time.get_ticks()
+            if current_time - self.last_asteroid_spawn > self.asteroid_spawn_interval:
+                self.last_asteroid_spawn = current_time
+                for _ in range(random.randint(1, self.asteroid_spawn_count)):
+                    for _ in range(10):
+                        new_asteroid = Asteroid(screen_size[0], min_y=-200,
+                                                max_y=-50)
+                        too_close = any(
+                            abs(new_asteroid.rect.y - m.rect.y) < 60 for m in
+                            self.asteroids)
+                        if not too_close:
+                            self.asteroids.add(new_asteroid)  # type: ignore
+                            break
 
         now = pg.time.get_ticks()
         if now - self.last_update_base > self.cooldown_base:
@@ -804,6 +814,7 @@ class Game:
         self.milliseconds = 0
         self.stopwatch = None
         self.game_over = False
+        self.tutorial_active = False
 
         if self.play_sound:
             pg.mixer.music.play(-1)
