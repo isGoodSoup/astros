@@ -73,3 +73,18 @@ class Ship(pygame.sprite.Sprite):
         self.perk_points += 1
         self.xp_to_next_level = int(self.xp_to_next_level * self.xp_growth)
         sound[3].play()
+
+    def get_stats(self):
+        return {
+            "level": self.level,
+            "xp": self.xp,
+            "perk_points": self.perk_points,
+            "hitpoints": self.hitpoints,
+            "shield": self.shield,
+            "damage": self.damage,
+            "crit_chance": self.crit_chance,
+            "crit_multiplier": self.crit_multiplier,
+            "velocity": self.velocity,
+            "max_hitpoints": self.max_hitpoints,
+            "max_shield": self.max_shield,
+        }

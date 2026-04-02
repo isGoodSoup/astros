@@ -38,7 +38,7 @@ class Menu:
         self.crt.prog['curvature'].value = 0.7
         self.font = "assets/ui/PressStart2P.ttf"
         self.cursor_sprite = pg.image.load("assets/ui/cursor.png")
-        self.game_font = pg.font.Font(self.font, 80)
+        self.game_font = pg.font.Font(self.font, 96)
         self.text_font = pg.font.Font(self.font, 24)
         pg.display.set_caption("Astros")
         self.clock = pg.time.Clock()
@@ -63,7 +63,7 @@ class Menu:
 
             colors = ["WHITE", (0,0,0,0)]
             count += 1
-            title = self.game_font.render("ASTROS", True, (255, 220, 50))
+            title = self.game_font.render("ASTROS<>", True, (255, 220, 50))
             start = self.text_font.render("Press any key to start", True, colors[count%2])
             title_y = 200
             self.render_surface.fill((0, 0, 0))
@@ -221,6 +221,8 @@ class Game:
         self.last_cursor_pos = pg.mouse.get_pos()
         self.last_move_time = pg.time.get_ticks()
         self.cursor_hide_delay = 3000
+
+        self.game_over_fx = True
 
     def run(self, running, clock, screen,
             screen_size, hud_padding, hud_ratio, crt, font):
@@ -750,17 +752,25 @@ class Game:
             self.cursor_visible = True
 
     def reset(self, screen_size):
+        saved_stats = self.ship.get_stats()
+
         self.projectiles.empty()
         self.asteroids.empty()
         self.explosions.empty()
+        self.upgrades.empty()
+        self.floating_numbers.empty()
+        self.particles.clear()
+
         framew = self.sprite_sheet.sheet.get_width() // self.cols
         frameh = self.sprite_sheet.sheet.get_height()
-        self.ship = Ship(self.sprite_sheet, 0, 0, self.frame,
-                         framew, frameh, columns=self.cols)
-        self.ship_alive = True
-        self.ship_x = screen_size[0] // 2 - framew // 2 - 25
-        self.ship_y = screen_size[1] // 2 + 200
+        self.ship.rect.topleft = (screen_size[0] // 2 - framew // 2 - 25,
+                                  screen_size[1] // 2 + 200)
+        self.ship.hitbox.center = self.ship.rect.center
 
+        for attr, value in saved_stats.items():
+            setattr(self.ship, attr, value)
+
+        self.ship_alive = True
         self.frame = 0
         self.last_update = pg.time.get_ticks()
         self.last_asteroid_spawn = 0
@@ -772,6 +782,7 @@ class Game:
         self.milliseconds = 0
         self.stopwatch = None
         self.game_over = False
+
         if self.play_sound:
             pg.mixer.music.play(-1)
 
@@ -786,6 +797,7 @@ class Game:
 
         if self.play_sound:
             self.sounds[-1].play(1)
+            self.game_over_fx = False
 
         if self.score > self.high_score:
             self.high_score = self.score
