@@ -2,6 +2,7 @@ import random
 
 import pygame
 
+from scripts.proj import Projectile
 from scripts.sheet import SpriteSheet
 
 class Ship(pygame.sprite.Sprite):
@@ -13,7 +14,7 @@ class Ship(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=(x, y))
         self.hitbox = self.rect.inflate(self.rect.width * -0.6,
                                         self.rect.height * -0.6)
-        self.velocity = 12
+        self.velocity = 0.5
         self.direction = "idle"
         self.shooting = False
         self.moving = False
@@ -40,6 +41,18 @@ class Ship(pygame.sprite.Sprite):
     def update_position(self, x, y):
         self.rect.topleft = (x, y)
         self.hitbox.center = self.rect.center
+
+    def shoot(self, base, last_shot_time, shot_cooldown, can_play, sound):
+        projectiles = pygame.sprite.Group()
+        current_time = pygame.time.get_ticks()
+        self.shooting = False
+        if current_time - last_shot_time >= shot_cooldown:
+            self.shooting = True
+            projectile = Projectile(self.rect.centerx, self.rect.top)
+            projectiles.add(projectile) # type: ignore
+            if can_play:
+                sound[0].play()
+        return projectiles
 
     def taken_damage(self):
         return [random.randint(0,10) - 4, random.randint(0,10) - 4]

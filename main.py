@@ -1,5 +1,5 @@
 import pygame as pg
-from pygame.constants import OPENGL, DOUBLEBUF
+from pygame.constants import *
 from pygame.display import toggle_fullscreen
 
 from scripts import upgd
@@ -11,13 +11,16 @@ from scripts.floaty import FloatingNumber
 from scripts.hud import Interface
 from scripts.impact import ImpactFrame
 from scripts.particle import Particle
-from scripts.proj import Projectile
 from scripts.sheet import SpriteSheet
 from scripts.ship import Ship
 from scripts.skill import SkillManager
 from scripts.skill_tab import Tab
 from scripts.soundlib import load_sounds, load_ost
 from scripts.upgd import Upgrade
+
+pg.joystick.init()
+joysticks = [pg.joystick.Joystick(i) for i in range(pg.joystick.get_count())]
+for j in joysticks: j.init()
 
 class Menu:
     def __init__(self):
@@ -51,19 +54,17 @@ class Menu:
                     self.running = False
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_RETURN:
-                        game = Game(self.screen, self.screen_size,
-                                    self.hud_ratio, self.text_font)
-                        game.run(self.running, self.clock, self.screen, self.screen_size,
-                                 self.hud_padding, self.hud_ratio, self.crt, self.text_font)
-                    elif event.key == pg.K_ESCAPE:
-                        self.running = False
+                        self.init_game()
+                elif event.type == JOYBUTTONDOWN:
+                    if event.button in range(0, 9):
+                        self.init_game()
 
             self.screen.fill((0, 0, 0))
 
             colors = ["WHITE", (0,0,0,0)]
             count += 1
             title = self.game_font.render("ASTROS", True, (255, 220, 50))
-            start = self.text_font.render("Press Enter", True, colors[count%2])
+            start = self.text_font.render("Press any key to start", True, colors[count%2])
             title_y = 200
             self.render_surface.fill((0, 0, 0))
             surface_width, surface_height = self.render_surface.get_size()
@@ -74,6 +75,13 @@ class Menu:
             self.screen.blit(pg.transform.scale(self.render_surface, self.screen_size),(0, 0))
             self.crt.render(self.render_surface)
             self.clock.tick(2)
+
+    def init_game(self):
+        game = Game(self.screen, self.screen_size,
+                    self.hud_ratio, self.text_font)
+        game.run(self.running, self.clock, self.screen,
+                 self.screen_size, self.hud_padding,
+                 self.hud_ratio, self.crt, self.text_font)
 
 class Game:
     def __init__(self, screen, screen_size, hud_ratio,
@@ -106,7 +114,10 @@ class Game:
         self.ship_alive = True
         self.ship_x = screen_size[0] // 2 - framew // 2 - 25
         self.ship_y = screen_size[1] // 2 + 200
+        self.ship_pos = [self.ship_x, self.ship_y]
         self.base = None
+        self.joy_axis = [0.0, 0.0]
+        self.deadzone = 0.2
 
         self.hitpoints = Interface("assets/ui/status.png", 0, 40, 40, hud_ratio)
         self.shield = Interface("assets/ui/shield_bar.png", 0, 40, 40,
@@ -130,6 +141,7 @@ class Game:
         self.last_update_right = pg.time.get_ticks()
         self.last_direction = None
         self.last_time = pg.time.get_ticks()
+        self.direction_set = None
 
         self.frames = []
         for i in range(self.cols):
@@ -250,15 +262,29 @@ class Game:
                         else:
                             pg.mixer.music.play(-1)
 
-                elif event.type == pygame.MOUSEBUTTONDOWN:
+                elif event.type == pg.MOUSEBUTTONDOWN:
                     for skill in self.skills.skills:
-                        if skill.is_hovered(pygame.mouse.get_pos()):
+                        if skill.is_hovered(pg.mouse.get_pos()):
                             self.skills.unlock_or_upgrade(skill, self.ship)
+
+                elif event.type == JOYBUTTONDOWN:
+                    if event.button == 0:
+                        self.projectiles = self.ship.shoot(self.base, self.last_shot_time,
+                                                           self.shot_cooldown,self.play_sound, self.sounds)
+                    if event.button == 1:
+                        self.skill_tab.active = not self.skill_tab.active
+                        self.stats_tab.active = not self.stats_tab.active
+
+                elif event.type == JOYAXISMOTION:
+                    self.joy_axis[event.axis] = (
+                        event.value) if abs(event.value) > self.deadzone else 0.0
+
             if not running:
                 break
 
-            clock.tick(self.fps)
             screen.fill((0,0,0))
+            dt = clock.get_time()/1000
+            self.update_controller(dt)
 
             mouse_pos = pg.mouse.get_pos()
             self.hide_cursor(mouse_pos)
@@ -267,6 +293,7 @@ class Game:
                 self.cursor_visible = False
 
             if not self.pause and not self.game_over:
+                self.update_movement(screen_size, dt)
                 self.update_game(screen_size, hud_padding)
                 self.update_time()
 
@@ -291,6 +318,49 @@ class Game:
                 screen.blit(pg.transform.scale(screen, screen_size), render)
             crt.render(screen)
         pg.quit()
+
+    def update_movement(self, screen_size, delta):
+        self.ship.moving = False
+        self.direction_set = False
+        key_pressed = pg.key.get_pressed()
+        if key_pressed[K_LEFT] and self.ship_x > 0:
+            self.ship_x -= self.ship.velocity * delta * 60
+            self.ship.direction = "left"
+            self.ship.moving = True
+            self.direction_set = True
+
+        elif (key_pressed[K_RIGHT] and self.ship_x < screen_size[0] -
+              self.base.copy().get_width()):
+            self.ship_x += self.ship.velocity * delta * 60
+            self.ship.direction = "right"
+            self.ship.moving = True
+            self.direction_set = True
+
+        if key_pressed[K_UP] and self.ship_y > 0:
+            self.ship_y -= self.ship.velocity * delta * 60
+            self.ship.moving = True
+
+        if key_pressed[K_DOWN] and self.ship_y < screen_size[1] - self.ship.image.get_height():
+            self.ship_y += self.ship.velocity * delta * 60
+
+        if key_pressed[K_SPACE]:
+            current_time = pg.time.get_ticks()
+            if current_time - self.last_shot_time >= self.shot_cooldown:
+                self.projectiles = self.ship.shoot(self.base, self.last_shot_time, self.shot_cooldown,
+                                                   self.play_sound, self.sounds)
+                self.last_shot_time = current_time
+
+    def update_controller(self, delta):
+        self.ship_x += self.joy_axis[0] * self.ship.velocity * delta * 60
+        if self.joy_axis[0] > 0:
+            self.ship.direction = "right"
+        elif self.joy_axis[0] < 0:
+            self.ship.direction = "left"
+        else:
+            self.ship.direction = "idle"
+
+        self.ship_y += self.joy_axis[1] * self.ship.velocity * delta * 60
+        self.ship.moving = any(abs(v) > 0 for v in self.joy_axis)
 
     def render(self, screen, font):
         for i in self.stars:
@@ -532,41 +602,8 @@ class Game:
             if particle.timer <= 0:
                 self.particles.remove(particle)
 
-        key_pressed = pg.key.get_pressed()
-        self.ship.moving = False
-        direction_set = False
-        if key_pressed[pg.K_LEFT] and self.ship_x > 0:
-            self.ship_x -= self.ship.velocity
-            self.ship.direction = "left"
-            self.ship.moving = True
-            direction_set = True
-        elif (key_pressed[pg.K_RIGHT] and self.ship_x < screen_size[0]
-              - self.base.copy().get_width()):
-            self.ship_x += self.ship.velocity
-            self.ship.direction = "right"
-            self.ship.moving = True
-            direction_set = True
-        if key_pressed[pg.K_UP] and self.ship_y > 0:
-            self.ship_y -= self.ship.velocity
-            self.ship.moving = True
-        if (key_pressed[pg.K_DOWN] and self.ship_y < screen_size[1]
-                - self.ship.image.get_height()):
-            self.ship_y += self.ship.velocity
-
-        if not direction_set:
+        if not self.direction_set:
             self.ship.direction = "idle"
-
-        if self.ship_alive:
-            self.ship.shooting = False
-            if (key_pressed[pg.K_SPACE] and current_time -
-                    self.last_shot_time >= self.shot_cooldown):
-                self.last_shot_time = current_time
-                self.ship.shooting = True
-                projectile = Projectile(self.ship_x +
-                            self.base.copy().get_width() // 2,self.ship_y)
-                self.projectiles.add(projectile)  # type: ignore
-                if self.play_sound:
-                    self.sounds[0].play()
 
         if self.ship_alive:
             self.ship.update_position(self.ship_x, self.ship_y)
@@ -691,7 +728,7 @@ class Game:
             if self.seconds % 48 == 0:
                 self.asteroid_spawn_interval = max(100,self.asteroid_spawn_interval - 10)
                 self.asteroid_spawn_count = min(32, self.asteroid_spawn_count + 1)
-                self.ship.velocity = min(24, self.ship.velocity + 1)
+                self.ship.velocity = min(24, int(self.ship.velocity) + 1)
             if self.seconds >= 60:
                 self.level_enemies()
                 self.seconds = 0
