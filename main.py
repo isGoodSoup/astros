@@ -204,13 +204,6 @@ class Game:
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_TAB:
                         self.skill_tab.active = not self.skill_tab.active
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        for skill in self.skills.skills:
-                            if skill.is_hovered(pygame.mouse.get_pos()):
-                                if not skill.unlocked:
-                                    self.skills.unlock(skill)
-                                else:
-                                    self.skills.upgrade(skill, self.ship)
                     if event.key == pg.K_a:
                         if event.mod & pg.KMOD_SHIFT:
                             crt.prog['curvature'].value = max(0.0,
@@ -241,6 +234,13 @@ class Game:
                         else:
                             pg.mixer.music.play(-1)
 
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    for skill in self.skills.skills:
+                        if skill.is_hovered(pygame.mouse.get_pos()):
+                            if not skill.unlocked:
+                                self.skills.unlock(skill)
+                            else:
+                                self.skills.upgrade(skill, self.ship)
             if not running:
                 break
 
@@ -318,6 +318,12 @@ class Game:
                 pg.draw.rect(screen, (255, 0, 0), self.ship.hitbox, 2)
 
         self.explosions.draw(screen)
+
+        if self.skill_tab.active:
+            mouse_pos = pg.mouse.get_pos()
+            for skill in self.skills.skills:
+                skill.is_hovered(mouse_pos)
+
         self.skill_tab.render(screen, font, self.ship, self.skills)
 
     @staticmethod
@@ -573,7 +579,14 @@ class Game:
         hits = pg.sprite.groupcollide(self.projectiles, self.asteroids,
                                       True, False)
         for asteroid in hits.values():
-            if random.random() > 0.9:
+            current_time = pg.time.get_ticks()
+            # Expire boost if time passed
+            if current_time > self.ship.maniac_boost_end:
+                self.ship.maniac_boost = 0
+
+            effective_crit = self.ship.crit + self.ship.maniac_boost
+
+            if random.random() < effective_crit:
                 damage = self.ship.crit
                 color = (255, 50, 50)
                 size = 36
@@ -590,6 +603,10 @@ class Game:
                                  self.frame_explode[0])
             self.explosions.add(impact) # type: ignore
             if asteroid[0].hitpoints <= 0:
+                asteroid[0].kill()
+                if maniac_skill := next((s for s in self.skills.get_unlocked()
+                                         if s.name == "Maniac"), None):
+                    maniac_skill.ability.apply(self.ship, maniac_skill.level)
                 explosion = Explosion(asteroid[0].rect.centerx,
                                       asteroid[0].rect.centery,
                                       self.frame_explode)

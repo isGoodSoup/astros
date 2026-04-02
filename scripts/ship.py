@@ -25,6 +25,9 @@ class Ship(pygame.sprite.Sprite):
         self.crit = self.damage * 3
         self.evasion = 0.01
 
+        self.maniac_boost = 0
+        self.maniac_boost_end = 0
+
         self.level = 1
         self.xp = 0
         self.xp_to_next_level = 100

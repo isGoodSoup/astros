@@ -16,7 +16,11 @@ class Skill:
         self.frames = {
             "locked": self.spritesheet.get_image(0, frame_width, frame_height, 4, cols),
             "unlocked": self.spritesheet.get_image(1, frame_width, frame_height, 4, cols),
-            "hover": self.spritesheet.get_image(6, frame_width, frame_height, 4, cols)
+            "unlocked2": self.spritesheet.get_image(2, frame_width, frame_height, 4, cols),
+            "unlocked3": self.spritesheet.get_image(3, frame_width, frame_height, 4, cols),
+            "unlocked4": self.spritesheet.get_image(4, frame_width, frame_height, 4, cols),
+            "hover": self.spritesheet.get_image(5, frame_width, frame_height,4, cols),
+            "unlockable": self.spritesheet.get_image(6, frame_width, frame_height,4, cols)
         }
 
         for lvl in range(1, max_level + 1):
@@ -48,10 +52,15 @@ class Skill:
     def current_frame(self):
         if self.hovered:
             return self.frames["hover"]
-        if self.level > 0:
-            return self.frames.get(f"level{self.level}", self.frames["unlocked"])
+
         if self.unlocked:
+            if self.level > 0:
+                return self.frames.get(f"level{self.level}",self.frames["unlocked"])
             return self.frames["unlocked"]
+
+        if all(parent.level > 0 for parent in self.parents):
+            return self.frames["unlockable"]
+
         return self.frames["locked"]
 
 class SkillManager:
@@ -62,7 +71,7 @@ class SkillManager:
         self.skills.append(skill)
 
     def unlock(self, skill):
-        if self.can_unlock(skill):
+        if self.can_unlock(skill) and not skill.unlocked:
             skill.unlocked = True
 
     def can_unlock(self, skill):
@@ -84,19 +93,28 @@ class SkillManager:
     def build_tree(self, skill_tab):
         explorer = Skill("Explorer", Explorer(), "01_explorer")
         berserk = Skill("Berserk", DamageBoost(), "02_berserk")
+        maniac = Skill("Maniac", Maniac(), "02a_maniac")
+
         survivor = Skill("Survivor", Survival(), "03_survivor")
+
         tank = Skill("Tank", Tank(), "04_tank")
 
         explorer.parents = []
         berserk.parents = [explorer]
+        maniac.parents = [berserk]
+
         survivor.parents = [explorer]
+
         tank.parents = [explorer]
 
         explorer.children = [berserk, survivor, tank]
-        explorer.pos = (skill_tab.padding + 200, skill_tab.padding)
-        first_y = 80
+        berserk.children = [maniac]
 
-        berserk.pos = (explorer.pos[0] - 100, explorer.pos[1] + first_y)
-        survivor.pos = (explorer.pos[0], explorer.pos[1] + first_y)
-        tank.pos = (explorer.pos[0] + 100, explorer.pos[1] + first_y)
-        self.skills = [explorer, berserk, survivor, tank]
+        explorer.pos = (skill_tab.padding + 200, skill_tab.padding)
+        padding = 80
+        berserk.pos = (explorer.pos[0] - 100, explorer.pos[1] + padding)
+        survivor.pos = (explorer.pos[0], explorer.pos[1] + padding)
+        tank.pos = (explorer.pos[0] + 100, explorer.pos[1] + padding)
+
+        maniac.pos = (berserk.pos[0], berserk.pos[1] + padding)
+        self.skills = [explorer, berserk, survivor, tank, maniac]
