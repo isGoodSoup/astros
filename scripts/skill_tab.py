@@ -1,42 +1,37 @@
 import pygame
 
 class Tab(pygame.sprite.Sprite):
-    def __init__(self, scale=4):
+    def __init__(self, image_path, start_pos, content_renderer=None, speed=16, scale=4):
         super().__init__()
-        self.image = pygame.image.load("assets/ui/skill_tab.png")
-        self.image = pygame.transform.scale(self.image, (self.image.get_width() * scale,
-            self.image.get_height() * scale))
-        self.rect = self.image.get_rect()
-        self.start_x = pygame.display.Info().current_w
-        self.x = self.start_x
-        self.y = (pygame.display.Info().current_h // 2 -
-                  self.image.get_height() // 2) - 75
+        self.image = pygame.image.load(image_path).convert_alpha()
+        self.image = pygame.transform.scale(
+            self.image,
+            (self.image.get_width() * scale, self.image.get_height() * scale)
+        )
         self.width = self.image.get_width()
         self.height = self.image.get_height()
-        self.speed = 12
-        self.active = False
 
+        self.rect = self.image.get_rect(topleft=start_pos)
+        self.start_pos = pygame.Vector2(start_pos)
+        self.pos = pygame.Vector2(start_pos)
+        self.target_pos = pygame.Vector2(start_pos)
+        self.speed = speed
+        self.active = False
+        self.content_renderer = content_renderer
         self.padding = 75
 
-    def update(self, hud_padding):
-        if self.active:
-            target_x = (pygame.display.Info().current_w -
-                        self.image.get_width() - hud_padding)
-            if self.x > target_x:
-                self.x -= self.speed
-        else:
-            if self.x < self.start_x:
-                self.x += self.speed
-        self.rect.topleft = (self.x, self.y)
+    def set_target(self, target_pos):
+        self.target_pos = pygame.Vector2(target_pos)
 
-    def render(self, screen, font, ship, skill_manager):
+    def update(self):
+        dest = self.target_pos if self.active else self.start_pos
+        direction = dest - self.pos
+        if direction.length() > 0:
+            move = direction.normalize() * min(self.speed, direction.length()) # type: ignore
+            self.pos += move
+            self.rect.topleft = (round(self.pos.x), round(self.pos.y))
+
+    def render(self, screen, font=None):
         screen.blit(self.image, self.rect)
-        perk_points = font.render(f"Perks: {ship.perk_points}", True,(255, 255, 255))
-        screen.blit(perk_points, (self.x + self.padding/2, self.y + self.padding // 2))
-
-        for skill in skill_manager.skills:
-            x, y = skill.pos
-            frame = pygame.transform.scale(skill.current_frame(), (64, 64))
-            skill.rect.topleft = (self.x + x, self.y + y)
-            screen.blit(frame, skill.rect)
-            screen.blit(skill.icon_image, skill.rect)
+        if self.content_renderer:
+            self.content_renderer(screen, self.rect, font)

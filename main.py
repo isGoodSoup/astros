@@ -52,7 +52,8 @@ class Menu:
                     self.running = False
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_RETURN:
-                        game = Game(self.screen_size, self.hud_ratio)
+                        game = Game(self.screen, self.screen_size,
+                                    self.hud_ratio, self.text_font)
                         game.run(self.running, self.clock, self.screen, self.screen_size,
                                  self.hud_padding, self.hud_ratio, self.crt, self.text_font)
                     elif event.key == pg.K_ESCAPE:
@@ -76,7 +77,8 @@ class Menu:
             self.clock.tick(2)
 
 class Game:
-    def __init__(self, screen_size, hud_ratio):
+    def __init__(self, screen, screen_size, hud_ratio,
+                 game_font):
         self.fps = 60
         self.frame = 0
         self.prev_state = None
@@ -170,7 +172,21 @@ class Game:
         self.survival_bonus = 0
         self.game_over = False
 
-        self.skill_tab = Tab()
+        self.skill_tab = Tab(
+            "assets/ui/skill_tab.png",
+            start_pos=(screen_size[0], 200),
+            content_renderer=self.render_skills_tab
+        )
+        self.skill_tab.set_target(
+            (screen_size[0] - self.skill_tab.width - 100, 200))
+
+        self.stats_tab = Tab(
+            "assets/ui/skill_tab.png",
+            start_pos=(100, screen_size[1]),
+            content_renderer=self.render_stats_tab
+        )
+        self.stats_tab.set_target(
+            (100, screen_size[1] - self.stats_tab.height - 100))
         self.skills = SkillManager()
         self.skills.build_tree(self.skill_tab)
 
@@ -204,6 +220,7 @@ class Game:
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_TAB:
                         self.skill_tab.active = not self.skill_tab.active
+                        self.stats_tab.active = not self.stats_tab.active
                     if event.key == pg.K_a:
                         if event.mod & pg.KMOD_SHIFT:
                             crt.prog['curvature'].value = max(0.0,
@@ -321,7 +338,32 @@ class Game:
             for skill in self.skills.skills:
                 skill.is_hovered(mouse_pos)
 
-        self.skill_tab.render(screen, font, self.ship, self.skills)
+        self.stats_tab.render(screen, font)
+        self.skill_tab.render(screen, font)
+
+    def render_skills_tab(self, screen, rect, game_font):
+        perk_points = game_font.render(f"Perks: {self.ship.perk_points}", True,
+                                       (255, 255, 255))
+        screen.blit(perk_points, (rect.x + 40, rect.y + 40))
+
+        for skill in self.skills.skills:
+            x, y = skill.pos
+            frame = pg.transform.scale(skill.current_frame(), (64, 64))
+            skill.rect.topleft = (rect.x + x, rect.y + y)
+            screen.blit(frame, skill.rect)
+            screen.blit(skill.icon_image, skill.rect)
+
+    def render_stats_tab(self, screen, rect, game_font):
+        stats = [
+            f"HP: {self.ship.hitpoints}/{self.ship.max_hitpoints}",
+            f"Shield: {self.ship.shield}/{self.ship.max_shield}",
+            f"XP: {self.ship.xp}/{self.ship.xp_to_next_level}"
+        ]
+        y_offset = 40
+        for stat in stats:
+            text_surface = game_font.render(stat, True, (255, 255, 255))
+            screen.blit(text_surface, (rect.x + 40, rect.y + y_offset))
+            y_offset += 50
 
     @staticmethod
     def set_hud(screen_size, padding):
@@ -480,7 +522,8 @@ class Game:
         self.explosions.update()
         self.upgrades.update()
         self.floating_numbers.update()
-        self.skill_tab.update(hud_padding)
+        self.skill_tab.update()
+        self.stats_tab.update()
 
         for particle in self.particles[:]:
             particle.update()
