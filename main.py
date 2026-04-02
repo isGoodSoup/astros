@@ -172,6 +172,7 @@ class Game:
 
         self.skill_tab = SkillTab()
         self.skills = SkillManager()
+        self.skills.build_tree(self.skill_tab)
 
         self.play_sound = True
         self.pause = False
@@ -203,6 +204,13 @@ class Game:
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_TAB:
                         self.skill_tab.active = not self.skill_tab.active
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        for skill in self.skills.skills:
+                            if skill.is_hovered(pygame.mouse.get_pos()):
+                                if not skill.unlocked:
+                                    self.skills.unlock(skill)
+                                else:
+                                    self.skills.upgrade(skill, self.ship)
                     if event.key == pg.K_a:
                         if event.mod & pg.KMOD_SHIFT:
                             crt.prog['curvature'].value = max(0.0,
@@ -532,6 +540,11 @@ class Game:
         asteroid_hit = pg.sprite.spritecollideany(self.ship, self.asteroids,# type: ignore
                                                   collided=lambda s,m: s.hitbox.colliderect(m.hitbox))
         if asteroid_hit:
+            if random.random() <= self.ship.evasion:
+                x, y = asteroid_hit.rect.center
+                self.floating_numbers.add(FloatingNumber(x, y,"MISS", color=(255, 255, 100))) # type: ignore
+                return
+
             ship_center_x = self.ship.rect.centerx
             ship_center_y = self.ship.rect.centery
             explosion = Explosion(ship_center_x, ship_center_y,

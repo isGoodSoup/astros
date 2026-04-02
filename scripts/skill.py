@@ -33,10 +33,13 @@ class Skill:
         self.max_level = max_level
         self.unlocked = False
         self.hovered = False
-        self.requirements = []
 
-    def is_hovered(self, mouse):
-        self.hovered = self.rect.collidepoint(mouse.get_pos())
+        self.pos = (0, 0)
+        self.parents = []
+        self.children = []
+
+    def is_hovered(self, mouse_pos):
+        self.hovered = self.rect.collidepoint(mouse_pos)
         return self.hovered
 
     def is_unlocked(self):
@@ -54,8 +57,6 @@ class Skill:
 class SkillManager:
     def __init__(self):
         self.skills = []
-        self.add_skill(Skill("Explorer", Explorer(), "01_explorer"))
-        self.add_skill(Skill("Beserk", DamageBoost(), "02_damage"))
 
     def add_skill(self, skill):
         self.skills.append(skill)
@@ -65,7 +66,7 @@ class SkillManager:
             skill.unlocked = True
 
     def can_unlock(self, skill):
-        return all(req.level > 0 for req in skill.requirements)
+        return all(req.level > 0 for req in skill.parents)
 
     def upgrade(self, skill, ship):
         if ship.perk_points <= 0:
@@ -79,3 +80,23 @@ class SkillManager:
 
     def get_unlocked(self):
         return [s for s in self.skills if s.unlocked]
+
+    def build_tree(self, skill_tab):
+        explorer = Skill("Explorer", Explorer(), "01_explorer")
+        berserk = Skill("Berserk", DamageBoost(), "02_berserk")
+        survivor = Skill("Survivor", Survival(), "03_survivor")
+        tank = Skill("Tank", Tank(), "04_tank")
+
+        explorer.parents = []
+        berserk.parents = [explorer]
+        survivor.parents = [explorer]
+        tank.parents = [explorer]
+
+        explorer.children = [berserk, survivor, tank]
+        explorer.pos = (skill_tab.padding + 200, skill_tab.padding)
+        first_y = 80
+
+        berserk.pos = (explorer.pos[0] - 100, explorer.pos[1] + first_y)
+        survivor.pos = (explorer.pos[0], explorer.pos[1] + first_y)
+        tank.pos = (explorer.pos[0] + 100, explorer.pos[1] + first_y)
+        self.skills = [explorer, berserk, survivor, tank]
