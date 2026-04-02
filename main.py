@@ -581,10 +581,10 @@ class Game:
             if current_time > self.ship.maniac_boost_end:
                 self.ship.maniac_boost = 0
 
-            effective_crit = self.ship.crit + self.ship.maniac_boost
-
-            if random.random() < effective_crit:
-                damage = self.ship.crit
+            effective_crit_chance = (self.ship.crit_chance +
+                                     self.ship.maniac_boost)
+            if random.random() < effective_crit_chance:
+                damage = self.ship.damage * self.ship.crit_multiplier
                 color = (255, 50, 50)
                 size = 36
             else:

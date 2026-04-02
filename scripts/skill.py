@@ -96,32 +96,40 @@ class SkillManager:
     def build_tree(self, skill_tab):
         explorer = Skill("Explorer", Explorer(), "01_explorer")
         berserk = Skill("Berserk", DamageBoost(), "02_berserk")
-        maniac = Skill("Maniac", Maniac(), "02a_maniac")
+        maniac, madness = (Skill("Maniac", Maniac(), "02a_maniac"),
+                           Skill("Madness", Madness(), "02b_madness"))
 
         survivor = Skill("Survivor", Survival(), "03_survivor")
-        adventurer = Skill("Adventurer", Adventurer(), "03a_adventurer")
+        adventurer, pilot = Skill("Adventurer", Adventurer(),
+                                  "03a_adventurer"), Skill("Pilot", Pilot(), "03b_pilot")
 
         tank = Skill("Tank", Tank(), "04_tank")
 
         explorer.parents = []
         berserk.parents = [explorer]
-        maniac.parents = [berserk]
-        adventurer.parents = [survivor]
+        maniac.parents, madness.parents = [berserk], [berserk]
 
         survivor.parents = [explorer]
+        adventurer.parents, pilot.parents = [survivor], [survivor]
 
         tank.parents = [explorer]
 
         explorer.children = [berserk, survivor, tank]
-        berserk.children = [maniac]
-        survivor.children = [adventurer]
+        berserk.children = [maniac, madness]
+        survivor.children = [adventurer, pilot]
 
-        explorer.pos = (skill_tab.padding + 180, skill_tab.padding)
-        padding = 80
-        berserk.pos = (explorer.pos[0] - 120, explorer.pos[1] + padding)
+        explorer.pos = (skill_tab.width // 2, skill_tab.padding)
+        padding = 90
+        berserk.pos = (explorer.pos[0] - 180, explorer.pos[1] + padding)
         survivor.pos = (explorer.pos[0], explorer.pos[1] + padding)
-        tank.pos = (explorer.pos[0] + 120, explorer.pos[1] + padding)
+        tank.pos = (explorer.pos[0] + 180, explorer.pos[1] + padding)
 
-        maniac.pos = (berserk.pos[0], berserk.pos[1] + padding)
-        adventurer.pos = (survivor.pos[0], berserk.pos[1] + padding)
-        self.skills = [explorer, berserk, survivor, tank, maniac, adventurer]
+        pad = 45
+
+        maniac.pos, madness.pos = (berserk.pos[0] - pad, berserk.pos[1] +
+            padding + 25), (berserk.pos[0] + pad, berserk.pos[1] + padding + 25)
+        adventurer.pos, pilot.pos = (survivor.pos[0] - pad, berserk.pos[1] +
+            padding + 25), (survivor.pos[0] + pad, berserk.pos[1] + padding + 25)
+
+        self.skills = [explorer, berserk, survivor, tank, maniac,
+                       madness, adventurer, pilot]

@@ -7,13 +7,13 @@ class SkillTab(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (self.image.get_width() * scale,
             self.image.get_height() * scale))
         self.rect = self.image.get_rect()
-        self.start_x = pygame.display.Info().current_w - 32
+        self.start_x = pygame.display.Info().current_w
         self.x = self.start_x
         self.y = (pygame.display.Info().current_h // 2 -
                   self.image.get_height() // 2) - 75
         self.width = self.image.get_width()
         self.height = self.image.get_height()
-        self.speed = 10
+        self.speed = 12
         self.active = False
 
         self.padding = 75
@@ -31,9 +31,8 @@ class SkillTab(pygame.sprite.Sprite):
 
     def render(self, screen, font, ship, skill_manager):
         screen.blit(self.image, self.rect)
-        perk_points = font.render(f"Perks: {ship.perk_points}", True,
-                                  (255, 255, 255))
-        screen.blit(perk_points, (self.x + self.padding, self.y + self.padding // 2))
+        perk_points = font.render(f"Perks: {ship.perk_points}", True,(255, 255, 255))
+        screen.blit(perk_points, (self.x + self.padding/2, self.y + self.padding // 2))
 
         for skill in skill_manager.skills:
             x, y = skill.pos

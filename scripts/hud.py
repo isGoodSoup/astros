@@ -14,7 +14,7 @@ class Interface(pygame.sprite.Sprite):
         self.offset_x, self.offset_y = offset
 
     def update(self, ship, hud_ratio, frame, screen):
-        frame = min(frame, len(self.frames) - 1)
+        frame = int(min(frame, len(self.frames) - 1))
         self.hud_x = hud_ratio['right'] - self.image.get_width() + self.offset_x
         self.hud_y = hud_ratio['bottom'] - self.image.get_height() + self.offset_y
         screen.blit(self.frames[frame], (self.hud_x, self.hud_y))

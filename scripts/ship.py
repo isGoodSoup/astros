@@ -22,7 +22,8 @@ class Ship(pygame.sprite.Sprite):
         self.hitpoints = self.max_hitpoints
         self.shield = self.max_shield
         self.damage = 4
-        self.crit = self.damage * 3
+        self.crit_chance = 0.1
+        self.crit_multiplier = 3
         self.evasion = 0.01
 
         self.maniac_boost = 0

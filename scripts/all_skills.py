@@ -26,6 +26,12 @@ class Maniac(Ability):
         ship.maniac_boost_end = current_time + 5000
         return [ship.maniac_boost]
 
+class Madness(Ability):
+    @override
+    def apply(self, ship, level):
+        ship.crit_multiplier += ship.crit_multiplier * (level * 0.2)
+        return [ship.crit_multiplier]
+
 class Survival(Ability):
     @override
     def apply(self, ship, level):
@@ -39,6 +45,12 @@ class Adventurer(Ability):
         ship.evasion += 0.02 * level
         ship.speed += 0.05 * level * ship.base_speed
         return [ship.evasion, ship.speed]
+
+class Pilot(Ability):
+    @override
+    def apply(self, ship, level):
+        ship.evasion += 0.03 * level
+        ship.hitpoints += ship.hitpoints * (level * 0.2)
 
 class Tank(Ability):
     @override
