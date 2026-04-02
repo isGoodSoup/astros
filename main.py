@@ -566,9 +566,8 @@ class Game:
                     self.last_direction = "left"
 
                 if now - self.last_update_left > self.cooldown_base:
-                    self.anim_index_left += 1
-                    if self.anim_index_left >= len(frames):
-                        self.anim_index_left = len(frames) - 1
+                    if self.anim_index_left < len(frames) - 1:
+                        self.anim_index_left += 1
                     self.last_update_left = now
                 self.base = frames[self.anim_index_left]
             else:
