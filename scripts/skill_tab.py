@@ -33,7 +33,7 @@ class SkillTab(pygame.sprite.Sprite):
     def render(self, screen, font, ship, skill_manager):
         screen.blit(self.image, self.rect)
         padding = 75
-        perk_points = font.render(f"Perk Points: {ship.perk_points}", True,
+        perk_points = font.render(f"Perks: {ship.perk_points}", True,
                                   (255, 255, 255))
         screen.blit(perk_points, (self.x + padding, self.y + padding // 2))
 

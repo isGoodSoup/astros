@@ -55,6 +55,7 @@ class SkillManager:
     def __init__(self):
         self.skills = []
         self.add_skill(Skill("Explorer", Explorer(), "01_explorer"))
+        self.add_skill(Skill("Beserk", DamageBoost(), "02_damage"))
 
     def add_skill(self, skill):
         self.skills.append(skill)
