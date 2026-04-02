@@ -1,6 +1,6 @@
 import pygame
 
-class SkillTab(pygame.sprite.Sprite):
+class Tab(pygame.sprite.Sprite):
     def __init__(self, scale=4):
         super().__init__()
         self.image = pygame.image.load("assets/ui/skill_tab.png")

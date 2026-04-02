@@ -15,7 +15,7 @@ from scripts.proj import Projectile
 from scripts.sheet import SpriteSheet
 from scripts.ship import Ship
 from scripts.skill import SkillManager
-from scripts.skill_tab import SkillTab
+from scripts.skill_tab import Tab
 from scripts.soundlib import load_sounds, load_ost
 from scripts.upgd import Upgrade
 
@@ -170,7 +170,7 @@ class Game:
         self.survival_bonus = 0
         self.game_over = False
 
-        self.skill_tab = SkillTab()
+        self.skill_tab = Tab()
         self.skills = SkillManager()
         self.skills.build_tree(self.skill_tab)
 
