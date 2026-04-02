@@ -17,6 +17,7 @@ from scripts.ship import Ship
 from scripts.skill import SkillManager
 from scripts.skill_tab import Tab
 from scripts.soundlib import load_sounds, load_ost
+from scripts.tutorial import Tutorial
 from scripts.upgd import Upgrade
 
 pg.joystick.init()
@@ -245,6 +246,7 @@ class Game:
         self.last_move_time = pg.time.get_ticks()
         self.cursor_hide_delay = 3000
 
+        self.tutorial = Tutorial()
         self.tutorial_active = True
 
         self.game_over_fx = True
@@ -326,6 +328,9 @@ class Game:
             if not self.pause and not self.game_over:
                 self.update_game(screen_size, hud_padding)
                 self.update_time()
+
+            if self.tutorial.active:
+                self.tutorial.update(self, dt)
 
             self.render(screen, font)
 
@@ -446,6 +451,9 @@ class Game:
 
         self.stats_tab.render(screen, font)
         self.skill_tab.render(screen, font)
+
+        if self.tutorial.active:
+            self.tutorial.render(screen, font, )
 
     def render_skills_tab(self, screen, rect, game_font):
         perk_points = game_font.render(f"Perks: {self.ship.perk_points}", True,
