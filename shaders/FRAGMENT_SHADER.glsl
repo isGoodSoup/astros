@@ -27,7 +27,7 @@ void main() {
             color = vec4(0.0, 0.0, 0.0, 1.0);
         } else {
             color = vec4(texture(Texture, v_text2).rgb, 1.0);
-            float fv = fract(v_text2.y * float(textureSize(Texture,0).y));
+            float fv = fract(v_text.y * float(textureSize(Texture,0).y));
             fv = min(1.0, 0.8 + 0.5 * min(fv, 1.0-fv));
             color.rgb *= fv;
         }

@@ -41,6 +41,9 @@ class Menu:
         self.crt = CRT(self.screen, style=1, virtual_resolution=(1920, 1080),cpu_only=False)
         self.crt.prog['curvature'].value = 0.7
         self.font = "assets/ui/PressStart2P.ttf"
+        self.logo_img = pygame.image.load("assets/ui/logo.png")
+        self.logo_img = pygame.transform.scale(self.logo_img,
+            (self.logo_img.get_width() * 4, self.logo_img.get_height() * 4))
         self.cursor_sprite = pg.image.load("assets/ui/cursor.png")
         self.game_font = pg.font.Font(self.font, 96)
         self.text_font = pg.font.Font(self.font, 24)
@@ -76,15 +79,14 @@ class Menu:
                 self.last_blink = now
 
             colors = [(255, 255, 255), (0, 0, 0, 0)]
-            title = self.game_font.render("ASTROS<>", True, (255, 220, 50))
             start = self.text_font.render("Press any key to start", True,
                                           colors[self.count % 2])
             title_y = 200
             self.render_surface.fill((0, 0, 0))
             surface_width, surface_height = self.render_surface.get_size()
-            title_x = surface_width // 2 - title.get_width() // 2
+            title_x = surface_width // 2 - self.logo_img.get_width() // 2
             start_x = surface_width // 2 - start.get_width() // 2
-            self.render_surface.blit(title, (title_x, title_y))
+            self.render_surface.blit(self.logo_img, (title_x, title_y))
             self.render_surface.blit(start, (start_x, title_y + 600))
             self.screen.blit(pg.transform.scale(self.render_surface, self.screen_size),(0, 0))
             if alpha > 0:
