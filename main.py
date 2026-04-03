@@ -444,8 +444,7 @@ class Game:
 
     def render(self, screen, font):
         for i in self.stars:
-            pg.draw.circle(screen, (255, 255, 255), (int(i[0]), int(i[1])),
-                           i[2])
+            pg.draw.circle(screen, (255, 255, 255), (int(i[0]), int(i[1])),i[2])
 
         self.celestials.draw(screen)
         self.asteroids.draw(screen)
@@ -766,6 +765,9 @@ class Game:
             impact = ImpactFrame(asteroid[0].rect.centerx,asteroid[0].rect.centery,
                                  self.frame_explode[0])
             self.explosions.add(impact) # type: ignore
+            for _ in range(10):
+                vel = [random.uniform(-2, 2), random.uniform(-2, 2)]
+                self.particles.append(Particle((asteroid[0].rect.centerx, asteroid[0].rect.centery),vel))
             if asteroid[0].hitpoints <= 0:
                 asteroid[0].kill()
                 if maniac_skill := next((s for s in self.skills.get_unlocked()
