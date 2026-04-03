@@ -23,7 +23,8 @@ from scripts.upgd import Upgrade
 pg.joystick.init()
 joysticks = [pg.joystick.Joystick(i) for i in range(pg.joystick.get_count())]
 for j in joysticks: j.init()
-controller = joysticks[0]
+if joysticks:
+    controller = joysticks[0]
 
 fade = Fade()
 
@@ -479,6 +480,17 @@ class Game:
             self.ship.direction = "idle"
         self.ship.moving = movement_x != 0 or movement_y != 0
 
+        if self.ship.moving:
+            if self.ship.tower_boost_applied:
+                self.ship.shield -= self.ship.tower_boost
+                self.ship.tower_boost = 0
+                self.ship.tower_boost_applied = False
+        elif not self.ship.moving:
+            if not self.ship.moving:
+                for skill in self.skills.skills:
+                    if skill.name == "Tower" and skill.unlocked:
+                        skill.ability.apply(self.ship, skill.level)
+
         if key_pressed[K_SPACE]:
             current_time = pg.time.get_ticks()
             if current_time - self.last_shot_time >= self.ship.shot_cooldown:
@@ -549,7 +561,7 @@ class Game:
             f"Ammo: {int(self.ship.ammo)}/{int(self.ship.base_ammo)}",
             f"Level: {int(self.ship.level)}",
             f"XP: {int(self.ship.xp)}/{int(self.ship.xp_to_next_level)}",
-            f"Crit Chance: {int(self.ship.crit_chance)}%",
+            f"Crit Chance: {int(self.ship.crit_chance * 100)}%",
             f"Crit Multiplier: {int(self.ship.crit_multiplier)}",
         ]
         y_offset = 40

@@ -22,6 +22,7 @@ class Ship(pygame.sprite.Sprite):
         self.max_hitpoints = 200
         self.hitpoints = self.max_hitpoints
         self.max_shield = 25
+        self.base_max_shield = self.max_shield
         self.shield = self.max_shield
         self.gun = "beam" # or "missile"
         self.base_damage = 4
@@ -36,17 +37,20 @@ class Ship(pygame.sprite.Sprite):
         self.base_ammo = 100
         self.ammo = self.base_ammo
         self.evasion = 0.01
+        self.shot_cooldown = 300
 
         self.maniac_boost = 0
         self.maniac_boost_end = 0
+
+        self.tower_boost = 0
+        self.tower_boost_end = 0
+        self.tower_boost_applied = False
 
         self.level = 1
         self.xp = 0
         self.xp_to_next_level = 100
         self.perk_points = 0
         self.xp_growth = 1.8
-
-        self.shot_cooldown = 300
 
     def update_damage(self):
         base = self.base_damage * (2 if self.gun == "missile" else 1)
