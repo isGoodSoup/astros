@@ -9,19 +9,18 @@ class FloatingNumber(pygame.sprite.Sprite):
         self.base_image = self.font.render(str(text), True, color)
         self.image = self.base_image.copy()
         self.rect = self.image.get_rect(center=(x, y))
-
         self.start_y = y
-        self.lifetime = lifetime
-        self.start_time = pygame.time.get_ticks()
-
         self.speed = speed
         self.drift_x = random.uniform(-0.5, 0.5)
         self.scale = 1.5
         self.angle = random.uniform(-8, 8)
 
-    def update(self):
-        elapsed = pygame.time.get_ticks() - self.start_time
-        progress = elapsed / self.lifetime
+        self.elapsed = 0
+        self.lifetime = lifetime
+
+    def update(self, delta):
+        self.elapsed += delta * 1000
+        progress = self.elapsed / self.lifetime
 
         if progress >= 1:
             self.kill()

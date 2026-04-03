@@ -224,6 +224,7 @@ class Game:
         self.score = 0
         self.score_multiplier = 1.0
         self.high_score = 0
+        self.active_mults = []
         self.survival_bonus = 0
         self.game_over = False
 
@@ -411,7 +412,7 @@ class Game:
                 self.cursor_visible = False
 
             if not self.pause and not self.game_over:
-                self.update_game(screen_size, hud_padding)
+                self.update_game(dt, screen_size, hud_padding)
                 self.update_time()
 
             if self.tutorial_on:
@@ -644,7 +645,7 @@ class Game:
         ammo_frame = max(0, min(ammo_total_frames, ammo_frame))
         self.ammo.update(self.ship, hud_ratio, ['right', 'bottom'], ammo_frame, screen)
 
-    def update_game(self, screen_size, hud_padding):
+    def update_game(self, delta, screen_size, hud_padding):
         self.ship.hit = False
         for i in self.stars:
             if not self.pause:
@@ -737,7 +738,7 @@ class Game:
         self.upgrades.update()
         self.skill_tab.update()
         self.stats_tab.update()
-        self.floating_numbers.update()
+        self.floating_numbers.update(delta)
 
         for particle in self.particles[:]:
             particle.update()
@@ -761,7 +762,7 @@ class Game:
         self.survival_bonus += 1
         if self.survival_bonus >= 60:
             self.survival_bonus = 0
-            self.score += 1
+            self.score += 1 * self.score_multiplier
 
     def level_enemies(self):
         for asteroid in self.asteroids:
@@ -776,6 +777,12 @@ class Game:
                 x, y = asteroid_hit.rect.center
                 self.floating_numbers.add(FloatingNumber(x, y,"MISS", color=(255, 255, 100))) # type: ignore
                 return
+
+            self.ship.hit = True
+            if self.ship.damage_multiplier > 1.0:
+                x, y = self.ship.rect.centerx, self.ship.rect.top
+                self.floating_numbers.add(FloatingNumber(x, y, "MULT LOSS",color=(255, 0, 0)))  # type: ignore
+                self.ship.damage_multiplier = 1.0
 
             ship_center_x = self.ship.rect.centerx
             ship_center_y = self.ship.rect.centery
@@ -834,8 +841,9 @@ class Game:
 
             if not self.ship.hit:
                 self.ship.damage_multiplier += 0.1
-                damage_per_frame *= self.ship.damage_multiplier
-            else:
+            damage_per_frame *= self.ship.damage_multiplier
+
+            if self.ship.hit:
                 self.ship.damage_multiplier = 1.0
 
             asteroid[0].hitpoints -= damage_per_frame
@@ -843,10 +851,10 @@ class Game:
 
             if not self.ship.hit:
                 mult_x, mult_y = self.ship.rect.centerx, self.ship.rect.top
-                self.floating_numbers.add(FloatingNumber(mult_x, mult_y, f"x{self.ship.damage_multiplier:02}",  # type: ignore
-                                                         color, size))
+                self.add_multiplier(mult_x, mult_y, f"x{self.ship.damage_multiplier:.2f}",
+                                    color=color, font_size=size)
 
-            self.floating_numbers.add(FloatingNumber(x, y, int(damage_per_frame), color, size))  # type: ignore
+            self.floating_numbers.add(FloatingNumber(x, y, int(damage_per_frame), color=color, font_size=size))  # type: ignore
             impact = ImpactFrame(asteroid[0].rect.centerx,asteroid[0].rect.centery,
                                  self.frame_explode[0])
             self.explosions.add(impact) # type: ignore
@@ -862,10 +870,9 @@ class Game:
                                       asteroid[0].rect.centery,
                                       self.frame_explode)
                 self.explosions.add(explosion)  # type: ignore
-                asteroid[0].kill()
                 if self.play_sound:
                     self.sounds[1].play()
-                self.score += self.ship.level * 10
+                self.score += self.ship.level * 10 * self.score_multiplier
                 self.ship.gain_xp(self.formulize(self.ship.level), self.sounds)
 
         upgrade_hit = pg.sprite.spritecollide(self.ship, self.upgrades, False,# type: ignore
@@ -881,6 +888,15 @@ class Game:
                 elif self.last_upgrade == "shield":
                     self.ship.shield = min(self.ship.shield + 10,
                                            self.ship.max_shield)
+
+    def add_multiplier(self, x, y, text, color=(255, 255, 0),font_size=24):
+        offset = 0
+        for fn in self.floating_numbers:
+            if abs(fn.rect.centerx - x) < 50 and abs(fn.rect.centery - y - offset) < 5:
+                offset -= 30
+        self.floating_numbers.add(
+            FloatingNumber(x, y + offset, text, color=color, font_size=font_size) # type: ignore
+        )
 
     def update_time(self):
         current_time = pg.time.get_ticks()

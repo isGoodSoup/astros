@@ -105,7 +105,6 @@ class Ship(pygame.sprite.Sprite):
         self.charges -= 1
 
     def taken_damage(self):
-        self.hit = True
         return [random.randint(0,10) - 4, random.randint(0,10) - 4]
 
     def gain_xp(self, amount, sound):
