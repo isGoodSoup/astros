@@ -54,9 +54,9 @@ class Ship(pygame.sprite.Sprite):
         self.xp_to_next_level = 256
         self.perk_points = 0
         self.xp_growth = 2.0
+        self.credits = 0
 
         self.hit = False
-
     def update_damage(self):
         base = self.base_damage * (2 if self.gun == "missile" else 1)
         self.damage = base * self.damage_multiplier

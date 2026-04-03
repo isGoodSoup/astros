@@ -159,6 +159,7 @@ class Game:
             hud_ratio, ['right', 'bottom'], 33, [0,-175])
         self.ammo = Interface("assets/ui/ammo.png", 0, 11, 40,
             hud_ratio, ['right', 'bottom'], 35, [-160, 0])
+        self.credits = game_font.render(f"{self.ship.credits}€$", True, (255, 200, 0))
 
         self.anim_frame_base = 0
         self.anim_frame_overlay = 0
@@ -404,6 +405,7 @@ class Game:
             dt = clock.tick(self.fps) / 1000
 
             self.update_movement(dt, screen_size)
+            self.update_credits(font)
 
             mouse_pos = pg.mouse.get_pos()
             self.hide_cursor(mouse_pos)
@@ -418,7 +420,7 @@ class Game:
             if self.tutorial_on:
                 self.tutorial.update(self, dt)
 
-            self.render(screen, font)
+            self.render(screen, font, hud_padding)
 
             if not self.game_over:
                 self.update_hud(font, screen, hud_ratio)
@@ -502,7 +504,10 @@ class Game:
                 self.projectiles.add(new_projectiles)
                 self.last_shot_time = current_time
 
-    def render(self, screen, font):
+    def update_credits(self, game_font):
+        self.credits = game_font.render(f"{self.ship.credits}€$", True,(255, 200, 0))
+
+    def render(self, screen, font, hud_padding):
         for i in self.stars:
             pg.draw.circle(screen, (255, 255, 255), (int(i[0]), int(i[1])),i[2])
 
@@ -543,6 +548,8 @@ class Game:
         self.stats_tab.render(screen, font)
         self.skill_tab.render(screen, font)
 
+        screen.blit(self.credits, [hud_padding, 125])
+
         if self.tutorial_on:
             self.tutorial.render(screen, font, )
 
@@ -566,6 +573,7 @@ class Game:
             f"XP: {int(self.ship.xp)}/{int(self.ship.xp_to_next_level)}",
             f"Crit Chance: {int(self.ship.crit_chance * 100)}%",
             f"Crit Multiplier: {int(self.ship.crit_multiplier)}",
+            f"Credits: {int(self.ship.credits)}"
         ]
         y_offset = 40
         for stat in stats:
@@ -864,6 +872,7 @@ class Game:
                 self.particles.append(Particle((asteroid[0].rect.centerx, asteroid[0].rect.centery),vel))
             if asteroid[0].hitpoints <= 0:
                 asteroid[0].kill()
+                self.ship.credits += random.randint(0, 5)
                 if maniac_skill := next((s for s in self.skills.get_unlocked()
                                          if s.name == "Maniac"), None):
                     maniac_skill.ability.apply(self.ship, maniac_skill.level)
