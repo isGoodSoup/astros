@@ -210,7 +210,6 @@ class Game:
         self.last_upgrade_spawn = 0
         self.upgrade_spawn_interval = 24_000
         self.last_shot_time = 0
-        self.shot_cooldown = 300
         self.last_upgrade = None
         self.active_upgrade = None
         self.upgrade_start_time = 0
@@ -341,7 +340,7 @@ class Game:
                 elif event.type == JOYBUTTONDOWN:
                     if event.button == 0:
                         if event.button == 0:
-                            new_projectiles = self.ship.shoot(self.base, self.last_shot_time, self.shot_cooldown,
+                            new_projectiles = self.ship.shoot(self.base, self.last_shot_time, self.ship.shot_cooldown,
                                                               self.play_sound, self.sounds)
                             self.projectiles.add(new_projectiles)
                             self.last_shot_time = pg.time.get_ticks()
@@ -482,8 +481,8 @@ class Game:
 
         if key_pressed[K_SPACE]:
             current_time = pg.time.get_ticks()
-            if current_time - self.last_shot_time >= self.shot_cooldown:
-                new_projectiles = self.ship.shoot(self.base, self.last_shot_time, self.shot_cooldown,
+            if current_time - self.last_shot_time >= self.ship.shot_cooldown:
+                new_projectiles = self.ship.shoot(self.base, self.last_shot_time, self.ship.shot_cooldown,
                                                   self.play_sound, self.sounds)
                 self.projectiles.add(new_projectiles)
                 self.last_shot_time = current_time
