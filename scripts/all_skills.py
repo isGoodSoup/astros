@@ -67,7 +67,7 @@ class Tank(Ability):
 class Tower(Ability):
     @override
     def apply(self, ship, level):
-        boost_amount = int(ship.base_max_shield * 0.5 * level)
+        boost_amount = int(ship.base_max_shield * 1.5 * level)
         if not ship.moving and not ship.tower_boost_applied:
             ship.tower_boost = boost_amount
             ship.shield += boost_amount
