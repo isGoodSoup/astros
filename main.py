@@ -294,7 +294,7 @@ class Game:
                             hud_padding = 0
                         hud_ratio = Game.set_hud(screen_size, hud_padding)
 
-                    if self.game_over and event.key == pg.K_r:
+                    if event.key == pg.K_r and self.game_over:
                         self.reset(screen_size)
 
                     if event.key == pg.K_F2:
@@ -319,6 +319,7 @@ class Game:
                             self.skills.unlock_or_upgrade(skill, self.ship)
 
                 elif event.type == JOYBUTTONDOWN:
+                    print(event)
                     if event.button == 0:
                         if event.button == 0:
                             new_projectiles = self.ship.shoot(self.base, self.last_shot_time, self.shot_cooldown,
@@ -336,6 +337,9 @@ class Game:
                                 self.ship.gun = "beam"
                             else:
                                 self.ship.gun = "missile"
+
+                    if event.button == 3 and self.game_over:
+                        self.reset(screen_size)
 
                     if event.button == 6:
                         running = False
