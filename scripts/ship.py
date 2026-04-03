@@ -15,18 +15,21 @@ class Ship(pygame.sprite.Sprite):
         self.hitbox = self.rect.inflate(self.rect.width * -0.6,
                                         self.rect.height * -0.6)
         self.velocity = 12
-        self.direction = "idle"
+        self.direction = "idle" # or "left", "right"
         self.shooting = False
         self.moving = False
         self.max_hitpoints = 200
         self.hitpoints = self.max_hitpoints
         self.max_shield = 25
         self.shield = self.max_shield
+        self.gun = "beam" # or "missile"
         self.base_damage = 4
         self.damage = self.base_damage
         self.base_crit_chance = 0.05
         self.crit_chance = self.base_crit_chance
         self.crit_multiplier = 3
+        self.base_ammo = 100
+        self.ammo = self.base_ammo
         self.evasion = 0.01
 
         self.maniac_boost = 0
@@ -38,20 +41,29 @@ class Ship(pygame.sprite.Sprite):
         self.perk_points = 0
         self.xp_growth = 1.8
 
+    def update_damage(self):
+        if self.gun == "missile":
+            self.damage = self.base_damage * 2
+        else:
+            self.damage = self.base_damage
+
     def update_position(self, x, y):
         self.rect.topleft = (x, y)
         self.hitbox.center = self.rect.center
 
     def shoot(self, base, last_shot_time, shot_cooldown, can_play, sound):
+        self.update_damage()
         projectiles = pygame.sprite.Group()
         current_time = pygame.time.get_ticks()
         self.shooting = False
         if current_time - last_shot_time >= shot_cooldown:
             self.shooting = True
-            projectile = Projectile(self.rect.centerx, self.rect.top)
+            projectile = Projectile(self.rect.centerx, self.rect.top,
+               "assets/projectile_2.png" if self.gun == "missile" else "assets/projectile.png")
             projectiles.add(projectile) # type: ignore
             if can_play:
                 sound[0].play()
+        self.ammo -= 1
         return projectiles
 
     def taken_damage(self):
@@ -65,7 +77,7 @@ class Ship(pygame.sprite.Sprite):
 
     def level_up(self, sound):
         self.level += 1
-        self.damage += 1
+        self.base_damage += 1
         self.max_hitpoints += 10
         self.hitpoints = self.max_hitpoints
         self.max_shield += 10
