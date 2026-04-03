@@ -25,6 +25,7 @@ class Ship(pygame.sprite.Sprite):
         self.gun = "beam" # or "missile"
         self.base_damage = 4
         self.damage = self.base_damage
+        self.damage_multiplier = 1.0
         self.base_crit_chance = 0.05
         self.crit_chance = self.base_crit_chance
         self.crit_multiplier = 3
@@ -42,10 +43,8 @@ class Ship(pygame.sprite.Sprite):
         self.xp_growth = 1.8
 
     def update_damage(self):
-        if self.gun == "missile":
-            self.damage = self.base_damage * 2
-        else:
-            self.damage = self.base_damage
+        base = self.base_damage * (2 if self.gun == "missile" else 1)
+        self.damage = base * self.damage_multiplier
 
     def update_position(self, x, y):
         self.rect.topleft = (x, y)

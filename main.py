@@ -206,7 +206,6 @@ class Game:
         self.active_upgrade = None
         self.upgrade_start_time = 0
         self.upgrade_duration = 16_000
-        self.base_damage = self.ship.damage
 
         self.score = 0
         self.high_score = 0
@@ -253,7 +252,7 @@ class Game:
         self.cursor_hide_delay = 3000
 
         self.tutorial = Tutorial()
-        self.tutorial_active = True
+        self.tutorial_active = False
 
         self.game_over_fx = True
         fade.start("in")
@@ -272,6 +271,7 @@ class Game:
 
                     if event.key == pg.K_g:
                         if self.ship.base_ammo > 0:
+                            self.sounds[2].play()
                             if self.ship.gun == "missile":
                                 self.ship.gun = "beam"
                             else:
@@ -331,13 +331,14 @@ class Game:
 
                     if event.button == 2:
                         if self.ship.base_ammo > 0:
+                            self.sounds[2].play()
                             if self.ship.gun == "missile":
                                 self.ship.gun = "beam"
                             else:
                                 self.ship.gun = "missile"
 
                     if event.button == 6:
-                        pass
+                        running = False
 
                     if event.button == 7:
                         self.pause = not self.pause
@@ -693,10 +694,10 @@ class Game:
         self.check_collision()
         current_time = pg.time.get_ticks()
         if self.active_upgrade == "power_up":
-            self.ship.damage = self.base_damage * 2
+            self.ship.damage = self.ship.base_damage * self.ship.damage_multiplier * 2
             if current_time - self.upgrade_start_time >= self.upgrade_duration:
                 self.active_upgrade = None
-                self.ship.damage = self.base_damage
+                self.ship.damage = self.ship.base_damage
 
         self.survival_bonus += 1
         if self.survival_bonus >= 60:
