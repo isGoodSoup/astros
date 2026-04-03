@@ -58,9 +58,15 @@ class Ship(pygame.sprite.Sprite):
         self.shooting = False
         if current_time - last_shot_time >= shot_cooldown:
             self.shooting = True
-            projectile = Projectile(self.rect.centerx, self.rect.top,
+            offset = 30
+            left_x = self.rect.centerx - offset
+            right_x = self.rect.centerx + offset
+            y = self.rect.bottom
+            projectile = Projectile(left_x, y,
                "assets/projectile_2.png" if self.gun == "missile" else "assets/projectile.png")
-            projectiles.add(projectile) # type: ignore
+            projectile_2 = Projectile(right_x, y,
+                "assets/projectile_2.png" if self.gun == "missile" else "assets/projectile.png")
+            projectiles.add(projectile, projectile_2) # type: ignore
             if can_play:
                 sound[0].play()
         if self.gun == "missile":

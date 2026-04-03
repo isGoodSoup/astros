@@ -132,7 +132,7 @@ class Game:
         self.floating_numbers = pg.sprite.Group()
         self.particles = []
 
-        self.cols = 12
+        self.cols = 9
         self.explosion_frames = 7
         self.sprite_sheet = SpriteSheet("assets/ship.png")
         self.explosion_sheet = SpriteSheet("assets/explosion.png")
@@ -149,10 +149,12 @@ class Game:
 
         self.hitpoints = Interface("assets/ui/status.png", 0, 40, 40,
             hud_ratio, ['right', 'bottom'])
-        self.shield = Interface("assets/ui/shield_bar.png", 0, 40, 40,
-            hud_ratio, ['right', 'bottom'], 33, [0, -50])
-        self.xp = Interface("assets/ui/xp.png", -1, 40, 40,
-            hud_ratio, ['right', 'bottom'], 33, [0,-75])
+        self.shield = Interface("assets/ui/shield_bar.png", 0, 40, 17,
+            hud_ratio, ['right', 'bottom'], 33, [0, -150])
+        self.xp = Interface("assets/ui/xp.png", -1, 40, 17,
+            hud_ratio, ['right', 'bottom'], 33, [0,-175])
+        self.ammo = Interface("assets/ui/ammo.png", 0, 11, 40,
+            hud_ratio, ['right', 'bottom'], 35, [-160, 0])
 
         self.anim_frame_base = 0
         self.anim_frame_overlay = 0
@@ -181,7 +183,6 @@ class Game:
         self.frame_idle = self.frames[2]
         self.right_frames_movement = self.frames[3:5]
         self.frames_flying = self.frames[5:9]
-        self.frames_shooting = self.frames[9:12]
         self.base = self.frame_idle
 
         framew = self.explosion_sheet.sheet.get_width() // self.explosion_frames
@@ -456,12 +457,6 @@ class Game:
             overlay_frame = self.frames_flying[overlay_index]
             img.blit(overlay_frame, (0, 0))
 
-        if self.ship.shooting:
-            shoot_index = self.anim_frame_overlay % len(
-                self.frames_shooting)
-            shoot_frame = self.frames_shooting[shoot_index]
-            img.blit(shoot_frame, (0, 0))
-
         if self.debugging:
             for i in self.asteroids:
                 pg.draw.rect(screen, (255, 0, 0), i.hitbox, 2)
@@ -489,8 +484,7 @@ class Game:
             self.tutorial.render(screen, font, )
 
     def render_skills_tab(self, screen, rect, game_font):
-        perk_points = game_font.render(f"Perks: {self.ship.perk_points}", True,
-                                       (255, 255, 255))
+        perk_points = game_font.render(f"Perks: {self.ship.perk_points}", True,(255, 255, 255))
         screen.blit(perk_points, (rect.x + 40, rect.y + 40))
 
         for skill in self.skills.skills:
@@ -581,6 +575,12 @@ class Game:
         xp_frame = (experience_total_frames - (experience_total_frames * self.ship.xp)
                     // self.ship.xp_to_next_level)
         self.xp.update(self.ship, hud_ratio, ['right', 'bottom'], xp_frame, screen)
+
+        ammo_total_frames = len(self.ammo.frames) - 1
+        ammo_frame = (shield_total_frames - (self.ship.ammo * ammo_total_frames)
+                    // self.ship.base_ammo)
+        ammo_frame = max(0, min(ammo_total_frames, ammo_frame))
+        self.ammo.update(self.ship, hud_ratio, ['right', 'bottom'], ammo_frame, screen)
 
     def update_game(self, screen_size, hud_padding):
         for i in self.stars:
