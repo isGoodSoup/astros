@@ -49,6 +49,7 @@ class Menu:
         self.text_font = pg.font.Font(self.font, 24)
         pg.display.set_caption("Astros")
         self.clock = pg.time.Clock()
+        self.sounds = load_sounds()
         self.running = True
         self.transitioning = False
         self.count = 0
@@ -63,10 +64,12 @@ class Menu:
                     self.running = False
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_RETURN and not self.transitioning:
+                        self.sounds[2].play()
                         fade.start("out")
                         self.transitioning = True
                 elif event.type == JOYBUTTONDOWN:
                     if event.button in range(0, 9):
+                        self.sounds[2].play()
                         fade.start("out")
                         self.transitioning = True
 
@@ -265,15 +268,25 @@ class Game:
                     if event.key == pg.K_TAB:
                         self.skill_tab.active = not self.skill_tab.active
                         self.stats_tab.active = not self.stats_tab.active
-                    if event.key == pg.K_a:
+
+                    if event.key == pg.K_g:
+                        if self.ship.base_ammo > 0:
+                            if self.ship.gun == "missile":
+                                self.ship.gun = "beam"
+                            else:
+                                self.ship.gun = "missile"
+
+                    if event.key == pg.K_c:
                         if event.mod & pg.KMOD_SHIFT:
                             crt.prog['curvature'].value = max(0.0,
                             crt.prog['curvature'].value - 0.5)
                         else:
                             crt.prog['curvature'].value += 0.5
+
                     if event.key == pg.K_KP_PLUS:
                         hud_padding += 5
                         hud_ratio = Game.set_hud(screen_size, hud_padding)
+
                     if event.key == pg.K_KP_MINUS:
                         hud_padding -= 5
                         if hud_padding < 0:
@@ -282,12 +295,16 @@ class Game:
 
                     if self.game_over and event.key == pg.K_r:
                         self.reset(screen_size)
+
                     if event.key == pg.K_F2:
                         self.debug()
+
                     if event.key == pg.K_ESCAPE:
                         self.pause = not self.pause
+
                     if event.key == pg.K_q and (event.mod & pg.KMOD_CTRL):
                         running = False
+
                     if event.key == pg.K_m:
                         self.play_sound = not self.play_sound
                         if not self.play_sound:
@@ -308,10 +325,24 @@ class Game:
                         self.skill_tab.active = not self.skill_tab.active
                         self.stats_tab.active = not self.stats_tab.active
 
+                    if event.button == 2:
+                        if self.ship.base_ammo > 0:
+                            if self.ship.gun == "missile":
+                                self.ship.gun = "beam"
+                            else:
+                                self.ship.gun = "missile"
+
+                    if event.button == 6:
+                        pass
+
+                    if event.button == 7:
+                        self.pause = not self.pause
+
                 elif event.type == JOYAXISMOTION:
-                    while len(self.joy_axis) <= event.axis:
-                        self.joy_axis.append(0.0)
-                    self.joy_axis[event.axis] = event.value if abs(event.value) > self.deadzone else 0.0
+                    if not self.pause:
+                        while len(self.joy_axis) <= event.axis:
+                            self.joy_axis.append(0.0)
+                        self.joy_axis[event.axis] = event.value if abs(event.value) > self.deadzone else 0.0
 
             if not running:
                 break
@@ -473,6 +504,7 @@ class Game:
         stats = [
             f"Hitpoints: {int(self.ship.hitpoints)}/{int(self.ship.max_hitpoints)}",
             f"Shield: {int(self.ship.shield)}/{int(self.ship.max_shield)}",
+            f"Ammo: {int(self.ship.ammo)}/{int(self.ship.base_ammo)}",
             f"Level: {int(self.ship.level)}",
             f"XP: {int(self.ship.xp)}/{int(self.ship.xp_to_next_level)}",
             f"Crit Chance: {int(self.ship.crit_chance)}%",
