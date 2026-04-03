@@ -63,3 +63,16 @@ class Tank(Ability):
         ship.max_hitpoints += ship.max_hitpoints * (level * 0.7)
         ship.hitpoints = ship.max_hitpoints
         return [ship.hitpoints]
+
+class Tower(Ability):
+    @override
+    def apply(self, ship, level):
+        boost_amount = int(ship.base_max_shield * 0.5 * level)
+        if not ship.moving and not ship.tower_boost_applied:
+            ship.tower_boost = boost_amount
+            ship.shield += boost_amount
+            ship.tower_boost_applied = True
+        elif ship.moving and ship.tower_boost_applied:
+            ship.shield -= ship.tower_boost
+            ship.tower_boost = 0
+            ship.tower_boost_applied = False
