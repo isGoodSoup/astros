@@ -320,8 +320,11 @@ class Game:
 
                 elif event.type == JOYBUTTONDOWN:
                     if event.button == 0:
-                        self.projectiles = self.ship.shoot(self.base, self.last_shot_time,
-                                                           self.shot_cooldown,self.play_sound, self.sounds)
+                        if event.button == 0:
+                            new_projectiles = self.ship.shoot(self.base, self.last_shot_time, self.shot_cooldown,
+                                                              self.play_sound, self.sounds)
+                            self.projectiles.add(new_projectiles)
+                            self.last_shot_time = pg.time.get_ticks()
                     if event.button == 1:
                         self.skill_tab.active = not self.skill_tab.active
                         self.stats_tab.active = not self.stats_tab.active
@@ -434,8 +437,9 @@ class Game:
         if key_pressed[K_SPACE]:
             current_time = pg.time.get_ticks()
             if current_time - self.last_shot_time >= self.shot_cooldown:
-                self.projectiles = self.ship.shoot(self.base, self.last_shot_time, self.shot_cooldown,
-                                                   self.play_sound, self.sounds)
+                new_projectiles = self.ship.shoot(self.base, self.last_shot_time, self.shot_cooldown,
+                                                  self.play_sound, self.sounds)
+                self.projectiles.add(new_projectiles)
                 self.last_shot_time = current_time
 
     def render(self, screen, font):

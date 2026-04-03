@@ -53,25 +53,26 @@ class Ship(pygame.sprite.Sprite):
 
     def shoot(self, base, last_shot_time, shot_cooldown, can_play, sound):
         self.update_damage()
-        projectiles = pygame.sprite.Group()
         current_time = pygame.time.get_ticks()
         self.shooting = False
+        new_projectiles = []
+
         if current_time - last_shot_time >= shot_cooldown:
             self.shooting = True
             offset = 30
             left_x = self.rect.centerx - offset
             right_x = self.rect.centerx + offset
             y = self.rect.bottom
-            projectile = Projectile(left_x, y,
-               "assets/projectile_2.png" if self.gun == "missile" else "assets/projectile.png")
-            projectile_2 = Projectile(right_x, y,
-                "assets/projectile_2.png" if self.gun == "missile" else "assets/projectile.png")
-            projectiles.add(projectile, projectile_2) # type: ignore
+            projectile = Projectile(left_x, y,"assets/projectile_2.png" if self.gun == "missile" else "assets/projectile.png")
+            projectile_2 = Projectile(right_x, y,"assets/projectile_2.png" if self.gun == "missile" else "assets/projectile.png")
+            new_projectiles.extend([projectile, projectile_2])
             if can_play:
                 sound[0].play()
-        if self.gun == "missile":
-            self.ammo -= 1
-        return projectiles
+
+            if self.gun == "missile":
+                self.ammo -= 1
+
+        return new_projectiles
 
     def taken_damage(self):
         return [random.randint(0,10) - 4, random.randint(0,10) - 4]
