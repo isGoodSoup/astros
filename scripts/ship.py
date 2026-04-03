@@ -2,6 +2,7 @@ import random
 
 import pygame
 
+from scripts.explode import Explosion
 from scripts.proj import Projectile
 from scripts.sheet import SpriteSheet
 
@@ -29,6 +30,9 @@ class Ship(pygame.sprite.Sprite):
         self.base_crit_chance = 0.05
         self.crit_chance = self.base_crit_chance
         self.crit_multiplier = 3
+
+        self.base_charges = 3
+        self.charges = self.base_charges
         self.base_ammo = 100
         self.ammo = self.base_ammo
         self.evasion = 0.01
@@ -72,6 +76,22 @@ class Ship(pygame.sprite.Sprite):
                 self.ammo -= 1
 
         return new_projectiles
+
+    def super_charge(self, joysticks, score, explosions, asteroids,
+                             frame_explode, frame_big_explode):
+        if self.charges <= 0:
+            return
+
+        if joysticks:
+            joysticks[0].rumble(0.5, 1.0, 1000)
+        explosions.add(Explosion(self.hitbox.centerx, self.hitbox.centery, frame_big_explode))
+
+        for asteroid in asteroids:
+            asteroid.kill()
+            explosions.add(Explosion(asteroid.rect.centerx, asteroid.rect.centery, frame_explode))
+            score += self.level * 10
+
+        self.charges -= 1
 
     def taken_damage(self):
         return [random.randint(0,10) - 4, random.randint(0,10) - 4]

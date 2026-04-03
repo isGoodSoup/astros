@@ -23,6 +23,7 @@ from scripts.upgd import Upgrade
 pg.joystick.init()
 joysticks = [pg.joystick.Joystick(i) for i in range(pg.joystick.get_count())]
 for j in joysticks: j.init()
+controller = joysticks[0]
 
 fade = Fade()
 
@@ -134,8 +135,10 @@ class Game:
 
         self.cols = 9
         self.explosion_frames = 7
+        self.destroy_all = False
         self.sprite_sheet = SpriteSheet("assets/ship.png")
         self.explosion_sheet = SpriteSheet("assets/explosion.png")
+        self.megaexplosion_sheet = SpriteSheet("assets/explosion_charge.png")
         framew = self.sprite_sheet.sheet.get_width() // self.cols
         frameh = self.sprite_sheet.sheet.get_height()
         self.ship = Ship(self.sprite_sheet, 0, 0, self.frame,
@@ -190,6 +193,12 @@ class Game:
         self.frame_explode = [self.explosion_sheet.get_image(i, framew, frameh, scale=self.scale,
                                                             columns=self.explosion_frames)
                                                             for i in range(self.explosion_frames)]
+
+        framew = self.megaexplosion_sheet.sheet.get_width() // 4
+        frameh = self.megaexplosion_sheet.sheet.get_height()
+        self.frame_big_explode = [self.megaexplosion_sheet.get_image(i, framew, frameh,
+            scale=self.scale, columns=4) for i in range(4)]
+
         self.stars = [[random.randint(0, screen_size[0]),
                        random.randint(0, screen_size[1]),
                        random.randint(1, 3)] for _ in range(100)]
@@ -206,6 +215,11 @@ class Game:
         self.active_upgrade = None
         self.upgrade_start_time = 0
         self.upgrade_duration = 16_000
+
+        self.charge_active = False
+        self.charge_start_time = 0
+        self.charge_duration = 2000
+        self.charge_rumble = 0.3
 
         self.score = 0
         self.high_score = 0
@@ -250,9 +264,10 @@ class Game:
         self.last_cursor_pos = pg.mouse.get_pos()
         self.last_move_time = pg.time.get_ticks()
         self.cursor_hide_delay = 3000
-
-        self.tutorial = Tutorial()
-        self.tutorial_active = False
+        
+        self.tutorial_on = False
+        if self.tutorial_on:
+            self.tutorial = Tutorial()
 
         self.game_over_fx = True
         fade.start("in")
@@ -269,6 +284,11 @@ class Game:
                         self.skill_tab.active = not self.skill_tab.active
                         self.stats_tab.active = not self.stats_tab.active
 
+                    if event.key == pg.K_f:
+                        if self.ship.charges > 0:
+                            self.ship.super_charge(joysticks, self.score,self.explosions,
+                                                   self.asteroids, self.frame_explode, self.frame_big_explode)
+                            self.screen_shake = 50
                     if event.key == pg.K_g:
                         if self.ship.base_ammo > 0:
                             self.sounds[2].play()
@@ -319,7 +339,6 @@ class Game:
                             self.skills.unlock_or_upgrade(skill, self.ship)
 
                 elif event.type == JOYBUTTONDOWN:
-                    print(event)
                     if event.button == 0:
                         if event.button == 0:
                             new_projectiles = self.ship.shoot(self.base, self.last_shot_time, self.shot_cooldown,
@@ -341,11 +360,27 @@ class Game:
                     if event.button == 3 and self.game_over:
                         self.reset(screen_size)
 
+                    if controller.get_button(4) and controller.get_button(5):
+                        if not self.charge_active and self.ship.charges > 0:
+                            self.charge_active = True
+                            self.charge_start_time = pg.time.get_ticks()
+
                     if event.button == 6:
-                        running = False
+                        if self.pause:
+                            running = False
 
                     if event.button == 7:
                         self.pause = not self.pause
+
+                elif event.type == JOYBUTTONUP:
+                    if event.button in (4, 5) and self.charge_active:
+                        self.ship.super_charge(joysticks, self.score,self.explosions,
+                                               self.asteroids, self.frame_explode, self.frame_big_explode)
+                        self.screen_shake = 50
+                        self.charge_active = False
+                        self.sounds[1].play()
+                        if joysticks:
+                            controller.stop_rumble()
 
                 elif event.type == JOYAXISMOTION:
                     if not self.pause:
@@ -355,6 +390,12 @@ class Game:
 
             if not running:
                 break
+
+            if self.charge_active:
+                if joysticks:
+                    controller.rumble(self.charge_rumble, 1,50)
+                charge_elapsed = pg.time.get_ticks() - self.charge_start_time
+                charge_ratio = min(1.0, charge_elapsed / self.charge_duration)
 
             screen.fill((0, 0, 0))
             dt = clock.tick(self.fps) / 1000
@@ -371,7 +412,7 @@ class Game:
                 self.update_game(screen_size, hud_padding)
                 self.update_time()
 
-            if self.tutorial.active:
+            if self.tutorial_on:
                 self.tutorial.update(self, dt)
 
             self.render(screen, font)
@@ -392,7 +433,7 @@ class Game:
             if self.screen_shake:
                 render = self.ship.taken_damage()
                 if joysticks:
-                    joysticks[0].rumble(0.5, 1, 20)
+                    controller.rumble(0.5, 1, 20)
             if not self.game_over:
                 screen.blit(pg.transform.scale(screen, screen_size), render)
 
@@ -488,7 +529,7 @@ class Game:
         self.stats_tab.render(screen, font)
         self.skill_tab.render(screen, font)
 
-        if self.tutorial.active:
+        if self.tutorial_on:
             self.tutorial.render(screen, font, )
 
     def render_skills_tab(self, screen, rect, game_font):
@@ -598,7 +639,7 @@ class Game:
                 i[1] = 0
                 i[0] = random.randint(0, screen_size[0])
 
-        if not self.tutorial_active:
+        if not self.tutorial_on:
             current_time = pg.time.get_ticks()
             if current_time - self.last_celestial_spawn > self.celestial_spawn_interval:
                 self.last_celestial_spawn = current_time
@@ -710,7 +751,7 @@ class Game:
 
     def level_enemies(self):
         for asteroid in self.asteroids:
-            asteroid.hitpoints += 0.8 * self.ship.level
+            asteroid.hitpoints += 10 * self.ship.level
             asteroid.speed += 1
 
     def check_collision(self):
@@ -735,11 +776,14 @@ class Game:
             asteroid_hit.kill()
             if self.play_sound:
                 self.sounds[1].play()
+
             if self.ship.shield > 0:
-                self.ship.shield -= max(1, self.ship.max_shield // 33)
+                self.ship.shield -= max(1, self.ship.max_shield // 33) * self.ship.level
             else:
-                self.ship.hitpoints -= max(1, self.ship.max_hitpoints // 28)
+                self.ship.hitpoints -= max(1, self.ship.max_hitpoints // 28) * self.ship.level
+
             self.screen_shake = 20
+
             if self.ship.hitpoints <= 0:
                 self.game_over = True
                 self.ship.kill()
@@ -867,7 +911,6 @@ class Game:
         self.milliseconds = 0
         self.stopwatch = None
         self.game_over = False
-        self.tutorial_active = False
 
         if self.play_sound:
             pg.mixer.music.play(-1)
@@ -882,7 +925,7 @@ class Game:
         game_over = font.render("GAME OVER", True, colors[self.count % 2])
 
         if self.play_sound:
-            self.sounds[-1].play(1)
+            self.sounds[-1].play()
             self.game_over_fx = False
 
         if self.score > self.high_score:
