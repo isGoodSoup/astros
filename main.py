@@ -788,10 +788,20 @@ class Game:
             if self.play_sound:
                 self.sounds[1].play()
 
+            damage_per_frame = 0
             if self.ship.shield > 0:
-                self.ship.shield -= max(1, self.ship.max_shield // 33) * self.ship.level
+                damage_per_frame = (max(1, self.ship.max_shield // 33) * self.ship.level)
+                self.ship.shield -= damage_per_frame
             else:
-                self.ship.hitpoints -= max(1, self.ship.max_hitpoints // 28) * self.ship.level
+                damage_per_frame = max(1, self.ship.max_hitpoints // 28) * self.ship.level
+                self.ship.hitpoints -= damage_per_frame
+
+            if hasattr(self.ship, "fortified_percent"):
+                if self.ship.fortified_percent > 0:
+                    shield_gain = int(damage_per_frame * self.ship.fortified_percent)
+                    if hasattr(self.ship, "fortified_cap"):
+                        shield_gain = min(shield_gain, self.ship.fortified_cap)
+                    self.ship.shield += shield_gain
 
             self.screen_shake = 20
 
@@ -811,17 +821,17 @@ class Game:
 
             effective_crit_chance = min(1.0, (self.ship.crit_chance/100) + self.ship.maniac_boost)
             if random.random() < effective_crit_chance:
-                damage = self.ship.damage * self.ship.crit_multiplier
+                damage_per_frame = self.ship.damage * self.ship.crit_multiplier
                 color = (255, 50, 50)
                 size = 36
             else:
-                damage = self.ship.damage
+                damage_per_frame = self.ship.damage
                 color = (255, 200, 0)
                 size = 24
 
-            asteroid[0].hitpoints -= damage
+            asteroid[0].hitpoints -= damage_per_frame
             x, y = asteroid[0].rect.center
-            self.floating_numbers.add(FloatingNumber(x, y, int(damage), color=color,font_size=size))  # type: ignore
+            self.floating_numbers.add(FloatingNumber(x, y, int(damage_per_frame), color=color,font_size=size))  # type: ignore
             impact = ImpactFrame(asteroid[0].rect.centerx,asteroid[0].rect.centery,
                                  self.frame_explode[0])
             self.explosions.add(impact) # type: ignore

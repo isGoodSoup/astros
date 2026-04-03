@@ -76,3 +76,10 @@ class Tower(Ability):
             ship.shield -= ship.tower_boost
             ship.tower_boost = 0
             ship.tower_boost_applied = False
+
+class Fortified(Ability):
+    @override
+    def apply(self, ship, level):
+        ship.fortified_percent = 0.1 * level
+        ship.fortified_cap = 50 * level
+        return [ship.fortified_percent, ship.fortified_cap]

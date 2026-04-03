@@ -46,6 +46,9 @@ class Ship(pygame.sprite.Sprite):
         self.tower_boost_end = 0
         self.tower_boost_applied = False
 
+        self.fortified_percent = 0
+        self.fortified_cap = 200
+
         self.level = 1
         self.xp = 0
         self.xp_to_next_level = 100

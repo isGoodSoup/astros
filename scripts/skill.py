@@ -104,7 +104,8 @@ class SkillManager:
                                   "03a_adventurer"), Skill("Pilot", Pilot(), "03b_pilot")
 
         tank = Skill("Tank", Tank(), "04_tank")
-        tower = Skill("Tower", Tower(), "04a_tower")
+        tower, fortified = (Skill("Tower", Tower(), "04a_tower"),
+                            Skill("Fortified", Fortified(), "04b_fortified"))
 
         explorer.parents = []
         berserk.parents = [explorer]
@@ -114,12 +115,12 @@ class SkillManager:
         adventurer.parents, pilot.parents = [survivor], [survivor]
 
         tank.parents = [explorer]
-        tower.parents = [tank]
+        tower.parents, fortified.parents = [tank], [tank]
 
         explorer.children = [berserk, survivor, tank]
         berserk.children = [maniac, madness]
         survivor.children = [adventurer, pilot]
-        tank.children = [tower]
+        tank.children = [tower, fortified]
 
         explorer.pos = (skill_tab.width // 2, skill_tab.padding)
         padding = 90
@@ -133,7 +134,8 @@ class SkillManager:
             padding + 25), (berserk.pos[0] + pad, berserk.pos[1] + padding + 25)
         adventurer.pos, pilot.pos = (survivor.pos[0] - pad, berserk.pos[1] +
             padding + 25), (survivor.pos[0] + pad, berserk.pos[1] + padding + 25)
-        tower.pos = (tank.pos[0] - pad, tank.pos[1] + padding + 25)
+        tower.pos, fortified = ((tank.pos[0] - pad, tank.pos[1] + padding + 25),
+                            (tank.pos[0] + pad, tank.pos[1] + padding + 25))
 
         self.skills = [explorer, berserk, survivor, tank, maniac,
-                       madness, adventurer, pilot, tower]
+                       madness, adventurer, pilot, tower, fortified]
