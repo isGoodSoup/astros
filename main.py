@@ -150,6 +150,7 @@ class Game:
         self.ship_pos = [self.ship_x, self.ship_y]
         self.joy_axis = [0.0, 0.0]
         self.deadzone = 0.2
+        self.motion = [0.0, 0.0]
 
         self.hitpoints = Interface("assets/ui/status.png", 0, 40, 40,
             hud_ratio, ['right', 'bottom'])
@@ -392,6 +393,11 @@ class Game:
                             self.joy_axis.append(0.0)
                         self.joy_axis[event.axis] = event.value if abs(event.value) > self.deadzone else 0.0
 
+                    if event.axis in [3,4]:
+                        while len(self.joy_axis) <= event.axis:
+                            self.motion.append(0.0)
+                            self.motion[event.axis] = event.value if abs(event.value) > self.deadzone else 0.0
+
             if not running:
                 break
 
@@ -426,7 +432,7 @@ class Game:
                 self.update_hud(font, screen, hud_ratio)
 
             if self.cursor_visible:
-                screen.blit(self.cursor_sprite, mouse_pos)
+                screen.blit(self.cursor_sprite, self.motion if joysticks else mouse_pos)
 
             if self.game_over:
                 self.game_lost(font, screen, screen_size)
