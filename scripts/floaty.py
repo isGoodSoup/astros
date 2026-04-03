@@ -1,20 +1,43 @@
+import random
+
 import pygame
 
 class FloatingNumber(pygame.sprite.Sprite):
-    def __init__(self, x, y, text, color=(255, 255, 0), lifetime=800, speed=-1, font_size=24):
+    def __init__(self, x, y, text, color=(255,255,0), lifetime=800, speed=-60, font_size=24):
         super().__init__()
         self.font = pygame.font.Font("assets/ui/PressStart2P.ttf", font_size)
-        self.image = self.font.render(str(text), True, color)
+        self.base_image = self.font.render(str(text), True, color)
+        self.image = self.base_image.copy()
         self.rect = self.image.get_rect(center=(x, y))
+
+        self.start_y = y
         self.lifetime = lifetime
         self.start_time = pygame.time.get_ticks()
+
         self.speed = speed
+        self.drift_x = random.uniform(-0.5, 0.5)
+        self.scale = 1.5
+        self.angle = random.uniform(-8, 8)
 
     def update(self):
-        self.rect.y += self.speed
         elapsed = pygame.time.get_ticks() - self.start_time
-        if elapsed > self.lifetime:
+        progress = elapsed / self.lifetime
+
+        if progress >= 1:
             self.kill()
-        else:
-            alpha = max(0, 255 - int(255 * (elapsed / self.lifetime)))
-            self.image.set_alpha(alpha)
+            return
+
+        ease = 1 - (1 - progress) ** 3
+        self.rect.y = self.start_y + self.speed * ease
+        self.rect.x += self.drift_x
+
+        self.scale = 1.5 - 0.5 * progress
+        self.angle *= 0.95
+
+        self.image = pygame.transform.rotozoom(
+            self.base_image, self.angle, self.scale)
+
+        self.rect = self.image.get_rect(center=self.rect.center)
+
+        alpha = int(255 * (1 - progress**2))
+        self.image.set_alpha(alpha)
