@@ -22,11 +22,15 @@ class Tutorial:
                 self.step += 1
 
         elif self.step == 3:
+            if game.ship.gun != "beam":
+                self.step += 1
+
+        elif self.step == 4:
             self.timer += delta
             if self.timer > 5:
                 self.step += 1
 
-        elif self.step == 4:
+        elif self.step == 5:
             self.active = False
             game.tutorial_active = False
 
@@ -42,12 +46,16 @@ class Tutorial:
                                pygame.display.Info().current_h - 100))
 
         elif self.step == 2:
-            text = font.render("Press TAB / B for the Skill Tree", True,(255,
-                                                                      255, 255))
+            text = font.render("Press TAB / B for the Skill Tree", True,(255,255, 255))
             screen.blit(text, (pygame.display.Info().current_w // 2 - text.get_width() // 2,
                                pygame.display.Info().current_h - 100))
 
         elif self.step == 3:
+            text = font.render("Press G / X to switch gun mode", True, (255, 255, 255))
+            screen.blit(text, (pygame.display.Info().current_w // 2 - text.get_width() // 2,
+                               pygame.display.Info().current_h - 100))
+
+        elif self.step == 4:
             text = font.render("Survive.", True,(255, 255, 255))
             screen.blit(text, (pygame.display.Info().current_w // 2 - text.get_width() // 2,
                                pygame.display.Info().current_h - 100))
