@@ -134,8 +134,8 @@ class SkillManager:
             padding + 25), (berserk.pos[0] + pad, berserk.pos[1] + padding + 25)
         adventurer.pos, pilot.pos = (survivor.pos[0] - pad, berserk.pos[1] +
             padding + 25), (survivor.pos[0] + pad, berserk.pos[1] + padding + 25)
-        tower.pos, fortified = ((tank.pos[0] - pad, tank.pos[1] + padding + 25),
-                            (tank.pos[0] + pad, tank.pos[1] + padding + 25))
+        tower.pos, fortified.pos = ((tank.pos[0] - pad, tank.pos[1] + padding + 25),
+            (tank.pos[0] + pad, tank.pos[1] + padding + 25))
 
         self.skills = [explorer, berserk, survivor, tank, maniac,
                        madness, adventurer, pilot, tower, fortified]

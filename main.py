@@ -222,6 +222,7 @@ class Game:
         self.charge_rumble = 0.3
 
         self.score = 0
+        self.score_multiplier = 1.0
         self.high_score = 0
         self.survival_bonus = 0
         self.game_over = False
@@ -268,6 +269,8 @@ class Game:
         self.tutorial_on = False
         if self.tutorial_on:
             self.tutorial = Tutorial()
+
+        self.delay = 99_999
 
         self.game_over_fx = True
         fade.start("in")
@@ -340,11 +343,10 @@ class Game:
 
                 elif event.type == JOYBUTTONDOWN:
                     if event.button == 0:
-                        if event.button == 0:
-                            new_projectiles = self.ship.shoot(self.base, self.last_shot_time, self.ship.shot_cooldown,
-                                                              self.play_sound, self.sounds)
-                            self.projectiles.add(new_projectiles)
-                            self.last_shot_time = pg.time.get_ticks()
+                        new_projectiles = self.ship.shoot(self.base, self.last_shot_time, self.ship.shot_cooldown,
+                                                          self.play_sound, self.sounds)
+                        self.projectiles.add(new_projectiles)
+                        self.last_shot_time = pg.time.get_ticks()
                     if event.button == 1:
                         self.skill_tab.active = not self.skill_tab.active
                         self.stats_tab.active = not self.stats_tab.active
@@ -643,6 +645,7 @@ class Game:
         self.ammo.update(self.ship, hud_ratio, ['right', 'bottom'], ammo_frame, screen)
 
     def update_game(self, screen_size, hud_padding):
+        self.ship.hit = False
         for i in self.stars:
             if not self.pause:
                 i[1] += 2
@@ -732,9 +735,9 @@ class Game:
         self.projectiles.update()
         self.explosions.update()
         self.upgrades.update()
-        self.floating_numbers.update()
         self.skill_tab.update()
         self.stats_tab.update()
+        self.floating_numbers.update()
 
         for particle in self.particles[:]:
             particle.update()
@@ -829,9 +832,21 @@ class Game:
                 color = (255, 200, 0)
                 size = 24
 
+            if not self.ship.hit:
+                self.ship.damage_multiplier += 0.1
+                damage_per_frame *= self.ship.damage_multiplier
+            else:
+                self.ship.damage_multiplier = 1.0
+
             asteroid[0].hitpoints -= damage_per_frame
             x, y = asteroid[0].rect.center
-            self.floating_numbers.add(FloatingNumber(x, y, int(damage_per_frame), color=color,font_size=size))  # type: ignore
+
+            if not self.ship.hit:
+                mult_x, mult_y = self.ship.rect.centerx, self.ship.rect.top
+                self.floating_numbers.add(FloatingNumber(mult_x, mult_y, f"x{self.ship.damage_multiplier:02}",  # type: ignore
+                                                         color, size))
+
+            self.floating_numbers.add(FloatingNumber(x, y, int(damage_per_frame), color, size))  # type: ignore
             impact = ImpactFrame(asteroid[0].rect.centerx,asteroid[0].rect.centery,
                                  self.frame_explode[0])
             self.explosions.add(impact) # type: ignore
@@ -891,7 +906,7 @@ class Game:
                     self.minutes = 0
                     self.hours += 1
 
-    def formulize(self, level, base_xp=10):
+    def formulize(self, level, base_xp=5):
         score_factor = self.score ** 0.5
         return int(base_xp * (level ** 1.2) + score_factor)
 
