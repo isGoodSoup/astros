@@ -271,7 +271,7 @@ class Game:
         if self.tutorial_on:
             self.tutorial = Tutorial()
 
-        self.delay = 99_999
+        self.delay = 30_000
 
         self.game_over_fx = True
         fade.start("in")
@@ -593,7 +593,7 @@ class Game:
                     [hud_ratio['left'] + hud_ratio['width'] // 2 -
                      self.stopwatch.get_width() // 2, hud_ratio['top']])
 
-        score_text = f"{self.score:05}"
+        score_text = f"{int(self.score):05}"
         high_score = f"{self.high_score:05}"
         score_title = "SCORE"
         high_score_title = "HIGH\nSCORE"
@@ -682,13 +682,14 @@ class Game:
             current_time = pg.time.get_ticks()
             if current_time - self.last_asteroid_spawn > self.asteroid_spawn_interval:
                 self.last_asteroid_spawn = current_time
-                for _ in range(random.randint(1, self.asteroid_spawn_count)):
+                for _ in range(
+                        random.randint(1, self.asteroid_spawn_count)):
                     for _ in range(10):
                         new_asteroid = Asteroid(screen_size[0], min_y=-200,
                                                 max_y=-50)
                         too_close = any(
-                            abs(new_asteroid.rect.y - m.rect.y) < 60 for m in
-                            self.asteroids)
+                            abs(new_asteroid.rect.y - m.rect.y) < 60 for m
+                            in self.asteroids)
                         if not too_close:
                             self.asteroids.add(new_asteroid)  # type: ignore
                             break
@@ -983,7 +984,7 @@ class Game:
         if self.score > self.high_score:
             self.high_score = self.score
 
-        score_text = font.render(f"{self.score:05}", True, "WHITE")
+        score_text = font.render(f"{int(self.score):05}", True, "WHITE")
         stopwatch = self.stopwatch
         game_over_x = self.center(game_over, screen_size)
         game_over_y = screen_size[1] // 2

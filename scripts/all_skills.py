@@ -46,8 +46,8 @@ class Adventurer(Ability):
     @override
     def apply(self, ship, level):
         ship.evasion += 0.02 * level
-        ship.speed += 0.05 * level * ship.base_speed
-        return [ship.evasion, ship.speed]
+        ship.velocity += 0.05 * level
+        return [ship.evasion, ship.velocity]
 
 class Pilot(Ability):
     @override
