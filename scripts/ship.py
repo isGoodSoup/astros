@@ -63,7 +63,8 @@ class Ship(pygame.sprite.Sprite):
             projectiles.add(projectile) # type: ignore
             if can_play:
                 sound[0].play()
-        self.ammo -= 1
+        if self.gun == "missile":
+            self.ammo -= 1
         return projectiles
 
     def taken_damage(self):
