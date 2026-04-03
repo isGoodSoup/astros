@@ -593,8 +593,8 @@ class Game:
                     [hud_ratio['left'] + hud_ratio['width'] // 2 -
                      self.stopwatch.get_width() // 2, hud_ratio['top']])
 
-        score_text = f"{int(self.score):05}"
-        high_score = f"{self.high_score:05}"
+        score_text = f"{int(self.score):06}"
+        high_score = f"{int(self.high_score):06}"
         score_title = "SCORE"
         high_score_title = "HIGH\nSCORE"
 
@@ -841,7 +841,7 @@ class Game:
                 size = 24
 
             if not self.ship.hit:
-                self.ship.damage_multiplier += 0.1
+                self.ship.damage_multiplier += 0.01
             damage_per_frame *= self.ship.damage_multiplier
 
             if self.ship.hit:
@@ -873,6 +873,7 @@ class Game:
                 self.explosions.add(explosion)  # type: ignore
                 if self.play_sound:
                     self.sounds[1].play()
+                self.score_multiplier = self.ship.damage_multiplier
                 self.score += self.ship.level * 10 * self.score_multiplier
                 self.ship.gain_xp(self.formulize(self.ship.level), self.sounds)
 
