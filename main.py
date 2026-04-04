@@ -151,6 +151,8 @@ class Game:
         self.joy_axis = [0.0, 0.0]
         self.deadzone = 0.2
         self.motion = [0.0, 0.0]
+        self.cursor_pos = [screen_size[0] // 2, screen_size[1] // 2]
+        self.cursor_speed = 1000
 
         self.hitpoints = Interface("assets/ui/status.png", 0, 40, 40,
             hud_ratio, ['right', 'bottom'])
@@ -251,7 +253,6 @@ class Game:
         self.play_sound = True
         self.pause = False
         self.debugging = False
-        self.cursor = True
 
         self.hours = 0
         self.minutes = 0
@@ -388,15 +389,23 @@ class Game:
                             controller.stop_rumble()
 
                 elif event.type == JOYAXISMOTION:
-                    if not self.pause:
+                    val = event.value if abs(event.value) > self.deadzone else 0.0
+                    if event.axis in (0, 1):
                         while len(self.joy_axis) <= event.axis:
                             self.joy_axis.append(0.0)
-                        self.joy_axis[event.axis] = event.value if abs(event.value) > self.deadzone else 0.0
+                        self.joy_axis[event.axis] = val
 
-                    if event.axis in [3,4]:
-                        while len(self.joy_axis) <= event.axis:
-                            self.motion.append(0.0)
-                            self.motion[event.axis] = event.value if abs(event.value) > self.deadzone else 0.0
+                    elif event.axis == 2:
+                        self.motion[0] = self.apply_curve(val)
+                        if val != 0:
+                            self.cursor_visible = True
+                            self.last_move_time = pg.time.get_ticks()
+
+                    elif event.axis == 3:
+                        self.motion[1] = self.apply_curve(val)
+                        if val != 0:
+                            self.cursor_visible = True
+                            self.last_move_time = pg.time.get_ticks()
 
             if not running:
                 break
@@ -409,6 +418,13 @@ class Game:
 
             screen.fill((0, 0, 0))
             dt = clock.tick(self.fps) / 1000
+
+            if joysticks:
+                self.cursor_pos[0] += self.motion[0] * self.cursor_speed * dt
+                self.cursor_pos[1] += self.motion[1] * self.cursor_speed * dt
+
+                self.cursor_pos[0] = max(0, min(screen_size[0],self.cursor_pos[0]))
+                self.cursor_pos[1] = max(0, min(screen_size[1],self.cursor_pos[1]))
 
             self.update_movement(dt, screen_size)
             self.update_credits(font)
@@ -432,7 +448,7 @@ class Game:
                 self.update_hud(font, screen, hud_ratio)
 
             if self.cursor_visible:
-                screen.blit(self.cursor_sprite, self.motion if joysticks else mouse_pos)
+                screen.blit(self.cursor_sprite, self.cursor_pos if joysticks else mouse_pos)
 
             if self.game_over:
                 self.game_lost(font, screen, screen_size)
@@ -512,6 +528,9 @@ class Game:
 
     def update_credits(self, game_font):
         self.credits = game_font.render(f"{self.ship.credits}€$", True,(255, 200, 0))
+
+    def apply_curve(self, v):
+        return v * abs(v)
 
     def render(self, screen, font, hud_padding):
         for i in self.stars:
