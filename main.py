@@ -148,11 +148,14 @@ class Game:
         self.ship_x = screen_size[0] // 2 - framew // 2 - 25
         self.ship_y = screen_size[1] // 2 + 200
         self.ship_pos = [self.ship_x, self.ship_y]
+        self.prev_select = False
         self.joy_axis = [0.0, 0.0]
         self.deadzone = 0.2
         self.motion = [0.0, 0.0]
         self.cursor_pos = [screen_size[0] // 2, screen_size[1] // 2]
         self.cursor_speed = 1000
+        self.selected_skill = None
+        self.last_nav_time = 0
 
         self.hitpoints = Interface("assets/ui/status.png", 0, 40, 40,
             hud_ratio, ['right', 'bottom'])
@@ -291,6 +294,9 @@ class Game:
                         self.skill_tab.active = not self.skill_tab.active
                         self.stats_tab.active = not self.stats_tab.active
 
+                        if self.skill_tab.active and self.skills.skills:
+                            self.selected_skill = self.skills.skills[0]
+
                     if event.key == pg.K_f:
                         if self.ship.charges > 0:
                             self.ship.super_charge(joysticks, self.score,self.explosions,
@@ -371,6 +377,10 @@ class Game:
                             self.charge_active = True
                             self.charge_start_time = pg.time.get_ticks()
 
+                    if event.button == 5:
+                        if self.selected_skill:
+                            self.skills.unlock_or_upgrade(self.selected_skill,self.ship)
+
                     if event.button == 6:
                         if self.pause:
                             running = False
@@ -419,12 +429,7 @@ class Game:
             screen.fill((0, 0, 0))
             dt = clock.tick(self.fps) / 1000
 
-            if joysticks:
-                self.cursor_pos[0] += self.motion[0] * self.cursor_speed * dt
-                self.cursor_pos[1] += self.motion[1] * self.cursor_speed * dt
-
-                self.cursor_pos[0] = max(0, min(screen_size[0],self.cursor_pos[0]))
-                self.cursor_pos[1] = max(0, min(screen_size[1],self.cursor_pos[1]))
+            self.update_controller(screen_size, dt)
 
             self.update_movement(dt, screen_size)
             self.update_credits(font)
@@ -473,6 +478,19 @@ class Game:
 
             crt.render(screen)
         pg.quit()
+
+    def update_controller(self, screen_size, dt):
+        if joysticks:
+            self.cursor_pos[0] += self.motion[0] * self.cursor_speed * dt
+            self.cursor_pos[1] += self.motion[1] * self.cursor_speed * dt
+
+            self.cursor_pos[0] = max(0, min(screen_size[0], self.cursor_pos[0]))
+            self.cursor_pos[1] = max(0, min(screen_size[1], self.cursor_pos[1]))
+
+            now = pg.time.get_ticks()
+
+            axis_x = controller.get_axis(0)
+            axis_y = controller.get_axis(1)
 
     def update_movement(self, delta, screen_size):
         key_pressed = pg.key.get_pressed()
@@ -528,9 +546,6 @@ class Game:
 
     def update_credits(self, game_font):
         self.credits = game_font.render(f"{self.ship.credits}€$", True,(255, 200, 0))
-
-    def apply_curve(self, v):
-        return v * abs(v)
 
     def render(self, screen, font, hud_padding):
         for i in self.stars:
@@ -677,6 +692,40 @@ class Game:
                     // self.ship.base_ammo)
         ammo_frame = max(0, min(ammo_total_frames, ammo_frame))
         self.ammo.update(self.ship, hud_ratio, ['right', 'bottom'], ammo_frame, screen)
+
+    def get_nearest_skill(self, direction):
+        if not self.selected_skill:
+            return None
+
+        cx, cy = self.selected_skill.rect.center
+
+        best = None
+        best_score = float("inf")
+
+        for skill in self.skills.skills:
+            if skill == self.selected_skill:
+                continue
+
+            sx, sy = skill.rect.center
+            dx = sx - cx
+            dy = sy - cy
+
+            if direction == "left" and dx >= 0:
+                continue
+            if direction == "right" and dx <= 0:
+                continue
+            if direction == "up" and dy >= 0:
+                continue
+            if direction == "down" and dy <= 0:
+                continue
+
+            score = abs(dx) + abs(dy) * 1.5 if direction in ["left", "right"]\
+                else abs(dy) + abs(dx) * 1.5
+
+            if score < best_score:
+                best_score = score
+                best = skill
+        return best
 
     def update_game(self, delta, screen_size, hud_padding):
         self.ship.hit = False
@@ -1035,6 +1084,9 @@ class Game:
         if not self.debugging:
             self.debugging = True
             return
+
+    def apply_curve(self, v):
+        return v * abs(v)
 
     def center(self, text, screen_size):
         return screen_size[0] // 2 - text.get_width() // 2
