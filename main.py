@@ -128,6 +128,7 @@ class Game:
 
         self.phases = ["quiet", "asteroids", "hell"]
         self.current_phase = "quiet"
+        self.phase_index = 0
         self.phase_to_sprite = {"quiet": 0, "asteroids": 1,
             "hell": 2}
         self.phase_colors = {"quiet": None, "asteroids": None,
@@ -992,8 +993,9 @@ class Game:
         if self.milliseconds >= 1000:
             self.milliseconds -= 1000
             self.seconds += 1
-            if self.seconds == 20:
-                self.current_phase = self.next_phase()
+            if self.seconds % 20 == 0:
+                self.phase_index = (self.phase_index + 1) % len(self.phases)
+                self.current_phase = self.phases[self.phase_index]
                 if self.current_phase == "asteroids":
                     self.level_enemies()
                 self.stars_speed += 1
@@ -1016,27 +1018,6 @@ class Game:
         overlay.fill((*tint, 0))
 
         surface.blit(overlay, (0, 0), special_flags=pg.BLEND_RGB_ADD)
-
-    def next_phase(self):
-        new_phase = random.choice(self.phases)
-        self.current_phase = new_phase
-        sprite_index = self.phase_to_sprite[new_phase]
-        self.new_phase(sprite_index)
-        return new_phase
-
-    def new_phase(self, index):
-        sheet = self.ship_sprite[index]
-
-        framew = sheet.sheet.get_width() // self.cols
-        frameh = sheet.sheet.get_height()
-        self.frames = [sheet.get_image(i, framew, frameh, scale=self.scale,columns=self.cols)
-            for i in range(self.cols)]
-
-        self.left_frames_movement = self.frames[0:2]
-        self.frame_idle = self.frames[2]
-        self.right_frames_movement = self.frames[3:5]
-        self.frames_flying = self.frames[5:9]
-        self.base = self.frame_idle
 
     def formulize(self, level, base_xp=5):
         score_factor = self.score ** 0.5
