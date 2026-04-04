@@ -128,6 +128,10 @@ class Game:
 
         self.phases = ["quiet", "asteroids", "hell"]
         self.current_phase = "quiet"
+        self.phase_to_sprite = {"quiet": 0, "asteroids": 1,
+            "hell": 2}
+        self.phase_colors = {"quiet": None, "asteroids": None,
+            "hell": (255, 60, 60)}
 
         self.celestials = pg.sprite.Group()
         self.projectiles = pg.sprite.Group()
@@ -147,7 +151,7 @@ class Game:
         self.megaexplosion_sheet = SpriteSheet("assets/explosion_charge.png")
         framew = self.ship_sprite[0].sheet.get_width() // self.cols
         frameh = self.ship_sprite[0].sheet.get_height()
-        self.ship = Ship(self.ship_sprite, 0, 0, self.frame,
+        self.ship = Ship(self.ship_sprite[0], 0, 0, self.frame,
                          framew, frameh, columns=self.cols)
         self.ship_alive = True
         self.ship_x = screen_size[0] // 2 - framew // 2 - 25
@@ -486,6 +490,7 @@ class Game:
                 fade_surface.set_alpha(alpha)
                 screen.blit(fade_surface, (0, 0))
 
+            self.apply_phase_filter(screen)
             crt.render(screen)
         pg.quit()
 
@@ -572,6 +577,7 @@ class Game:
             particle.draw(screen)
 
         img = self.base.copy()
+
         if self.ship.moving:
             overlay_index = self.anim_frame_overlay % len(self.frames_flying)
             overlay_frame = self.frames_flying[overlay_index]
@@ -986,7 +992,7 @@ class Game:
         if self.milliseconds >= 1000:
             self.milliseconds -= 1000
             self.seconds += 1
-            if self.seconds == 30:
+            if self.seconds == 20:
                 self.current_phase = self.next_phase()
                 if self.current_phase == "asteroids":
                     self.level_enemies()
@@ -998,9 +1004,39 @@ class Game:
                     self.minutes = 0
                     self.hours += 1
 
+    def apply_phase_filter(self, surface):
+        phase_color = self.phase_colors.get(self.current_phase)
+        if not phase_color:
+            return
+
+        intensity = 0.5
+        tint = tuple(int(c * intensity) for c in phase_color)
+
+        overlay = pg.Surface(surface.get_size(), pg.SRCALPHA)
+        overlay.fill((*tint, 0))
+
+        surface.blit(overlay, (0, 0), special_flags=pg.BLEND_RGB_ADD)
+
     def next_phase(self):
-        self.ship_sprite += 1
-        return random.choice(self.phases)
+        new_phase = random.choice(self.phases)
+        self.current_phase = new_phase
+        sprite_index = self.phase_to_sprite[new_phase]
+        self.new_phase(sprite_index)
+        return new_phase
+
+    def new_phase(self, index):
+        sheet = self.ship_sprite[index]
+
+        framew = sheet.sheet.get_width() // self.cols
+        frameh = sheet.sheet.get_height()
+        self.frames = [sheet.get_image(i, framew, frameh, scale=self.scale,columns=self.cols)
+            for i in range(self.cols)]
+
+        self.left_frames_movement = self.frames[0:2]
+        self.frame_idle = self.frames[2]
+        self.right_frames_movement = self.frames[3:5]
+        self.frames_flying = self.frames[5:9]
+        self.base = self.frame_idle
 
     def formulize(self, level, base_xp=5):
         score_factor = self.score ** 0.5
@@ -1027,8 +1063,8 @@ class Game:
         self.floating_numbers.empty()
         self.particles.clear()
 
-        framew = self.ship_sprite.sheet.get_width() // self.cols
-        frameh = self.ship_sprite.sheet.get_height()
+        framew = self.ship_sprite[0].sheet.get_width() // self.cols
+        frameh = self.ship_sprite[0].sheet.get_height()
         self.ship.rect.topleft = (screen_size[0] // 2 - framew // 2 - 25,
                                   screen_size[1] // 2 + 200)
         self.ship.hitbox.center = self.ship.rect.center

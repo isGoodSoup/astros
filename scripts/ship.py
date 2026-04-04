@@ -4,13 +4,12 @@ import pygame
 
 from scripts.explode import Explosion
 from scripts.proj import Projectile
-from scripts.sheet import SpriteSheet
+
 
 class Ship(pygame.sprite.Sprite):
     def __init__(self, sprite_sheet, x, y, frame, width, height, scale=4,
                  columns=1):
         super().__init__()
-        self.sprite_sheet = SpriteSheet("assets/ship.png")
         self.image = sprite_sheet.get_image(frame, width, height, scale, columns)
         self.rect = self.image.get_rect(topleft=(x, y))
         self.hitbox = self.rect.inflate(self.rect.width * -0.6,
