@@ -126,13 +126,14 @@ class Game:
         pg.mixer.music.play(-1)
         pg.mixer.music.set_volume(0.5)
 
-        self.phases = ["quiet", "asteroids", "hell"]
+        self.phases = ["quiet", "asteroids", "boss_fight"]
         self.current_phase = "quiet"
         self.phase_index = 0
         self.phase_to_sprite = {"quiet": 0, "asteroids": 1,
-            "hell": 2}
-        self.phase_colors = {"quiet": None, "asteroids": None,
-            "hell": (255, 60, 60)}
+            "boss_fight": 2}
+
+        self.boss_alive = False
+        self.boss_spawned = False
 
         self.celestials = pg.sprite.Group()
         self.projectiles = pg.sprite.Group()
@@ -491,7 +492,6 @@ class Game:
                 fade_surface.set_alpha(alpha)
                 screen.blit(fade_surface, (0, 0))
 
-            self.apply_phase_filter(screen)
             crt.render(screen)
         pg.quit()
 
@@ -994,11 +994,16 @@ class Game:
             self.milliseconds -= 1000
             self.seconds += 1
             if self.seconds % 20 == 0:
-                self.phase_index = (self.phase_index + 1) % len(self.phases)
-                self.current_phase = self.phases[self.phase_index]
-                if self.current_phase == "asteroids":
-                    self.level_enemies()
-                self.stars_speed += 1
+                if self.current_phase == "boss_fight" and not self.boss_spawned:
+                    self.spawn_boss()
+                    self.boss_alive = True
+                    self.boss_spawned = True
+                else:
+                    self.phase_index = (self.phase_index + 1) % len(self.phases)
+                    self.current_phase = self.phases[self.phase_index]
+                    if self.current_phase == "asteroids":
+                        self.level_enemies()
+                    self.stars_speed += 1
             if self.seconds >= 60:
                 self.seconds = 0
                 self.minutes += 1
@@ -1006,18 +1011,8 @@ class Game:
                     self.minutes = 0
                     self.hours += 1
 
-    def apply_phase_filter(self, surface):
-        phase_color = self.phase_colors.get(self.current_phase)
-        if not phase_color:
-            return
-
-        intensity = 0.5
-        tint = tuple(int(c * intensity) for c in phase_color)
-
-        overlay = pg.Surface(surface.get_size(), pg.SRCALPHA)
-        overlay.fill((*tint, 0))
-
-        surface.blit(overlay, (0, 0), special_flags=pg.BLEND_RGB_ADD)
+    def spawn_boss(self):
+        pass # TODO boss spawning
 
     def formulize(self, level, base_xp=5):
         score_factor = self.score ** 0.5
