@@ -133,6 +133,7 @@ class Game:
         self.upgrades = pg.sprite.Group()
         self.floating_numbers = pg.sprite.Group()
         self.particles = []
+        self.stars_speed = 2
 
         self.cols = 9
         self.explosion_frames = 7
@@ -705,7 +706,7 @@ class Game:
         self.ship.hit = False
         for i in self.stars:
             if not self.pause:
-                i[1] += 2
+                i[1] += self.stars_speed
             if i[1] > screen_size[1]:
                 i[1] = 0
                 i[0] = random.randint(0, screen_size[0])
@@ -973,6 +974,7 @@ class Game:
             self.milliseconds -= 1000
             self.seconds += 1
             if self.seconds % 48 == 0:
+                self.stars_speed += 1
                 self.asteroid_spawn_interval = max(100,self.asteroid_spawn_interval - 10)
                 self.asteroid_spawn_count = min(32, self.asteroid_spawn_count + 1)
             if self.seconds >= 60:
