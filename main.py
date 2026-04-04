@@ -216,6 +216,9 @@ class Game:
         self.last_asteroid_spawn = 0
         self.asteroid_spawn_interval = 600
         self.asteroid_spawn_count = 6
+        self.asteroid_hitpoints = 8
+        self.asteroid_speed = 8
+        self.asteroid_increment_speed = 10
         self.last_upgrade_spawn = 0
         self.upgrade_spawn_interval = 24_000
         self.last_shot_time = 0
@@ -747,6 +750,8 @@ class Game:
                             abs(new_asteroid.rect.y - m.rect.y) < 60 for m
                             in self.asteroids)
                         if not too_close:
+                            new_asteroid.hitpoints = int(new_asteroid.hitpoints * self.asteroid_hitpoints)
+                            new_asteroid.speed = self.asteroid_speed
                             self.asteroids.add(new_asteroid)  # type: ignore
                             break
 
@@ -826,8 +831,8 @@ class Game:
 
     def level_enemies(self):
         for asteroid in self.asteroids:
-            asteroid.hitpoints += 10 * self.ship.level
-            asteroid.speed += 1
+            self.asteroid_hitpoints = 1 + 0.1 * self.ship.level
+            self.asteroid_speed = 1 + 10 * self.ship.level
 
     def check_collision(self):
         asteroid_hit = pg.sprite.spritecollideany(self.ship, self.asteroids,# type: ignore
@@ -973,12 +978,13 @@ class Game:
         if self.milliseconds >= 1000:
             self.milliseconds -= 1000
             self.seconds += 1
-            if self.seconds % 48 == 0:
+            if self.seconds == 30:
+                self.level_enemies()
                 self.stars_speed += 1
                 self.asteroid_spawn_interval = max(100,self.asteroid_spawn_interval - 10)
                 self.asteroid_spawn_count = min(32, self.asteroid_spawn_count + 1)
+
             if self.seconds >= 60:
-                self.level_enemies()
                 self.seconds = 0
                 self.minutes += 1
                 if self.minutes >= 60:
