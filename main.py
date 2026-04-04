@@ -372,6 +372,7 @@ class Game:
                     if event.button == 3 and self.game_over:
                         self.reset(screen_size)
 
+
                     if controller.get_button(4) and controller.get_button(5):
                         if not self.charge_active and self.ship.charges > 0:
                             self.charge_active = True
@@ -384,6 +385,7 @@ class Game:
                     if event.button == 6:
                         if self.pause:
                             running = False
+
 
                     if event.button == 7:
                         self.pause = not self.pause
@@ -581,9 +583,15 @@ class Game:
         self.explosions.draw(screen)
 
         if self.skill_tab.active:
-            mouse_pos = pg.mouse.get_pos()
+            cursor_pos = self.cursor_pos if joysticks else pg.mouse.get_pos()
             for skill in self.skills.skills:
-                skill.is_hovered(mouse_pos)
+                skill.is_hovered(cursor_pos)
+
+            self.selected_skill = None
+            for skill in self.skills.skills:
+                if skill.is_hovered(cursor_pos):
+                    self.selected_skill = skill
+                    break
 
         self.stats_tab.render(screen, font)
         self.skill_tab.render(screen, font)
