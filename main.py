@@ -126,6 +126,9 @@ class Game:
         pg.mixer.music.play(-1)
         pg.mixer.music.set_volume(0.5)
 
+        self.phases = ["quiet", "asteroids", "hell"]
+        self.current_phase = "quiet"
+
         self.celestials = pg.sprite.Group()
         self.projectiles = pg.sprite.Group()
         self.asteroids = pg.sprite.Group()
@@ -138,12 +141,13 @@ class Game:
         self.cols = 9
         self.explosion_frames = 7
         self.destroy_all = False
-        self.sprite_sheet = SpriteSheet("assets/ship.png")
+        self.ship_sprite = [SpriteSheet("assets/ship.png"), SpriteSheet(
+            "assets/ship_v2.png"), SpriteSheet("assets/ship_v3.png")]
         self.explosion_sheet = SpriteSheet("assets/explosion.png")
         self.megaexplosion_sheet = SpriteSheet("assets/explosion_charge.png")
-        framew = self.sprite_sheet.sheet.get_width() // self.cols
-        frameh = self.sprite_sheet.sheet.get_height()
-        self.ship = Ship(self.sprite_sheet, 0, 0, self.frame,
+        framew = self.ship_sprite[0].sheet.get_width() // self.cols
+        frameh = self.ship_sprite[0].sheet.get_height()
+        self.ship = Ship(self.ship_sprite, 0, 0, self.frame,
                          framew, frameh, columns=self.cols)
         self.ship_alive = True
         self.ship_x = screen_size[0] // 2 - framew // 2 - 25
@@ -188,7 +192,7 @@ class Game:
 
         self.frames = []
         for i in range(self.cols):
-            img = self.sprite_sheet.get_image(i, framew, frameh, scale=self.scale,columns=self.cols)
+            img = self.ship_sprite[0].get_image(i, framew, frameh, scale=self.scale, columns=self.cols)
             self.frames.append(img)
 
         self.left_frames_movement = self.frames[0:2]
@@ -558,7 +562,9 @@ class Game:
             pg.draw.circle(screen, (255, 255, 255), (int(i[0]), int(i[1])),i[2])
 
         self.celestials.draw(screen)
-        self.asteroids.draw(screen)
+        if self.current_phase == "asteroids":
+            self.asteroids.draw(screen)
+
         self.projectiles.draw(screen)
         self.upgrades.draw(screen)
         self.floating_numbers.draw(screen)
@@ -577,6 +583,9 @@ class Game:
 
             for u in self.upgrades:
                 pg.draw.rect(screen, (0, 255, 0), u.rect, 2)
+
+            for p in self.projectiles:
+                pg.draw.rect(screen, (0, 0, 255), p.rect, 2)
 
         if self.ship_alive:
             self.ship.rect.topleft = (self.ship_x, self.ship_y)
@@ -739,21 +748,23 @@ class Game:
                     self.upgrades.add(new_upgrade)  # type: ignore
 
             current_time = pg.time.get_ticks()
-            if current_time - self.last_asteroid_spawn > self.asteroid_spawn_interval:
-                self.last_asteroid_spawn = current_time
-                for _ in range(
-                        random.randint(1, self.asteroid_spawn_count)):
-                    for _ in range(10):
-                        new_asteroid = Asteroid(screen_size[0], min_y=-200,
-                                                max_y=-50)
-                        too_close = any(
-                            abs(new_asteroid.rect.y - m.rect.y) < 60 for m
-                            in self.asteroids)
-                        if not too_close:
-                            new_asteroid.hitpoints = int(new_asteroid.hitpoints * self.asteroid_hitpoints)
-                            new_asteroid.speed = self.asteroid_speed
-                            self.asteroids.add(new_asteroid)  # type: ignore
-                            break
+            if self.current_phase == "asteroids":
+                if current_time - self.last_asteroid_spawn > self.asteroid_spawn_interval:
+                    self.last_asteroid_spawn = current_time
+                    for _ in range(
+                            random.randint(1, self.asteroid_spawn_count)):
+                        for _ in range(10):
+                            new_asteroid = Asteroid(screen_size[0], min_y=-200,
+                                                    max_y=-50)
+                            too_close = any(
+                                abs(new_asteroid.rect.y - m.rect.y) < 60 for m
+                                in self.asteroids)
+                            if not too_close:
+                                new_asteroid.hitpoints = int(
+                                    new_asteroid.hitpoints * self.asteroid_hitpoints)
+                                new_asteroid.speed = self.asteroid_speed
+                                self.asteroids.add(new_asteroid)  # type: ignore
+                                break
 
         now = pg.time.get_ticks()
         if now - self.last_update_base > self.cooldown_base:
@@ -797,7 +808,9 @@ class Game:
             self.last_direction = None
 
         self.celestials.update()
-        self.asteroids.update()
+        if self.current_phase == "asteroids":
+            self.asteroids.update()
+
         self.projectiles.update()
         self.explosions.update()
         self.upgrades.update()
@@ -828,11 +841,6 @@ class Game:
         if self.survival_bonus >= 60:
             self.survival_bonus = 0
             self.score += 1 * self.score_multiplier
-
-    def level_enemies(self):
-        for asteroid in self.asteroids:
-            self.asteroid_hitpoints = 1 + 0.1 * self.ship.level
-            self.asteroid_speed = 1 + 10 * self.ship.level
 
     def check_collision(self):
         asteroid_hit = pg.sprite.spritecollideany(self.ship, self.asteroids,# type: ignore
@@ -979,11 +987,10 @@ class Game:
             self.milliseconds -= 1000
             self.seconds += 1
             if self.seconds == 30:
-                self.level_enemies()
+                self.current_phase = self.next_phase()
+                if self.current_phase == "asteroids":
+                    self.level_enemies()
                 self.stars_speed += 1
-                self.asteroid_spawn_interval = max(100,self.asteroid_spawn_interval - 10)
-                self.asteroid_spawn_count = min(32, self.asteroid_spawn_count + 1)
-
             if self.seconds >= 60:
                 self.seconds = 0
                 self.minutes += 1
@@ -991,9 +998,18 @@ class Game:
                     self.minutes = 0
                     self.hours += 1
 
+    def next_phase(self):
+        self.ship_sprite += 1
+        return random.choice(self.phases)
+
     def formulize(self, level, base_xp=5):
         score_factor = self.score ** 0.5
         return int(base_xp * (level ** 1.2) + score_factor)
+
+    def level_enemies(self):
+        for asteroid in self.asteroids:
+            self.asteroid_hitpoints = 1 + 0.1 * self.ship.level
+            self.asteroid_speed = 1 + 10 * self.ship.level
 
     def hide_cursor(self, mouse_pos):
         if mouse_pos != self.last_cursor_pos:
@@ -1011,8 +1027,8 @@ class Game:
         self.floating_numbers.empty()
         self.particles.clear()
 
-        framew = self.sprite_sheet.sheet.get_width() // self.cols
-        frameh = self.sprite_sheet.sheet.get_height()
+        framew = self.ship_sprite.sheet.get_width() // self.cols
+        frameh = self.ship_sprite.sheet.get_height()
         self.ship.rect.topleft = (screen_size[0] // 2 - framew // 2 - 25,
                                   screen_size[1] // 2 + 200)
         self.ship.hitbox.center = self.ship.rect.center
