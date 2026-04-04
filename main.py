@@ -701,40 +701,6 @@ class Game:
         ammo_frame = max(0, min(ammo_total_frames, ammo_frame))
         self.ammo.update(self.ship, hud_ratio, ['right', 'bottom'], ammo_frame, screen)
 
-    def get_nearest_skill(self, direction):
-        if not self.selected_skill:
-            return None
-
-        cx, cy = self.selected_skill.rect.center
-
-        best = None
-        best_score = float("inf")
-
-        for skill in self.skills.skills:
-            if skill == self.selected_skill:
-                continue
-
-            sx, sy = skill.rect.center
-            dx = sx - cx
-            dy = sy - cy
-
-            if direction == "left" and dx >= 0:
-                continue
-            if direction == "right" and dx <= 0:
-                continue
-            if direction == "up" and dy >= 0:
-                continue
-            if direction == "down" and dy <= 0:
-                continue
-
-            score = abs(dx) + abs(dy) * 1.5 if direction in ["left", "right"]\
-                else abs(dy) + abs(dx) * 1.5
-
-            if score < best_score:
-                best_score = score
-                best = skill
-        return best
-
     def update_game(self, delta, screen_size, hud_padding):
         self.ship.hit = False
         for i in self.stars:
@@ -751,8 +717,7 @@ class Game:
                 for _ in range(random.randint(1, 4)):
                     for _ in range(10):
                         new_celestial = random_celestial()
-                        if new_celestial and is_valid_spawn(new_celestial,
-                                                            self.celestials,
+                        if new_celestial and is_valid_spawn(new_celestial, self.celestials,
                                                             200):
                             self.celestials.add(new_celestial)
                             break
@@ -797,15 +762,17 @@ class Game:
             if self.ship.direction == "left":
                 frames = self.left_frames_movement
                 if self.last_direction != "left":
-                    self.anim_index_left = 0
+                    self.anim_index_left = len(frames) - 1
                     self.last_update_left = now
                     self.last_direction = "left"
 
                 if now - self.last_update_left > self.cooldown_base:
-                    if self.anim_index_left < len(frames) - 1:
-                        self.anim_index_left += 1
+                    self.anim_index_left -= 1
+                    if self.anim_index_left < 0:
+                        self.anim_index_left = 0
                     self.last_update_left = now
                 self.base = frames[self.anim_index_left]
+
             else:
                 frames = self.right_frames_movement
                 if self.last_direction != "right":
@@ -821,6 +788,7 @@ class Game:
                 self.base = frames[self.anim_index_right]
         else:
             self.base = self.frame_idle
+            self.last_direction = None
 
         self.celestials.update()
         self.asteroids.update()
