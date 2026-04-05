@@ -19,7 +19,7 @@ def game_lost(game, font, screen, screen_size):
 
     score_text = font.render(f"{int(game.score):05}", True, "WHITE")
     stopwatch = game.stopwatch
-    game_over_x = game.center(game_over, screen_size)
+    game_over_x = center(game, game_over, screen_size)
     game_over_y = screen_size[1] // 2
     screen.blit(game_over, [game_over_x, game_over_y])
     screen.blit(score_text,[center(game, score_text, screen_size), game_over_y + 25])

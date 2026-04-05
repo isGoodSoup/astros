@@ -136,7 +136,7 @@ def check_collision(game):
                 (asteroid[0].rect.centerx, asteroid[0].rect.centery), vel))
         if asteroid[0].hitpoints <= 0:
             asteroid[0].kill()
-            game.ship.credits += random.randint(0, 5)
+            game.ship.credits += random.randint(1, 50)
             if maniac_skill := next((s for s in game.skills.get_unlocked()
                                      if s.name == "Maniac"), None):
                 maniac_skill.ability.apply(game.ship, maniac_skill.level)
@@ -198,7 +198,7 @@ def check_collision(game):
                          vel))
 
         if alien[0].hitpoints <= 0:
-            game.ship.credits += random.randint(0, 10)
+            game.ship.credits += random.randint(1, 100)
             if maniac_skill := next((s for s in game.skills.get_unlocked()
                                      if s.name == "Maniac"), None):
                 maniac_skill.ability.apply(game.ship, maniac_skill.level)

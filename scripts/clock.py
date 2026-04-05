@@ -2,7 +2,7 @@ import random
 
 import pygame
 
-from scripts.boss import spawn_boss
+from scripts.update import spawn_boss
 from scripts.utils import level_enemies
 
 def update_time(game):

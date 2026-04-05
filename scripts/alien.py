@@ -1,18 +1,14 @@
-import random
-
 import pygame
 
 from scripts.proj import Projectile
-from scripts.sheet import SpriteSheet
 
 class Alien(pygame.sprite.Sprite):
-    def __init__(self, ship, x, y, frame, width=32, height=32, scale=4,
+    def __init__(self, ship, x, y, color, frame, width=16, height=13, scale=4,
                  columns=1, offset_x=0, offset_y=0):
         super().__init__()
-        self.sprite_sheet = SpriteSheet("assets/aliens.png")
-        frame_index = random.randint(0, 12)
-        self.image = self.sprite_sheet.get_image(frame_index, width, height,
-                                                 scale, columns=16)
+        # self.sprite_sheet = SpriteSheet(f"assets/{color}_alien.png")
+        self.image = pygame.image.load(f"assets/{color}_alien.png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (width * scale, height * scale))
         self.rect = self.image.get_rect(topleft=(x, y))
         self.hitbox = self.rect.inflate(self.rect.width * -0.6,
                                         self.rect.height * -0.6)
@@ -36,24 +32,8 @@ class Alien(pygame.sprite.Sprite):
         self.move_delay = 200
         self.hit = False
 
-        self.target = pygame.Vector2(
-            self.ship.rect.midbottom[0] + self.offset_x,
-            self.offset_y
-        )
-
     def update(self):
         self.hitbox.center = self.rect.center
-        target_x = self.ship.rect.centerx + self.offset_x
-
-        direction = self.target - self.pos
-
-        if direction.length() > self.velocity:
-            direction = direction.normalize()
-            self.pos += direction * self.velocity
-        else:
-            self.pos = self.target
-
-        self.rect.topleft = (int(self.pos.x), int(self.pos.y))
         if self.rect.top > pygame.display.Info().current_h or self.hitpoints <= 0:
             self.kill()
 

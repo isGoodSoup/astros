@@ -1,53 +1,77 @@
+import random
+
 import pygame
 from scripts.alien import Alien
 
-def alien_formation(game, formation="line", base_x=None, base_y=None):
-    aliens_to_spawn = game.alien_spawn_count
-    alien_width = 26 * 4
-    alien_height = 32 * 4
-    spacing_x = 10
-    spacing_y = 50
-    limit = pygame.display.Info().current_h // 4
+class AlienFleet:
+    def __init__(self, game, rows=2, cols=4, start_y=200,
+                 spacing_x=5, spacing_y=5, scale=3):
+        self.game = game
+        self.aliens = []
+        self.rows = rows
+        self.cols = cols
+        self.spacing_x = spacing_x
+        self.spacing_y = spacing_y
+        self.alien_width = 16 * scale
+        self.alien_height = 13 * scale
+        self.direction = 1
+        self.speed = 1
+        self.move_timer = pygame.time.get_ticks()
+        self.move_delay = 50
 
-    if base_x is None:
-        if formation == "line":
-            base_x = game.ship_x - ((aliens_to_spawn - 1) * (alien_width + spacing_x)) // 2
-        elif formation == "block":
-            cols = 3
-            base_x = game.ship_x - ((cols - 1) * (alien_width + spacing_x)) // 2
-        elif formation == "clutch":
-            base_x = game.ship_x
+        cluster_width = cols * self.alien_width + (cols - 1) * spacing_x
+        self.start_x = (game.screen_size[0] - cluster_width) // 2
+        self.start_y = start_y
 
-    if base_y is None:
-        base_y = limit
+        for row in range(rows):
+            for col in range(cols):
+                x = self.start_x + col * (self.alien_width + spacing_x)
+                y = self.start_y + row * (self.alien_height + spacing_y)
+                new_alien = Alien(game.ship, x, y, 'red', 0)
+                game.aliens.add(new_alien)
+                self.aliens.append(new_alien)
 
-    positions = []
+        self.left_edge = self.start_x
+        self.right_edge = self.start_x + cluster_width
 
-    if formation == "line":
-        for i in range(aliens_to_spawn):
-            positions.append((base_x + i * (alien_width + spacing_x), base_y))
+    def update(self):
+        now = pygame.time.get_ticks()
+        if now - self.move_timer >= self.move_delay:
+            self.left_edge += self.direction * self.speed
+            self.right_edge += self.direction * self.speed
 
-    elif formation == "block":
-        cols = 3
-        for i in range(aliens_to_spawn):
-            r = i // cols
-            c = i % cols
-            positions.append((base_x + c * (alien_width + spacing_x),
-                              base_y + r * (alien_height + spacing_y)))
+            if self.right_edge >= self.game.screen_size[0] or self.left_edge <= 0:
+                self.direction *= -1
+                self.left_edge += self.direction * self.speed
+                self.right_edge += self.direction * self.speed
+                for alien in self.aliens:
+                    alien.pos.y += 10
+                    alien.rect.y = int(alien.pos.y)
 
-    elif formation == "clutch":
-        mid = aliens_to_spawn // 2
-        for i in range(aliens_to_spawn):
-            offset = (i - mid) * (alien_width + spacing_x)
-            positions.append((base_x + offset, base_y + abs(i - mid) * 20))
+            for alien in self.aliens:
+                alien.pos.x += self.direction * self.speed
+                alien.rect.x = int(alien.pos.x)
 
-    for pos in positions:
-        new_alien = Alien(
-            game.ship,
-            x=pos[0],
-            y=pos[1] - 200,
-            frame=0,
-            offset_x=pos[0] - game.ship.rect.centerx,
-            offset_y=pos[1]
-        )
-        game.aliens.add(new_alien)
+            self.move_timer = now
+
+def spawn_phase_aliens(game, phase):
+    now = pygame.time.get_ticks()
+    if now - game.last_alien_spawn < game.alien_spawn_interval:
+        return
+
+    if phase == "asteroids":
+        clusters = random.randint(1, 3)
+        for _ in range(clusters):
+            AlienFleet(game, rows=3, cols=8, start_y=80)
+
+    elif phase == "quiet":
+        clusters = random.randint(1, 2)
+        for _ in range(clusters):
+            AlienFleet(game, rows=3, cols=6, start_y=100)
+
+    elif phase == "boss_fight":
+        clusters = random.randint(0, 2)
+        for _ in range(clusters):
+            AlienFleet(game, rows=2, cols=4, start_y=120)
+
+    game.last_alien_spawn = now

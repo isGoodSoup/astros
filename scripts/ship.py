@@ -84,7 +84,7 @@ class Ship(pygame.sprite.Sprite):
 
         return new_projectiles
 
-    def super_charge(self, joysticks, score, explosions, asteroids,
+    def super_charge(self, joysticks, score, explosions, entities,
                              frame_explode, frame_big_explode):
         if self.charges <= 0:
             return
@@ -93,9 +93,9 @@ class Ship(pygame.sprite.Sprite):
             joysticks[0].rumble(0.5, 1.0, 1000)
         explosions.add(Explosion(self.hitbox.centerx, self.hitbox.centery, frame_big_explode))
 
-        for asteroid in asteroids:
-            asteroid.kill()
-            explosions.add(Explosion(asteroid.rect.centerx, asteroid.rect.centery, frame_explode))
+        for entity in entities:
+            entity.kill()
+            explosions.add(Explosion(entity.rect.centerx, entity.rect.centery, frame_explode))
             score += self.level * 10
 
         self.charges -= 1

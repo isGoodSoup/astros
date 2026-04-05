@@ -14,6 +14,9 @@ def render_frame(game, screen, font, hud_padding):
     if game.current_phase in ("quiet", "asteroids"):
         game.aliens.draw(screen)
 
+    if game.current_phase == "boss_fight":
+        game.bosses.draw(screen)
+
     game.projectiles.draw(screen)
     game.upgrades.draw(screen)
     game.floating_numbers.draw(screen)

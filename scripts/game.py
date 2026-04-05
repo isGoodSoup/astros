@@ -19,7 +19,6 @@ from scripts.tutorial import Tutorial
 from scripts.update import set_hud, update_game, update_hud
 from scripts.utils import debug, apply_curve, hide_cursor
 
-
 class Game:
     def __init__(self, screen, screen_size, hud_ratio,
                  game_font):
@@ -48,10 +47,12 @@ class Game:
         self.projectiles = pg.sprite.Group()
         self.enemy_projectiles = pg.sprite.Group()
         self.aliens = pg.sprite.Group()
+        self.bosses = pg.sprite.Group()
         self.asteroids = pg.sprite.Group()
         self.explosions = pg.sprite.Group()
         self.upgrades = pg.sprite.Group()
         self.floating_numbers = pg.sprite.Group()
+        self.entities = pg.sprite.Group()
         self.particles = []
         self.stars_speed = 2
 
@@ -77,7 +78,6 @@ class Game:
         self.cursor_pos = [screen_size[0] // 2, screen_size[1] // 2]
         self.cursor_speed = 1000
         self.selected_skill = None
-        self.last_nav_time = 0
 
         self.hitpoints = Interface("assets/ui/status.png", 0, 40, 40,
                                    hud_ratio, ['right', 'bottom'])
@@ -87,8 +87,7 @@ class Game:
                             hud_ratio, ['right', 'bottom'], 33, [0, -175])
         self.ammo = Interface("assets/ui/ammo.png", 0, 11, 40,
                               hud_ratio, ['right', 'bottom'], 35, [-160, 0])
-        self.credits = game_font.render(f"{self.ship.credits}€$", True,
-                                        (255, 200, 0))
+        self.credits = game_font.render(f"{self.ship.credits}€$", True, (255, 200, 0))
 
         self.anim_frame_base = 0
         self.anim_frame_overlay = 0
@@ -109,9 +108,9 @@ class Game:
         self.direction_set = None
 
         self.frames = []
+
         for i in range(self.cols):
-            img = self.ship_sprite[0].get_image(i, framew, frameh,
-                                                scale=self.scale,
+            img = self.ship_sprite[0].get_image(i, framew, frameh, scale=self.scale,
                                                 columns=self.cols)
             self.frames.append(img)
 
@@ -153,6 +152,7 @@ class Game:
         self.asteroid_increment_speed = 10
         self.last_upgrade_spawn = 0
         self.upgrade_spawn_interval = 24_000
+        self.last_boss_spawn = 0
         self.last_shot_time = 0
         self.last_upgrade = None
         self.active_upgrade = None
@@ -233,10 +233,8 @@ class Game:
 
                     if event.key == pg.K_f:
                         if self.ship.charges > 0:
-                            self.ship.super_charge(joysticks, self.score,
-                                                   self.explosions,
-                                                   self.asteroids,
-                                                   self.frame_explode,
+                            self.ship.super_charge(joysticks, self.score, self.explosions,
+                                                   self.entities, self.frame_explode,
                                                    self.frame_big_explode)
                             self.screen_shake = 50
                     if event.key == pg.K_g:
@@ -249,9 +247,7 @@ class Game:
 
                     if event.key == pg.K_c:
                         if event.mod & pg.KMOD_SHIFT:
-                            crt.prog['curvature'].value = max(0.0,
-                                                              crt.prog[
-                                                                  'curvature'].value - 0.5)
+                            crt.prog['curvature'].value = max(0.0,crt.prog['curvature'].value - 0.5)
                         else:
                             crt.prog['curvature'].value += 0.5
 
@@ -332,11 +328,8 @@ class Game:
 
                 elif event.type == JOYBUTTONUP:
                     if event.button in (4, 5) and self.charge_active:
-                        self.ship.super_charge(joysticks, self.score,
-                                               self.explosions,
-                                               self.asteroids,
-                                               self.frame_explode,
-                                               self.frame_big_explode)
+                        self.ship.super_charge(joysticks, self.score, self.explosions,
+                                               self.entities, self.frame_explode, self.frame_big_explode)
                         self.screen_shake = 50
                         self.charge_active = False
                         self.sounds[1].play()
