@@ -57,8 +57,7 @@ class AlienFleet:
         for alien in self.aliens[:]:
             if not alien.alive():
                 self.aliens.remove(alien)
-                if alien in self.game.aliens:
-                    self.game.aliens.remove(alien)
+                alien.kill()
 
         if not self.aliens:
             return

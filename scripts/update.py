@@ -205,6 +205,13 @@ def update_game(game, delta, screen_size, hud_padding):
     if game.ship_alive:
         game.ship.update_position(game.ship_x, game.ship_y)
 
+    for group in [game.asteroids, game.aliens, game.bosses, game.projectiles,
+                  game.enemy_projectiles]:
+        for sprite in list(group):
+            if not sprite.alive() or sprite.rect.bottom < 0 or sprite.rect.top > \
+                    game.screen_size[1]:
+                sprite.kill()
+
     check_collision(game)
     current_time = pg.time.get_ticks()
     if game.active_upgrade == "power_up":

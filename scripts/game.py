@@ -228,12 +228,13 @@ class Game:
                 if event.type == pg.QUIT:
                     running = False
                 elif event.type == self.ALIENLASER:
-                    shots_this_frame = 0
                     shooters = random.sample(self.aliens.sprites(), k=min(3, len(self.aliens)))
+                    shots_this_frame = 0
                     for alien in shooters:
                         new_projectiles = alien.shoot(self.ship, alien.shot_cooldown)
-                        for p in new_projectiles:
-                            self.enemy_projectiles.add(p)
+                        if new_projectiles:
+                            shots_this_frame += len(new_projectiles)
+                            self.enemy_projectiles.add(new_projectiles)
 
                     if shots_this_frame > 0 and self.play_sound:
                         self.sounds[4].play()
