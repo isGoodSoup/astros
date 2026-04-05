@@ -5,18 +5,18 @@ import pygame
 from scripts.proj import Projectile
 from scripts.sheet import SpriteSheet
 
-
 class Alien(pygame.sprite.Sprite):
-    def __init__(self, ship, x, y, frame, width=32, height=32, scale=2,
+    def __init__(self, ship, x, y, frame, width=32, height=32, scale=4,
                  columns=1, offset_x=0, offset_y=0):
         super().__init__()
         self.sprite_sheet = SpriteSheet("assets/aliens.png")
-        frame_index = random.randint(0, 255)
+        frame_index = random.randint(0, 12)
         self.image = self.sprite_sheet.get_image(frame_index, width, height,
                                                  scale, columns=16)
-        self.rect = self.image.get_rect(center=(x, y))
+        self.rect = self.image.get_rect(topleft=(x, y))
         self.hitbox = self.rect.inflate(self.rect.width * -0.6,
                                         self.rect.height * -0.6)
+        self.pos = pygame.Vector2(x, y)
         self.frames = []
         self.ship = ship
         self.velocity = max(1, ship.velocity - 2)
@@ -36,26 +36,24 @@ class Alien(pygame.sprite.Sprite):
         self.move_delay = 200
         self.hit = False
 
-    def animate(self):
-        pass
+        self.target = pygame.Vector2(
+            self.ship.rect.midbottom[0] + self.offset_x,
+            self.offset_y
+        )
 
     def update(self):
         self.hitbox.center = self.rect.center
         target_x = self.ship.rect.centerx + self.offset_x
-        target_y = self.offset_y
 
-        dx = target_x - self.rect.x
-        if abs(dx) > 1:
-            self.rect.x += dx * 0.1
+        direction = self.target - self.pos
+
+        if direction.length() > self.velocity:
+            direction = direction.normalize()
+            self.pos += direction * self.velocity
         else:
-            self.rect.x = target_x
+            self.pos = self.target
 
-        dy = target_y - self.rect.y
-        if abs(dy) > 1:
-            self.rect.y += dy / abs(dy) * max(1, self.velocity // 2)
-        else:
-            self.rect.y = target_y
-
+        self.rect.topleft = (int(self.pos.x), int(self.pos.y))
         if self.rect.top > pygame.display.Info().current_h or self.hitpoints <= 0:
             self.kill()
 

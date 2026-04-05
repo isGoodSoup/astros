@@ -29,15 +29,15 @@ def update_phase(game):
         game.phase_ending = False
 
     elapsed = current_time - game.phase_start_time
-    phase_length = random.randint(20000, 30000)
+    if not hasattr(game, "phase_length"):
+        game.phase_length = random.randint(20_000, 30_000)
     buffer_time = 5000
 
-    if elapsed >= phase_length - buffer_time:
+    if elapsed >= game.phase_length - buffer_time:
         game.phase_ending = True
 
     if game.phase_ending:
         game.last_alien_spawn = current_time
-        game.last_asteroid_spawn = current_time
 
         if not game.aliens and not game.asteroids:
             game.phase_index = (game.phase_index + 1) % len(game.phases)
@@ -48,7 +48,7 @@ def update_phase(game):
             game.last_asteroid_spawn = 0
 
     else:
-        if game.current_phase == "asteroids":
+        if game.current_phase == "asteroids" and not game.phase_ending:
             spawn_asteroids(game)
         elif game.current_phase in ("quiet", "aliens"):
             spawn_aliens(game)
@@ -163,7 +163,6 @@ def update_game(game, delta, screen_size, hud_padding):
             asteroid.rect.y -= 2
             if asteroid.rect.y > pygame.display.Info().current_h:
                 game.asteroids.remove(asteroid)
-        game.asteroids.empty()
 
     if game.current_phase in ("quiet", "asteroids"):
         game.aliens.update()

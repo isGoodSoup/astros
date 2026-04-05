@@ -19,6 +19,7 @@ from scripts.tutorial import Tutorial
 from scripts.update import set_hud, update_game, update_hud
 from scripts.utils import debug, apply_curve, hide_cursor
 
+
 class Game:
     def __init__(self, screen, screen_size, hud_ratio,
                  game_font):
@@ -35,9 +36,9 @@ class Game:
         self.phases = ["quiet", "asteroids", "boss_fight"]
         self.current_phase = "quiet"
         self.phase_index = 0
-        self.phase_to_sprite = {"quiet": 0, "asteroids": 1,
-                                "boss_fight": 2}
+        self.phase_to_sprite = {"quiet": 0, "asteroids": 1, "boss_fight": 2}
         self.phase_start_time = pg.time.get_ticks()
+        self.phase_length = random.randint(20_000, 30_000)
         self.phase_ending = False
 
         self.boss_alive = False
