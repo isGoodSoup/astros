@@ -35,7 +35,7 @@ class Alien(pygame.sprite.Sprite):
 
         screen_mid_y = pygame.display.Info().current_h // 2
         target_x = self.ship.rect.centerx + self.offset_x
-        target_y = min(self.ship.rect.centery + self.offset_y, screen_mid_y)
+        target_y = screen_mid_y
 
         if abs(target_x - self.rect.centerx) > self.velocity:
             self.rect.x += self.velocity if target_x > self.rect.centerx else -self.velocity
@@ -44,7 +44,8 @@ class Alien(pygame.sprite.Sprite):
 
         if self.rect.centery < target_y:
             self.rect.y += max(1, self.velocity // 2)
-
+        elif self.rect.centery > target_y:
+            self.rect.y -= max(1, self.velocity // 2)
         if self.rect.top > pygame.display.Info().current_h:
             self.kill()
 
