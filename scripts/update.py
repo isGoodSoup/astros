@@ -178,6 +178,9 @@ def update_game(game, delta, screen_size, hud_padding):
         #         new_proj = alien.shoot(game.base, alien.shot_cooldown, game.play_sound, game.sounds)
         #         game.enemy_projectiles.add(new_proj)
 
+    for fleet in game.fleets:
+        fleet.update()
+
     if game.current_phase == "boss_fight":
         game.bosses.update()
 

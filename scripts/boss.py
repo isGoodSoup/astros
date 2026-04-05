@@ -4,8 +4,7 @@ class Boss(pygame.sprite.Sprite):
     def __init__(self, ship, x, y, color, frame=0, width=32, height=32, scale=8,
                  columns=1, offset_x=0, offset_y=0):
         super().__init__()
-        # self.sprite_sheet = SpriteSheet(f"assets/{color}_alien.png")
-        self.image = pygame.image.load(f"assets/{color}_alien.png").convert_alpha()
+        self.image = pygame.image.load(f"assets/aliens/{color}.png").convert_alpha()
         self.rect = self.image.get_rect()
         self.hitbox = self.rect.inflate(self.rect.width * -0.5, self.rect.height * -0.5)
 

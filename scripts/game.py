@@ -53,6 +53,7 @@ class Game:
         self.upgrades = pg.sprite.Group()
         self.floating_numbers = pg.sprite.Group()
         self.entities = pg.sprite.Group()
+        self.fleets = []
         self.particles = []
         self.stars_speed = 2
 
