@@ -34,26 +34,20 @@ class Alien(pygame.sprite.Sprite):
     @override
     def update(self):
         self.hitbox.center = self.rect.center
-
-        screen_mid_y = pygame.display.Info().current_h // 2
         target_x = self.ship.rect.centerx + self.offset_x
-        target_y = screen_mid_y + self.offset_y
+        target_y = self.offset_y
 
-        self.move_delay -= 1
-
-        dx = target_x - self.rect.centerx
+        dx = target_x - self.rect.x
         if abs(dx) > self.velocity:
-            if self.move_delay <= 0:
-                self.rect.x += self.velocity if dx > 0 else -self.velocity
-                self.move_delay = 200
+            self.rect.x += self.velocity if dx > 0 else -self.velocity
         else:
-            self.rect.centerx = target_x
+            self.rect.x = target_x
 
-        dy = target_y - self.rect.centery
+        dy = target_y - self.rect.y
         if abs(dy) > 1:
             self.rect.y += dy / abs(dy) * max(1, self.velocity // 2)
         else:
-            self.rect.centery = target_y
+            self.rect.y = target_y
 
         if self.rect.top > pygame.display.Info().current_h or self.hitpoints <= 0:
             self.kill()
