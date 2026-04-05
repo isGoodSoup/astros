@@ -421,6 +421,3 @@ class Game:
 
             crt.render(screen)
         pg.quit()
-
-    def spawn_boss(self):
-        pass  # TODO boss spawning
