@@ -31,7 +31,7 @@ class Tab(pygame.sprite.Sprite):
             self.pos += move
             self.rect.topleft = (round(self.pos.x), round(self.pos.y))
 
-    def render(self, screen, font=None):
+    def render(self, game, screen, font, hud_padding=None):
         screen.blit(self.image, self.rect)
         if self.content_renderer:
-            self.content_renderer(screen, self.rect, font)
+            self.content_renderer(game, screen, self.rect, font)

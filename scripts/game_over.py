@@ -1,0 +1,61 @@
+import pygame
+from scripts.utils import center
+
+def game_lost(game, font, screen, screen_size):
+    now = pygame.time.get_ticks()
+    if now - game.last_blink > 500:
+        game.count += 1
+        game.last_blink = now
+
+    colors = ["RED", (0, 0, 0, 0)]
+    game_over = font.render("GAME OVER", True, colors[game.count % 2])
+
+    if game.play_sound:
+        game.sounds[-1].play()
+        game.game_over_fx = False
+
+    if game.score > game.high_score:
+        game.high_score = game.score
+
+    score_text = font.render(f"{int(game.score):05}", True, "WHITE")
+    stopwatch = game.stopwatch
+    game_over_x = game.center(game_over, screen_size)
+    game_over_y = screen_size[1] // 2
+    screen.blit(game_over, [game_over_x, game_over_y])
+    screen.blit(score_text,[center(game, score_text, screen_size), game_over_y + 25])
+    screen.blit(stopwatch,[center(game, stopwatch, screen_size), game_over_y + 50])
+    
+def reboot(game, screen_size):
+    saved_stats = game.ship.get_stats()
+
+    game.projectiles.empty()
+    game.asteroids.empty()
+    game.explosions.empty()
+    game.upgrades.empty()
+    game.floating_numbers.empty()
+    game.particles.clear()
+
+    framew = game.ship_sprite[0].sheet.get_width() // game.cols
+    frameh = game.ship_sprite[0].sheet.get_height()
+    game.ship.rect.topleft = (screen_size[0] // 2 - framew // 2 - 25,
+                              screen_size[1] // 2 + 200)
+    game.ship.hitbox.center = game.ship.rect.center
+
+    for attr, value in saved_stats.items():
+        setattr(game.ship, attr, value)
+
+    game.ship_alive = True
+    game.frame = 0
+    game.last_update = pygame.time.get_ticks()
+    game.last_asteroid_spawn = 0
+    game.last_shot_time = 0
+    game.score = 0
+    game.hours = 0
+    game.minutes = 0
+    game.seconds = 0
+    game.milliseconds = 0
+    game.stopwatch = None
+    game.game_over = False
+
+    if game.play_sound:
+        pygame.mixer.music.play(-1)

@@ -15,7 +15,7 @@ class Ship(pygame.sprite.Sprite):
         self.hitbox = self.rect.inflate(self.rect.width * -0.6,
                                         self.rect.height * -0.6)
         self.velocity = 12
-        self.direction = "idle" # or "left", "right"
+        self.direction = "idle"
         self.shooting = False
         self.moving = False
         self.max_hitpoints = 200

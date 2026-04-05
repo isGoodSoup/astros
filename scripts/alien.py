@@ -18,15 +18,17 @@ class Alien(pygame.sprite.Sprite):
         self.velocity = max(1, ship.velocity - 2)
         self.offset_x = offset_x
         self.offset_y = offset_y
-        self.direction = "idle" # or "left", "right"
+        self.direction = "idle"
         self.shooting = False
         self.moving = False
 
         self.level = ship.level + 2
         self.max_hitpoints = ship.max_hitpoints * self.level
+        self.hitpoints = self.max_hitpoints
         self.base_damage = ship.damage * self.level
         self.last_shot_time = 0
         self.shot_cooldown = 200
+        self.move_delay = 200
         self.hit = False
 
     @override
@@ -35,18 +37,25 @@ class Alien(pygame.sprite.Sprite):
 
         screen_mid_y = pygame.display.Info().current_h // 2
         target_x = self.ship.rect.centerx + self.offset_x
-        target_y = screen_mid_y
+        target_y = screen_mid_y + self.offset_y
 
-        if abs(target_x - self.rect.centerx) > self.velocity:
-            self.rect.x += self.velocity if target_x > self.rect.centerx else -self.velocity
+        self.move_delay -= 1
+
+        dx = target_x - self.rect.centerx
+        if abs(dx) > self.velocity:
+            if self.move_delay <= 0:
+                self.rect.x += self.velocity if dx > 0 else -self.velocity
+                self.move_delay = 200
         else:
             self.rect.centerx = target_x
 
-        if self.rect.centery < target_y:
-            self.rect.y += max(1, self.velocity // 2)
-        elif self.rect.centery > target_y:
-            self.rect.y -= max(1, self.velocity // 2)
-        if self.rect.top > pygame.display.Info().current_h:
+        dy = target_y - self.rect.centery
+        if abs(dy) > 1:
+            self.rect.y += dy / abs(dy) * max(1, self.velocity // 2)
+        else:
+            self.rect.centery = target_y
+
+        if self.rect.top > pygame.display.Info().current_h or self.hitpoints <= 0:
             self.kill()
 
     def shoot(self, base, shot_cooldown, can_play, sound):
