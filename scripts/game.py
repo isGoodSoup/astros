@@ -19,6 +19,7 @@ from scripts.tutorial import Tutorial
 from scripts.update import set_hud, update_game, update_hud
 from scripts.utils import debug, apply_curve, hide_cursor
 
+
 class Game:
     def __init__(self, screen, screen_size, hud_ratio,
                  game_font):
@@ -214,8 +215,6 @@ class Game:
         self.tutorial_on = False
         if self.tutorial_on:
             self.tutorial = Tutorial()
-
-        self.delay = 30_000
 
         self.game_over_fx = True
         fade.start("in")
@@ -430,6 +429,5 @@ class Game:
                 fade_surface.fill((0, 0, 0))
                 fade_surface.set_alpha(alpha)
                 screen.blit(fade_surface, (0, 0))
-
             crt.render(screen)
         pg.quit()
