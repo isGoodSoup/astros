@@ -33,7 +33,7 @@ class Alien(pygame.sprite.Sprite):
         if self.rect.top > pygame.display.Info().current_h or self.hitpoints <= 0:
             self.kill()
 
-    def shoot(self, base, shot_cooldown, can_play, sound):
+    def shoot(self, base, shot_cooldown):
         current_time = pygame.time.get_ticks()
         self.shooting = False
         new_projectiles = []
@@ -44,6 +44,4 @@ class Alien(pygame.sprite.Sprite):
             self.shooting = True
             new_projectiles.extend([projectile])
             self.last_shot_time = current_time
-            if can_play:
-                sound[0].play()
         return new_projectiles

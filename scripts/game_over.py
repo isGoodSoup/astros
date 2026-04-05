@@ -10,7 +10,7 @@ def game_lost(game, font, screen, screen_size):
     colors = ["RED", (0, 0, 0, 0)]
     game_over = font.render("GAME OVER", True, colors[game.count % 2])
 
-    if game.play_sound:
+    if game.play_sound and getattr(game, "game_over_fx", True):
         game.sounds[-1].play()
         game.game_over_fx = False
 
@@ -18,12 +18,13 @@ def game_lost(game, font, screen, screen_size):
         game.high_score = game.score
 
     score_text = font.render(f"{int(game.score):05}", True, "WHITE")
-    stopwatch = game.stopwatch
+    stopwatch = game.stopwatch if game.stopwatch is not None else (
+        font.render("00:00:00", True, "WHITE"))
     game_over_x = center(game, game_over, screen_size)
     game_over_y = screen_size[1] // 2
     screen.blit(game_over, [game_over_x, game_over_y])
-    screen.blit(score_text,[center(game, score_text, screen_size), game_over_y + 25])
-    screen.blit(stopwatch,[center(game, stopwatch, screen_size), game_over_y + 50])
+    screen.blit(score_text, [center(game, score_text, screen_size), game_over_y + 25])
+    screen.blit(stopwatch, [center(game, stopwatch, screen_size), game_over_y + 50])
     
 def reboot(game, screen_size):
     saved_stats = game.ship.get_stats()
@@ -56,6 +57,7 @@ def reboot(game, screen_size):
     game.milliseconds = 0
     game.stopwatch = None
     game.game_over = False
+    game.game_over_fx = True
 
     if game.play_sound:
         pygame.mixer.music.play(-1)

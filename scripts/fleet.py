@@ -1,7 +1,7 @@
-import random
-
 import pygame
+
 from scripts.alien import Alien
+
 
 class AlienFleet:
     def __init__(self, game, rows=2, cols=4, start_y=200,
@@ -54,7 +54,15 @@ class AlienFleet:
         if not self.aliens:
             return
 
-        self.aliens = [alien for alien in self.aliens if alien.alive()]
+        for alien in self.aliens[:]:
+            if not alien.alive():
+                self.aliens.remove(alien)
+                if alien in self.game.aliens:
+                    self.game.aliens.remove(alien)
+
+        if not self.aliens:
+            return
+
         now = pygame.time.get_ticks()
         if now - self.move_timer >= self.move_delay:
             left = min(alien.rect.left for alien in self.aliens)
@@ -73,28 +81,26 @@ class AlienFleet:
         total = self.rows * self.cols
         self.move_delay = max(self.min_delay, int(600 * (alive / total)))
 
-def spawn_phase_aliens(game, phase):
-    now = pygame.time.get_ticks()
-    if now - game.last_alien_spawn < game.alien_spawn_interval:
-        return
+def spawn_fleet(game, phase):
+    if game.fleets:
+        alive = any(fleet.aliens for fleet in game.fleets)
+        if alive:
+            return
 
     if phase == "asteroids":
-        clusters = random.randint(1, 3)
-        for _ in range(clusters):
-            fleet = AlienFleet(game, rows=4, cols=8, start_y=120)
-            game.fleets.append(fleet)
-
+        clusters = 1
+        rows, cols = 4, 8
     elif phase == "quiet":
-        clusters = random.randint(1, 2)
-        if not game.fleets:
-            for _ in range(clusters):
-                fleet = AlienFleet(game, rows=3, cols=6, start_y=120)
-                game.fleets.append(fleet)
-
+        clusters = 1
+        rows, cols = 6, 12
     elif phase == "boss_fight":
-        clusters = random.randint(0, 2)
-        for _ in range(clusters):
-            fleet = AlienFleet(game, rows=2, cols=4, start_y=120)
-            game.fleets.append(fleet)
+        clusters = 0
+        rows, cols = 2, 4
+    else:
+        return
 
-    game.last_alien_spawn = now
+    for _ in range(clusters):
+        fleet = AlienFleet(game, rows=rows, cols=cols, start_y=120)
+        game.fleets.append(fleet)
+
+    game.last_alien_spawn = pygame.time.get_ticks()

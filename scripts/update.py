@@ -8,7 +8,7 @@ from scripts.asteroid import Asteroid
 from scripts.boss import Boss
 from scripts.celestial import random_celestial, is_valid_spawn
 from scripts.collision import check_collision
-from scripts.fleet import spawn_phase_aliens
+from scripts.fleet import spawn_fleet
 from scripts.upgd import Upgrade
 
 
@@ -23,6 +23,7 @@ def set_hud(screen_size, padding):
         'height': height - 2 * padding
     }
 
+
 def update_phase(game):
     current_time = pg.time.get_ticks()
 
@@ -31,30 +32,32 @@ def update_phase(game):
         game.phase_ending = False
 
     elapsed = current_time - game.phase_start_time
-    if not hasattr(game, "phase_length"):
-        game.phase_length = random.randint(20_000, 30_000)
     buffer_time = 5000
 
     if elapsed >= game.phase_length - buffer_time:
         game.phase_ending = True
 
+    if game.current_phase == "asteroids" or game.current_phase == "quiet":
+        spawn_fleet(game, game.current_phase)
+
     if game.current_phase == "boss_fight":
         spawn_boss(game)
 
-    if game.phase_ending:
-        if not game.aliens and not game.asteroids and not game.bosses:
-            game.phase_index = (game.phase_index + 1) % len(game.phases)
-            game.current_phase = game.phases[game.phase_index]
-            game.phase_start_time = current_time
-            game.phase_ending = False
-            game.last_alien_spawn = 0
-            game.last_asteroid_spawn = 0
-            game.boss_spawned = False
-    else:
-        if game.current_phase == "asteroids" and not game.phase_ending:
-            spawn_asteroids(game)
-        elif game.current_phase in ("quiet", "aliens", "asteroids"):
-            spawn_phase_aliens(game, game.current_phase)
+    enemies_alive = any([
+        bool(game.aliens),
+        bool(game.asteroids),
+        bool(game.bosses),
+        bool(game.fleets)
+    ])
+
+    if game.phase_ending and not enemies_alive:
+        game.phase_index = (game.phase_index + 1) % len(game.phases)
+        game.current_phase = game.phases[game.phase_index]
+        game.phase_start_time = current_time
+        game.phase_ending = False
+        game.last_alien_spawn = 0
+        game.last_asteroid_spawn = 0
+        game.boss_spawned = False
 
 def spawn_asteroids(game):
     current_time = pg.time.get_ticks()
@@ -170,16 +173,16 @@ def update_game(game, delta, screen_size, hud_padding):
             if asteroid.rect.y > pygame.display.Info().current_h:
                 game.asteroids.remove(asteroid)
 
-    if game.current_phase in ("quiet", "asteroids"):
-        game.entities.add(game.aliens)
-        game.entities.update()
-        # if random.random() > 0.4:
-        #     for alien in game.aliens:
-        #         new_proj = alien.shoot(game.base, alien.shot_cooldown, game.play_sound, game.sounds)
-        #         game.enemy_projectiles.add(new_proj)
+    for fleet in game.fleets:
+        game.entities.add(fleet.aliens)
+    game.entities.update()
 
+    alive_fleets = []
     for fleet in game.fleets:
         fleet.update()
+        if fleet.aliens:
+            alive_fleets.append(fleet)
+    game.fleets = alive_fleets
 
     if game.current_phase == "boss_fight":
         game.bosses.update()

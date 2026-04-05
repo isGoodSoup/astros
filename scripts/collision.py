@@ -30,9 +30,18 @@ def check_collision(game):
 
     if asteroid_hit or alien_hit or alien_proj:
         if random.random() <= game.ship.evasion:
-            x, y = asteroid_hit.rect.center
-            game.floating_numbers.add(FloatingNumber(
-                x, y, "MISS", color=(255, 255, 100)))  # type: ignore
+            if asteroid_hit:
+                x, y = asteroid_hit.rect.center
+                game.floating_numbers.add(FloatingNumber(
+                    x, y, "MISS", color=(255, 255, 100)))
+            elif alien_hit:
+                x, y = alien_hit.rect.center
+                game.floating_numbers.add(FloatingNumber(
+                    x, y, "MISS", color=(255, 255, 100)))
+            elif alien_proj:
+                x, y = alien_proj.rect.center
+                game.floating_numbers.add(FloatingNumber(
+                    x, y, "MISS", color=(255, 255, 100)))
             return
 
         game.ship.hit = True

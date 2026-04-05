@@ -145,6 +145,9 @@ class Game:
         self.alien_spawn_count = random.randint(1, 5)
         self.formation = ["clutch", "line", "block"]
 
+        self.ALIENLASER = pygame.USEREVENT + 1
+        pygame.time.set_timer(self.ALIENLASER, 800)
+
         self.last_asteroid_spawn = 0
         self.asteroid_spawn_interval = 600
         self.asteroid_spawn_count = 6
@@ -224,6 +227,17 @@ class Game:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     running = False
+                elif event.type == self.ALIENLASER:
+                    shots_this_frame = 0
+                    shooters = random.sample(self.aliens.sprites(), k=min(3, len(self.aliens)))
+                    for alien in shooters:
+                        new_projectiles = alien.shoot(self.ship, alien.shot_cooldown)
+                        for p in new_projectiles:
+                            self.enemy_projectiles.add(p)
+
+                    if shots_this_frame > 0 and self.play_sound:
+                        self.sounds[4].play()
+
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_TAB:
                         self.skill_tab.active = not self.skill_tab.active
