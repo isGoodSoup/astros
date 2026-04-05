@@ -22,10 +22,9 @@ def render_frame(game, screen, font, hud_padding):
 
     img = game.base.copy()
 
-    if game.ship.moving:
-        overlay_index = game.anim_frame_overlay % len(game.frames_flying)
-        overlay_frame = game.frames_flying[overlay_index]
-        img.blit(overlay_frame, (0, 0))
+    overlay_index = game.anim_frame_overlay % len(game.frames_flying)
+    overlay_frame = game.frames_flying[overlay_index]
+    img.blit(overlay_frame, (0, 0))
 
     if game.debugging:
         for i in game.asteroids:

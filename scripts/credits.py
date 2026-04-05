@@ -1,4 +1,4 @@
 
 def update_credits(game, game_font):
-    game.credits = game_font.render(f"{game.ship.credits}€$", True,
-                                    (255, 200, 0))
+    formatted_credits = f"{game.ship.credits:,.0f}".replace(',', '.') + "€$"
+    game.credits = game_font.render(formatted_credits, True, (255, 200, 0))

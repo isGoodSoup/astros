@@ -211,11 +211,8 @@ def check_collision(game):
             game.score += game.ship.level * 10 * game.score_multiplier
             game.ship.gain_xp(formulize(game, game.ship.level), game.sounds)
 
-    upgrade_hit = pg.sprite.spritecollide(game.ship, game.upgrades, False,
-                                          # type: ignore
-                                          collided=lambda s,
-                                                          u: s.hitbox.colliderect(
-                                              u.rect))
+    upgrade_hit = pg.sprite.spritecollide(game.ship, game.upgrades, False, # type: ignore
+                                          collided=lambda s,u: s.hitbox.colliderect(u.rect))
     if upgrade_hit:
         for upgrade in upgrade_hit:
             upgrade.kill()
