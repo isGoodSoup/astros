@@ -36,7 +36,7 @@ class Ship(pygame.sprite.Sprite):
         self.base_ammo = 100
         self.ammo = self.base_ammo
         self.evasion = 0.01
-        self.shot_cooldown = 300
+        self.shot_cooldown = 250
 
         self.maniac_boost = 0
         self.maniac_boost_end = 0
@@ -56,6 +56,7 @@ class Ship(pygame.sprite.Sprite):
         self.credits = 0
 
         self.hit = False
+
     def update_damage(self):
         base = self.base_damage * (2 if self.gun == "missile" else 1)
         self.damage = base * self.damage_multiplier
@@ -72,7 +73,7 @@ class Ship(pygame.sprite.Sprite):
 
         if current_time - last_shot_time >= shot_cooldown:
             projectile = Projectile(self.rect.centerx, self.rect.bottom,"assets/projectile_2.png" if
-            self.gun == "missile" else "assets/projectile.png")
+            self.gun == "missile" else "assets/projectile.png", 4, speed=-16)
             self.shooting = True
             new_projectiles.extend([projectile])
             if can_play:
