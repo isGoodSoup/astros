@@ -19,7 +19,6 @@ from scripts.tutorial import Tutorial
 from scripts.update import set_hud, update_game, update_hud
 from scripts.utils import debug, apply_curve, hide_cursor
 
-
 class Game:
     def __init__(self, screen, screen_size, hud_ratio,
                  game_font):

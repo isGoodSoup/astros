@@ -1,9 +1,8 @@
-from typing import override
-
 import pygame
 
 from scripts.proj import Projectile
 from scripts.sheet import SpriteSheet
+
 
 class Alien(pygame.sprite.Sprite):
     def __init__(self, ship, x, y, frame, width=26, height=32, scale=4,
@@ -23,23 +22,23 @@ class Alien(pygame.sprite.Sprite):
         self.moving = False
 
         self.level = ship.level + 2
-        self.max_hitpoints = ship.max_hitpoints * self.level
+        self.max_hitpoints = 10 * self.level
         self.hitpoints = self.max_hitpoints
         self.base_damage = ship.damage * self.level
         self.last_shot_time = 0
         self.shot_cooldown = 200
+        self.last_move = pygame.time.get_ticks()
         self.move_delay = 200
         self.hit = False
 
-    @override
     def update(self):
         self.hitbox.center = self.rect.center
         target_x = self.ship.rect.centerx + self.offset_x
         target_y = self.offset_y
 
         dx = target_x - self.rect.x
-        if abs(dx) > self.velocity:
-            self.rect.x += self.velocity if dx > 0 else -self.velocity
+        if abs(dx) > 1:
+            self.rect.x += dx * 0.1
         else:
             self.rect.x = target_x
 
