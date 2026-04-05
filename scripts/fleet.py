@@ -42,6 +42,12 @@ def alien_formation(game, formation="line", base_x=None, base_y=None):
             positions.append((base_x + offset, base_y + abs(i - mid) * 20))
 
     for pos in positions:
-        new_alien = Alien(game.ship, x=pos[0], y=-150,
-            frame=2, offset_x=pos[0] - game.ship.rect.centerx, offset_y=pos[1])
+        new_alien = Alien(
+            game.ship,
+            x=pos[0],
+            y=pos[1] - 200,
+            frame=0,
+            offset_x=pos[0] - game.ship.rect.centerx,
+            offset_y=pos[1]
+        )
         game.aliens.add(new_alien)

@@ -1,3 +1,5 @@
+import random
+
 import pygame
 
 from scripts.proj import Projectile
@@ -5,14 +7,17 @@ from scripts.sheet import SpriteSheet
 
 
 class Alien(pygame.sprite.Sprite):
-    def __init__(self, ship, x, y, frame, width=26, height=32, scale=4,
+    def __init__(self, ship, x, y, frame, width=32, height=32, scale=2,
                  columns=1, offset_x=0, offset_y=0):
         super().__init__()
-        self.sprite_sheet = SpriteSheet("assets/alien.png")
-        self.image = self.sprite_sheet.get_image(frame, width, height, scale, columns)
-        self.rect = self.image.get_rect(topleft=(x, y))
+        self.sprite_sheet = SpriteSheet("assets/aliens.png")
+        frame_index = random.randint(0, 255)
+        self.image = self.sprite_sheet.get_image(frame_index, width, height,
+                                                 scale, columns=16)
+        self.rect = self.image.get_rect(center=(x, y))
         self.hitbox = self.rect.inflate(self.rect.width * -0.6,
                                         self.rect.height * -0.6)
+        self.frames = []
         self.ship = ship
         self.velocity = max(1, ship.velocity - 2)
         self.offset_x = offset_x
@@ -30,6 +35,9 @@ class Alien(pygame.sprite.Sprite):
         self.last_move = pygame.time.get_ticks()
         self.move_delay = 200
         self.hit = False
+
+    def animate(self):
+        pass
 
     def update(self):
         self.hitbox.center = self.rect.center

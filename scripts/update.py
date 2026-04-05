@@ -1,6 +1,8 @@
 import pygame as pg
 import random
 
+import pygame.display
+
 from scripts import upgd
 from scripts.asteroid import Asteroid
 from scripts.celestial import random_celestial, is_valid_spawn
@@ -19,72 +21,63 @@ def set_hud(screen_size, padding):
         'height': height - 2 * padding
     }
 
-def update_hud(game, font, screen, hud_ratio):
-    game.stopwatch = font.render(
-        f"{game.hours:02}:{game.minutes:02}:{game.seconds:02}",
-        True, "WHITE")
-    screen.blit(game.stopwatch,
-                [hud_ratio['left'] + hud_ratio['width'] // 2 -
-                 game.stopwatch.get_width() // 2, hud_ratio['top']])
+def update_phase(game):
+    current_time = pg.time.get_ticks()
 
-    score_text = f"{int(game.score):06}"
-    high_score = f"{int(game.high_score):06}"
-    score_title = "SCORE"
-    high_score_title = "HIGH\nSCORE"
+    if not hasattr(game, "phase_start_time"):
+        game.phase_start_time = current_time
+        game.phase_ending = False
 
-    score_surface = font.render(score_text, True, "WHITE")
-    score_title_surface = font.render(score_title, True, "WHITE")
-    high_score_surfaces = [font.render(line, True, "WHITE")
-                           for line in high_score_title.split('\n')]
-    high_score_surface = font.render(high_score, True, "WHITE")
+    elapsed = current_time - game.phase_start_time
+    phase_length = random.randint(20000, 30000)
+    buffer_time = 5000
 
-    score_x = hud_ratio['left']
-    score_y = hud_ratio['top']
-    screen.blit(score_title_surface,
-                [score_x, score_y - score_title_surface.get_height() - 5])
-    screen.blit(score_surface, [score_x, score_y])
+    if elapsed >= phase_length - buffer_time:
+        game.phase_ending = True
 
-    y_pos = hud_ratio['top']
-    x_pos = hud_ratio['right'] - max(s.get_width()
-                                     for s in high_score_surfaces + [
-                                         high_score_surface])
-    for line_surf in high_score_surfaces:
-        screen.blit(line_surf, [x_pos, y_pos])
-        y_pos += line_surf.get_height() + 2
-    screen.blit(high_score_surface, [x_pos, y_pos])
+    if game.phase_ending:
+        game.last_alien_spawn = current_time
+        game.last_asteroid_spawn = current_time
 
-    total_frames = len(game.hitpoints.frames) - 1
-    if game.ship.hitpoints <= 0:
-        hitpoints_frame = total_frames
+        if not game.aliens and not game.asteroids:
+            game.phase_index = (game.phase_index + 1) % len(game.phases)
+            game.current_phase = game.phases[game.phase_index]
+            game.phase_start_time = current_time
+            game.phase_ending = False
+            game.last_alien_spawn = 0
+            game.last_asteroid_spawn = 0
+
     else:
-        hitpoints_frame = (
-                    total_frames - (game.ship.hitpoints * total_frames)
-                    // game.ship.max_hitpoints)
-        hitpoints_frame = max(0, min(hitpoints_frame, total_frames))
-    game.hitpoints.update(game.ship, hud_ratio, ['right', 'bottom'],
-                          hitpoints_frame, screen)
+        if game.current_phase == "asteroids":
+            spawn_asteroids(game)
+        elif game.current_phase in ("quiet", "aliens"):
+            spawn_aliens(game)
 
-    shield_total_frames = len(game.shield.frames) - 1
-    shield_frame = (shield_total_frames - (
-                game.ship.shield * shield_total_frames)
-                    // game.ship.max_shield)
-    shield_frame = max(0, min(shield_total_frames, shield_frame))
-    game.shield.update(game.ship, hud_ratio, ['right', 'bottom'],
-                       shield_frame, screen)
 
-    experience_total_frames = len(game.xp.frames) - 1
-    xp_frame = (experience_total_frames - (
-                experience_total_frames * game.ship.xp)
-                // game.ship.xp_to_next_level)
-    game.xp.update(game.ship, hud_ratio, ['right', 'bottom'], xp_frame,
-                   screen)
+def spawn_asteroids(game):
+    current_time = pg.time.get_ticks()
+    if current_time - game.last_asteroid_spawn > game.asteroid_spawn_interval:
+        game.last_asteroid_spawn = current_time
+        for _ in range(random.randint(1, game.asteroid_spawn_count)):
+            for _ in range(10):
+                new_asteroid = Asteroid(game.screen_size[0], min_y=-200,
+                                        max_y=-50)
+                too_close = any(
+                    abs(new_asteroid.rect.y - a.rect.y) < 60 for a in
+                    game.asteroids)
+                if not too_close:
+                    new_asteroid.hitpoints = int(
+                        new_asteroid.hitpoints * game.asteroid_hitpoints)
+                    new_asteroid.speed = game.asteroid_speed
+                    game.asteroids.add(new_asteroid)
+                    break
 
-    ammo_total_frames = len(game.ammo.frames) - 1
-    ammo_frame = (shield_total_frames - (game.ship.ammo * ammo_total_frames)
-                  // game.ship.base_ammo)
-    ammo_frame = max(0, min(ammo_total_frames, ammo_frame))
-    game.ammo.update(game.ship, hud_ratio, ['right', 'bottom'], ammo_frame,
-                     screen)
+
+def spawn_aliens(game):
+    current_time = pg.time.get_ticks()
+    if current_time - game.last_alien_spawn > game.alien_spawn_interval:
+        game.last_alien_spawn = current_time
+        alien_formation(game, formation=random.choice(game.formation))
 
 def update_game(game, delta, screen_size, hud_padding):
     game.ship.hit = False
@@ -102,8 +95,7 @@ def update_game(game, delta, screen_size, hud_padding):
             for _ in range(random.randint(1, 4)):
                 for _ in range(10):
                     new_celestial = random_celestial()
-                    if new_celestial and is_valid_spawn(new_celestial,
-                                                        game.celestials,
+                    if new_celestial and is_valid_spawn(new_celestial, game.celestials,
                                                         200):
                         game.celestials.add(new_celestial)
                         break
@@ -120,27 +112,7 @@ def update_game(game, delta, screen_size, hud_padding):
                 new_upgrade = Upgrade(upgrade, x, y)
                 game.upgrades.add(new_upgrade)  # type: ignore
 
-        if game.current_phase in ("quiet", "asteroids"):
-            if current_time - game.last_alien_spawn > game.alien_spawn_interval:
-                game.last_alien_spawn = current_time
-                alien_formation(game, formation=random.choice(game.formation))
-
-        current_time = pg.time.get_ticks()
-        if game.current_phase == "asteroids":
-            if current_time - game.last_asteroid_spawn > game.asteroid_spawn_interval:
-                game.last_asteroid_spawn = current_time
-                for _ in range(
-                        random.randint(1, game.asteroid_spawn_count)):
-                    for _ in range(10):
-                        new_asteroid = Asteroid(screen_size[0], min_y=-200,max_y=-50)
-                        too_close = any(abs(new_asteroid.rect.y - m.rect.y) < 60 for m
-                            in game.asteroids)
-                        if not too_close:
-                            new_asteroid.hitpoints = int(
-                                new_asteroid.hitpoints * game.asteroid_hitpoints)
-                            new_asteroid.speed = game.asteroid_speed
-                            game.asteroids.add(new_asteroid)  # type: ignore
-                            break
+        update_phase(game)
 
     now = pg.time.get_ticks()
     if now - game.last_update_base > game.cooldown_base:
@@ -187,6 +159,10 @@ def update_game(game, delta, screen_size, hud_padding):
     if game.current_phase == "asteroids":
         game.asteroids.update()
     elif game.current_phase != "asteroids":
+        for asteroid in game.asteroids:
+            asteroid.rect.y -= 2
+            if asteroid.rect.y > pygame.display.Info().current_h:
+                game.asteroids.remove(asteroid)
         game.asteroids.empty()
 
     if game.current_phase in ("quiet", "asteroids"):
@@ -226,3 +202,70 @@ def update_game(game, delta, screen_size, hud_padding):
     if game.survival_bonus >= 60:
         game.survival_bonus = 0
         game.score += 1 * game.score_multiplier
+
+def update_hud(game, font, screen, hud_ratio):
+    game.stopwatch = font.render(
+        f"{game.hours:02}:{game.minutes:02}:{game.seconds:02}",
+        True, "WHITE")
+    screen.blit(game.stopwatch,
+                [hud_ratio['left'] + hud_ratio['width'] // 2 -
+                 game.stopwatch.get_width() // 2, hud_ratio['top']])
+
+    score_text = f"{int(game.score):06}"
+    high_score = f"{int(game.high_score):06}"
+    score_title = "SCORE"
+    high_score_title = "HIGH\nSCORE"
+
+    score_surface = font.render(score_text, True, "WHITE")
+    score_title_surface = font.render(score_title, True, "WHITE")
+    high_score_surfaces = [font.render(line, True, "WHITE")
+                           for line in high_score_title.split('\n')]
+    high_score_surface = font.render(high_score, True, "WHITE")
+
+    score_x = hud_ratio['left']
+    score_y = hud_ratio['top']
+    screen.blit(score_title_surface,
+                [score_x, score_y - score_title_surface.get_height() - 5])
+    screen.blit(score_surface, [score_x, score_y])
+
+    y_pos = hud_ratio['top']
+    x_pos = hud_ratio['right'] - max(s.get_width() for s in
+        high_score_surfaces + [high_score_surface])
+
+    for line_surf in high_score_surfaces:
+        screen.blit(line_surf, [x_pos, y_pos])
+        y_pos += line_surf.get_height() + 2
+    screen.blit(high_score_surface, [x_pos, y_pos])
+
+    total_frames = len(game.hitpoints.frames) - 1
+    if game.ship.hitpoints <= 0:
+        hitpoints_frame = total_frames
+    else:
+        hitpoints_frame = (
+                    total_frames - (game.ship.hitpoints * total_frames)
+                    // game.ship.max_hitpoints)
+        hitpoints_frame = max(0, min(hitpoints_frame, total_frames))
+    game.hitpoints.update(game.ship, hud_ratio, ['right', 'bottom'],
+                          hitpoints_frame, screen)
+
+    shield_total_frames = len(game.shield.frames) - 1
+    shield_frame = (shield_total_frames - (
+                game.ship.shield * shield_total_frames)
+                    // game.ship.max_shield)
+    shield_frame = max(0, min(shield_total_frames, shield_frame))
+    game.shield.update(game.ship, hud_ratio, ['right', 'bottom'],
+                       shield_frame, screen)
+
+    experience_total_frames = len(game.xp.frames) - 1
+    xp_frame = (experience_total_frames - (
+                experience_total_frames * game.ship.xp)
+                // game.ship.xp_to_next_level)
+    game.xp.update(game.ship, hud_ratio, ['right', 'bottom'], xp_frame,
+                   screen)
+
+    ammo_total_frames = len(game.ammo.frames) - 1
+    ammo_frame = (shield_total_frames - (game.ship.ammo * ammo_total_frames)
+                  // game.ship.base_ammo)
+    ammo_frame = max(0, min(ammo_total_frames, ammo_frame))
+    game.ammo.update(game.ship, hud_ratio, ['right', 'bottom'], ammo_frame,
+                     screen)

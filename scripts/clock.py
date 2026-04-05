@@ -1,6 +1,8 @@
 import random
 
 import pygame
+
+from scripts.boss import spawn_boss
 from scripts.utils import level_enemies
 
 def update_time(game):
@@ -18,17 +20,20 @@ def update_time(game):
         game.seconds += 1
         if game.seconds % random.randint(20, 30) == 0:
             if game.current_phase == "boss_fight" and not game.boss_spawned:
-                game.spawn_boss()
+                spawn_boss(game)
                 game.boss_alive = True
                 game.boss_spawned = True
             else:
-                game.phase_index = (game.phase_index + 1) % len(game.phases)
-                game.current_phase = game.phases[game.phase_index]
-                game.last_alien_spawn = 0
-                game.last_asteroid_spawn = 0
-                if game.current_phase == "asteroids":
-                    level_enemies(game)
-                game.stars_speed += 1
+                if game.current_phase == "quiet" and not game.aliens:
+                    pass
+                else:
+                    game.phase_index = (game.phase_index + 1) % len(game.phases)
+                    game.current_phase = game.phases[game.phase_index]
+                    game.last_alien_spawn = 0
+                    game.last_asteroid_spawn = 0
+                    if game.current_phase == "asteroids":
+                        level_enemies(game)
+                    game.stars_speed += 1
         if game.seconds >= 60:
             game.seconds = 0
             game.minutes += 1

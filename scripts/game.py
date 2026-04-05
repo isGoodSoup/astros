@@ -24,6 +24,7 @@ class Game:
                  game_font):
         self.fps = 60
         self.frame = 0
+        self.screen_size = screen_size
         self.prev_state = None
         self.scale = 4
         self.sounds = load_sounds()
@@ -36,6 +37,8 @@ class Game:
         self.phase_index = 0
         self.phase_to_sprite = {"quiet": 0, "asteroids": 1,
                                 "boss_fight": 2}
+        self.phase_start_time = pg.time.get_ticks()
+        self.phase_ending = False
 
         self.boss_alive = False
         self.boss_spawned = False
