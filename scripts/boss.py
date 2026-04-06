@@ -6,11 +6,10 @@ class Boss(pygame.sprite.Sprite):
         super().__init__()
         self.image = pygame.image.load(f"assets/aliens/{color}.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (width * scale, height * scale))
-        self.rect = self.image.get_rect()
+        self.rect = self.image.get_rect(center=(x,y))
         self.hitbox = self.rect.inflate(self.rect.width * -0.5, self.rect.height * -0.5)
 
         self.pos = pygame.Vector2(x, y)
-        self.frames = []
         self.ship = ship
         self.step = max(1, ship.velocity + 1)
         self.offset_x = offset_x
@@ -42,10 +41,11 @@ class Boss(pygame.sprite.Sprite):
         now = pygame.time.get_ticks()
         if now - self.move_timer >= self.move_delay:
 
-            if (self.rect.right >= pygame.display.Info().current_w or
-                    self.rect.left == 0):
+            screen_width = pygame.display.Info().current_w
+            if self.rect.right >= screen_width or self.rect.left <= 0:
                 self.direction *= -1
                 self.rect.y += 30
 
             self.rect.x += self.direction * self.step
+            self.rect.x = max(0, min(self.rect.x, screen_width - self.rect.width))
             self.move_timer = now
