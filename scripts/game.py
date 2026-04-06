@@ -319,7 +319,6 @@ class Game:
                         for skill in self.current_phase_options:
                             if skill.is_hovered(mouse_pos):
                                 self.skills.unlock_or_upgrade(skill, self.ship)
-                                self.current_phase_options = []
                                 self.pause = False
                                 self.skill_tab.active = False
                                 break
@@ -360,7 +359,6 @@ class Game:
                         if self.selected_skill and self.current_phase_options:
                             self.skills.unlock_or_upgrade(self.selected_skill,
                                                           self.ship)
-                            self.current_phase_options = []
                             self.skill_tab.active = False
 
                     if event.button == 6:

@@ -56,6 +56,7 @@ def update_phase(game):
 
     if game.phase_ending and not game.skill_tab.active\
             and not enemies_alive:
+        game.ship.perk_points += 1
         game.skill_tab.active = True
 
     if game.skill_tab.active:
@@ -202,6 +203,9 @@ def update_game(game, delta, screen_size, hud_padding):
     game.skill_tab.update()
     game.stats_tab.update()
     game.floating_numbers.update(delta)
+
+    if game.skill_tab.pos == game.skill_tab.start_pos:
+        game.current_phase_options = []
 
     for particle in game.particles[:]:
         particle.update()

@@ -124,7 +124,6 @@ class Ship(pygame.sprite.Sprite):
         self.hitpoints = self.max_hitpoints
         self.max_shield += 10
         self.shield = self.max_shield
-        self.perk_points += 1
         self.xp_to_next_level = int(self.xp_to_next_level * self.xp_growth)
         sound[3].play()
 
