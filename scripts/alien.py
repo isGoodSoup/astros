@@ -25,7 +25,7 @@ class Alien(pygame.sprite.Sprite):
         self.hitpoints = self.max_hitpoints
         self.base_damage = ship.damage * self.level
         self.last_shot_time = 0
-        self.shot_cooldown = 200
+        self.shot_cooldown = 500
         self.hit = False
 
     def update(self):
