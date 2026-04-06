@@ -34,17 +34,14 @@ def update_phase(game):
     if elapsed >= game.phase_length - buffer_time:
         game.phase_ending = True
 
-    if (game.current_phase in game.phases and not game.phase_ending
-            and not getattr(game, "fleet_spawned", False)):
-        spawn_fleet(game, game.current_phase)
-        game.fleet_spawned = True
-
-    if (game.current_phase in [game.phases[3], game.phases[5]] and not
-            game.phase_ending):
-        spawn_asteroids(game)
-
-    if game.current_phase == game.phases[-1]:
-        spawn_boss(game)
+    if not game.phase_spawned:
+        if game.current_phase == game.phases[-1]:
+            spawn_boss(game)
+        elif game.current_phase in [game.phases[3], game.phases[5]]:
+            spawn_asteroids(game)
+        else:
+            spawn_fleet(game, game.current_phase)
+        game.phase_spawned = True
 
     fleets_alive = any(len(fleet.aliens) > 0 for fleet in game.fleets)
     enemies_alive = any([
@@ -68,8 +65,7 @@ def update_phase(game):
             game.phase_ending = False
             game.last_alien_spawn = 0
             game.last_asteroid_spawn = 0
-            game.fleet_spawned = False
-            game.boss_spawned = False
+            game.phase_spawned = False
 
     if game.phase_ending and not game.current_phase_options:
         available_skills = [s for s in game.skills.skills if not s.unlocked]
@@ -83,19 +79,15 @@ def spawn_asteroids(game):
     if current_time - game.last_asteroid_spawn > game.asteroid_spawn_interval:
         game.last_asteroid_spawn = current_time
         for _ in range(random.randint(1, game.asteroid_spawn_count)):
-            for _ in range(10):
-                new_asteroid = Asteroid(game.screen_size[0], min_y=-200,
-                                        max_y=-50)
-                too_close = any(
-                    abs(new_asteroid.rect.y - a.rect.y) < 60 for a in
-                    game.asteroids)
-                if not too_close:
-                    new_asteroid.hitpoints = int(
-                        new_asteroid.hitpoints * game.asteroid_hitpoints)
-                    new_asteroid.speed = game.asteroid_speed
+            attempts = 0
+            while attempts < 20:
+                new_asteroid = Asteroid(game.screen_size[0], min_y=-200, max_y=-50)
+                if all(abs(new_asteroid.rect.y - a.rect.y) >= 60 for a in
+                       game.asteroids):
                     game.asteroids.add(new_asteroid)
                     game.entities.add(new_asteroid)
                     break
+                attempts += 1
 
 def spawn_boss(game):
     if not game.boss_spawned:
@@ -182,7 +174,7 @@ def update_game(game, delta, screen_size, hud_padding):
         game.last_direction = None
 
     game.celestials.update()
-    game.entities.update()
+    game.asteroids.update()
 
     alive_fleets = []
     for fleet in game.fleets:

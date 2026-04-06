@@ -93,14 +93,14 @@ def spawn_fleet(game, phase):
         if alive:
             return
 
-    if phase == f"{game.phases[2]}" or phase == f"{game.phases[4]}":
+    if phase == {game.phases[2]} or phase == {game.phases[4]}:
         clusters = 1
         rows, cols = 3, 8
-    elif (phase == f"{game.phases[0]}" or phase == f"{game.phases[1]}" or
-          phase == f"{game.phases[3]}"):
+    elif (phase == {game.phases[0]} or phase == {game.phases[1]} or
+          phase == {game.phases[3]}):
         clusters = 1
         rows, cols = 5, 8
-    elif phase == f"{game.phases[-1]}":
+    elif phase == {game.phases[-1]}:
         clusters = 0
         rows, cols = 1, 4
     else:

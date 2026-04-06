@@ -47,10 +47,9 @@ class Game:
         self.phase_start_time = pg.time.get_ticks()
         self.phase_length = 30_000
         self.phase_ending = False
+        self.phase_spawned = False
 
-        self.fleet_spawned = False
         self.boss_alive = False
-        self.boss_spawned = False
 
         self.celestials = pg.sprite.Group()
         self.projectiles = pg.sprite.Group()
