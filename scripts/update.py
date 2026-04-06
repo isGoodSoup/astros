@@ -279,7 +279,7 @@ def update_hud(game, font, screen, hud_ratio):
                    screen)
 
     ammo_total_frames = len(game.ammo.frames) - 1
-    ammo_frame = (shield_total_frames - (game.ship.ammo * ammo_total_frames)
+    ammo_frame = (ammo_total_frames - (game.ship.ammo * ammo_total_frames)
                   // game.ship.base_ammo)
     ammo_frame = max(0, min(ammo_total_frames, ammo_frame))
     game.ammo.update(game.ship, hud_ratio, ['right', 'bottom'], ammo_frame,
