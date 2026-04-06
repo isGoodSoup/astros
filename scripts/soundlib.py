@@ -12,4 +12,4 @@ def load_sounds():
     return sounds
 
 def load_ost():
-    return pygame.mixer.music.load("fx/theme.ogg")
+    return pygame.mixer.music.load("assets/fx/theme.ogg")
