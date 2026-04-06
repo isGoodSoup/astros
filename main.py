@@ -49,7 +49,7 @@ class Menu:
                 if event.type == pg.QUIT:
                     self.running = False
                 elif event.type == pg.KEYDOWN:
-                    if event.key == pg.K_RETURN and not self.transitioning:
+                    if any(pygame.key.get_pressed()) and not self.transitioning:
                         self.sounds[2].play()
                         fade.start("out")
                         self.transitioning = True
