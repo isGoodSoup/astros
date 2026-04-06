@@ -1,2 +1,2 @@
-invincible = True
+invincible = False
 unlimited_ammo = False
