@@ -15,7 +15,7 @@ class AlienFleet:
         self.alien_width = 16 * scale
         self.alien_height = 13 * scale
         self.direction = 1
-        self.step = 16
+        self.step = 24
         self.move_timer = pygame.time.get_ticks()
         self.move_delay = 600
         self.min_delay = 100
@@ -95,14 +95,14 @@ def spawn_fleet(game, phase):
 
     if phase == f"{game.phases[2]}" or phase == f"{game.phases[4]}":
         clusters = 1
-        rows, cols = 4, 8
+        rows, cols = 3, 8
     elif (phase == f"{game.phases[0]}" or phase == f"{game.phases[1]}" or
           phase == f"{game.phases[3]}"):
         clusters = 1
-        rows, cols = 6, 12
+        rows, cols = 5, 8
     elif phase == f"{game.phases[-1]}":
         clusters = 0
-        rows, cols = 2, 4
+        rows, cols = 1, 4
     else:
         return
 
