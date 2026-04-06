@@ -3,9 +3,42 @@ from pygame.constants import *
 
 lock_y = False
 
+def get_next_skill(current, skills, direction):
+    if not skills:
+        return None
+
+    if current is None:
+        return skills[0]
+
+    cx, cy = current.pos
+    dir_x, dir_y = direction
+
+    candidates = []
+
+    for skill in skills:
+        if skill == current:
+            continue
+
+        sx, sy = skill.pos
+        dx = sx - cx
+        dy = sy - cy
+
+        if dir_x != 0 and (dx * dir_x) <= 0:
+            continue
+        if dir_y != 0 and (dy * dir_y) <= 0:
+            continue
+
+        dist = dx * dx + dy * dy
+        candidates.append((dist, skill))
+
+    if not candidates:
+        return current
+
+    candidates.sort(key=lambda x: x[0])
+    return candidates[0][1]
+
 def update_movement(game, delta, screen_size):
     key_pressed = pygame.key.get_pressed()
-    joy_x = game.joy_axis[0]
 
     movement_x = 0
     movement_y = 0
@@ -14,14 +47,13 @@ def update_movement(game, delta, screen_size):
         movement_x -= game.ship.velocity * delta * 60
     if key_pressed[K_RIGHT]:
         movement_x += game.ship.velocity * delta * 60
-
     if not lock_y:
         if key_pressed[K_UP]:
             movement_y -= game.ship.velocity * delta * 60
         if key_pressed[K_DOWN]:
             movement_y += game.ship.velocity * delta * 60
 
-    movement_x += joy_x * game.ship.velocity * delta * 60
+    movement_x += game.joy_axis[0] * game.ship.velocity * delta * 60
     if not lock_y:
         movement_y += game.joy_axis[1] * game.ship.velocity * delta * 60
 
@@ -43,29 +75,71 @@ def update_movement(game, delta, screen_size):
             game.ship.shield -= game.ship.tower_boost
             game.ship.tower_boost = 0
             game.ship.tower_boost_applied = False
-    elif not game.ship.moving:
-        if game.skill_tab.active:
-            cursor_speed = game.cursor_speed * delta
-            game.cursor_pos[0] += game.joy_axis[0] * cursor_speed
-            game.cursor_pos[1] += game.joy_axis[1] * cursor_speed
+    else:
+        game.ship.shield += game.ship.tower_boost
+        game.ship.tower_boost_applied = True
 
-            game.cursor_pos[0] = max(0, min(screen_size[0], game.cursor_pos[0]))
-            game.cursor_pos[1] = max(0, min(screen_size[1], game.cursor_pos[1]))
+    if game.skill_tab.active:
+        cursor_speed = game.cursor_speed * delta
 
-            if game.current_phase_options:
-                closest_skill = None
-                min_dist = float('inf')
-                for skill in game.current_phase_options:
-                    dx = game.cursor_pos[0] - skill.pos[0]
-                    dy = game.cursor_pos[1] - skill.pos[1]
-                    dist = (dx * dx + dy * dy) ** 0.5
-                    if dist < min_dist:
-                        min_dist = dist
-                        closest_skill = skill
-                game.selected_skill = closest_skill
+        mouse_pos = pygame.mouse.get_pos()
+        if mouse_pos != getattr(game, "last_cursor_pos", (0, 0)):
+            game.input_mode = "mouse"
+            game.last_input_time = pygame.time.get_ticks()
+        game.last_cursor_pos = mouse_pos
 
-                for skill in game.current_phase_options:
-                    skill.hovered = (skill == game.selected_skill)
+        if abs(game.motion[0]) > 0.05 or abs(game.motion[1]) > 0.05:
+            game.input_mode = "controller"
+            game.last_input_time = pygame.time.get_ticks()
+
+        if game.input_mode == "mouse":
+            game.cursor_pos = list(mouse_pos)
+        elif game.input_mode == "controller":
+            game.cursor_pos[0] += game.motion[0] * cursor_speed
+            game.cursor_pos[1] += game.motion[1] * cursor_speed
+            game.cursor_pos[0] = max(0, min(game.screen_size[0],
+                                            game.cursor_pos[0]))
+            game.cursor_pos[1] = max(0, min(game.screen_size[1],
+                                            game.cursor_pos[1]))
+
+        current_time = pygame.time.get_ticks()
+        dx, dy = game.motion
+        threshold = 0.5
+
+        if current_time - game.last_nav_time > game.nav_cooldown:
+            direction = None
+            if abs(dx) > abs(dy):
+                if dx > threshold:
+                    direction = (1, 0)
+                elif dx < -threshold:
+                    direction = (-1, 0)
+            else:
+                if dy > threshold:
+                    direction = (0, 1)
+                elif dy < -threshold:
+                    direction = (0, -1)
+
+            if direction:
+                game.selected_skill = get_next_skill(
+                    game.selected_skill,
+                    game.current_phase_options,
+                    direction
+                )
+                game.last_nav_time = current_time
+
+        closest_skill = None
+        min_dist = float('inf')
+        for skill in game.current_phase_options:
+            dx = game.cursor_pos[0] - skill.pos[0]
+            dy = game.cursor_pos[1] - skill.pos[1]
+            dist = dx * dx + dy * dy
+            if dist < min_dist:
+                min_dist = dist
+                closest_skill = skill
+
+        game.selected_skill = closest_skill
+        for skill in game.current_phase_options:
+            skill.hovered = (skill == game.selected_skill)
 
     if key_pressed[K_SPACE]:
         current_time = pygame.time.get_ticks()

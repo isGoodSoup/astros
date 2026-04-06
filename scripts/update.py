@@ -77,6 +77,7 @@ def update_phase(game):
         if not available_skills:
             available_skills = game.skills.skills
         game.current_phase_options = random.sample(available_skills, k=min(3,len(available_skills)))
+        game.selected_skill = game.current_phase_options[0]
 
 def spawn_asteroids(game):
     current_time = pg.time.get_ticks()
@@ -100,9 +101,9 @@ def spawn_asteroids(game):
 def spawn_boss(game):
     if not game.boss_spawned:
         x = game.screen_size[0] // 2
-        y = 100
-        color = 'red'
-        boss = Boss(game.ship, x, y, color)
+        y = 350
+        color = ['red', 'green', 'yellow']
+        boss = Boss(game.ship, x, y, random.choice(color))
         game.bosses.add(boss)
         game.boss_spawned = True
         game.boss_alive = True

@@ -44,6 +44,9 @@ def render_frame(game, screen, font, hud_padding):
         for p in game.projectiles:
             pg.draw.rect(screen, (0, 0, 255), p.rect, 2)
 
+        for b in game.bosses:
+            pg.draw.rect(screen, (255, 0, 0), b.rect, 2)
+
     if game.ship_alive:
         game.ship.rect.topleft = (game.ship_x, game.ship_y)
         screen.blit(img, game.ship.rect)

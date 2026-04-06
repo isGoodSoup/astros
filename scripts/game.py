@@ -89,6 +89,11 @@ class Game:
         self.cursor_pos = [screen_size[0] // 2, screen_size[1] // 2]
         self.cursor_speed = 1000
         self.selected_skill = None
+        self.nav_cooldown = 150  # ms
+        self.last_nav_time = 0
+
+        self.input_mode = "mouse"
+        self.last_input_time = 0
 
         self.hitpoints = Interface("assets/ui/status.png", 0, 40, 40,
                                    hud_ratio, ['right', 'bottom'])
@@ -316,12 +321,64 @@ class Game:
                 elif event.type == pg.MOUSEBUTTONDOWN:
                     if self.skill_tab.active and self.current_phase_options:
                         mouse_pos = pg.mouse.get_pos()
+
+                        if mouse_pos != getattr(self, "last_cursor_pos",
+                                                (0, 0)):
+                            self.input_mode = "mouse"
+                            self.last_input_time = pg.time.get_ticks()
+                        self.last_cursor_pos = mouse_pos
+
+                        if abs(self.motion[0]) > 0.05 or abs(
+                                self.motion[1]) > 0.05:
+                            self.input_mode = "controller"
+                            self.last_input_time = pg.time.get_ticks()
+
+                        if self.input_mode == "mouse":
+                            self.cursor_pos = list(mouse_pos)
+                            closest_skill = None
+                            min_dist = float('inf')
+                            for skill in self.current_phase_options:
+                                dx = self.cursor_pos[0] - skill.pos[0]
+                                dy = self.cursor_pos[1] - skill.pos[1]
+                                dist = dx * dx + dy * dy
+                                if dist < min_dist:
+                                    min_dist = dist
+                                    closest_skill = skill
+                            self.selected_skill = closest_skill
+
+                        elif self.input_mode == "controller":
+                            current_time = pg.time.get_ticks()
+                            dx = self.motion[0]
+                            dy = self.motion[1]
+                            threshold = 0.5
+
+                            if current_time - self.last_nav_time > self.nav_cooldown:
+                                direction = None
+                                if abs(dx) > abs(dy):
+                                    if dx > threshold:
+                                        direction = (1, 0)
+                                    elif dx < -threshold:
+                                        direction = (-1, 0)
+                                else:
+                                    if dy > threshold:
+                                        direction = (0, 1)
+                                    elif dy < -threshold:
+                                        direction = (0, -1)
+
+                                if direction:
+                                    from scripts.movement import get_next_skill
+                                    self.selected_skill = get_next_skill(
+                                        self.selected_skill,
+                                        self.current_phase_options,
+                                        direction
+                                    )
+                                    self.last_nav_time = current_time
+
+                            if self.selected_skill:
+                                self.cursor_pos = list(self.selected_skill.pos)
+
                         for skill in self.current_phase_options:
-                            if skill.is_hovered(mouse_pos):
-                                self.skills.unlock_or_upgrade(skill, self.ship)
-                                self.pause = False
-                                self.skill_tab.active = False
-                                break
+                            skill.hovered = (skill == self.selected_skill)
 
                 elif event.type == JOYBUTTONDOWN:
                     if event.button == 0:
@@ -379,8 +436,13 @@ class Game:
                             controller.stop_rumble()
 
                 elif event.type == JOYAXISMOTION:
+                    if abs(event.value) > self.deadzone:
+                        self.input_mode = "controller"
+                        self.last_input_time = pg.time.get_ticks()
+
                     val = event.value if abs(
                         event.value) > self.deadzone else 0.0
+
                     if event.axis in (0, 1):
                         while len(self.joy_axis) <= event.axis:
                             self.joy_axis.append(0.0)
