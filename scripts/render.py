@@ -1,3 +1,6 @@
+import random
+
+import pygame
 import pygame as pg
 
 from scripts.shared import joysticks
@@ -50,13 +53,10 @@ def render_frame(game, screen, font, hud_padding):
 
     game.explosions.draw(screen)
 
-    if game.skill_tab.active:
+    if game.skill_tab.active and game.current_phase_options:
         cursor_pos = game.cursor_pos if joysticks else pg.mouse.get_pos()
-        for skill in game.skills.skills:
-            skill.is_hovered(cursor_pos)
-
         game.selected_skill = None
-        for skill in game.skills.skills:
+        for skill in game.current_phase_options:
             if skill.is_hovered(cursor_pos):
                 game.selected_skill = skill
                 break
@@ -67,21 +67,28 @@ def render_frame(game, screen, font, hud_padding):
     screen.blit(game.credits, [hud_padding, 190])
 
     if game.tutorial_on:
-        game.tutorial.render(screen, font, )
-
+        game.tutorial.render(screen, font)
 
 def render_skills_tab(game, screen, rect, game_font):
-    perk_points = game_font.render(f"Perks: {game.ship.perk_points}", True,
-                                   (255, 255, 255))
-    screen.blit(perk_points, (rect.x + 40, rect.y + 40))
+    title_text, perks = "End of Phase", f"Perks: {game.ship.perk_points}"
+    title = game_font.render(title_text, True, (255, 255, 255))
+    perk_points = game_font.render(perks, True, (255, 255, 255))
+    padding, offset = 60, 20
 
-    for skill in game.skills.skills:
-        x, y = skill.pos
-        frame = pg.transform.scale(skill.current_frame(), (64, 64))
-        skill.rect.topleft = (rect.x + x, rect.y + y)
+    screen.blit(title, (rect.x + 250 + offset, rect.y + padding))
+    screen.blit(perk_points, (rect.x + 300 + offset, rect.y + padding + 40))
+
+    if not hasattr(game, "current_phase_options") or game.current_phase_options is None:
+        available_skills = [s for s in game.skills.skills if not s.unlocked]
+        game.current_phase_options = random.sample(available_skills, k=min(3, len(available_skills)))
+
+    grid = [(250, 200), (350, 200), (450, 200)]
+
+    for skill, pos in zip(game.current_phase_options, grid):
+        skill.rect.topleft = (rect.x + pos[0] + offset, rect.y + pos[1])
+        frame = pygame.transform.scale(skill.current_frame(), (64, 64))
         screen.blit(frame, skill.rect)
         screen.blit(skill.icon_image, skill.rect)
-
 
 def render_stats_tab(game, screen, rect, game_font):
     stats = [

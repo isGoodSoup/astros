@@ -10,7 +10,6 @@ from scripts.collision import check_collision
 from scripts.fleet import spawn_fleet
 from scripts.upgd import Upgrade
 
-
 def set_hud(screen_size, padding):
     width, height = screen_size
     return {
@@ -21,7 +20,6 @@ def set_hud(screen_size, padding):
         'width': width - 2 * padding,
         'height': height - 2 * padding
     }
-
 
 def update_phase(game):
     current_time = pg.time.get_ticks()
@@ -36,24 +34,29 @@ def update_phase(game):
     if elapsed >= game.phase_length - buffer_time:
         game.phase_ending = True
 
-    if game.current_phase in game.phases:
+    if game.current_phase in game.phases and not game.phase_ending:
         spawn_fleet(game, game.current_phase)
 
-    if game.current_phase in [game.phases[3], game.phases[5]]:
+    if (game.current_phase in [game.phases[3], game.phases[5]] and not
+            game.phase_ending):
         spawn_asteroids(game)
 
     if game.current_phase == game.phases[-1]:
         spawn_boss(game)
 
+    fleets_alive = any(len(fleet.aliens) > 0 for fleet in game.fleets)
     enemies_alive = any([
-        bool(game.aliens),
-        bool(game.asteroids),
-        bool(game.bosses),
-        bool(game.fleets)
+        len(game.aliens) > 0,
+        len(game.asteroids) > 0,
+        len(game.bosses) > 0,
+        fleets_alive
     ])
 
     if game.phase_ending and not enemies_alive:
         game.phase_index = (game.phase_index + 1) % len(game.phases)
+        game.skill_tab.active = True
+        if game.skill_tab.update:
+            game.pause = True
         game.current_phase = game.phases[game.phase_index]
         game.phase_start_time = current_time
         game.phase_ending = False
@@ -123,8 +126,6 @@ def update_game(game, delta, screen_size, hud_padding):
                 new_upgrade = Upgrade(upgrade, x, y)
                 game.upgrades.add(new_upgrade)  # type: ignore
 
-        update_phase(game)
-
     now = pg.time.get_ticks()
     if now - game.last_update_base > game.cooldown_base:
         game.anim_frame_base += 1
@@ -185,8 +186,9 @@ def update_game(game, delta, screen_size, hud_padding):
 
     game.explosions.update()
     game.upgrades.update()
-    game.skill_tab.update()
-    game.stats_tab.update()
+    if game.pause and game.phase_ending:
+        game.skill_tab.update()
+        game.stats_tab.update()
     game.floating_numbers.update(delta)
 
     for particle in game.particles[:]:
@@ -212,6 +214,8 @@ def update_game(game, delta, screen_size, hud_padding):
     if game.survival_bonus >= 60:
         game.survival_bonus = 0
         game.score += 1 * game.score_multiplier
+
+    update_phase(game)
 
 def update_hud(game, font, screen, hud_ratio):
     game.stopwatch = font.render(f"{game.hours:02}:{game.minutes:02}:{game.seconds:02}", True, "WHITE")
