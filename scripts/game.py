@@ -229,7 +229,6 @@ class Game:
 
     def run(self, running, clock, screen,
             screen_size, hud_padding, hud_ratio, crt, font):
-        clock.tick()
         while running:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
