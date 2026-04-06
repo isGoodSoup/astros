@@ -1,4 +1,6 @@
 import pygame
+
+from scripts.ship import Ship
 from scripts.utils import center
 
 def game_lost(game, font, screen, screen_size):
@@ -25,13 +27,15 @@ def game_lost(game, font, screen, screen_size):
     screen.blit(game_over, [game_over_x, game_over_y])
     screen.blit(score_text, [center(game, score_text, screen_size), game_over_y + 25])
     screen.blit(stopwatch, [center(game, stopwatch, screen_size), game_over_y + 50])
-    
+
+
 def reboot(game, screen_size):
     saved_stats = game.ship.get_stats()
 
     game.projectiles.empty()
     game.enemy_projectiles.empty()
     game.entities.empty()
+    game.aliens.empty()
     game.fleets.clear()
     game.explosions.empty()
     game.upgrades.empty()
@@ -40,12 +44,13 @@ def reboot(game, screen_size):
 
     framew = game.ship_sprite[0].sheet.get_width() // game.cols
     frameh = game.ship_sprite[0].sheet.get_height()
-    game.ship.rect.topleft = (screen_size[0] // 2 - framew // 2 - 25,
-                              screen_size[1] // 2 + 200)
-    game.ship.hitbox.center = game.ship.rect.center
+    game.ship = Ship(game.ship_sprite[0], 0, 0, game.frame, framew, frameh,
+                     columns=game.cols)
 
     for attr, value in saved_stats.items():
         setattr(game.ship, attr, value)
+
+    game.spawnpoint(game.ship, screen_size, game.ship_sprite, game.cols)
 
     game.ship_alive = True
     game.ship.hitpoints = game.ship.max_hitpoints

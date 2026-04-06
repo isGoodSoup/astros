@@ -70,8 +70,9 @@ class Game:
         self.megaexplosion_sheet = SpriteSheet("assets/explosion_charge.png")
         framew = self.ship_sprite[0].sheet.get_width() // self.cols
         frameh = self.ship_sprite[0].sheet.get_height()
-        self.ship = Ship(self.ship_sprite[0], 0, 0, self.frame,
-                         framew, frameh, columns=self.cols)
+        self.ship = Ship(self.ship_sprite[0], 0, 0, self.frame, framew, frameh, columns=self.cols)
+        self.spawnpoint(self.ship, screen_size, self.ship_sprite, self.cols)
+
         self.ship_alive = True
         self.ship_x = screen_size[0] // 2 - framew // 2 - 25
         self.ship_y = screen_size[1] // 2 + 200
@@ -440,3 +441,11 @@ class Game:
                 screen.blit(fade_surface, (0, 0))
             crt.render(screen)
         pg.quit()
+
+    def spawnpoint(self, ship, screen_size, ship_sprite, cols):
+        framew = ship_sprite[0].sheet.get_width() // cols
+        x = screen_size[0] // 2 - framew // 2
+        y = screen_size[1] // 2 + 200
+        ship.rect.topleft = (x, y)
+        ship.hitbox.center = ship.rect.center
+        self.ship_pos = [x, y]
