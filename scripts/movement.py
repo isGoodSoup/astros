@@ -1,6 +1,8 @@
 import pygame
 from pygame.constants import *
 
+lock_y = False
+
 def update_movement(game, delta, screen_size):
     key_pressed = pygame.key.get_pressed()
     joy_x = game.joy_axis[0]
@@ -13,13 +15,15 @@ def update_movement(game, delta, screen_size):
     if key_pressed[K_RIGHT]:
         movement_x += game.ship.velocity * delta * 60
 
-    if key_pressed[K_UP]:
-        movement_y -= game.ship.velocity * delta * 60
-    if key_pressed[K_DOWN]:
-        movement_y += game.ship.velocity * delta * 60
+    if not lock_y:
+        if key_pressed[K_UP]:
+            movement_y -= game.ship.velocity * delta * 60
+        if key_pressed[K_DOWN]:
+            movement_y += game.ship.velocity * delta * 60
 
     movement_x += joy_x * game.ship.velocity * delta * 60
-    movement_y += game.joy_axis[1] * game.ship.velocity * delta * 60
+    if not lock_y:
+        movement_y += game.joy_axis[1] * game.ship.velocity * delta * 60
 
     game.ship_x = max(0, min(screen_size[0] - game.base.get_width(),
                              game.ship_x + movement_x))

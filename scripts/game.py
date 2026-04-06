@@ -1,6 +1,7 @@
 import pygame as pg
 from pygame.constants import *
 
+from scripts import movement
 from scripts.celestial import *
 from scripts.clock import update_time
 from scripts.controller import update_controller
@@ -276,6 +277,9 @@ class Game:
                             hud_padding = 0
                         hud_ratio = set_hud(screen_size, hud_padding)
 
+                    if event.key == pg.K_l:
+                        movement.lock_y = not movement.lock_y
+
                     if event.key == pg.K_r and self.game_over:
                         reboot(self, screen_size)
 
@@ -328,6 +332,9 @@ class Game:
                         if not self.charge_active and self.ship.charges > 0:
                             self.charge_active = True
                             self.charge_start_time = pg.time.get_ticks()
+
+                    if event.button == 4:
+                        movement.lock_y = not movement.lock_y
 
                     if event.button == 5:
                         if self.selected_skill:
