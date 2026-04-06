@@ -44,10 +44,28 @@ def update_movement(game, delta, screen_size):
             game.ship.tower_boost = 0
             game.ship.tower_boost_applied = False
     elif not game.ship.moving:
-        if not game.ship.moving:
-            for skill in game.skills.skills:
-                if skill.name == "Tower" and skill.unlocked:
-                    skill.ability.apply(game.ship, skill.level)
+        if game.skill_tab.active:
+            cursor_speed = game.cursor_speed * delta
+            game.cursor_pos[0] += game.joy_axis[0] * cursor_speed
+            game.cursor_pos[1] += game.joy_axis[1] * cursor_speed
+
+            game.cursor_pos[0] = max(0, min(screen_size[0], game.cursor_pos[0]))
+            game.cursor_pos[1] = max(0, min(screen_size[1], game.cursor_pos[1]))
+
+            if game.current_phase_options:
+                closest_skill = None
+                min_dist = float('inf')
+                for skill in game.current_phase_options:
+                    dx = game.cursor_pos[0] - skill.pos[0]
+                    dy = game.cursor_pos[1] - skill.pos[1]
+                    dist = (dx * dx + dy * dy) ** 0.5
+                    if dist < min_dist:
+                        min_dist = dist
+                        closest_skill = skill
+                game.selected_skill = closest_skill
+
+                for skill in game.current_phase_options:
+                    skill.hovered = (skill == game.selected_skill)
 
     if key_pressed[K_SPACE]:
         current_time = pygame.time.get_ticks()

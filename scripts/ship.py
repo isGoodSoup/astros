@@ -5,6 +5,7 @@ import pygame
 
 from scripts.explode import Explosion
 from scripts.proj import Projectile
+from scripts.toggles import unlimited_ammo
 
 
 class Ship(pygame.sprite.Sprite):
@@ -86,7 +87,8 @@ class Ship(pygame.sprite.Sprite):
                 proj = Projectile(pos, (255, 200, 0), direction=direction,
                                   speed=12, is_shotgun=True, damage=3, range_limit=200)
                 projectiles.append(proj)
-            self.ammo -= num_pellets
+            if not unlimited_ammo:
+                self.ammo -= num_pellets
         return projectiles
 
     def super_charge(self, joysticks, score, explosions, entities,
@@ -103,7 +105,8 @@ class Ship(pygame.sprite.Sprite):
             explosions.add(Explosion(entity.rect.centerx, entity.rect.centery, frame_explode))
             score += self.level * 10
 
-        self.charges -= 1
+        if not unlimited_ammo:
+            self.charges -= 1
 
     def taken_damage(self):
         return [random.randint(0,10) - 4, random.randint(0,10) - 4]

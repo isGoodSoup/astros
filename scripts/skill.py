@@ -52,48 +52,17 @@ class Skill:
     def current_frame(self):
         if self.hovered:
             return self.frames["hover"]
-
         if self.unlocked:
             if self.level > 0:
-                return self.frames.get(f"unlocked{self.level}", self.frames["unlocked1"])
+                return self.frames.get(f"unlocked{self.level}",self.frames["unlocked1"])
             return self.frames["unlocked1"]
 
-        if all(parent.level > 0 for parent in self.parents):
-            return self.frames["unlockable"]
-
-        return self.frames["locked"]
+        return self.frames["unlockable"]
 
 class SkillManager:
     def __init__(self):
         self.skills = []
 
-    def add_skill(self, skill):
-        self.skills.append(skill)
-
-    def can_unlock(self, skill, ship):
-        return ship.perk_points > 0 and all(req.level > 0 for req in skill.parents)
-
-    def unlock_or_upgrade(self, skill, ship):
-        if ship.perk_points <= 0:
-            return
-
-        if not skill.unlocked:
-            if all(req.level > 0 for req in skill.parents):
-                skill.unlocked = True
-                skill.level = 1
-                ship.perk_points -= 1
-                if skill.ability:
-                    skill.ability.apply(ship, skill.level)
-        elif skill.level < skill.max_level:
-            skill.level += 1
-            ship.perk_points -= 1
-            if skill.ability:
-                skill.ability.apply(ship, skill.level)
-
-    def get_unlocked(self):
-        return [s for s in self.skills if s.unlocked]
-
-    def build_tree(self, skill_tab):
         explorer = Skill("Explorer", Explorer(), "01_explorer")
         berserk = Skill("Berserk", DamageBoost(), "02_berserk")
         maniac, madness = (Skill("Maniac", Maniac(), "02a_maniac"),
@@ -107,35 +76,30 @@ class SkillManager:
         tower, fortified = (Skill("Tower", Tower(), "04a_tower"),
                             Skill("Fortified", Fortified(), "04b_fortified"))
 
-        explorer.parents = []
-        berserk.parents = [explorer]
-        maniac.parents, madness.parents = [berserk], [berserk]
-
-        survivor.parents = [explorer]
-        adventurer.parents, pilot.parents = [survivor], [survivor]
-
-        tank.parents = [explorer]
-        tower.parents, fortified.parents = [tank], [tank]
-
-        explorer.children = [berserk, survivor, tank]
-        berserk.children = [maniac, madness]
-        survivor.children = [adventurer, pilot]
-        tank.children = [tower, fortified]
-
-        explorer.pos = (skill_tab.width // 2, skill_tab.padding)
-        padding = 90
-        berserk.pos = (explorer.pos[0] - 180, explorer.pos[1] + padding)
-        survivor.pos = (explorer.pos[0], explorer.pos[1] + padding)
-        tank.pos = (explorer.pos[0] + 180, explorer.pos[1] + padding)
-
-        pad = 45
-
-        maniac.pos, madness.pos = (berserk.pos[0] - pad, berserk.pos[1] +
-            padding + 25), (berserk.pos[0] + pad, berserk.pos[1] + padding + 25)
-        adventurer.pos, pilot.pos = (survivor.pos[0] - pad, berserk.pos[1] +
-            padding + 25), (survivor.pos[0] + pad, berserk.pos[1] + padding + 25)
-        tower.pos, fortified.pos = ((tank.pos[0] - pad, tank.pos[1] + padding + 25),
-            (tank.pos[0] + pad, tank.pos[1] + padding + 25))
-
         self.skills = [explorer, berserk, survivor, tank, maniac,
                        madness, adventurer, pilot, tower, fortified]
+
+    def add_skill(self, skill):
+        self.skills.append(skill)
+
+    def can_unlock(self, skill, ship):
+        return ship.perk_points > 0 and all(req.level > 0 for req in skill.parents)
+
+    def unlock_or_upgrade(self, skill, ship):
+        if ship.perk_points <= 0:
+            return
+
+        if not skill.unlocked:
+            skill.unlocked = True
+            skill.level = 1
+            ship.perk_points -= 1
+            if skill.ability:
+                skill.ability.apply(ship, skill.level)
+        elif skill.level < skill.max_level:
+            skill.level += 1
+            ship.perk_points -= 1
+            if skill.ability:
+                skill.ability.apply(ship, skill.level)
+
+    def get_unlocked(self):
+        return [s for s in self.skills if s.unlocked]

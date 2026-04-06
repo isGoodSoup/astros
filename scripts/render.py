@@ -1,9 +1,8 @@
-import random
-
 import pygame
 import pygame as pg
 
 from scripts.shared import joysticks
+
 
 def render_frame(game, screen, font, hud_padding):
     for i in game.stars:
@@ -78,14 +77,10 @@ def render_skills_tab(game, screen, rect, game_font):
     screen.blit(title, (rect.x + 250 + offset, rect.y + padding))
     screen.blit(perk_points, (rect.x + 300 + offset, rect.y + padding + 40))
 
-    if not hasattr(game, "current_phase_options") or game.current_phase_options is None:
-        available_skills = [s for s in game.skills.skills if not s.unlocked]
-        game.current_phase_options = random.sample(available_skills, k=min(3, len(available_skills)))
-
     grid = [(250, 200), (350, 200), (450, 200)]
-
     for skill, pos in zip(game.current_phase_options, grid):
-        skill.rect.topleft = (rect.x + pos[0] + offset, rect.y + pos[1])
+        skill.pos = (rect.x + pos[0] + offset, rect.y + pos[1])
+        skill.rect.topleft = skill.pos
         frame = pygame.transform.scale(skill.current_frame(), (64, 64))
         screen.blit(frame, skill.rect)
         screen.blit(skill.icon_image, skill.rect)

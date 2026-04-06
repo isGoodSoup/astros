@@ -24,7 +24,6 @@ from scripts.tutorial import Tutorial
 from scripts.update import set_hud, update_game, update_hud
 from scripts.utils import debug, apply_curve, hide_cursor
 
-
 class Game:
     def __init__(self, screen, screen_size, hud_ratio,
                  game_font):
@@ -49,6 +48,7 @@ class Game:
         self.phase_length = 30_000
         self.phase_ending = False
 
+        self.fleet_spawned = False
         self.boss_alive = False
         self.boss_spawned = False
 
@@ -198,7 +198,6 @@ class Game:
         self.stats_tab.set_target((100, screen_size[1] - self.stats_tab.height - 100))
 
         self.skills = SkillManager()
-        self.skills.build_tree(self.skill_tab)
 
         self.play_sound = True
         self.pause = False
@@ -315,9 +314,15 @@ class Game:
                             pg.mixer.music.play(-1)
 
                 elif event.type == pg.MOUSEBUTTONDOWN:
-                    for skill in self.skills.skills:
-                        if skill.is_hovered(pg.mouse.get_pos()):
-                            self.skills.unlock_or_upgrade(skill, self.ship)
+                    if self.skill_tab.active and self.current_phase_options:
+                        mouse_pos = pg.mouse.get_pos()
+                        for skill in self.current_phase_options:
+                            if skill.is_hovered(mouse_pos):
+                                self.skills.unlock_or_upgrade(skill, self.ship)
+                                self.current_phase_options = []
+                                self.pause = False
+                                self.skill_tab.active = False
+                                break
 
                 elif event.type == JOYBUTTONDOWN:
                     if event.button == 0:
@@ -351,10 +356,12 @@ class Game:
                     elif event.button == 4:
                         movement.lock_y = not movement.lock_y
 
-                    elif event.button == 5:
-                        if self.selected_skill:
+                    if event.button == 5:
+                        if self.selected_skill and self.current_phase_options:
                             self.skills.unlock_or_upgrade(self.selected_skill,
                                                           self.ship)
+                            self.current_phase_options = []
+                            self.skill_tab.active = False
 
                     if event.button == 6:
                         if self.pause:

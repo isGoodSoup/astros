@@ -34,8 +34,10 @@ def update_phase(game):
     if elapsed >= game.phase_length - buffer_time:
         game.phase_ending = True
 
-    if game.current_phase in game.phases and not game.phase_ending:
+    if (game.current_phase in game.phases and not game.phase_ending
+            and not getattr(game, "fleet_spawned", False)):
         spawn_fleet(game, game.current_phase)
+        game.fleet_spawned = True
 
     if (game.current_phase in [game.phases[3], game.phases[5]] and not
             game.phase_ending):
@@ -66,7 +68,14 @@ def update_phase(game):
             game.phase_ending = False
             game.last_alien_spawn = 0
             game.last_asteroid_spawn = 0
+            game.fleet_spawned = False
             game.boss_spawned = False
+
+    if game.phase_ending and not game.current_phase_options:
+        available_skills = [s for s in game.skills.skills if not s.unlocked]
+        if not available_skills:
+            available_skills = game.skills.skills
+        game.current_phase_options = random.sample(available_skills, k=min(3,len(available_skills)))
 
 def spawn_asteroids(game):
     current_time = pg.time.get_ticks()
@@ -190,9 +199,8 @@ def update_game(game, delta, screen_size, hud_padding):
 
     game.explosions.update()
     game.upgrades.update()
-    if game.pause and game.phase_ending:
-        game.skill_tab.update()
-        game.stats_tab.update()
+    game.skill_tab.update()
+    game.stats_tab.update()
     game.floating_numbers.update(delta)
 
     for particle in game.particles[:]:

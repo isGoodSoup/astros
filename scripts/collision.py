@@ -6,6 +6,7 @@ from scripts.explode import Explosion
 from scripts.floaty import FloatingNumber
 from scripts.impact import ImpactFrame
 from scripts.particle import Particle
+from scripts.toggles import invincible
 from scripts.utils import add_multiplier, formulize
 
 
@@ -72,17 +73,17 @@ def check_collision(game):
             alien_hit.kill()
 
         damage_per_frame = 0
-        if game.ship.shield > 0:
-            damage_per_frame = (max(1,game.ship.max_shield // 33) * game.ship.level)
-            game.ship.shield -= damage_per_frame
-        else:
-            damage_per_frame = max(1,game.ship.max_hitpoints // 28) * game.ship.level
-            game.ship.hitpoints -= damage_per_frame
+        if not invincible:
+            if game.ship.shield > 0:
+                damage_per_frame = (max(1,game.ship.max_shield // 33) * game.ship.level)
+                game.ship.shield -= damage_per_frame
+            else:
+                damage_per_frame = max(1,game.ship.max_hitpoints // 28) * game.ship.level
+                game.ship.hitpoints -= damage_per_frame
 
         if hasattr(game.ship, "fortified_percent"):
             if game.ship.fortified_percent > 0:
-                shield_gain = int(
-                    damage_per_frame * game.ship.fortified_percent)
+                shield_gain = int(damage_per_frame * game.ship.fortified_percent)
                 if hasattr(game.ship, "fortified_cap"):
                     shield_gain = min(shield_gain, game.ship.fortified_cap)
                 game.ship.shield += shield_gain
