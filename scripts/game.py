@@ -333,10 +333,10 @@ class Game:
                             self.charge_active = True
                             self.charge_start_time = pg.time.get_ticks()
 
-                    if event.button == 4:
+                    elif event.button == 4:
                         movement.lock_y = not movement.lock_y
 
-                    if event.button == 5:
+                    elif event.button == 5:
                         if self.selected_skill:
                             self.skills.unlock_or_upgrade(self.selected_skill,
                                                           self.ship)
