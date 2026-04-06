@@ -26,8 +26,8 @@ class CRT:
             self.render_indices = [0, 1, 2,
                                    1, 2, 3]
             self.style = style
-            self.prog = self.ctx.program(vertex_shader=open(resource_path('shaders/VERTEX_SHADER.glsl')).read(),
-                fragment_shader=open(resource_path('shaders/FRAGMENT_SHADER.glsl')).read())
+            self.prog = self.ctx.program(vertex_shader=open(resource_path('assets/shaders/VERTEX_SHADER.glsl')).read(),
+                fragment_shader=open(resource_path('assets/shaders/FRAGMENT_SHADER.glsl')).read())
             self.prog['mode'] = self.style
 
             self.screen_texture = self.ctx.texture(self.virtual_resolution, 4,
