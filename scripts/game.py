@@ -341,6 +341,7 @@ class Game:
                         if clicked_skill:
                             self.selected_skill = clicked_skill
                             self.skills.unlock_or_upgrade(self.selected_skill,self.ship)
+                            self.pause = False
                             self.skill_tab.active = False
 
                         for skill in self.current_phase_options:

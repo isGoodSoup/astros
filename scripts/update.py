@@ -60,7 +60,6 @@ def update_phase(game):
         game.skill_tab.active = True
 
     if game.skill_tab.active:
-        game.skill_tab.update()
         if game.skill_tab.pos == game.skill_tab.target_pos:
             game.pause = True
             game.phase_index = (game.phase_index + 1) % len(game.phases)
