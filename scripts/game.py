@@ -44,6 +44,7 @@ class Game:
         self.phase_index = 0
         self.phase_to_sprite = {self.phases[i] : i for i in range(self.total_phases)}
         self.phase_colors = ['red', 'green', 'yellow']
+        self.current_phase_options = []
         self.phase_start_time = pg.time.get_ticks()
         self.phase_length = 30_000
         self.phase_ending = False
@@ -188,7 +189,7 @@ class Game:
             "assets/ui/skill_tab.png",
             start_pos=(screen_size[0], 200),
             content_renderer=render_skills_tab)
-        self.skill_tab.set_target((screen_size[0] - self.skill_tab.width - 100, 200))
+        self.skill_tab.set_target((screen_size[0]//2 - self.skill_tab.width//2, 200))
 
         self.stats_tab = Tab(
             "assets/ui/skill_tab.png",
@@ -258,12 +259,8 @@ class Game:
                         save_path = os.path.join(save_dir, f"{timestamp}.png")
                         pg.image.save(screen, save_path)
 
-                    if event.key == pg.K_TAB:
-                        self.skill_tab.active = not self.skill_tab.active
+                    if event.key == pg.K_b:
                         self.stats_tab.active = not self.stats_tab.active
-
-                        if self.skill_tab.active and self.skills.skills:
-                            self.selected_skill = self.skills.skills[0]
 
                     if event.key == pg.K_f:
                         if self.ship.charges > 0:
@@ -408,9 +405,10 @@ class Game:
             screen.fill((0, 0, 0))
             delta = clock.tick(self.fps) / 1000
 
-            update_controller(self, screen_size, delta)
-            update_movement(self, delta, screen_size)
-            update_credits(self, font)
+            if not self.pause:
+                update_controller(self, screen_size, delta)
+                update_movement(self, delta, screen_size)
+                update_credits(self, font)
 
             mouse_pos = pg.mouse.get_pos()
             hide_cursor(self, mouse_pos)
