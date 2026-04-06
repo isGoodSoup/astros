@@ -4,20 +4,20 @@ from scripts.shared import joysticks
 
 def render_frame(game, screen, font, hud_padding):
     for i in game.stars:
-        pg.draw.circle(screen, (255, 255, 255), (int(i[0]), int(i[1])),
-                       i[2])
+        pg.draw.circle(screen, (255, 255, 255), (int(i[0]), int(i[1])), i[2])
 
     game.celestials.draw(screen)
-    if game.current_phase == "asteroids":
+    if game.current_phase in [game.phases[3], game.phases[5]]:
         game.asteroids.draw(screen)
 
-    if game.current_phase in ("quiet", "asteroids"):
+    if game.current_phase in game.phases:
         game.aliens.draw(screen)
 
-    if game.current_phase == "boss_fight":
+    if game.current_phase == game.phases[-1]:
         game.bosses.draw(screen)
 
     game.projectiles.draw(screen)
+    game.enemy_projectiles.draw(screen)
     game.upgrades.draw(screen)
     game.floating_numbers.draw(screen)
     for particle in game.particles:

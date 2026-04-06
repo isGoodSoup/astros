@@ -34,12 +34,14 @@ class Game:
         pg.mixer.music.play(-1)
         pg.mixer.music.set_volume(0.5)
 
-        self.phases = ["quiet", "asteroids", "boss_fight"]
-        self.current_phase = "quiet"
+        self.total_phases = 6
+        self.phases = [f"wave_{i+1}" for i in range(self.total_phases)]
+        self.current_phase = self.phases[0]
         self.phase_index = 0
-        self.phase_to_sprite = {"quiet": 0, "asteroids": 1, "boss_fight": 2}
+        self.phase_to_sprite = {self.phases[i] : i for i in range(self.total_phases)}
+        self.phase_colors = ['red', 'green', 'yellow']
         self.phase_start_time = pg.time.get_ticks()
-        self.phase_length = random.randint(20_000, 30_000)
+        self.phase_length = 30_000
         self.phase_ending = False
 
         self.boss_alive = False
@@ -234,7 +236,7 @@ class Game:
                         new_projectiles = alien.shoot(self.ship, alien.shot_cooldown)
                         if new_projectiles:
                             shots_this_frame += len(new_projectiles)
-                            self.enemy_projectiles.add(new_projectiles)
+                            self.enemy_projectiles.add(*new_projectiles)
 
                     if shots_this_frame > 0 and self.play_sound:
                         self.sounds[4].play()

@@ -19,19 +19,21 @@ def update_time(game):
         game.milliseconds -= 1000
         game.seconds += 1
         if game.seconds % random.randint(20, 30) == 0:
-            if game.current_phase == "boss_fight" and not game.boss_spawned:
+            if (game.current_phase == game.phases[-1] and not
+            game.boss_spawned):
                 spawn_boss(game)
                 game.boss_alive = True
                 game.boss_spawned = True
             else:
-                if game.current_phase == "quiet" and not game.aliens:
+                if (game.current_phase == game.phases[0] and not
+                game.aliens):
                     pass
                 else:
                     game.phase_index = (game.phase_index + 1) % len(game.phases)
                     game.current_phase = game.phases[game.phase_index]
                     game.last_alien_spawn = 0
                     game.last_asteroid_spawn = 0
-                    if game.current_phase == "asteroids":
+                    if game.current_phase in [game.phases[3], game.phases[5]]:
                         level_enemies(game)
                     game.stars_speed += 1
         if game.seconds >= 60:

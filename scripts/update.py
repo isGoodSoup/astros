@@ -1,7 +1,6 @@
 import random
 
 import pygame as pg
-import pygame.display
 
 from scripts import upgd
 from scripts.asteroid import Asteroid
@@ -37,10 +36,13 @@ def update_phase(game):
     if elapsed >= game.phase_length - buffer_time:
         game.phase_ending = True
 
-    if game.current_phase == "asteroids" or game.current_phase == "quiet":
+    if game.current_phase in game.phases:
         spawn_fleet(game, game.current_phase)
 
-    if game.current_phase == "boss_fight":
+    if game.current_phase in [game.phases[3], game.phases[5]]:
+        spawn_asteroids(game)
+
+    if game.current_phase == game.phases[-1]:
         spawn_boss(game)
 
     enemies_alive = any([
@@ -75,6 +77,7 @@ def spawn_asteroids(game):
                         new_asteroid.hitpoints * game.asteroid_hitpoints)
                     new_asteroid.speed = game.asteroid_speed
                     game.asteroids.add(new_asteroid)
+                    game.entities.add(new_asteroid)
                     break
 
 def spawn_boss(game):
@@ -164,17 +167,6 @@ def update_game(game, delta, screen_size, hud_padding):
         game.last_direction = None
 
     game.celestials.update()
-    if game.current_phase == "asteroids":
-        game.entities.add(game.asteroids)
-        game.entities.update()
-    elif game.current_phase != "asteroids":
-        for asteroid in game.asteroids:
-            asteroid.rect.y -= 2
-            if asteroid.rect.y > pygame.display.Info().current_h:
-                game.asteroids.remove(asteroid)
-
-    for fleet in game.fleets:
-        game.entities.add(fleet.aliens)
     game.entities.update()
 
     alive_fleets = []
@@ -184,10 +176,11 @@ def update_game(game, delta, screen_size, hud_padding):
             alive_fleets.append(fleet)
     game.fleets = alive_fleets
 
-    if game.current_phase == "boss_fight":
+    if game.current_phase == game.phases[-1]:
         game.bosses.update()
 
     game.projectiles.update()
+    game.enemy_projectiles.update()
     game.explosions.update()
     game.upgrades.update()
     game.skill_tab.update()
@@ -204,13 +197,6 @@ def update_game(game, delta, screen_size, hud_padding):
 
     if game.ship_alive:
         game.ship.update_position(game.ship_x, game.ship_y)
-
-    for group in [game.asteroids, game.aliens, game.bosses, game.projectiles,
-                  game.enemy_projectiles]:
-        for sprite in list(group):
-            if not sprite.alive() or sprite.rect.bottom < 0 or sprite.rect.top > \
-                    game.screen_size[1]:
-                sprite.kill()
 
     check_collision(game)
     current_time = pg.time.get_ticks()
