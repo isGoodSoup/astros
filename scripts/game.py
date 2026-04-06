@@ -306,7 +306,8 @@ class Game:
                         debug(self)
 
                     if event.key == pg.K_ESCAPE:
-                        self.pause = not self.pause
+                        if not self.skill_tab.active:
+                            self.pause = not self.pause
 
                     if event.key == pg.K_q and (event.mod & pg.KMOD_CTRL):
                         running = False
@@ -319,63 +320,28 @@ class Game:
                             pg.mixer.music.play(-1)
 
                 elif event.type == pg.MOUSEBUTTONDOWN:
+                    self.input_mode = "mouse"
+                    self.motion = [0.0, 0.0]
+                    self.last_input_time = pg.time.get_ticks()
+
                     if self.skill_tab.active and self.current_phase_options:
                         mouse_pos = pg.mouse.get_pos()
+                        self.cursor_pos = list(mouse_pos)
+                        tab_x, tab_y = self.skill_tab.pos
+                        clicked_skill = None
+                        mouse_rect = pg.Rect(mouse_pos[0], mouse_pos[1], 1, 1)
 
-                        if mouse_pos != getattr(self, "last_cursor_pos",
-                                                (0, 0)):
-                            self.input_mode = "mouse"
-                            self.last_input_time = pg.time.get_ticks()
-                        self.last_cursor_pos = mouse_pos
+                        for skill in self.current_phase_options:
+                            skill_rect = pygame.Rect(skill.pos[0], skill.pos[1],
+                                                     skill.rect.width,skill.rect.height)
+                            if skill_rect.colliderect(mouse_rect):
+                                clicked_skill = skill
+                                break
 
-                        if abs(self.motion[0]) > 0.05 or abs(
-                                self.motion[1]) > 0.05:
-                            self.input_mode = "controller"
-                            self.last_input_time = pg.time.get_ticks()
-
-                        if self.input_mode == "mouse":
-                            self.cursor_pos = list(mouse_pos)
-                            closest_skill = None
-                            min_dist = float('inf')
-                            for skill in self.current_phase_options:
-                                dx = self.cursor_pos[0] - skill.pos[0]
-                                dy = self.cursor_pos[1] - skill.pos[1]
-                                dist = dx * dx + dy * dy
-                                if dist < min_dist:
-                                    min_dist = dist
-                                    closest_skill = skill
-                            self.selected_skill = closest_skill
-
-                        elif self.input_mode == "controller":
-                            current_time = pg.time.get_ticks()
-                            dx = self.motion[0]
-                            dy = self.motion[1]
-                            threshold = 0.5
-
-                            if current_time - self.last_nav_time > self.nav_cooldown:
-                                direction = None
-                                if abs(dx) > abs(dy):
-                                    if dx > threshold:
-                                        direction = (1, 0)
-                                    elif dx < -threshold:
-                                        direction = (-1, 0)
-                                else:
-                                    if dy > threshold:
-                                        direction = (0, 1)
-                                    elif dy < -threshold:
-                                        direction = (0, -1)
-
-                                if direction:
-                                    from scripts.movement import get_next_skill
-                                    self.selected_skill = get_next_skill(
-                                        self.selected_skill,
-                                        self.current_phase_options,
-                                        direction
-                                    )
-                                    self.last_nav_time = current_time
-
-                            if self.selected_skill:
-                                self.cursor_pos = list(self.selected_skill.pos)
+                        if clicked_skill:
+                            self.selected_skill = clicked_skill
+                            self.skills.unlock_or_upgrade(self.selected_skill,self.ship)
+                            self.skill_tab.active = False
 
                         for skill in self.current_phase_options:
                             skill.hovered = (skill == self.selected_skill)
