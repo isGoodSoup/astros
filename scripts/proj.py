@@ -3,14 +3,13 @@ import math
 
 class Projectile(pygame.sprite.Sprite):
     def __init__(self, pos, color, direction=(0, -1), speed=16,
-                 is_shotgun=False, damage=1, range_limit=600):
+                 damage=1, range_limit=900):
         super().__init__()
         self.image = pygame.Surface([4, 20], pygame.SRCALPHA)
         self.image.fill((*color, 255))
         self.rect = self.image.get_rect(center=pos)
         self.speed = speed
         self.damage = damage
-        self.is_shotgun = is_shotgun
         self.direction = direction
         self.range_limit = range_limit
         self.distance_traveled = 0

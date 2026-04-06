@@ -85,7 +85,7 @@ class Ship(pygame.sprite.Sprite):
                 rad = math.radians(angle)
                 direction = (math.sin(rad), -math.cos(rad))
                 proj = Projectile(pos, (255, 200, 0), direction=direction,
-                                  speed=12, is_shotgun=True, damage=3, range_limit=200)
+                                  speed=12, damage=3, range_limit=200)
                 projectiles.append(proj)
             if not unlimited_ammo:
                 self.ammo -= num_pellets
