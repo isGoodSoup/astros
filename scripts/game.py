@@ -258,10 +258,10 @@ class Game:
                     if event.key == pg.K_g:
                         if self.ship.base_ammo > 0:
                             self.sounds[2].play()
-                            if self.ship.gun == "missile":
+                            if self.ship.gun == "shotgun":
                                 self.ship.gun = "beam"
                             else:
-                                self.ship.gun = "missile"
+                                self.ship.gun = "shotgun"
 
                     if event.key == pg.K_c:
                         if event.mod & pg.KMOD_SHIFT:
@@ -308,13 +308,13 @@ class Game:
 
                 elif event.type == JOYBUTTONDOWN:
                     if event.button == 0:
-                        new_projectiles = self.ship.shoot(self.base,
-                                                          self.last_shot_time,
-                                                          self.ship.shot_cooldown,
-                                                          self.play_sound,
-                                                          self.sounds)
-                        self.projectiles.add(new_projectiles)
+                        new_projectiles = self.ship.shoot(gun_type=self.ship.gun)
+                        self.projectiles.add(*new_projectiles)
                         self.last_shot_time = pg.time.get_ticks()
+
+                        if self.ship.gun == "shotgun":
+                            self.screen_shake = 20
+
                     if event.button == 1:
                         self.skill_tab.active = not self.skill_tab.active
                         self.stats_tab.active = not self.stats_tab.active
@@ -322,10 +322,10 @@ class Game:
                     if event.button == 2:
                         if self.ship.base_ammo > 0:
                             self.sounds[2].play()
-                            if self.ship.gun == "missile":
+                            if self.ship.gun == "shotgun":
                                 self.ship.gun = "beam"
                             else:
-                                self.ship.gun = "missile"
+                                self.ship.gun = "shotgun"
 
                     if event.button == 3 and self.game_over:
                         reboot(self, screen_size)

@@ -40,7 +40,8 @@ class Alien(pygame.sprite.Sprite):
 
         if current_time - self.last_shot_time >= shot_cooldown:
             projectile = Projectile(
-                [self.rect.centerx, self.rect.bottom],[0, 255, 100], speed=12)
+                pos=[self.rect.centerx, self.rect.bottom],
+                color=[0, 255, 100], direction=(0, 1), speed=12)
             self.shooting = True
             new_projectiles.extend([projectile])
             self.last_shot_time = current_time

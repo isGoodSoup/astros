@@ -52,8 +52,9 @@ def update_movement(game, delta, screen_size):
     if key_pressed[K_SPACE]:
         current_time = pygame.time.get_ticks()
         if current_time - game.last_shot_time >= game.ship.shot_cooldown:
-            new_projectiles = game.ship.shoot(game.base, game.last_shot_time,
-                                              game.ship.shot_cooldown,
-                                              game.play_sound, game.sounds)
-            game.projectiles.add(new_projectiles)
+            new_projectiles = game.ship.shoot(gun_type=game.ship.gun)
+            game.projectiles.add(*new_projectiles)
             game.last_shot_time = current_time
+
+            if game.ship.gun == "shotgun":
+                game.screen_shake = 20

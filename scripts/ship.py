@@ -1,3 +1,4 @@
+import math
 import random
 
 import pygame
@@ -23,7 +24,7 @@ class Ship(pygame.sprite.Sprite):
         self.max_shield = 25
         self.base_max_shield = self.max_shield
         self.shield = self.max_shield
-        self.gun = "beam" # or "missile"
+        self.gun = "beam" # or "shotgun"
         self.base_damage = 4
         self.damage = self.base_damage
         self.damage_multiplier = 1.0
@@ -58,31 +59,35 @@ class Ship(pygame.sprite.Sprite):
         self.hit = False
 
     def update_damage(self):
-        base = self.base_damage * (2 if self.gun == "missile" else 1)
+        base = self.base_damage * (10 if self.gun == "shotgun" else 1)
         self.damage = base * self.damage_multiplier
 
     def update_position(self, x, y):
         self.rect.topleft = (x, y)
         self.hitbox.center = self.rect.center
 
-    def shoot(self, base, last_shot_time, shot_cooldown, can_play, sound):
-        self.update_damage()
-        current_time = pygame.time.get_ticks()
-        self.shooting = False
-        new_projectiles = []
+    def shoot(self, gun_type="beam"):
+        projectiles = []
+        pos = self.hitbox.center
+        if gun_type == "beam":
+            projectiles.append(
+                Projectile(pos, (255, 255, 0), direction=(0, -1), speed=16,
+                           damage=1))
+        elif gun_type == "shotgun":
+            if self.ammo <= 0:
+                return None
 
-        if current_time - last_shot_time >= shot_cooldown:
-            projectile = Projectile([self.rect.centerx, self.rect.bottom], [255, 220, 0] if
-            self.gun == "missile" else [0, 220, 255], speed=-16)
-            self.shooting = True
-            new_projectiles.extend([projectile])
-            if can_play:
-                sound[0].play()
-
-            if self.gun == "missile":
-                self.ammo -= 1
-
-        return new_projectiles
+            num_pellets = 6
+            spread_angle = 30
+            for i in range(num_pellets):
+                angle = (-spread_angle / 2) + (i * (spread_angle / (num_pellets - 1)))
+                rad = math.radians(angle)
+                direction = (math.sin(rad), -math.cos(rad))
+                proj = Projectile(pos, (255, 200, 0), direction=direction,
+                                  speed=12, is_shotgun=True, damage=3, range_limit=200)
+                projectiles.append(proj)
+                self.ammo -= num_pellets
+        return projectiles
 
     def super_charge(self, joysticks, score, explosions, entities,
                              frame_explode, frame_big_explode):
