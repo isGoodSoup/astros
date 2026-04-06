@@ -72,8 +72,8 @@ class Ship(pygame.sprite.Sprite):
         new_projectiles = []
 
         if current_time - last_shot_time >= shot_cooldown:
-            projectile = Projectile(self.rect.centerx, self.rect.bottom,"assets/projectile_2.png" if
-            self.gun == "missile" else "assets/projectile.png", 4, speed=-16)
+            projectile = Projectile([self.rect.centerx, self.rect.bottom], [255, 220, 0] if
+            self.gun == "missile" else [0, 220, 255], speed=-16)
             self.shooting = True
             new_projectiles.extend([projectile])
             if can_play:
