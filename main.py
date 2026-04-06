@@ -31,7 +31,9 @@ class Menu:
         self.cursor_sprite = pg.image.load("assets/ui/cursor.png")
         self.game_font = pg.font.Font(self.font, 96)
         self.text_font = pg.font.Font(self.font, 24)
+        icon = pg.image.load("assets/ui/icon.png")
         pg.display.set_caption("Astros")
+        pg.display.set_icon(icon)
         self.clock = pg.time.Clock()
         self.sounds = load_sounds()
         self.running = True
