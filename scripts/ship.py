@@ -75,7 +75,7 @@ class Ship(pygame.sprite.Sprite):
                            damage=1))
         elif gun_type == "shotgun":
             if self.ammo <= 0:
-                return None
+                return projectiles
 
             num_pellets = 6
             spread_angle = 30
@@ -86,7 +86,7 @@ class Ship(pygame.sprite.Sprite):
                 proj = Projectile(pos, (255, 200, 0), direction=direction,
                                   speed=12, is_shotgun=True, damage=3, range_limit=200)
                 projectiles.append(proj)
-                self.ammo -= num_pellets
+            self.ammo -= num_pellets
         return projectiles
 
     def super_charge(self, joysticks, score, explosions, entities,
