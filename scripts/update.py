@@ -179,8 +179,10 @@ def update_game(game, delta, screen_size, hud_padding):
     if game.current_phase == game.phases[-1]:
         game.bosses.update()
 
-    game.projectiles.update()
-    game.enemy_projectiles.update()
+    if not game.pause:
+        game.projectiles.update()
+        game.enemy_projectiles.update()
+
     game.explosions.update()
     game.upgrades.update()
     game.skill_tab.update()
@@ -212,45 +214,50 @@ def update_game(game, delta, screen_size, hud_padding):
         game.score += 1 * game.score_multiplier
 
 def update_hud(game, font, screen, hud_ratio):
-    game.stopwatch = font.render(
-        f"{game.hours:02}:{game.minutes:02}:{game.seconds:02}",
-        True, "WHITE")
+    game.stopwatch = font.render(f"{game.hours:02}:{game.minutes:02}:{game.seconds:02}", True, "WHITE")
     screen.blit(game.stopwatch,
                 [hud_ratio['left'] + hud_ratio['width'] // 2 -
                  game.stopwatch.get_width() // 2, hud_ratio['top']])
 
     score_text = f"{int(game.score):06}"
     high_score = f"{int(game.high_score):06}"
-    score_title = "SCORE"
-    high_score_title = "HIGH\nSCORE"
-
     score_surface = font.render(score_text, True, "WHITE")
-    score_title_surface = font.render(score_title, True, "WHITE")
-    high_score_surfaces = [font.render(line, True, "WHITE")
-                           for line in high_score_title.split('\n')]
     high_score_surface = font.render(high_score, True, "WHITE")
 
-    score_x = hud_ratio['left']
-    score_y = hud_ratio['top']
-    screen.blit(score_title_surface,
-                [score_x, score_y - score_title_surface.get_height() - 5])
-    screen.blit(score_surface, [score_x, score_y])
+    line_spacing = 2
 
-    y_pos = hud_ratio['top']
-    x_pos = hud_ratio['right'] - max(s.get_width() for s in
-        high_score_surfaces + [high_score_surface])
+    score_lines = ["", "SCORE"]
+    score_line_surfs = [font.render(line, True, "WHITE") for line in score_lines]
 
-    for line_surf in high_score_surfaces:
-        screen.blit(line_surf, [x_pos, y_pos])
-        y_pos += line_surf.get_height() + 2
-    screen.blit(high_score_surface, [x_pos, y_pos])
+    title_height = sum(s.get_height() for s in score_line_surfs) + line_spacing * (len(score_line_surfs) - 1)
+    score_value_y = hud_ratio['top'] + title_height + 5
+
+    screen.blit(score_surface, [hud_ratio['left'], score_value_y])
+
+    y = score_value_y - 5
+    for surf in reversed(score_line_surfs):
+        y -= surf.get_height()
+        screen.blit(surf, [hud_ratio['left'], y])
+        y -= line_spacing
+
+    high_lines = ["HIGH", "SCORE"]
+    high_line_surfs = [font.render(line, True, "WHITE") for line in high_lines]
+
+    block_width = max(s.get_width() for s in high_line_surfs + [high_score_surface])
+    x_pos = hud_ratio['right'] - block_width
+    screen.blit(high_score_surface, [x_pos, score_value_y])
+
+    y = score_value_y - 5
+    for surf in reversed(high_line_surfs):
+        y -= surf.get_height()
+        screen.blit(surf, [x_pos, y])
+        y -= line_spacing
 
     total_frames = len(game.hitpoints.frames) - 1
     if game.ship.hitpoints <= 0:
         hitpoints_frame = total_frames
     else:
-        hitpoints_frame = (
-                    total_frames - (game.ship.hitpoints * total_frames)
+        hitpoints_frame = (total_frames - (game.ship.hitpoints * total_frames)
                     // game.ship.max_hitpoints)
         hitpoints_frame = max(0, min(hitpoints_frame, total_frames))
     game.hitpoints.update(game.ship, hud_ratio, ['right', 'bottom'],

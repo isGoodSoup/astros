@@ -1,3 +1,7 @@
+import datetime
+import os
+import sys
+
 import pygame as pg
 from pygame.constants import *
 
@@ -231,18 +235,30 @@ class Game:
                 if event.type == pg.QUIT:
                     running = False
                 elif event.type == self.ALIENLASER:
-                    shooters = random.sample(self.aliens.sprites(), k=min(3, len(self.aliens)))
-                    shots_this_frame = 0
-                    for alien in shooters:
-                        new_projectiles = alien.shoot(self.ship, alien.shot_cooldown)
-                        if new_projectiles:
-                            shots_this_frame += len(new_projectiles)
-                            self.enemy_projectiles.add(*new_projectiles)
+                    if not self.pause:
+                        shooters = random.sample(self.aliens.sprites(), k=min(3, len(self.aliens)))
+                        shots_this_frame = 0
+                        for alien in shooters:
+                            new_projectiles = alien.shoot(self.ship, alien.shot_cooldown)
+                            if new_projectiles:
+                                shots_this_frame += len(new_projectiles)
+                                self.enemy_projectiles.add(*new_projectiles)
 
-                    if shots_this_frame > 0 and self.play_sound:
-                        self.sounds[4].play()
+                        if shots_this_frame > 0 and self.play_sound:
+                            self.sounds[4].play()
 
                 elif event.type == pg.KEYDOWN:
+                    if event.key == pg.K_p:
+                        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+
+                        if getattr(sys, 'frozen', False):
+                            save_dir = os.path.dirname(sys.executable)
+                        else:
+                            save_dir = os.path.dirname(os.path.abspath(__file__))
+
+                        save_path = os.path.join(save_dir, f"{timestamp}.png")
+                        pg.image.save(screen, save_path)
+
                     if event.key == pg.K_TAB:
                         self.skill_tab.active = not self.skill_tab.active
                         self.stats_tab.active = not self.stats_tab.active
