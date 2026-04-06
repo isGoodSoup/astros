@@ -52,17 +52,21 @@ def update_phase(game):
         fleets_alive
     ])
 
-    if game.phase_ending and not enemies_alive:
-        game.phase_index = (game.phase_index + 1) % len(game.phases)
+    if game.phase_ending and not game.skill_tab.active\
+            and not enemies_alive:
         game.skill_tab.active = True
-        if game.skill_tab.update:
+
+    if game.skill_tab.active:
+        game.skill_tab.update()
+        if game.skill_tab.pos == game.skill_tab.target_pos:
             game.pause = True
-        game.current_phase = game.phases[game.phase_index]
-        game.phase_start_time = current_time
-        game.phase_ending = False
-        game.last_alien_spawn = 0
-        game.last_asteroid_spawn = 0
-        game.boss_spawned = False
+            game.phase_index = (game.phase_index + 1) % len(game.phases)
+            game.current_phase = game.phases[game.phase_index]
+            game.phase_start_time = pg.time.get_ticks()
+            game.phase_ending = False
+            game.last_alien_spawn = 0
+            game.last_asteroid_spawn = 0
+            game.boss_spawned = False
 
 def spawn_asteroids(game):
     current_time = pg.time.get_ticks()

@@ -73,12 +73,10 @@ def check_collision(game):
 
         damage_per_frame = 0
         if game.ship.shield > 0:
-            damage_per_frame = (max(1,
-                                    game.ship.max_shield // 33) * game.ship.level)
+            damage_per_frame = (max(1,game.ship.max_shield // 33) * game.ship.level)
             game.ship.shield -= damage_per_frame
         else:
-            damage_per_frame = max(1,
-                                   game.ship.max_hitpoints // 28) * game.ship.level
+            damage_per_frame = max(1,game.ship.max_hitpoints // 28) * game.ship.level
             game.ship.hitpoints -= damage_per_frame
 
         if hasattr(game.ship, "fortified_percent"):
