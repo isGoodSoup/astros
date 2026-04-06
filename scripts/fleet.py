@@ -36,7 +36,8 @@ class AlienFleet:
         )
 
         for x, y in positions:
-            alien = Alien(game.ship, x, y, 'red', 0)
+            color = game.phase_colors[game.phase_index % len(game.phase_colors)]
+            alien = Alien(game.ship, x, y, color, 0)
             game.aliens.add(alien)
             self.aliens.append(alien)
 
@@ -81,18 +82,25 @@ class AlienFleet:
         self.move_delay = max(self.min_delay, int(600 * (alive / total)))
 
 def spawn_fleet(game, phase):
+    fleet_sprites = pygame.sprite.Group()
+    for alien in fleet_sprites.sprites():
+        if not alien.alive():
+            fleet_sprites.remove(alien)
+            game.entities.remove(alien)
+
     if game.fleets:
         alive = any(fleet.aliens for fleet in game.fleets)
         if alive:
             return
 
-    if phase == "asteroids":
+    if phase == f"{game.phases[2]}" or phase == f"{game.phases[4]}":
         clusters = 1
         rows, cols = 4, 8
-    elif phase == "quiet":
+    elif (phase == f"{game.phases[0]}" or phase == f"{game.phases[1]}" or
+          phase == f"{game.phases[3]}"):
         clusters = 1
         rows, cols = 6, 12
-    elif phase == "boss_fight":
+    elif phase == f"{game.phases[-1]}":
         clusters = 0
         rows, cols = 2, 4
     else:
@@ -101,5 +109,6 @@ def spawn_fleet(game, phase):
     for _ in range(clusters):
         fleet = AlienFleet(game, rows=rows, cols=cols, start_y=120)
         game.fleets.append(fleet)
-
+        for alien in fleet.aliens:
+            game.entities.add(alien)
     game.last_alien_spawn = pygame.time.get_ticks()

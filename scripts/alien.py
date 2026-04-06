@@ -21,7 +21,7 @@ class Alien(pygame.sprite.Sprite):
         self.moving = False
 
         self.level = ship.level + 2
-        self.max_hitpoints = 10 * self.level
+        self.max_hitpoints = 2 * self.level
         self.hitpoints = self.max_hitpoints
         self.base_damage = ship.damage * self.level
         self.last_shot_time = 0
