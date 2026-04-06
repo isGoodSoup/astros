@@ -12,21 +12,23 @@ class Boss(pygame.sprite.Sprite):
         self.pos = pygame.Vector2(x, y)
         self.frames = []
         self.ship = ship
-        self.velocity = max(1, ship.velocity + 1)
+        self.step = max(1, ship.velocity + 1)
         self.offset_x = offset_x
         self.offset_y = offset_y
-        self.direction = "idle"
+        self.direction = 1
         self.shooting = False
         self.moving = False
 
+        self.colors = {'red' : 100, 'green' : 200, 'yellow' : 300}
         self.level = ship.level + 5
-        self.max_hitpoints = 50 * self.level
+        self.max_hitpoints = 50 * self.level + self.colors.get(color)
         self.hitpoints = self.max_hitpoints
         self.base_damage = ship.damage * self.level
         self.last_shot_time = 0
         self.shot_cooldown = 150
         self.last_move = pygame.time.get_ticks()
-        self.move_delay = 100
+        self.move_delay = 800
+        self.move_timer = pygame.time.get_ticks()
         self.hit = False
 
         self.target = pygame.Vector2(
@@ -36,16 +38,14 @@ class Boss(pygame.sprite.Sprite):
 
     def update(self):
         self.hitbox.center = self.rect.center
-        target_x = self.ship.rect.centerx + self.offset_x
 
-        direction = self.target - self.pos
+        now = pygame.time.get_ticks()
+        if now - self.move_timer >= self.move_delay:
 
-        if direction.length() > self.velocity:
-            direction = direction.normalize()
-            self.pos += direction * self.velocity
-        else:
-            self.pos = self.target
+            if (self.rect.right >= pygame.display.Info().current_w or
+                    self.rect.left == 0):
+                self.direction *= -1
+                self.rect.y += 30
 
-        self.rect.topleft = (int(self.pos.x), int(self.pos.y))
-        if self.rect.top > pygame.display.Info().current_h or self.hitpoints <= 0:
-            self.kill()
+            self.rect.x += self.direction * self.step
+            self.move_timer = now

@@ -219,6 +219,67 @@ def check_collision(game):
                 game.score += game.ship.level * 10 * game.score_multiplier
                 game.ship.gain_xp(formulize(game, game.ship.level), game.sounds)
 
+    hits3 = pg.sprite.groupcollide(game.projectiles, game.bosses, True, False)
+    for projectile, boss_hit in hits3.items():
+        for boss in boss_hit:
+            current_time = pg.time.get_ticks()
+            if current_time > game.ship.maniac_boost_end:
+                game.ship.maniac_boost = 0
+
+            effective_crit_chance = min(1.0, (
+                    game.ship.crit_chance / 100) + game.ship.maniac_boost)
+            if random.random() < effective_crit_chance:
+                damage_per_frame = game.ship.damage * game.ship.crit_multiplier
+                color = (255, 50, 50)
+                size = 36
+            else:
+                damage_per_frame = game.ship.damage
+                color = (255, 200, 0)
+                size = 24
+
+            if not game.ship.hit:
+                game.ship.damage_multiplier += 0.1
+            damage_per_frame *= game.ship.damage_multiplier
+
+            if game.ship.hit:
+                game.ship.damage_multiplier = 1.0
+
+            boss.hitpoints -= damage_per_frame
+            x, y = boss.rect.center
+
+            if not game.ship.hit:
+                mult_x, mult_y = game.ship.rect.centerx, game.ship.rect.top
+                add_multiplier(game, mult_x, mult_y,
+                               f"x{game.ship.damage_multiplier:.2f}",
+                               color=color, font_size=size)
+
+            game.floating_numbers.add(
+                FloatingNumber(x, y, int(damage_per_frame), color=color,
+                               font_size=size))
+            impact = ImpactFrame(boss.rect.centerx, boss.rect.centery,
+                                 game.frame_explode[0])
+            game.explosions.add(impact)
+            for _ in range(10):
+                vel = [random.uniform(-2, 2), random.uniform(-2, 2)]
+                game.particles.append(
+                    Particle((boss.rect.centerx, boss.rect.centery), vel))
+
+            if boss.hitpoints <= 0:
+                boss.kill()
+                game.ship.credits += random.randint(1, 100)
+                if maniac_skill := next(
+                        (s for s in game.skills.get_unlocked() if
+                         s.name == "Maniac"), None):
+                    maniac_skill.ability.apply(game.ship, maniac_skill.level)
+                explosion = Explosion(boss.rect.centerx, boss.rect.centery,
+                                      game.frame_explode)
+                game.explosions.add(explosion)
+                if game.play_sound:
+                    game.sounds[1].play()
+                game.score_multiplier = game.ship.damage_multiplier
+                game.score += game.ship.level * 10 * game.score_multiplier
+                game.ship.gain_xp(formulize(game, game.ship.level), game.sounds)
+
     upgrade_hit = pg.sprite.spritecollide(game.ship, game.upgrades, False, # type: ignore
                                           collided=lambda s,u: s.hitbox.colliderect(u.rect))
     if upgrade_hit:
