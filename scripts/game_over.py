@@ -30,7 +30,9 @@ def reboot(game, screen_size):
     saved_stats = game.ship.get_stats()
 
     game.projectiles.empty()
-    game.asteroids.empty()
+    game.enemy_projectiles.empty()
+    game.entities.empty()
+    game.fleets.clear()
     game.explosions.empty()
     game.upgrades.empty()
     game.floating_numbers.empty()
@@ -46,16 +48,22 @@ def reboot(game, screen_size):
         setattr(game.ship, attr, value)
 
     game.ship_alive = True
+    game.ship.hitpoints = game.ship.max_hitpoints
+    game.ship.shield = game.ship.max_shield
+    game.ship.ammo = game.ship.base_ammo
+    game.ship.charges = game.ship.base_charges
+
     game.frame = 0
     game.last_update = pygame.time.get_ticks()
     game.last_asteroid_spawn = 0
     game.last_shot_time = 0
     game.score = 0
-    game.hours = 0
-    game.minutes = 0
-    game.seconds = 0
-    game.milliseconds = 0
+    game.hours = game.minutes = game.seconds = game.milliseconds = 0
     game.stopwatch = None
+    game.current_phase = game.phases[0]
+    game.phase_index = 0
+    game.phase_start_time = pygame.time.get_ticks()
+    game.phase_ending = False
     game.game_over = False
     game.game_over_fx = True
 

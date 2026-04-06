@@ -128,14 +128,9 @@ class Ship(pygame.sprite.Sprite):
     def get_stats(self):
         return {
             "level": self.level,
-            "xp": self.xp,
             "perk_points": self.perk_points,
-            "hitpoints": self.hitpoints,
-            "shield": self.shield,
             "damage": self.damage,
             "crit_chance": self.crit_chance,
             "crit_multiplier": self.crit_multiplier,
             "velocity": self.velocity,
-            "max_hitpoints": self.max_hitpoints,
-            "max_shield": self.max_shield,
         }
