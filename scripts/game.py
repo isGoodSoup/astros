@@ -275,7 +275,7 @@ class Game:
                     if event.key == pg.K_p:
                         timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
                         home_dir = os.path.expanduser("~")
-                        save_dir = os.path.join(home_dir, ".astros")
+                        save_dir = os.path.join(home_dir, ".imgs")
                         os.makedirs(save_dir, exist_ok=True)
                         save_path = os.path.join(save_dir, f"{timestamp}.png")
                         pg.image.save(screen, save_path)
