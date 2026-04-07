@@ -9,6 +9,7 @@ from scripts.boss import Boss
 from scripts.celestial import random_celestial, is_valid_spawn
 from scripts.collision import check_collision
 from scripts.fleet import spawn_fleet
+from scripts.particle import Particle
 from scripts.toggles import tutorial_on
 from scripts.upgd import Upgrade
 
@@ -180,6 +181,14 @@ def update_game(game, delta, screen_size, hud_padding):
 
     if game.ship_alive:
         game.ship.update_position(game.ship_x, game.ship_y)
+        if not game.ship.moved_down:
+            trail_pos = game.ship.hitbox.midbottom
+            for _ in range(8):
+                velocity = pg.Vector2(random.uniform(-1, 1),
+                                      random.uniform(2, 4))
+                particle = Particle(trail_pos, velocity, timer=80,
+                                    color=(255, 255, 255), radius=4)
+                game.particles.append(particle)
 
     alive_fleets = []
     for fleet in game.fleets:

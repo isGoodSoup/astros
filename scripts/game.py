@@ -446,6 +446,9 @@ class Game:
 
                     if event.axis in (0, 1):
                         self.left_joystick[event.axis] = val
+                        self.ship.moved_down = False
+                    elif event.axis in (-1, 0):
+                        self.ship.moved_down = True
 
                     elif event.axis in (2, 3):
                         if event.axis == 2:
