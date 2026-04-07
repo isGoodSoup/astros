@@ -36,7 +36,7 @@ class AlienFleet:
         )
 
         for x, y in positions:
-            color = game.phase_colors[game.phase_index % len(game.phase_colors)]
+            color = game.state.phase_colors[game.state.phase_index % len(game.state.phase_colors)]
             alien = Alien(game.ship, x, y, color, 0)
             game.aliens.add(alien)
             self.aliens.append(alien)
@@ -93,13 +93,13 @@ def spawn_fleet(game, phase):
         if alive:
             return
 
-    if phase == game.phases[2] or phase == game.phases[4]:
+    if phase == game.state.phases[2] or phase == game.state.phases[4]:
         clusters = 1
         rows, cols = 3, 8
-    elif phase in (game.phases[0], game.phases[1], game.phases[3]):
+    elif phase in (game.state.phases[0], game.state.phases[1], game.state.phases[3]):
         clusters = 1
         rows, cols = 5, 8
-    elif phase == game.phases[-1]:
+    elif phase == game.state.phases[-1]:
         clusters = 0
         rows, cols = 1, 4
     else:

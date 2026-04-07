@@ -16,11 +16,11 @@ def game_lost(game, font, screen, screen_size):
         game.sounds[-1].play()
         game.game_over_fx = False
 
-    if game.score > game.high_score:
-        game.high_score = game.score
+    if game.state.score > game.state.high_score:
+        game.state.high_score = game.state.score
         game.save_config()
 
-    score_text = font.render(f"{int(game.score):05}", True, "WHITE")
+    score_text = font.render(f"{int(game.state.score):05}", True, "WHITE")
     stopwatch = game.stopwatch if game.stopwatch is not None else (
         font.render("00:00:00", True, "WHITE"))
     game_over_x = center(game, game_over, screen_size)
@@ -63,14 +63,14 @@ def reboot(game, screen_size):
     game.last_update = pygame.time.get_ticks()
     game.last_asteroid_spawn = 0
     game.last_shot_time = 0
-    game.score = 0
+    game.state.score = 0
     game.hours = game.minutes = game.seconds = game.milliseconds = 0
     game.stopwatch = None
-    game.current_phase = game.phases[0]
-    game.phase_index = 0
-    game.phase_start_time = pygame.time.get_ticks()
-    game.phase_ending = False
-    game.game_over = False
+    game.state.current_phase = game.state.phases[0]
+    game.state.phase_index = 0
+    game.state.phase_start_time = pygame.time.get_ticks()
+    game.state.phase_ending = False
+    game.state.game_over = False
     game.game_over_fx = True
 
     if game.play_sound:

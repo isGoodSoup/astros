@@ -1,9 +1,12 @@
+import datetime
+import os
+
 import pygame
 
 from scripts.floaty import FloatingNumber
 
 def formulize(game, level, base_xp=5):
-    score_factor = game.score ** 0.5
+    score_factor = game.state.score ** 0.5
     return int(base_xp * (level ** 1.2) + score_factor)
 
 def add_multiplier(game, x, y, text, color=(255, 255, 0), font_size=24):
@@ -34,10 +37,18 @@ def apply_curve(game, v):
     return v * abs(v)
 
 def hide_cursor(game, mouse_pos):
-    if mouse_pos != game.last_cursor_pos:
-        game.last_cursor_pos = mouse_pos
-        game.last_move_time = pygame.time.get_ticks()
-        game.cursor_visible = True
+    if mouse_pos != game.input.last_cursor_pos:
+        game.input.last_cursor_pos = mouse_pos
+        game.input.last_move_time = pygame.time.get_ticks()
+        game.input.cursor_visible = True
 
 def center(game, text, screen_size):
     return screen_size[0] // 2 - text.get_width() // 2
+
+def take_screenshot(self, screen):
+    timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    home_dir = os.path.expanduser("~")
+    save_dir = os.path.join(home_dir, ".imgs")
+    os.makedirs(save_dir, exist_ok=True)
+    save_path = os.path.join(save_dir, f"{timestamp}.png")
+    pygame.image.save(screen, save_path)

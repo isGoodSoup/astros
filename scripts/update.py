@@ -25,20 +25,20 @@ def set_hud(screen_size, padding):
 
 def update_phase(game):
     current_time = pygame.time.get_ticks()
-    elapsed = current_time - game.phase_start_time
+    elapsed = current_time - game.state.phase_start_time
     buffer_time = 5000
 
-    if elapsed >= game.phase_length - buffer_time:
-        game.phase_ending = True
+    if elapsed >= game.state.phase_length - buffer_time:
+        game.state.phase_ending = True
 
-    if not game.phase_spawned:
-        if game.current_phase == game.phases[-1]:
+    if not game.state.phase_spawned:
+        if game.state.current_phase == game.state.phases[-1]:
             spawn_boss(game)
-        elif game.current_phase in [game.phases[3], game.phases[5]]:
+        elif game.state.current_phase in [game.state.phases[3], game.state.phases[5]]:
             spawn_asteroids(game)
         else:
-            spawn_fleet(game, game.current_phase)
-        game.phase_spawned = True
+            spawn_fleet(game, game.state.current_phase)
+        game.state.phase_spawned = True
 
     fleets_alive = any(len(fleet.aliens) > 0 for fleet in game.fleets)
     enemies_alive = any([
@@ -48,32 +48,32 @@ def update_phase(game):
         fleets_alive
     ])
 
-    if (game.phase_ending and not game.skill_tab.active and not enemies_alive
+    if (game.state.phase_ending and not game.skill_tab.active and not enemies_alive
             and not game.skills_generated):
         game.skill_tab.open((pygame.display.Info().current_w // 2 -
                              game.skill_tab.width // 2, 200))
         available_skills = [s for s in game.skills.skills if not s.unlocked]
         if not available_skills:
             available_skills = game.skills.skills
-        game.current_phase_options = random.sample(
+        game.state.current_phase_options = random.sample(
             available_skills, k=min(3, len(available_skills)))
         game.skills_generated = True
 
     if game.skill_tab.active:
-        game.pause = True
-        if game.pause:
+        game.state.pause = True
+        if game.state.pause:
             game.ship.perk_points += 1
 
-    if not game.skill_tab.active and game.phase_ending and not enemies_alive:
-        game.pause = False
-        game.phase_index = (game.phase_index + 1) % len(game.phases)
-        game.current_phase = game.phases[game.phase_index]
-        game.phase_start_time = current_time
-        game.phase_ending = False
+    if not game.skill_tab.active and game.state.phase_ending and not enemies_alive:
+        game.state.pause = False
+        game.phase_index = (game.phase_index + 1) % len(game.state.phases)
+        game.state.current_phase = game.state.phases[game.phase_index]
+        game.state.phase_start_time = current_time
+        game.state.phase_ending = False
         game.last_alien_spawn = 0
         game.last_asteroid_spawn = 0
-        game.phase_spawned = False
-        game.current_phase_options = []
+        game.state.phase_spawned = False
+        game.state.current_phase_options = []
         game.skills_generated = False
 
 def spawn_asteroids(game):
@@ -92,19 +92,19 @@ def spawn_asteroids(game):
                 attempts += 1
 
 def spawn_boss(game):
-    if not game.phase_spawned:
+    if not game.state.phase_spawned:
         x = game.screen_size[0] // 2
         y = 350
         color = ['red', 'green', 'yellow']
         boss = Boss(game.ship, x, y, random.choice(color))
         game.bosses.add(boss)
-        game.phase_spawned = True
+        game.state.phase_spawned = True
         game.boss_alive = True
 
 def update_game(game, delta, screen_size, hud_padding):
     game.ship.hit = False
     for i in game.stars:
-        if not game.pause:
+        if not game.state.pause:
             i[1] += game.stars_speed
         if i[1] > screen_size[1]:
             i[1] = 0
@@ -196,7 +196,7 @@ def update_game(game, delta, screen_size, hud_padding):
             alive_fleets.append(fleet)
     game.fleets = alive_fleets
 
-    if game.current_phase == game.phases[-1]:
+    if game.state.current_phase == game.state.phases[-1]:
         game.bosses.update()
 
     game.projectiles.update()
@@ -222,10 +222,10 @@ def update_game(game, delta, screen_size, hud_padding):
             game.active_upgrade = None
             game.ship.damage = game.ship.base_damage
 
-    game.survival_bonus += 1
-    if game.survival_bonus >= 60:
-        game.survival_bonus = 0
-        game.score += 1 * game.score_multiplier
+    game.state.survival_bonus += 1
+    if game.state.survival_bonus >= 60:
+        game.state.survival_bonus = 0
+        game.state.score += 1 * game.state.score_multiplier
 
     update_phase(game)
 
@@ -235,8 +235,8 @@ def update_hud(game, font, screen, hud_ratio):
                 [hud_ratio['left'] + hud_ratio['width'] // 2 -
                  game.stopwatch.get_width() // 2, hud_ratio['top']])
 
-    score_text = f"{int(game.score):06}"
-    high_score = f"{int(game.high_score):06}"
+    score_text = f"{int(game.state.score):06}"
+    high_score = f"{int(game.state.high_score):06}"
     score_surface = font.render(score_text, True, "WHITE")
     high_score_surface = font.render(high_score, True, "WHITE")
 

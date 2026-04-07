@@ -9,13 +9,13 @@ def render_frame(game, screen, font, hud_padding):
         pygame.draw.circle(screen, (255, 255, 255), (int(i[0]), int(i[1])), i[2])
 
     game.celestials.draw(screen)
-    if game.current_phase in [game.phases[3], game.phases[5]]:
+    if game.state.current_phase in [game.state.phases[3], game.state.phases[5]]:
         game.asteroids.draw(screen)
 
-    if game.current_phase in game.phases:
+    if game.state.current_phase in game.state.phases:
         game.aliens.draw(screen)
 
-    if game.current_phase == game.phases[-1]:
+    if game.state.current_phase == game.state.phases[-1]:
         game.bosses.draw(screen)
 
     game.projectiles.draw(screen)
@@ -56,19 +56,19 @@ def render_frame(game, screen, font, hud_padding):
     game.explosions.draw(screen)
 
     if game.skill_tab.active and game.current_phase_options:
-        cursor_pos = game.cursor_pos if joysticks else pygame.mouse.get_pos()
-        game.selected_skill = None
+        cursor_pos = game.input.cursor_pos if joysticks else pygame.mouse.get_pos()
+        game.input.selected_skill  = None
 
         for skill in game.current_phase_options:
             if skill.is_hovered(cursor_pos):
-                game.selected_skill = skill
+                game.input.selected_skill  = skill
                 break
 
         mouse_pressed = pygame.mouse.get_pressed()[0]
-        if mouse_pressed and game.selected_skill:
-            game.skills.unlock_or_upgrade(game.selected_skill, game.ship)
-            if game.selected_skill.unlocked and game.selected_skill not in game.ship.skills:
-                game.ship.add_skill(game.selected_skill)
+        if mouse_pressed and game.input.selected_skill :
+            game.skills.unlock_or_upgrade(game.input.selected_skill , game.ship)
+            if game.input.selected_skill .unlocked and game.input.selected_skill  not in game.ship.skills:
+                game.ship.add_skill(game.input.selected_skill )
             game.skill_tab.close()
 
     game.stats_tab.render(game, screen, font, hud_padding)
@@ -89,10 +89,10 @@ def render_skills_tab(game, screen, rect, game_font):
     screen.blit(perk_points, (rect.x + 300 + offset, rect.y + padding + 40))
 
     grid = [(250, 200), (350, 200), (450, 200)]
-    for skill, pos in zip(game.current_phase_options, grid):
+    for skill, pos in zip(game.state.current_phase_options, grid):
         skill.pos = (rect.x + pos[0] + offset, rect.y + pos[1])
         skill.rect.topleft = skill.pos
-        skill.hovered = (skill == game.selected_skill)
+        skill.hovered = (skill == game.input.selected_skill )
         frame = pygame.transform.scale(skill.current_frame(), (64, 64))
         screen.blit(frame, skill.rect)
         screen.blit(skill.icon_image, skill.rect)

@@ -1,27 +1,36 @@
 import pygame
-
 from scripts.shared import joysticks, controller
 from scripts.utils import apply_curve
 
-
 def update_controller(game, screen_size, dt):
-    if joysticks:
-        axis_x = controller.get_axis(2)
-        axis_y = controller.get_axis(3)
+    if not joysticks:
+        return
 
-        if abs(axis_x) < game.deadzone: axis_x = 0
-        if abs(axis_y) < game.deadzone: axis_y = 0
+    lx = controller.get_axis(0)
+    ly = controller.get_axis(1)
+    lx = 0 if abs(lx) < game.input.deadzone else lx
+    ly = 0 if abs(ly) < game.input.deadzone else ly
 
-        axis_x = apply_curve(game, axis_x)
-        axis_y = apply_curve(game, axis_y)
+    game.ship.rect.x += int(lx * game.ship.speed * dt)
+    game.ship.rect.y += int(ly * game.ship.speed * dt)
+    game.ship.hitbox.center = game.ship.rect.center
 
-        if axis_x != 0 or axis_y != 0:
-            game.input_mode = "controller"
-            game.cursor_pos[0] += axis_x * game.cursor_speed * dt
-            game.cursor_pos[1] += axis_y * game.cursor_speed * dt
+    rx = controller.get_axis(2)
+    ry = controller.get_axis(3)
+    rx = 0 if abs(rx) < game.input.deadzone else rx
+    ry = 0 if abs(ry) < game.input.deadzone else ry
 
-            game.cursor_pos[0] = max(0, min(screen_size[0], game.cursor_pos[0]))
-            game.cursor_pos[1] = max(0, min(screen_size[1], game.cursor_pos[1]))
+    rx = apply_curve(game, rx)
+    ry = apply_curve(game, ry)
 
-            game.cursor_visible = True
-            game.last_move_time = pygame.time.get_ticks()
+    if rx != 0 or ry != 0:
+        game.input.mode = "controller"
+        game.input.cursor_pos[0] += rx * game.input.cursor_speed * dt
+        game.input.cursor_pos[1] += ry * game.input.cursor_speed * dt
+
+        # Clamp to screen
+        game.input.cursor_pos[0] = max(0, min(screen_size[0], game.input.cursor_pos[0]))
+        game.input.cursor_pos[1] = max(0, min(screen_size[1], game.input.cursor_pos[1]))
+
+        game.input.cursor_visible = True
+        game.input.last_move_time = pygame.time.get_ticks()

@@ -11,19 +11,19 @@ from scripts.utils import add_multiplier, formulize
 
 
 def check_collision(game):
-    if game.current_phase in [game.phases[3], game.phases[5]]:
+    if game.state.current_phase in [game.state.phases[3], game.state.phases[5]]:
         asteroid_hit = pygame.sprite.spritecollideany(game.ship, game.asteroids, # type: ignore
             collided=lambda s,m: s.hitbox.colliderect(m.hitbox))
     else:
         asteroid_hit = None
 
-    if game.current_phase in game.phases:
+    if game.state.current_phase in game.state.phases:
         alien_hit = pygame.sprite.spritecollideany(game.ship, game.aliens, # type: ignore
             collided=lambda s,m: s.hitbox.colliderect(m.hitbox))
     else:
         alien_hit = None
 
-    if game.current_phase in game.phases:
+    if game.state.current_phase in game.state.phases:
         alien_proj = pygame.sprite.spritecollideany(game.ship, game.enemy_projectiles, # type: ignore
             collided=lambda s,m: s.hitbox.colliderect(m.rect))
     else:
@@ -91,11 +91,11 @@ def check_collision(game):
         game.screen_shake = 20
 
         if game.ship.hitpoints <= 0:
-            game.game_over = True
+            game.state.game_over = True
             game.ship.kill()
             game.ship_alive = False
             pygame.mixer.music.stop()
-            game.game_over = True
+            game.state.game_over = True
 
     hits1 = pygame.sprite.groupcollide(game.projectiles, game.asteroids, True,
                                    False)
@@ -155,8 +155,8 @@ def check_collision(game):
                 game.explosions.add(explosion)
                 if game.play_sound:
                     game.sounds[1].play()
-                game.score_multiplier = game.ship.damage_multiplier
-                game.score += game.ship.level * 10 * game.score_multiplier
+                game.state.score_multiplier = game.ship.damage_multiplier
+                game.score += game.ship.level * 10 * game.state.score_multiplier
                 game.ship.gain_xp(formulize(game, game.ship.level), game.sounds)
 
     hits2 = pygame.sprite.groupcollide(game.projectiles, game.aliens, True, False)
@@ -215,8 +215,8 @@ def check_collision(game):
                 game.explosions.add(explosion)
                 if game.play_sound:
                     game.sounds[1].play()
-                game.score_multiplier = game.ship.damage_multiplier
-                game.score += game.ship.level * 10 * game.score_multiplier
+                game.state.score_multiplier = game.ship.damage_multiplier
+                game.state.score += (game.ship.level * 10 * game.state.score_multiplier)
                 game.ship.gain_xp(formulize(game, game.ship.level), game.sounds)
 
     hits3 = pygame.sprite.groupcollide(game.projectiles, game.bosses, True, False)
@@ -276,8 +276,8 @@ def check_collision(game):
                 game.explosions.add(explosion)
                 if game.play_sound:
                     game.sounds[1].play()
-                game.score_multiplier = game.ship.damage_multiplier
-                game.score += game.ship.level * 10 * game.score_multiplier
+                game.state.score_multiplier = game.ship.damage_multiplier
+                game.score += game.ship.level * 10 * game.state.score_multiplier
                 game.ship.gain_xp(formulize(game, game.ship.level), game.sounds)
 
     upgrade_hit = pygame.sprite.spritecollide(game.ship, game.upgrades, False, # type: ignore

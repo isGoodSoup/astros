@@ -1,16 +1,13 @@
-import datetime
 import json
 import os
 
-from pygame.constants import *
-
-from scripts import movement
 from scripts.celestial import *
 from scripts.clock import update_time
 from scripts.controller import update_controller
 from scripts.credits import update_credits
-from scripts.game_over import reboot, game_lost
+from scripts.game_over import game_lost
 from scripts.hud import Interface
+from scripts.input import Input
 from scripts.movement import update_movement
 from scripts.render import render_stats_tab, render_skills_tab, render_frame
 from scripts.shared import joysticks, controller, fade
@@ -18,12 +15,13 @@ from scripts.sheet import SpriteSheet
 from scripts.ship import Ship
 from scripts.skill import SkillManager
 from scripts.skill_tab import Tab
-from scripts.soundlib import load_sounds, load_ost, increase_volume, \
-    decrease_volume, apply_volume
+from scripts.soundlib import load_sounds, load_ost, apply_volume
+from scripts.state import GameState
 from scripts.toggles import tutorial_on
 from scripts.tutorial import Tutorial
-from scripts.update import set_hud, update_game, update_hud
-from scripts.utils import debug, apply_curve, hide_cursor
+from scripts.update import update_game, update_hud
+from scripts.utils import hide_cursor
+
 
 # Copyright (c) 2026 Diego
 # Licensed under the MIT License. See LICENSE file for details.
@@ -37,6 +35,9 @@ class Game:
         os.makedirs(save_dir, exist_ok=True)
         self.config_path = os.path.join(save_dir, "config.json")
 
+        self.state = GameState()
+        self.input = Input(screen_size)
+
         self.fps = 60
         self.frame = 0
         self.screen_size = screen_size
@@ -45,18 +46,6 @@ class Game:
         self.sounds = load_sounds()
         self.theme = load_ost()
         self.volume = 0.5
-
-        self.total_phases = 6
-        self.phases = [f"wave_{i+1}" for i in range(self.total_phases)]
-        self.current_phase = self.phases[0]
-        self.phase_index = 0
-        self.phase_to_sprite = {self.phases[i] : i for i in range(self.total_phases)}
-        self.phase_colors = ['red', 'green', 'yellow']
-        self.current_phase_options = []
-        self.phase_start_time = pygame.time.get_ticks()
-        self.phase_length = 30_000
-        self.phase_ending = False
-        self.phase_spawned = False
 
         self.boss_alive = False
 
@@ -90,19 +79,6 @@ class Game:
         self.ship_x = screen_size[0] // 2 - framew // 2 - 25
         self.ship_y = screen_size[1] // 2 + 200
         self.ship_pos = [self.ship_x, self.ship_y]
-        self.prev_select = False
-        self.left_joystick = [0.0, 0.0]
-        self.right_joystick = [0.0, 0.0]
-        self.axis_active = {0: False, 1: False}
-        self.deadzone = 0.2
-        self.cursor_pos = [screen_size[0] // 2, screen_size[1] // 2]
-        self.cursor_speed = 1000
-        self.selected_skill = None
-        self.nav_cooldown = 150  # ms
-        self.last_nav_time = 0
-
-        self.input_mode = "mouse"
-        self.last_input_time = 0
 
         self.hitpoints = Interface("assets/ui/status.png", 0, 40, 40,
                                    hud_ratio, ['right', 'bottom'])
@@ -166,7 +142,6 @@ class Game:
         self.last_alien_spawn = 0
         self.alien_spawn_interval = random.randint(4000, 10_000)
         self.alien_spawn_count = random.randint(1, 5)
-        self.formation = ["clutch", "line", "block"]
 
         self.ALIENLASER = pygame.USEREVENT + 1
         pygame.time.set_timer(self.ALIENLASER, 800)
@@ -186,18 +161,6 @@ class Game:
         self.upgrade_start_time = 0
         self.upgrade_duration = 16_000
 
-        self.charge_active = False
-        self.charge_start_time = 0
-        self.charge_duration = 2000
-        self.charge_rumble = 0.3
-
-        self.score = 0
-        self.score_multiplier = 1.0
-        self.high_score = 0
-        self.active_mults = []
-        self.survival_bonus = 0
-        self.game_over = False
-
         self.skill_tab = Tab(
             "assets/ui/skill_tab.png",
             start_pos=(screen_size[0], 200),
@@ -211,7 +174,6 @@ class Game:
         self.skills = SkillManager()
 
         self.play_sound = True
-        self.pause = False
         self.debugging = False
 
         self.hours = 0
@@ -226,10 +188,6 @@ class Game:
 
         self.cursor_sprite = pygame.image.load(
             "assets/ui/cursor.png").convert_alpha()
-        self.cursor_visible = False
-        self.last_cursor_pos = pygame.mouse.get_pos()
-        self.last_move_time = pygame.time.get_ticks()
-        self.cursor_hide_delay = 3000
 
         if tutorial_on:
             self.tutorial = Tutorial()
@@ -243,256 +201,50 @@ class Game:
 
         pygame.mixer.music.play(-1)
 
-    def run(self, running, clock, screen,
-            screen_size, hud_padding, hud_ratio, crt, font):
+    def run(self, running, clock, screen, screen_size, hud_padding, hud_ratio,
+            crt, font):
         while running:
-            for event in pygame.event.get():
+            events = pygame.event.get()
+            for event in events:
                 if event.type == pygame.QUIT:
                     running = False
-                elif event.type == self.ALIENLASER:
-                    if not self.pause:
-                        shooters = random.sample(self.aliens.sprites(), k=min(3, len(self.aliens)))
-                        shots_this_frame = 0
-                        for alien in shooters:
-                            new_projectiles = alien.shoot(self.ship, alien.shot_cooldown)
-                            if new_projectiles:
-                                shots_this_frame += len(new_projectiles)
-                                self.enemy_projectiles.add(*new_projectiles)
-
-                        if shots_this_frame > 0 and self.play_sound:
-                            self.sounds[0].play()
-
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_w:
-                        increase_volume(self)
-
-                    if event.key == pygame.K_s:
-                        decrease_volume(self)
-
-                    if event.key == pygame.K_c:
-                        self.take_screenshot(screen)
-
-                    if event.key == pygame.K_TAB:
-                        if not self.skill_tab.active:
-                            if self.stats_tab.active:
-                                self.stats_tab.close()
-                            else:
-                                self.stats_tab.open((100, screen_size[1] - self.stats_tab.height - 100))
-
-                    if event.key == pygame.K_f:
-                        if self.ship.charges > 0:
-                            self.ship.super_charge(joysticks, self.score, self.explosions,
-                                                   self.entities, self.frame_explode,
-                                                   self.frame_big_explode)
-                            self.sounds[1].play()
-                            self.screen_shake = 50
-                    if event.key == pygame.K_g:
-                        if self.ship.base_ammo > 0:
-                            self.sounds[2].play()
-                            if self.ship.gun == "shotgun":
-                                self.ship.gun = "beam"
-                            else:
-                                self.ship.gun = "shotgun"
-
-                    if event.key == pygame.K_z:
-                        if event.mod & pygame.KMOD_SHIFT:
-                            crt.prog['curvature'].value = max(0.0,crt.prog['curvature'].value - 0.5)
-                        else:
-                            crt.prog['curvature'].value += 0.5
-
-                    if event.key == pygame.K_KP_PLUS:
-                        hud_padding += 5
-                        hud_ratio = set_hud(screen_size, hud_padding)
-
-                    if event.key == pygame.K_KP_MINUS:
-                        hud_padding -= 5
-                        if hud_padding < 0:
-                            hud_padding = 0
-                        hud_ratio = set_hud(screen_size, hud_padding)
-
-                    if event.key == pygame.K_l:
-                        movement.lock_y = not movement.lock_y
-
-                    if event.key == pygame.K_r and self.game_over:
-                        reboot(self, screen_size)
-
-                    if event.key == pygame.K_F2:
-                        debug(self)
-
-                    if event.key == pygame.K_ESCAPE:
-                        if not self.skill_tab.active:
-                            self.pause = not self.pause
-
-                    if event.key == pygame.K_q and (event.mod & pygame.KMOD_CTRL):
-                        if self.pause and not self.skill_tab.active:
-                            running = False
-
-                    if event.key == pygame.K_m:
-                        self.play_sound = not self.play_sound
-                        if not self.play_sound:
-                            pygame.mixer.music.stop()
-                        else:
-                            pygame.mixer.music.play(-1)
-                        self.save_config()
-
-                elif event.type == pygame.KEYUP:
-                    if event.key == pygame.K_DOWN:
-                        self.ship.moved_down = False
-
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                    if self.input_mode != "controller":
-                        self.input_mode = "mouse"
-                        self.right_joystick = [0.0, 0.0]
-                    self.last_input_time = pygame.time.get_ticks()
-
-                    if self.skill_tab.active and self.current_phase_options:
-                        mouse_pos = pygame.mouse.get_pos()
-                        self.cursor_pos = list(mouse_pos)
-                        tab_x, tab_y = self.skill_tab.pos
-                        clicked_skill = None
-                        mouse_rect = pygame.Rect(mouse_pos[0], mouse_pos[1], 1, 1)
-
-                        for skill in self.current_phase_options:
-                            skill_rect = pygame.Rect(skill.pos[0], skill.pos[1],
-                                                     skill.rect.width,skill.rect.height)
-                            if skill_rect.colliderect(mouse_rect):
-                                clicked_skill = skill
-                                break
-
-                        if clicked_skill:
-                            self.selected_skill = clicked_skill
-                            self.skills.unlock_or_upgrade(self.selected_skill,self.ship)
-                            self.skill_tab.close()
-                            self.current_phase_options = []
-                            self.phase_ending = False
-                            self.pause = False
-
-                        for skill in self.current_phase_options:
-                            skill.hovered = (skill == self.selected_skill)
-
-                elif event.type == JOYBUTTONDOWN:
-                    if event.button == 0:
-                        new_projectiles = self.ship.shoot(gun_type=self.ship.gun)
-                        self.projectiles.add(*new_projectiles)
-                        self.last_shot_time = pygame.time.get_ticks()
-
+                elif event.type == self.ALIENLASER and not self.state.pause:
+                    shooters = random.sample(self.aliens.sprites(),
+                                             k=min(3, len(self.aliens)))
+                    shots_this_frame = 0
+                    for alien in shooters:
+                        new_projectiles = alien.shoot(self.ship,
+                                                      alien.shot_cooldown)
+                        if new_projectiles:
+                            shots_this_frame += len(new_projectiles)
+                            self.enemy_projectiles.add(*new_projectiles)
+                    if shots_this_frame > 0 and self.play_sound:
                         self.sounds[0].play()
-
-                        if self.ship.gun == "shotgun":
-                            self.screen_shake = 20
-
-                    if event.button == 1:
-                        if not self.skill_tab.active:
-                            if self.stats_tab.active:
-                                self.stats_tab.close()
-                            else:
-                                self.stats_tab.open((100, screen_size[1] - self.stats_tab.height - 100))
-
-                    if event.button == 2:
-                        if self.ship.base_ammo > 0:
-                            self.sounds[2].play()
-                            if self.ship.gun == "shotgun":
-                                self.ship.gun = "beam"
-                            else:
-                                self.ship.gun = "shotgun"
-
-                    if event.button == 3 and self.game_over:
-                        reboot(self, screen_size)
-
-                    if controller.get_button(4) and controller.get_button(5):
-                        if not self.charge_active and self.ship.charges > 0:
-                            self.charge_active = True
-                            self.charge_start_time = pygame.time.get_ticks()
-
-                    elif event.button == 4:
-                        movement.lock_y = not movement.lock_y
-
-                    if event.button == 5:
-                        if self.selected_skill and self.current_phase_options:
-                            self.skills.unlock_or_upgrade(self.selected_skill,
-                                                          self.ship)
-                            self.skill_tab.close()
-                            self.current_phase_options = []
-                            self.phase_ending = False
-                            self.pause = False
-
-                    if event.button == 6:
-                        if self.pause and not self.skill_tab.active:
-                            running = False
-
-                    if event.button == 7:
-                        if not self.skill_tab.active:
-                            self.pause = not self.pause
-
-                elif event.type == JOYBUTTONUP:
-                    if event.button in (4, 5) and self.charge_active:
-                        self.ship.super_charge(joysticks, self.score, self.explosions,
-                                               self.entities, self.frame_explode, self.frame_big_explode)
-                        self.screen_shake = 50
-                        self.charge_active = False
-                        self.sounds[1].play()
-                        if joysticks:
-                            controller.stop_rumble()
-
-                elif event.type == JOYHATMOTION:
-                    if event.value == (0, 1):
-                        increase_volume(self)
-                    elif event.value == (1, 0):
-                        self.take_screenshot(screen)
-                    elif event.value == (0, -1):
-                        decrease_volume(self)
-
-                elif event.type == JOYAXISMOTION:
-                    axis = event.axis
-                    raw_val = event.value
-                    val = raw_val if abs(raw_val) > self.deadzone else 0.0
-                    was_active = self.axis_active.get(axis, False)
-                    is_active = val != 0.0
-
-                    if is_active and not was_active:
-                        if axis == 1 and val > 0:
-                            self.ship.moved_down = True
-
-                    elif not is_active and was_active:
-                        if axis == 1:
-                            self.ship.moved_down = False
-
-                    self.axis_active[axis] = is_active
-
-                    if axis in (0, 1):
-                        self.left_joystick[axis] = val
-
-                    elif axis in (2, 3):
-                        if axis == 2:
-                            self.right_joystick[0] = apply_curve(self, val)
-                        elif axis == 3:
-                            self.right_joystick[1] = apply_curve(self, val)
-
-            if not running:
-                break
-
-            if self.charge_active:
-                if joysticks:
-                    controller.rumble(self.charge_rumble, 1, 50)
-                charge_elapsed = pygame.time.get_ticks() - self.charge_start_time
-                charge_ratio = min(1.0, charge_elapsed / self.charge_duration)
 
             screen.fill((0, 0, 0))
             delta = clock.tick(self.fps) / 1000
 
-            if not self.pause or self.skill_tab.active:
+            self.input.update(events)
+            self.input.act(self)
+
+            if self.input.charge_active:
+                if joysticks:
+                    controller.rumble(self.input.charge_rumble, 1, 50)
+                charge_elapsed = pygame.time.get_ticks() - self.input.charge_start_time
+                charge_ratio = min(1.0,
+                                   charge_elapsed / self.input.charge_duration)
+
+            if not self.state.pause or self.skill_tab.active:
                 update_controller(self, screen_size, delta)
                 if not self.skill_tab.active:
                     update_movement(self, delta, screen_size)
                     update_credits(self, font)
 
-            mouse_pos = pygame.mouse.get_pos()
-            hide_cursor(self, mouse_pos)
+            hide_cursor(self, self.input.cursor_pos)
+            self.input.cursor_visible = (
+                        pygame.time.get_ticks() - self.input.last_move_time <= self.input.cursor_hide_delay)
 
-            if pygame.time.get_ticks() - self.last_move_time > self.cursor_hide_delay:
-                self.cursor_visible = False
-
-            if not self.pause and not self.game_over:
+            if not self.state.pause and not self.state.game_over:
                 update_game(self, delta, screen_size, hud_padding)
                 update_time(self)
 
@@ -503,34 +255,25 @@ class Game:
                 self.tutorial.update(self, delta)
 
             render_frame(self, screen, font, hud_padding)
-
-            if not self.game_over:
+            if not self.state.game_over:
                 update_hud(self, font, screen, hud_ratio)
 
-            current_mouse_pos = pygame.mouse.get_pos()
-            mouse_moved = (current_mouse_pos != self.last_cursor_pos)
-            if mouse_moved and not joysticks:
-                self.input_mode = "mouse"
-                self.cursor_pos = list(current_mouse_pos)
-            self.last_cursor_pos = current_mouse_pos
-
-            if self.cursor_visible:
-                pos = self.cursor_pos if self.input_mode == "controller" else pygame.mouse.get_pos()
+            if self.input.cursor_visible:
+                pos = self.input.cursor_pos if self.input.mode == "controller" else pygame.mouse.get_pos()
                 screen.blit(self.cursor_sprite, (int(pos[0]), int(pos[1])))
 
-            if self.game_over:
+            if self.state.game_over:
                 game_lost(self, font, screen, screen_size)
 
             if self.screen_shake > 0:
                 self.screen_shake -= 1
+            render_offset = self.ship.taken_damage() if self.screen_shake else [0, 0]
+            if joysticks and self.screen_shake:
+                controller.rumble(0.5, 1, 20)
 
-            render = [0, 0]
-            if self.screen_shake:
-                render = self.ship.taken_damage()
-                if joysticks:
-                    controller.rumble(0.5, 1, 20)
-            if not self.game_over:
-                screen.blit(pygame.transform.scale(screen, screen_size), render)
+            if not self.state.game_over:
+                screen.blit(pygame.transform.scale(screen, screen_size),
+                            render_offset)
 
             alpha = fade.update()
             if alpha > 0:
@@ -538,6 +281,7 @@ class Game:
                 fade_surface.fill((0, 0, 0))
                 fade_surface.set_alpha(alpha)
                 screen.blit(fade_surface, (0, 0))
+
             crt.render(screen)
         pygame.quit()
 
@@ -554,7 +298,7 @@ class Game:
             "volume" : self.volume,
             "play_sound" : self.play_sound,
             "credits" : self.ship.credits,
-            "high_score" : self.high_score
+            "high_score" : self.state.high_score
         }
         with open(self.config_path, "w") as f:
             json.dump(config_data, f, indent=4)
@@ -570,12 +314,4 @@ class Game:
             self.volume = config_data.get("volume", 1)
             self.play_sound = config_data.get("play_sound", True)
             self.ship.credits = config_data.get("credits", 0)
-            self.high_score = config_data.get("high_score", 0)
-
-    def take_screenshot(self, screen):
-        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-        home_dir = os.path.expanduser("~")
-        save_dir = os.path.join(home_dir, ".imgs")
-        os.makedirs(save_dir, exist_ok=True)
-        save_path = os.path.join(save_dir, f"{timestamp}.png")
-        pygame.image.save(screen, save_path)
+            self.state.high_score = config_data.get("high_score", 0)
