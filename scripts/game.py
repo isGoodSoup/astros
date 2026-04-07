@@ -38,6 +38,7 @@ class Game:
         self.state = GameState()
         self.input = Input(screen_size)
 
+        self.screen = screen
         self.fps = 60
         self.frame = 0
         self.screen_size = screen_size

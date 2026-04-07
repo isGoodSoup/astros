@@ -1,6 +1,9 @@
 import pygame
 
 from scripts.shared import joysticks
+from scripts.soundlib import decrease_volume, increase_volume
+from scripts.utils import take_screenshot
+
 
 class Input:
     def __init__(self, screen_size):
@@ -42,8 +45,10 @@ class Input:
 
     def act(self, game):
         now = pygame.time.get_ticks()
-        shooting_input = (joysticks and joysticks[0].get_button(0)) or \
-                         pygame.key.get_pressed()[pygame.K_SPACE]
+        keys = pygame.key.get_pressed()
+
+        shooting_input = (joysticks and joysticks[0].get_button(0)) or keys[
+            pygame.K_SPACE]
         if shooting_input:
             if now - game.last_shot_time >= game.ship.shot_cooldown:
                 new_projectiles = game.ship.shoot(gun_type=game.ship.gun)
@@ -51,21 +56,54 @@ class Input:
                 game.last_shot_time = now
                 if game.play_sound:
                     game.sounds[0].play()
-                if game.ship.gun == "shotgun":
+                if game.ship.gun == "shotgun" and game.ship.ammo > 0:
                     game.screen_shake = 20
 
-        if joysticks and joysticks[0].get_button(4) and joysticks[0].get_button(5):
+        if ((joysticks and joysticks[0].get_button(4) and joysticks[0].get_button(5))
+                or keys[pygame.K_f]):
             if not self.charge_active and game.ship.charges > 0:
                 self.charge_active = True
                 self.charge_start_time = now
 
-        pause_input = (joysticks and joysticks[0].get_button(7)) or \
-                      pygame.key.get_pressed()[pygame.K_ESCAPE]
+        pause_input = ((joysticks and joysticks[0].get_button(7))
+                       or keys[pygame.K_ESCAPE])
         if pause_input and not game.skill_tab.active:
             game.state.pause = not game.state.pause
 
+        lock_input = (keys[pygame.K_l]
+            or (joysticks and joysticks[0].get_button(4)))
+        if lock_input:
+            from scripts.movement import lock_y
+            lock_y = not lock_y
+
+        switch_gun_input = (keys[pygame.K_g]
+            or (joysticks and joysticks[0].get_button(2)))
+        if switch_gun_input:
+            game.ship.switch_gun()
+
+        volume_up = keys[pygame.K_PLUS] or keys[pygame.K_KP_PLUS] or (
+                    joysticks and joysticks[0].get_hat(0)[1] == 1)
+        volume_down = keys[pygame.K_MINUS] or keys[pygame.K_KP_MINUS] or (
+                    joysticks and joysticks[0].get_hat(0)[1] == -1)
+        if volume_up:
+            increase_volume(game)
+        if volume_down:
+            decrease_volume(game)
+
+        screenshot_input = keys[pygame.K_F12] or (
+                    joysticks and joysticks[0].get_hat(0)[0] == 1)
+        if screenshot_input:
+            take_screenshot(game, game.screen)
+
+        stats_input = keys[pygame.K_TAB] or (joysticks and joysticks[0].get_button(1))
+        if stats_input:
+            if game.stats_tab.active:
+                game.stats_tab.close()
+            else:
+                game.stats_tab.open()
+
         if game.skill_tab.active and game.state.current_phase_options and self.mode == "mouse":
-            mouse_rect = pygame.Rect(self.cursor_pos[0], self.cursor_pos[1], 1, 1)
+            mouse_rect = pygame.Rect(self.cursor_pos[0], self.cursor_pos[1],  1, 1)
             clicked_skill = None
             for skill in game.state.current_phase_options:
                 skill_rect = pygame.Rect(skill.pos[0], skill.pos[1],

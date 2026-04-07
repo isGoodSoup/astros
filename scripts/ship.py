@@ -72,6 +72,12 @@ class Ship(pygame.sprite.Sprite):
         self.rect.topleft = (x, y)
         self.hitbox.center = self.rect.center
 
+    def switch_gun(self):
+        if self.gun == "shotgun":
+            self.gun = "beam"
+        else:
+            self.gun = "shotgun"
+
     def shoot(self, gun_type="beam"):
         projectiles = []
         pos = self.hitbox.center
