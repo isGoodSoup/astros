@@ -272,7 +272,7 @@ class Game:
                     if event.key == pg.K_s:
                         decrease_volume(self)
 
-                    if event.key == pg.K_p:
+                    if event.key == pg.K_e:
                         timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
                         home_dir = os.path.expanduser("~")
                         save_dir = os.path.join(home_dir, ".imgs")
@@ -280,7 +280,7 @@ class Game:
                         save_path = os.path.join(save_dir, f"{timestamp}.png")
                         pg.image.save(screen, save_path)
 
-                    if event.key == pg.K_b:
+                    if event.key == pg.K_TAB:
                         self.stats_tab.active = not self.stats_tab.active
 
                     if event.key == pg.K_f:
