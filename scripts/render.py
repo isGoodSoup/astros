@@ -2,6 +2,7 @@ import pygame
 import pygame as pg
 
 from scripts.shared import joysticks
+from scripts.toggles import tutorial_on
 
 
 def render_frame(game, screen, font, hud_padding):
@@ -68,7 +69,7 @@ def render_frame(game, screen, font, hud_padding):
 
     screen.blit(game.credits, [hud_padding, 190])
 
-    if game.tutorial_on:
+    if tutorial_on:
         game.tutorial.render(screen, font)
 
 def render_skills_tab(game, screen, rect, game_font):

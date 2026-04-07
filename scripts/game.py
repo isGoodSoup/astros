@@ -1,6 +1,6 @@
 import datetime
+import json
 import os
-import sys
 
 import pygame as pg
 from pygame.constants import *
@@ -20,10 +20,12 @@ from scripts.ship import Ship
 from scripts.skill import SkillManager
 from scripts.skill_tab import Tab
 from scripts.soundlib import load_sounds, load_ost, increase_volume, \
-    decrease_volume
+    decrease_volume, apply_volume
+from scripts.toggles import tutorial_on
 from scripts.tutorial import Tutorial
 from scripts.update import set_hud, update_game, update_hud
 from scripts.utils import debug, apply_curve, hide_cursor
+
 
 # Copyright (c) 2026 Diego
 # Licensed under the MIT License. See LICENSE file for details.
@@ -32,6 +34,11 @@ from scripts.utils import debug, apply_curve, hide_cursor
 class Game:
     def __init__(self, screen, screen_size, hud_ratio,
                  game_font):
+        home_dir = os.path.expanduser("~")
+        save_dir = os.path.join(home_dir, ".saves")
+        os.makedirs(save_dir, exist_ok=True)
+        self.config_path = os.path.join(save_dir, "config.json")
+
         self.fps = 60
         self.frame = 0
         self.screen_size = screen_size
@@ -39,6 +46,11 @@ class Game:
         self.scale = 4
         self.sounds = load_sounds()
         self.theme = load_ost()
+        self.volume = 0.5
+
+        self.load_config()
+        apply_volume(self)
+
         pg.mixer.music.play(-1)
 
         self.total_phases = 6
@@ -228,8 +240,7 @@ class Game:
         self.last_move_time = pg.time.get_ticks()
         self.cursor_hide_delay = 3000
 
-        self.tutorial_on = False
-        if self.tutorial_on:
+        if tutorial_on:
             self.tutorial = Tutorial()
 
         self.game_over_fx = True
@@ -256,19 +267,16 @@ class Game:
 
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_w:
-                        increase_volume()
+                        increase_volume(self)
 
                     if event.key == pg.K_s:
-                        decrease_volume()
+                        decrease_volume(self)
 
                     if event.key == pg.K_p:
                         timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-
-                        if getattr(sys, 'frozen', False):
-                            save_dir = os.path.dirname(sys.executable)
-                        else:
-                            save_dir = os.path.dirname(os.path.abspath(__file__))
-
+                        home_dir = os.path.expanduser("~")
+                        save_dir = os.path.join(home_dir, ".astros")
+                        os.makedirs(save_dir, exist_ok=True)
                         save_path = os.path.join(save_dir, f"{timestamp}.png")
                         pg.image.save(screen, save_path)
 
@@ -328,6 +336,7 @@ class Game:
                             pg.mixer.music.stop()
                         else:
                             pg.mixer.music.play(-1)
+                        self.save_config()
 
                 elif event.type == pg.MOUSEBUTTONDOWN:
                     self.input_mode = "mouse"
@@ -466,7 +475,7 @@ class Game:
                 update_game(self, delta, screen_size, hud_padding)
                 update_time(self)
 
-            if self.tutorial_on:
+            if tutorial_on:
                 self.tutorial.update(self, delta)
 
             render_frame(self, screen, font, hud_padding)
@@ -508,3 +517,18 @@ class Game:
         ship.rect.topleft = (x, y)
         ship.hitbox.center = ship.rect.center
         self.ship_pos = [x, y]
+
+    def save_config(self):
+        config_data = {
+            "volume": self.volume,
+            "play_sound": self.play_sound
+        }
+        with open(self.config_path, "w") as f:
+            json.dump(config_data, f, indent=4)
+
+    def load_config(self):
+        if os.path.exists(self.config_path):
+            with open(self.config_path, "r") as f:
+                config_data = json.load(f)
+                self.volume = config_data.get("volume", 1)
+                self.play_sound = config_data.get("play_sound", True)

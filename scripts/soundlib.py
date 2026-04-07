@@ -18,16 +18,17 @@ def load_sounds():
 def load_ost():
     return pygame.mixer.music.load("assets/fx/theme.ogg")
 
-VOLUME_STEP = 0.1
+def increase_volume(game):
+    game.volume = min(game.volume + 0.1, 1.0)
+    apply_volume(game)
+    game.save_config()
 
-def increase_volume():
-    for sound in sounds:
-        new_vol = min(sound.get_volume() + VOLUME_STEP, 1.0)
-        sound.set_volume(new_vol)
-    pygame.mixer.music.set_volume(min(pygame.mixer.music.get_volume() + VOLUME_STEP, 1.0))
+def decrease_volume(game):
+    game.volume = max(game.volume - 0.1, 0.0)
+    apply_volume(game)
+    game.save_config()
 
-def decrease_volume():
-    for sound in sounds:
-        new_vol = max(sound.get_volume() - VOLUME_STEP, 0.0)
-        sound.set_volume(new_vol)
-    pygame.mixer.music.set_volume(max(pygame.mixer.music.get_volume() - VOLUME_STEP, 0.0))
+def apply_volume(game):
+    for sound in game.sounds:
+        sound.set_volume(game.volume)
+    pygame.mixer.music.set_volume(game.volume)

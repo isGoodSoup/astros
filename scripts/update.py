@@ -8,6 +8,7 @@ from scripts.boss import Boss
 from scripts.celestial import random_celestial, is_valid_spawn
 from scripts.collision import check_collision
 from scripts.fleet import spawn_fleet
+from scripts.toggles import tutorial_on
 from scripts.upgd import Upgrade
 
 def set_hud(screen_size, padding):
@@ -107,7 +108,7 @@ def update_game(game, delta, screen_size, hud_padding):
             i[1] = 0
             i[0] = random.randint(0, screen_size[0])
 
-    if not game.tutorial_on:
+    if not tutorial_on:
         current_time = pg.time.get_ticks()
         if current_time - game.last_celestial_spawn > game.celestial_spawn_interval:
             game.last_celestial_spawn = current_time
