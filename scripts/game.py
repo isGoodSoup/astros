@@ -95,6 +95,7 @@ class Game:
         self.prev_select = False
         self.left_joystick = [0.0, 0.0]
         self.right_joystick = [0.0, 0.0]
+        self.axis_active = {0: False, 1: False}
         self.deadzone = 0.2
         self.cursor_pos = [screen_size[0] // 2, screen_size[1] // 2]
         self.cursor_speed = 1000
@@ -336,6 +337,9 @@ class Game:
                             pg.mixer.music.play(-1)
                         self.save_config()
 
+                elif event.type == pg.KEYUP:
+                    if event.key == pg.K_DOWN:
+                        self.ship.moved_down = False
 
                 elif event.type == pg.MOUSEBUTTONDOWN:
                     if self.input_mode != "controller":
@@ -441,25 +445,30 @@ class Game:
                         decrease_volume(self)
 
                 elif event.type == JOYAXISMOTION:
-                    val = event.value if abs(
-                        event.value) > self.deadzone else 0.0
+                    axis = event.axis
+                    raw_val = event.value
+                    val = raw_val if abs(raw_val) > self.deadzone else 0.0
+                    was_active = self.axis_active.get(axis, False)
+                    is_active = val != 0.0
 
-                    if event.axis in (0, 1):
-                        self.left_joystick[event.axis] = val
-                        self.ship.moved_down = False
-                    elif event.axis in (-1, 0):
-                        self.ship.moved_down = True
+                    if is_active and not was_active:
+                        if axis == 1 and val > 0:
+                            self.ship.moved_down = True
 
-                    elif event.axis in (2, 3):
-                        if event.axis == 2:
+                    elif not is_active and was_active:
+                        if axis == 1:
+                            self.ship.moved_down = False
+
+                    self.axis_active[axis] = is_active
+
+                    if axis in (0, 1):
+                        self.left_joystick[axis] = val
+
+                    elif axis in (2, 3):
+                        if axis == 2:
                             self.right_joystick[0] = apply_curve(self, val)
-
-                        elif event.axis == 3:
+                        elif axis == 3:
                             self.right_joystick[1] = apply_curve(self, val)
-
-                        if val != 0:
-                            self.cursor_visible = True
-                            self.last_move_time = pg.time.get_ticks()
 
             if not running:
                 break
