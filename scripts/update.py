@@ -1,5 +1,6 @@
 import random
 
+import pygame
 import pygame as pg
 
 from scripts import upgd
@@ -24,11 +25,6 @@ def set_hud(screen_size, padding):
 
 def update_phase(game):
     current_time = pg.time.get_ticks()
-
-    if not hasattr(game, "phase_start_time"):
-        game.phase_start_time = current_time
-        game.phase_ending = False
-
     elapsed = current_time - game.phase_start_time
     buffer_time = 5000
 
@@ -49,30 +45,32 @@ def update_phase(game):
         len(game.aliens) > 0,
         len(game.asteroids) > 0,
         len(game.bosses) > 0,
-        fleets_alive])
+        fleets_alive
+    ])
 
-    if game.phase_ending and not game.skill_tab.active\
-            and not enemies_alive:
-        game.ship.perk_points += 1
-        game.skill_tab.active = True
-
-    if game.skill_tab.active:
-        if game.skill_tab.pos == game.skill_tab.target_pos:
-            game.pause = True
-            game.phase_index = (game.phase_index + 1) % len(game.phases)
-            game.current_phase = game.phases[game.phase_index]
-            game.phase_start_time = pg.time.get_ticks()
-            game.phase_ending = False
-            game.last_alien_spawn = 0
-            game.last_asteroid_spawn = 0
-            game.phase_spawned = False
-
-    if game.phase_ending and not game.current_phase_options:
+    if game.phase_ending and not game.skill_tab.active and not enemies_alive:
+        game.skill_tab.open((pygame.display.Info().current_w//2 -
+                             game.skill_tab.width//2, 200))
         available_skills = [s for s in game.skills.skills if not s.unlocked]
         if not available_skills:
             available_skills = game.skills.skills
-        game.current_phase_options = random.sample(available_skills, k=min(3,len(available_skills)))
+        game.current_phase_options = random.sample(
+            available_skills, k=min(3, len(available_skills)))
         game.selected_skill = game.current_phase_options[0]
+
+    if game.skill_tab.active:
+        game.pause = True
+
+    if not game.skill_tab.active and game.phase_ending and not enemies_alive:
+        game.pause = False
+        game.phase_index = (game.phase_index + 1) % len(game.phases)
+        game.current_phase = game.phases[game.phase_index]
+        game.phase_start_time = current_time
+        game.phase_ending = False
+        game.last_alien_spawn = 0
+        game.last_asteroid_spawn = 0
+        game.phase_spawned = False
+        game.current_phase_options = []
 
 def spawn_asteroids(game):
     current_time = pg.time.get_ticks()
@@ -176,6 +174,9 @@ def update_game(game, delta, screen_size, hud_padding):
     game.celestials.update()
     game.asteroids.update()
 
+    if game.ship_alive:
+        game.ship.update_position(game.ship_x, game.ship_y)
+
     alive_fleets = []
     for fleet in game.fleets:
         fleet.update()
@@ -186,18 +187,12 @@ def update_game(game, delta, screen_size, hud_padding):
     if game.current_phase == game.phases[-1]:
         game.bosses.update()
 
-    if not game.pause:
-        game.projectiles.update()
-        game.enemy_projectiles.update()
+    game.projectiles.update()
+    game.enemy_projectiles.update()
 
+    game.floating_numbers.update(delta)
     game.explosions.update()
     game.upgrades.update()
-    game.skill_tab.update()
-    game.stats_tab.update()
-    game.floating_numbers.update(delta)
-
-    if game.skill_tab.pos == game.skill_tab.start_pos:
-        game.current_phase_options = []
 
     for particle in game.particles[:]:
         particle.update()
@@ -206,9 +201,6 @@ def update_game(game, delta, screen_size, hud_padding):
 
     if not game.direction_set:
         game.ship.direction = "idle"
-
-    if game.ship_alive:
-        game.ship.update_position(game.ship_x, game.ship_y)
 
     check_collision(game)
     current_time = pg.time.get_ticks()

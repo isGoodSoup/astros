@@ -157,8 +157,7 @@ class Game:
         frameh = self.megaexplosion_sheet.sheet.get_height()
         self.frame_big_explode = [
             self.megaexplosion_sheet.get_image(i, framew, frameh,
-                                               scale=self.scale, columns=4) for
-            i in range(4)]
+                                               scale=self.scale, columns=4) for i in range(4)]
 
         self.stars = [[random.randint(0, screen_size[0]),
                        random.randint(0, screen_size[1]),
@@ -204,13 +203,11 @@ class Game:
             "assets/ui/skill_tab.png",
             start_pos=(screen_size[0], 200),
             content_renderer=render_skills_tab)
-        self.skill_tab.set_target((screen_size[0]//2 - self.skill_tab.width//2, 200))
 
         self.stats_tab = Tab(
             "assets/ui/skill_tab.png",
             start_pos=(100, screen_size[1]),
             content_renderer=render_stats_tab)
-        self.stats_tab.set_target((100, screen_size[1] - self.stats_tab.height - 100))
 
         self.skills = SkillManager()
 
@@ -276,7 +273,11 @@ class Game:
                         self.take_screenshot(screen)
 
                     if event.key == pg.K_TAB:
-                        self.stats_tab.active = not self.stats_tab.active
+                        if not self.skill_tab.active:
+                            if self.stats_tab.active:
+                                self.stats_tab.close()
+                            else:
+                                self.stats_tab.open((100, screen_size[1] - self.stats_tab.height - 100))
 
                     if event.key == pg.K_f:
                         if self.ship.charges > 0:
@@ -357,7 +358,8 @@ class Game:
                             self.selected_skill = clicked_skill
                             self.skills.unlock_or_upgrade(self.selected_skill,self.ship)
                             self.pause = False
-                            self.skill_tab.active = False
+                            self.skill_tab.close()
+                            self.pause = False
 
                         for skill in self.current_phase_options:
                             skill.hovered = (skill == self.selected_skill)
@@ -375,7 +377,10 @@ class Game:
 
                     if event.button == 1:
                         if not self.skill_tab.active:
-                            self.stats_tab.active = not self.stats_tab.active
+                            if self.stats_tab.active:
+                                self.stats_tab.close()
+                            else:
+                                self.stats_tab.open((100, screen_size[1] - self.stats_tab.height - 100))
 
                     if event.button == 2:
                         if self.ship.base_ammo > 0:
@@ -400,7 +405,8 @@ class Game:
                         if self.selected_skill and self.current_phase_options:
                             self.skills.unlock_or_upgrade(self.selected_skill,
                                                           self.ship)
-                            self.skill_tab.active = False
+                            self.skill_tab.close()
+                            self.pause = False
 
                     if event.button == 6:
                         if self.pause and not self.skill_tab.active:
@@ -467,8 +473,9 @@ class Game:
 
             if not self.pause:
                 update_controller(self, screen_size, delta)
-                update_movement(self, delta, screen_size)
-                update_credits(self, font)
+                if not self.skill_tab.active:
+                    update_movement(self, delta, screen_size)
+                    update_credits(self, font)
 
             mouse_pos = pg.mouse.get_pos()
             hide_cursor(self, mouse_pos)
@@ -479,6 +486,9 @@ class Game:
             if not self.pause and not self.game_over:
                 update_game(self, delta, screen_size, hud_padding)
                 update_time(self)
+
+            self.skill_tab.update()
+            self.stats_tab.update()
 
             if tutorial_on:
                 self.tutorial.update(self, delta)

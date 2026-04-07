@@ -24,10 +24,10 @@ class Tab(pygame.sprite.Sprite):
         self.target_pos = pygame.Vector2(target_pos)
 
     def update(self):
-        dest = self.target_pos if self.active else self.start_pos
-        direction = dest - self.pos
+        direction = self.target_pos - self.pos
         if direction.length() > 0:
-            move = direction.normalize() * min(self.speed, direction.length()) # type: ignore
+            move = (direction.normalize() * min(self.speed,
+                    int(direction.length())))
             self.pos += move
             self.rect.topleft = (round(self.pos.x), round(self.pos.y))
 
@@ -35,3 +35,11 @@ class Tab(pygame.sprite.Sprite):
         screen.blit(self.image, self.rect)
         if self.content_renderer:
             self.content_renderer(game, screen, self.rect, font)
+
+    def open(self, target_pos):
+        self.active = True
+        self.set_target(target_pos)
+
+    def close(self):
+        self.active = False
+        self.set_target(self.start_pos)
