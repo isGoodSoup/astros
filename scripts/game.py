@@ -48,11 +48,6 @@ class Game:
         self.theme = load_ost()
         self.volume = 0.5
 
-        self.load_config()
-        apply_volume(self)
-
-        pg.mixer.music.play(-1)
-
         self.total_phases = 6
         self.phases = [f"wave_{i+1}" for i in range(self.total_phases)]
         self.current_phase = self.phases[0]
@@ -246,6 +241,11 @@ class Game:
         self.game_over_fx = True
         fade.start("in")
 
+        self.load_config()
+        apply_volume(self)
+
+        pg.mixer.music.play(-1)
+
     def run(self, running, clock, screen,
             screen_size, hud_padding, hud_ratio, crt, font):
         while running:
@@ -374,8 +374,8 @@ class Game:
                             self.screen_shake = 20
 
                     if event.button == 1:
-                        self.skill_tab.active = not self.skill_tab.active
-                        self.stats_tab.active = not self.stats_tab.active
+                        if not self.skill_tab.active:
+                            self.stats_tab.active = not self.stats_tab.active
 
                     if event.button == 2:
                         if self.ship.base_ammo > 0:
@@ -525,18 +525,26 @@ class Game:
 
     def save_config(self):
         config_data = {
-            "volume": self.volume,
-            "play_sound": self.play_sound
+            "volume" : self.volume,
+            "play_sound" : self.play_sound,
+            "credits" : self.ship.credits,
+            "high_score" : self.high_score
         }
         with open(self.config_path, "w") as f:
             json.dump(config_data, f, indent=4)
 
     def load_config(self):
         if os.path.exists(self.config_path):
-            with open(self.config_path, "r") as f:
-                config_data = json.load(f)
-                self.volume = config_data.get("volume", 1)
-                self.play_sound = config_data.get("play_sound", True)
+            try:
+                with open(self.config_path, "r") as f:
+                    config_data = json.load(f)
+            except (json.JSONDecodeError, ValueError):
+                config_data = {}
+
+            self.volume = config_data.get("volume", 1)
+            self.play_sound = config_data.get("play_sound", True)
+            self.ship.credits = config_data.get("credits", 0)
+            self.high_score = config_data.get("high_score", 0)
 
     def take_screenshot(self, screen):
         timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")

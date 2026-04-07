@@ -18,6 +18,7 @@ def game_lost(game, font, screen, screen_size):
 
     if game.score > game.high_score:
         game.high_score = game.score
+        game.save_config(game)
 
     score_text = font.render(f"{int(game.score):05}", True, "WHITE")
     stopwatch = game.stopwatch if game.stopwatch is not None else (
