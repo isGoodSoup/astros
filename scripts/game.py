@@ -273,12 +273,7 @@ class Game:
                         decrease_volume(self)
 
                     if event.key == pg.K_e:
-                        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-                        home_dir = os.path.expanduser("~")
-                        save_dir = os.path.join(home_dir, ".imgs")
-                        os.makedirs(save_dir, exist_ok=True)
-                        save_path = os.path.join(save_dir, f"{timestamp}.png")
-                        pg.image.save(screen, save_path)
+                        self.take_screenshot(screen)
 
                     if event.key == pg.K_TAB:
                         self.stats_tab.active = not self.stats_tab.active
@@ -298,7 +293,7 @@ class Game:
                             else:
                                 self.ship.gun = "shotgun"
 
-                    if event.key == pg.K_c:
+                    if event.key == pg.K_z:
                         if event.mod & pg.KMOD_SHIFT:
                             crt.prog['curvature'].value = max(0.0,crt.prog['curvature'].value - 0.5)
                         else:
@@ -423,6 +418,14 @@ class Game:
                         if joysticks:
                             controller.stop_rumble()
 
+                elif event.type == JOYHATMOTION:
+                    if event.value == (0, 1):
+                        increase_volume(self)
+                    elif event.value == (1, 0):
+                        self.take_screenshot(screen)
+                    elif event.value == (0, -1):
+                        decrease_volume(self)
+
                 elif event.type == JOYAXISMOTION:
                     if abs(event.value) > self.deadzone:
                         self.input_mode = "controller"
@@ -532,3 +535,11 @@ class Game:
                 config_data = json.load(f)
                 self.volume = config_data.get("volume", 1)
                 self.play_sound = config_data.get("play_sound", True)
+
+    def take_screenshot(self, screen):
+        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        home_dir = os.path.expanduser("~")
+        save_dir = os.path.join(home_dir, ".imgs")
+        os.makedirs(save_dir, exist_ok=True)
+        save_path = os.path.join(save_dir, f"{timestamp}.png")
+        pg.image.save(screen, save_path)
