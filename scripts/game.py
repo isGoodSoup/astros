@@ -272,7 +272,7 @@ class Game:
                     if event.key == pg.K_s:
                         decrease_volume(self)
 
-                    if event.key == pg.K_e:
+                    if event.key == pg.K_c:
                         self.take_screenshot(screen)
 
                     if event.key == pg.K_TAB:
