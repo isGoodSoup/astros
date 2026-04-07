@@ -323,7 +323,8 @@ class Game:
                             self.pause = not self.pause
 
                     if event.key == pg.K_q and (event.mod & pg.KMOD_CTRL):
-                        running = False
+                        if self.pause and not self.skill_tab.active:
+                            running = False
 
                     if event.key == pg.K_m:
                         self.play_sound = not self.play_sound
@@ -402,11 +403,12 @@ class Game:
                             self.skill_tab.active = False
 
                     if event.button == 6:
-                        if self.pause:
+                        if self.pause and not self.skill_tab.active:
                             running = False
 
                     if event.button == 7:
-                        self.pause = not self.pause
+                        if not self.skill_tab.active:
+                            self.pause = not self.pause
 
                 elif event.type == JOYBUTTONUP:
                     if event.button in (4, 5) and self.charge_active:
