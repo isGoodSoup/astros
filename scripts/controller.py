@@ -12,7 +12,6 @@ def update_controller(game, screen_size, dt):
             game.cursor_pos[0] += axis_x * game.cursor_speed * dt
             game.cursor_pos[1] += axis_y * game.cursor_speed * dt
 
-            # Clamp to screen bounds
             game.cursor_pos[0] = max(0, min(screen_size[0], game.cursor_pos[0]))
             game.cursor_pos[1] = max(0, min(screen_size[1], game.cursor_pos[1]))
 
