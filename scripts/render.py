@@ -1,5 +1,4 @@
 import pygame
-import pygame as pg
 
 from scripts.shared import joysticks
 from scripts.toggles import tutorial_on
@@ -7,7 +6,7 @@ from scripts.toggles import tutorial_on
 
 def render_frame(game, screen, font, hud_padding):
     for i in game.stars:
-        pg.draw.circle(screen, (255, 255, 255), (int(i[0]), int(i[1])), i[2])
+        pygame.draw.circle(screen, (255, 255, 255), (int(i[0]), int(i[1])), i[2])
 
     game.celestials.draw(screen)
     if game.current_phase in [game.phases[3], game.phases[5]]:
@@ -34,25 +33,25 @@ def render_frame(game, screen, font, hud_padding):
 
     if game.debugging:
         for i in game.asteroids:
-            pg.draw.rect(screen, (255, 0, 0), i.hitbox, 2)
+            pygame.draw.rect(screen, (255, 0, 0), i.hitbox, 2)
 
         for a in game.aliens:
-            pg.draw.rect(screen, (255, 0, 0), a.rect, 2)
+            pygame.draw.rect(screen, (255, 0, 0), a.rect, 2)
 
         for u in game.upgrades:
-            pg.draw.rect(screen, (0, 255, 0), u.rect, 2)
+            pygame.draw.rect(screen, (0, 255, 0), u.rect, 2)
 
         for p in game.projectiles:
-            pg.draw.rect(screen, (0, 0, 255), p.rect, 2)
+            pygame.draw.rect(screen, (0, 0, 255), p.rect, 2)
 
         for b in game.bosses:
-            pg.draw.rect(screen, (255, 0, 0), b.rect, 2)
+            pygame.draw.rect(screen, (255, 0, 0), b.rect, 2)
 
     if game.ship_alive:
         game.ship.rect.topleft = (game.ship_x, game.ship_y)
         screen.blit(img, game.ship.rect)
         if game.debugging:
-            pg.draw.rect(screen, (255, 0, 0), game.ship.hitbox, 2)
+            pygame.draw.rect(screen, (255, 0, 0), game.ship.hitbox, 2)
 
     game.explosions.draw(screen)
 

@@ -1,6 +1,6 @@
 import random
 
-import pygame as pg
+import pygame
 
 from scripts.explode import Explosion
 from scripts.floaty import FloatingNumber
@@ -12,19 +12,19 @@ from scripts.utils import add_multiplier, formulize
 
 def check_collision(game):
     if game.current_phase in [game.phases[3], game.phases[5]]:
-        asteroid_hit = pg.sprite.spritecollideany(game.ship, game.asteroids, # type: ignore
+        asteroid_hit = pygame.sprite.spritecollideany(game.ship, game.asteroids, # type: ignore
             collided=lambda s,m: s.hitbox.colliderect(m.hitbox))
     else:
         asteroid_hit = None
 
     if game.current_phase in game.phases:
-        alien_hit = pg.sprite.spritecollideany(game.ship, game.aliens, # type: ignore
+        alien_hit = pygame.sprite.spritecollideany(game.ship, game.aliens, # type: ignore
             collided=lambda s,m: s.hitbox.colliderect(m.hitbox))
     else:
         alien_hit = None
 
     if game.current_phase in game.phases:
-        alien_proj = pg.sprite.spritecollideany(game.ship, game.enemy_projectiles, # type: ignore
+        alien_proj = pygame.sprite.spritecollideany(game.ship, game.enemy_projectiles, # type: ignore
             collided=lambda s,m: s.hitbox.colliderect(m.rect))
     else:
         alien_proj = None
@@ -94,14 +94,14 @@ def check_collision(game):
             game.game_over = True
             game.ship.kill()
             game.ship_alive = False
-            pg.mixer.music.stop()
+            pygame.mixer.music.stop()
             game.game_over = True
 
-    hits1 = pg.sprite.groupcollide(game.projectiles, game.asteroids, True,
+    hits1 = pygame.sprite.groupcollide(game.projectiles, game.asteroids, True,
                                    False)
     for projectile, asteroids_hit in hits1.items():
         for asteroid in asteroids_hit:
-            current_time = pg.time.get_ticks()
+            current_time = pygame.time.get_ticks()
             if current_time > game.ship.maniac_boost_end:
                 game.ship.maniac_boost = 0
 
@@ -159,10 +159,10 @@ def check_collision(game):
                 game.score += game.ship.level * 10 * game.score_multiplier
                 game.ship.gain_xp(formulize(game, game.ship.level), game.sounds)
 
-    hits2 = pg.sprite.groupcollide(game.projectiles, game.aliens, True, False)
+    hits2 = pygame.sprite.groupcollide(game.projectiles, game.aliens, True, False)
     for projectile, aliens_hit in hits2.items():
         for alien in aliens_hit:
-            current_time = pg.time.get_ticks()
+            current_time = pygame.time.get_ticks()
             if current_time > game.ship.maniac_boost_end:
                 game.ship.maniac_boost = 0
 
@@ -219,10 +219,10 @@ def check_collision(game):
                 game.score += game.ship.level * 10 * game.score_multiplier
                 game.ship.gain_xp(formulize(game, game.ship.level), game.sounds)
 
-    hits3 = pg.sprite.groupcollide(game.projectiles, game.bosses, True, False)
+    hits3 = pygame.sprite.groupcollide(game.projectiles, game.bosses, True, False)
     for projectile, boss_hit in hits3.items():
         for boss in boss_hit:
-            current_time = pg.time.get_ticks()
+            current_time = pygame.time.get_ticks()
             if current_time > game.ship.maniac_boost_end:
                 game.ship.maniac_boost = 0
 
@@ -280,7 +280,7 @@ def check_collision(game):
                 game.score += game.ship.level * 10 * game.score_multiplier
                 game.ship.gain_xp(formulize(game, game.ship.level), game.sounds)
 
-    upgrade_hit = pg.sprite.spritecollide(game.ship, game.upgrades, False, # type: ignore
+    upgrade_hit = pygame.sprite.spritecollide(game.ship, game.upgrades, False, # type: ignore
                                           collided=lambda s,u: s.hitbox.colliderect(u.rect))
     if upgrade_hit:
         for upgrade in upgrade_hit:
@@ -289,7 +289,7 @@ def check_collision(game):
                 game.sounds[2].play()
             if game.last_upgrade == "power_up":
                 game.active_upgrade = "power_up"
-                game.upgrade_start_time = pg.time.get_ticks()
+                game.upgrade_start_time = pygame.time.get_ticks()
             elif game.last_upgrade == "shield":
                 game.ship.shield = min(game.ship.shield + 10,
                                        game.ship.max_shield)

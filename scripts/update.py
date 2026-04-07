@@ -1,7 +1,6 @@
 import random
 
 import pygame
-import pygame as pg
 
 from scripts import upgd
 from scripts.asteroid import Asteroid
@@ -25,7 +24,7 @@ def set_hud(screen_size, padding):
     }
 
 def update_phase(game):
-    current_time = pg.time.get_ticks()
+    current_time = pygame.time.get_ticks()
     elapsed = current_time - game.phase_start_time
     buffer_time = 5000
 
@@ -78,7 +77,7 @@ def update_phase(game):
         game.skills_generated = False
 
 def spawn_asteroids(game):
-    current_time = pg.time.get_ticks()
+    current_time = pygame.time.get_ticks()
     if current_time - game.last_asteroid_spawn > game.asteroid_spawn_interval:
         game.last_asteroid_spawn = current_time
         for _ in range(random.randint(1, game.asteroid_spawn_count)):
@@ -112,7 +111,7 @@ def update_game(game, delta, screen_size, hud_padding):
             i[0] = random.randint(0, screen_size[0])
 
     if not tutorial_on:
-        current_time = pg.time.get_ticks()
+        current_time = pygame.time.get_ticks()
         if current_time - game.last_celestial_spawn > game.celestial_spawn_interval:
             game.last_celestial_spawn = current_time
             for _ in range(random.randint(1, 4)):
@@ -135,7 +134,7 @@ def update_game(game, delta, screen_size, hud_padding):
                 new_upgrade = Upgrade(upgrade, x, y)
                 game.upgrades.add(new_upgrade)  # type: ignore
 
-    now = pg.time.get_ticks()
+    now = pygame.time.get_ticks()
     if now - game.last_update_base > game.cooldown_base:
         game.anim_frame_base += 1
         game.last_update_base = now
@@ -184,7 +183,7 @@ def update_game(game, delta, screen_size, hud_padding):
         if not game.ship.moved_down:
             trail_pos = game.ship.hitbox.midbottom
             for _ in range(8):
-                velocity = pg.Vector2(random.uniform(-1, 1),
+                velocity = pygame.Vector2(random.uniform(-1, 1),
                                       random.uniform(2, 4))
                 particle = Particle(trail_pos, velocity, timer=80,
                                     color=(255, 255, 255), radius=4)
@@ -216,7 +215,7 @@ def update_game(game, delta, screen_size, hud_padding):
         game.ship.direction = "idle"
 
     check_collision(game)
-    current_time = pg.time.get_ticks()
+    current_time = pygame.time.get_ticks()
     if game.active_upgrade == "power_up":
         game.ship.damage = game.ship.base_damage * game.ship.damage_multiplier * 2
         if current_time - game.upgrade_start_time >= game.upgrade_duration:

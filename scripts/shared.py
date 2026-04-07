@@ -1,9 +1,10 @@
-import pygame as pg
+import pygame
+
 from scripts.fade import Fade
 
-pg.init()
-pg.joystick.init()
-joysticks = [pg.joystick.Joystick(i) for i in range(pg.joystick.get_count())]
+pygame.init()
+pygame.joystick.init()
+joysticks = [pygame.joystick.Joystick(i) for i in range(pygame.joystick.get_count())]
 for j in joysticks:
     j.init()
 
