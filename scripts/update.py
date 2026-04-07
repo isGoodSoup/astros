@@ -91,13 +91,13 @@ def spawn_asteroids(game):
                 attempts += 1
 
 def spawn_boss(game):
-    if not game.boss_spawned:
+    if not game.phase_spawned:
         x = game.screen_size[0] // 2
         y = 350
         color = ['red', 'green', 'yellow']
         boss = Boss(game.ship, x, y, random.choice(color))
         game.bosses.add(boss)
-        game.boss_spawned = True
+        game.phase_spawned = True
         game.boss_alive = True
 
 def update_game(game, delta, screen_size, hud_padding):

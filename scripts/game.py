@@ -19,7 +19,8 @@ from scripts.sheet import SpriteSheet
 from scripts.ship import Ship
 from scripts.skill import SkillManager
 from scripts.skill_tab import Tab
-from scripts.soundlib import load_sounds, load_ost
+from scripts.soundlib import load_sounds, load_ost, increase_volume, \
+    decrease_volume
 from scripts.tutorial import Tutorial
 from scripts.update import set_hud, update_game, update_hud
 from scripts.utils import debug, apply_curve, hide_cursor
@@ -39,7 +40,6 @@ class Game:
         self.sounds = load_sounds()
         self.theme = load_ost()
         pg.mixer.music.play(-1)
-        pg.mixer.music.set_volume(0.5)
 
         self.total_phases = 6
         self.phases = [f"wave_{i+1}" for i in range(self.total_phases)]
@@ -255,6 +255,12 @@ class Game:
                             self.sounds[0].play()
 
                 elif event.type == pg.KEYDOWN:
+                    if event.key == pg.K_w:
+                        increase_volume()
+
+                    if event.key == pg.K_s:
+                        decrease_volume()
+
                     if event.key == pg.K_p:
                         timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 
