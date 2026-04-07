@@ -50,6 +50,8 @@ class Ship(pygame.sprite.Sprite):
         self.fortified_percent = 0
         self.fortified_cap = 200
 
+        self.skills = []
+
         self.level = 1
         self.xp = 0
         self.xp_to_next_level = 256
@@ -58,6 +60,9 @@ class Ship(pygame.sprite.Sprite):
         self.credits = 0
 
         self.hit = False
+
+    def add_skill(self, skill):
+        self.skills.append(skill)
 
     def update_damage(self):
         base = self.base_damage * (10 if self.gun == "shotgun" else 1)

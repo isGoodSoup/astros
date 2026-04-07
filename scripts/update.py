@@ -30,6 +30,7 @@ def update_phase(game):
 
     if elapsed >= game.phase_length - buffer_time:
         game.phase_ending = True
+        game.ship.perk_points += 1
 
     if not game.phase_spawned:
         if game.current_phase == game.phases[-1]:
@@ -50,14 +51,13 @@ def update_phase(game):
 
     if (game.phase_ending and not game.skill_tab.active and not enemies_alive
             and not game.skills_generated):
-        game.skill_tab.open((pygame.display.Info().current_w // 2 - game.skill_tab.width // 2,
-             200))
+        game.skill_tab.open((pygame.display.Info().current_w // 2 -
+                             game.skill_tab.width // 2, 200))
         available_skills = [s for s in game.skills.skills if not s.unlocked]
         if not available_skills:
             available_skills = game.skills.skills
         game.current_phase_options = random.sample(
             available_skills, k=min(3, len(available_skills)))
-        game.selected_skill = game.current_phase_options[0]
         game.skills_generated = True
 
     if game.skill_tab.active:
