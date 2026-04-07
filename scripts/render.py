@@ -81,12 +81,12 @@ def render_frame(game, screen, font, hud_padding):
         game.tutorial.render(screen, font)
 
 def render_skills_tab(game, screen, rect, game_font):
-    title_text, perks = "End of Phase", f"Perks: {game.ship.perk_points}"
+    title_text, perks = "Victory!", f"Perks: {game.ship.perk_points}"
     title = game_font.render(title_text, True, (255, 255, 255))
     perk_points = game_font.render(perks, True, (255, 255, 255))
     padding, offset = 60, 20
 
-    screen.blit(title, (rect.x + 250 + offset, rect.y + padding))
+    screen.blit(title, (rect.x + 300 + offset, rect.y + padding))
     screen.blit(perk_points, (rect.x + 300 + offset, rect.y + padding + 40))
 
     grid = [(250, 200), (350, 200), (450, 200)]
@@ -107,7 +107,6 @@ def render_stats_tab(game, screen, rect, game_font):
         f"XP: {int(game.ship.xp)}/{int(game.ship.xp_to_next_level)}",
         f"Crit Chance: {int(game.ship.crit_chance * 100)}%",
         f"Crit Multiplier: {int(game.ship.crit_multiplier)}",
-        "Active Skills: "
     ]
 
     y_offset = 40
@@ -115,36 +114,3 @@ def render_stats_tab(game, screen, rect, game_font):
         text_surface = game_font.render(stat, True, (255, 255, 255))
         screen.blit(text_surface, (rect.x + 40, rect.y + y_offset))
         y_offset += 50
-
-    start_x = rect.x + 40
-    base_y = rect.y + y_offset - 15
-    max_columns = 8
-    spacing_x = 70
-    spacing_y = 90
-
-    cursor_pos = game.cursor_pos if joysticks else pygame.mouse.get_pos()
-    clicked_skill = None
-
-    for idx, skill in enumerate(game.ship.skills):
-        col = idx % max_columns
-        row = idx // max_columns
-        skill_x = start_x + col * spacing_x
-        skill_y = base_y + row * spacing_y
-
-        if not hasattr(skill, "rect") or skill.rect is None:
-            skill.rect = skill.current_frame().get_rect()
-        skill.rect.topleft = (skill_x, skill_y)
-
-        skill.is_hovered(cursor_pos)
-
-        frame = pygame.transform.scale(skill.current_frame(), (64, 64))
-        screen.blit(frame, skill.rect)
-        screen.blit(skill.icon_image, skill.rect)
-
-        mouse_pressed = pygame.mouse.get_pressed()[0]
-        if mouse_pressed and skill.hovered:
-            clicked_skill = skill
-
-    if clicked_skill:
-        game.selected_skill = clicked_skill
-        game.skills.unlock_or_upgrade(clicked_skill, game.ship)
