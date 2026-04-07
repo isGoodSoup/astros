@@ -251,7 +251,7 @@ class Game:
                                 self.enemy_projectiles.add(*new_projectiles)
 
                         if shots_this_frame > 0 and self.play_sound:
-                            self.sounds[4].play()
+                            self.sounds[0].play()
 
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_p:
@@ -273,6 +273,7 @@ class Game:
                             self.ship.super_charge(joysticks, self.score, self.explosions,
                                                    self.entities, self.frame_explode,
                                                    self.frame_big_explode)
+                            self.sounds[1].play()
                             self.screen_shake = 50
                     if event.key == pg.K_g:
                         if self.ship.base_ammo > 0:
@@ -354,6 +355,8 @@ class Game:
                         new_projectiles = self.ship.shoot(gun_type=self.ship.gun)
                         self.projectiles.add(*new_projectiles)
                         self.last_shot_time = pg.time.get_ticks()
+
+                        self.sounds[0].play()
 
                         if self.ship.gun == "shotgun":
                             self.screen_shake = 20
