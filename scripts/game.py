@@ -26,6 +26,7 @@ from scripts.utils import debug, apply_curve, hide_cursor
 
 # Copyright (c) 2026 Diego
 # Licensed under the MIT License. See LICENSE file for details.
+# All assets in this game are © 2026 Diego. See ASSETS_LICENSE.txt.
 
 class Game:
     def __init__(self, screen, screen_size, hud_ratio,
