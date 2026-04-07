@@ -246,7 +246,6 @@ class Game:
     def run(self, running, clock, screen,
             screen_size, hud_padding, hud_ratio, crt, font):
         while running:
-            self.right_joystick = [0.0, 0.0]
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     running = False
@@ -467,7 +466,7 @@ class Game:
             screen.fill((0, 0, 0))
             delta = clock.tick(self.fps) / 1000
 
-            if not self.pause:
+            if not self.pause or self.skill_tab.active:
                 update_controller(self, screen_size, delta)
                 if not self.skill_tab.active:
                     update_movement(self, delta, screen_size)
@@ -494,8 +493,12 @@ class Game:
             if not self.game_over:
                 update_hud(self, font, screen, hud_ratio)
 
-            if self.input_mode != "controller":
-                self.cursor_pos = list(pg.mouse.get_pos())
+            current_mouse_pos = pg.mouse.get_pos()
+            mouse_moved = (current_mouse_pos != self.last_cursor_pos)
+            if mouse_moved and not joysticks:
+                self.input_mode = "mouse"
+                self.cursor_pos = list(current_mouse_pos)
+            self.last_cursor_pos = current_mouse_pos
 
             if self.cursor_visible:
                 pos = self.cursor_pos if self.input_mode == "controller" else pg.mouse.get_pos()
