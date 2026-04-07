@@ -30,7 +30,6 @@ def update_phase(game):
 
     if elapsed >= game.phase_length - buffer_time:
         game.phase_ending = True
-        game.ship.perk_points += 1
 
     if not game.phase_spawned:
         if game.current_phase == game.phases[-1]:
@@ -62,6 +61,8 @@ def update_phase(game):
 
     if game.skill_tab.active:
         game.pause = True
+        if game.pause:
+            game.ship.perk_points += 1
 
     if not game.skill_tab.active and game.phase_ending and not enemies_alive:
         game.pause = False
