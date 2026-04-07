@@ -53,9 +53,9 @@ def update_movement(game, delta, screen_size):
         if key_pressed[K_DOWN]:
             movement_y += game.ship.velocity * delta * 60
 
-    movement_x += game.joy_axis[0] * game.ship.velocity * delta * 60
+    movement_x += game.left_joystick[0] * game.ship.velocity * delta * 60
     if not lock_y:
-        movement_y += game.joy_axis[1] * game.ship.velocity * delta * 60
+        movement_y += game.left_joystick[1] * game.ship.velocity * delta * 60
 
     game.ship_x = max(0, min(screen_size[0] - game.base.get_width(),
                              game.ship_x + movement_x))
@@ -88,22 +88,22 @@ def update_movement(game, delta, screen_size):
             game.last_input_time = pygame.time.get_ticks()
         game.last_cursor_pos = mouse_pos
 
-        if abs(game.motion[0]) > 0.05 or abs(game.motion[1]) > 0.05:
+        if abs(game.right_joystick[0]) > 0.05 or abs(game.right_joystick[1]) > 0.05:
             game.input_mode = "controller"
             game.last_input_time = pygame.time.get_ticks()
 
         if game.input_mode == "mouse":
             game.cursor_pos = list(mouse_pos)
         elif game.input_mode == "controller":
-            game.cursor_pos[0] += game.motion[0] * cursor_speed
-            game.cursor_pos[1] += game.motion[1] * cursor_speed
+            game.cursor_pos[0] += game.right_joystick[0] * cursor_speed
+            game.cursor_pos[1] += game.right_joystick[1] * cursor_speed
             game.cursor_pos[0] = max(0, min(game.screen_size[0],
                                             game.cursor_pos[0]))
             game.cursor_pos[1] = max(0, min(game.screen_size[1],
                                             game.cursor_pos[1]))
 
         current_time = pygame.time.get_ticks()
-        dx, dy = game.motion
+        dx, dy = game.right_joystick
         threshold = 0.5
 
         if current_time - game.last_nav_time > game.nav_cooldown:

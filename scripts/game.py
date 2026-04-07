@@ -93,9 +93,9 @@ class Game:
         self.ship_y = screen_size[1] // 2 + 200
         self.ship_pos = [self.ship_x, self.ship_y]
         self.prev_select = False
-        self.joy_axis = [0.0, 0.0]
+        self.left_joystick = [0.0, 0.0]
+        self.right_joystick = [0.0, 0.0]
         self.deadzone = 0.2
-        self.motion = [0.0, 0.0]
         self.cursor_pos = [screen_size[0] // 2, screen_size[1] // 2]
         self.cursor_speed = 1000
         self.selected_skill = None
@@ -337,7 +337,7 @@ class Game:
 
                 elif event.type == pg.MOUSEBUTTONDOWN:
                     self.input_mode = "mouse"
-                    self.motion = [0.0, 0.0]
+                    self.right_joystick = [0.0, 0.0]
                     self.last_input_time = pg.time.get_ticks()
 
                     if self.skill_tab.active and self.current_phase_options:
@@ -435,26 +435,19 @@ class Game:
                         decrease_volume(self)
 
                 elif event.type == JOYAXISMOTION:
-                    if abs(event.value) > self.deadzone:
-                        self.input_mode = "controller"
-                        self.last_input_time = pg.time.get_ticks()
-
                     val = event.value if abs(
                         event.value) > self.deadzone else 0.0
 
                     if event.axis in (0, 1):
-                        while len(self.joy_axis) <= event.axis:
-                            self.joy_axis.append(0.0)
-                        self.joy_axis[event.axis] = val
+                        self.left_joystick[event.axis] = val
 
-                    elif event.axis == 2:
-                        self.motion[0] = apply_curve(self, val)
-                        if val != 0:
-                            self.cursor_visible = True
-                            self.last_move_time = pg.time.get_ticks()
+                    elif event.axis in (2, 3):
+                        if event.axis == 2:
+                            self.right_joystick[0] = apply_curve(self, val)
 
-                    elif event.axis == 3:
-                        self.motion[1] = apply_curve(self, val)
+                        elif event.axis == 3:
+                            self.right_joystick[1] = apply_curve(self, val)
+
                         if val != 0:
                             self.cursor_visible = True
                             self.last_move_time = pg.time.get_ticks()
@@ -498,9 +491,12 @@ class Game:
             if not self.game_over:
                 update_hud(self, font, screen, hud_ratio)
 
+            if self.input_mode == "mouse":
+                self.cursor_pos = list(pg.mouse.get_pos())
+
             if self.cursor_visible:
-                screen.blit(self.cursor_sprite,
-                            self.cursor_pos if joysticks else mouse_pos)
+                pos = self.cursor_pos if self.input_mode == "controller" else pg.mouse.get_pos()
+                screen.blit(self.cursor_sprite, (int(pos[0]), int(pos[1])))
 
             if self.game_over:
                 game_lost(self, font, screen, screen_size)
