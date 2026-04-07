@@ -24,6 +24,9 @@ from scripts.tutorial import Tutorial
 from scripts.update import set_hud, update_game, update_hud
 from scripts.utils import debug, apply_curve, hide_cursor
 
+# Copyright (c) 2026 Diego
+# Licensed under the MIT License. See LICENSE file for details.
+
 class Game:
     def __init__(self, screen, screen_size, hud_ratio,
                  game_font):
