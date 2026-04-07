@@ -35,14 +35,12 @@ def update_phase(game):
         game.phase_ending = True
 
     if not game.phase_spawned:
-        print(f"Spawning phase {game.current_phase}")
         if game.current_phase == game.phases[-1]:
             spawn_boss(game)
         elif game.current_phase in [game.phases[3], game.phases[5]]:
             spawn_asteroids(game)
         else:
             spawn_fleet(game, game.current_phase)
-            print(f"Aliens spawned: {len(game.aliens)}")
         game.phase_spawned = True
 
     fleets_alive = any(len(fleet.aliens) > 0 for fleet in game.fleets)
