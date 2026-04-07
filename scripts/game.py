@@ -236,6 +236,7 @@ class Game:
             self.tutorial = Tutorial()
 
         self.game_over_fx = True
+        self.skills_generated = False
         fade.start("in")
 
         self.load_config()
@@ -359,8 +360,9 @@ class Game:
                         if clicked_skill:
                             self.selected_skill = clicked_skill
                             self.skills.unlock_or_upgrade(self.selected_skill,self.ship)
-                            self.pause = False
                             self.skill_tab.close()
+                            self.current_phase_options = []
+                            self.phase_ending = False
                             self.pause = False
 
                         for skill in self.current_phase_options:
@@ -408,6 +410,8 @@ class Game:
                             self.skills.unlock_or_upgrade(self.selected_skill,
                                                           self.ship)
                             self.skill_tab.close()
+                            self.current_phase_options = []
+                            self.phase_ending = False
                             self.pause = False
 
                     if event.button == 6:
