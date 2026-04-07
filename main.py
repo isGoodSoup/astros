@@ -50,12 +50,12 @@ class Menu:
                     self.running = False
                 elif event.type == pg.KEYDOWN:
                     if any(pygame.key.get_pressed()) and not self.transitioning:
-                        self.sounds[2].play()
+                        self.sounds[4].play()
                         fade.start("out")
                         self.transitioning = True
                 elif event.type == JOYBUTTONDOWN:
                     if event.button in range(0, 9):
-                        self.sounds[2].play()
+                        self.sounds[4].play()
                         fade.start("out")
                         self.transitioning = True
 

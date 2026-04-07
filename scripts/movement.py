@@ -148,5 +148,7 @@ def update_movement(game, delta, screen_size):
             game.projectiles.add(*new_projectiles)
             game.last_shot_time = current_time
 
+            game.sounds[0].play()
+
             if game.ship.gun == "shotgun":
                 game.screen_shake = 20
