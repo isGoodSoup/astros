@@ -246,6 +246,7 @@ class Game:
     def run(self, running, clock, screen,
             screen_size, hud_padding, hud_ratio, crt, font):
         while running:
+            self.right_joystick = [0.0, 0.0]
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     running = False
@@ -335,9 +336,11 @@ class Game:
                             pg.mixer.music.play(-1)
                         self.save_config()
 
+
                 elif event.type == pg.MOUSEBUTTONDOWN:
-                    self.input_mode = "mouse"
-                    self.right_joystick = [0.0, 0.0]
+                    if self.input_mode != "controller":
+                        self.input_mode = "mouse"
+                        self.right_joystick = [0.0, 0.0]
                     self.last_input_time = pg.time.get_ticks()
 
                     if self.skill_tab.active and self.current_phase_options:
@@ -491,7 +494,7 @@ class Game:
             if not self.game_over:
                 update_hud(self, font, screen, hud_ratio)
 
-            if self.input_mode == "mouse":
+            if self.input_mode != "controller":
                 self.cursor_pos = list(pg.mouse.get_pos())
 
             if self.cursor_visible:
