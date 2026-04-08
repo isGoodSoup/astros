@@ -40,6 +40,7 @@ class Game:
 
         self.screen = screen
         self.screen_size = screen_size
+        self.hud_padding = 100
         self.fps = 60
         self.frame = 0
         self.scale = 4
@@ -161,7 +162,7 @@ class Game:
         fade.start("in")
         pygame.mixer.music.play(-1)
 
-    def run(self, running, clock, screen, screen_size, hud_padding, hud_ratio,
+    def run(self, running, clock, screen, screen_size, hud_ratio,
             crt, font):
         while running:
             events = pygame.event.get()
@@ -202,14 +203,17 @@ class Game:
 
             hide_cursor(self, self.input.cursor_pos)
 
+            self.hud_padding = self.input.padding
+
             if not self.state.pause and not self.state.game_over:
-                update_game(self, delta, screen_size, hud_padding)
+                update_game(self, delta, screen_size, self.hud_padding)
                 self.clock.update_time(self)
 
             if tutorial_on:
                 self.tutorial.update(self, delta)
 
-            render_frame(self, screen, font, hud_padding)
+            render_frame(self, screen, font, self.hud_padding)
+
             if not self.state.game_over:
                 self.hud.update(self, font, screen, hud_ratio)
 

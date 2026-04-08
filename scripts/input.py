@@ -29,6 +29,7 @@ class Input:
         self.last_move_time = pygame.time.get_ticks()
         self.cursor_hide_delay = 3000
         self.has_moved = False
+        self.padding = 100
 
     def update(self, events):
         self.last_input_time = pygame.time.get_ticks()
@@ -46,8 +47,8 @@ class Input:
                 self.has_moved = True
                 self.last_move_time = pygame.time.get_ticks()
 
-        self.cursor_visible = (pygame.time.get_ticks() -
-            self.last_move_time <= self.cursor_hide_delay)
+        self.cursor_visible = (self.has_moved and pygame.time.get_ticks() -
+                               self.last_move_time <= self.cursor_hide_delay)
 
     def act(self, game):
         now = pygame.time.get_ticks()
@@ -98,17 +99,26 @@ class Input:
         if volume_down:
             decrease_volume(game)
 
+        hud_padding_increase = keys[pygame.K_F4]
+        hud_padding_decrease = keys[pygame.K_F3]
+
+        if hud_padding_increase:
+            self.padding += 1
+        elif hud_padding_decrease:
+            self.padding -= 1
+
         screenshot_input = keys[pygame.K_F12] or (
                     joysticks and controller.get_hat(0)[0] == 1)
         if screenshot_input:
             take_screenshot(game, game.screen)
 
         stats_input = keys[pygame.K_TAB] or (joysticks and controller.get_button(1))
-        if stats_input:
+        if stats_input and not game.hud.skill_tab.active:
             if game.hud.stats_tab.active:
                 game.hud.stats_tab.close()
             else:
-                game.hud.stats_tab.open()
+                game.hud.stats_tab.open((game.screen_size[0] // 2 - game.hud.stats_tab.rect.width // 2,
+                                        game.screen_size[1] // 2))
 
         if game.hud.skill_tab.active and game.state.current_phase_options and self.mode == "mouse":
             mouse_rect = pygame.Rect(self.cursor_pos[0], self.cursor_pos[1],  1, 1)

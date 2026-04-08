@@ -36,12 +36,11 @@ class HUD:
         self.credits = 0
 
         self.skill_tab = Tab("assets/ui/skill_tab.png",
-            start_pos=(screen_size[0], 200),
-            content_renderer=render_skills_tab)
+            start_pos=(screen_size[0], 200), content_renderer=render_skills_tab)
 
         self.stats_tab = Tab("assets/ui/skill_tab.png",
-            start_pos=(100, screen_size[1]),
-            content_renderer=render_stats_tab)
+            start_pos=(screen_size[0] // 2 - self.skill_tab.rect.width // 2,
+                       screen_size[1]), content_renderer=render_stats_tab)
 
     def update(self, game, font, screen, hud_ratio):
         game.clock.stopwatch = font.render(f"{game.clock.hours:02}:{game.clock.minutes:02}"
