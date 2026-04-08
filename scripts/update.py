@@ -73,17 +73,17 @@ def update_phase(game):
 def spawn_asteroids(game):
     current_time = pygame.time.get_ticks()
     if current_time - game.last_asteroid_spawn > game.asteroid_spawn_interval:
-        game.last_asteroid_spawn = current_time
+        spawned = False
         for _ in range(random.randint(1, game.asteroid_spawn_count)):
-            attempts = 0
-            while attempts < 20:
+            for attempt in range(50):
                 new_asteroid = Asteroid(game.screen_size[0], min_y=-200, max_y=-50)
-                if all(abs(new_asteroid.rect.y - a.rect.y) >= 60 for a in
-                       game.asteroids):
+                if all(abs(new_asteroid.rect.y - a.rect.y) >= 40 for a in game.asteroids) or attempt > 30:
                     game.asteroids.add(new_asteroid)
                     game.entities.add(new_asteroid)
+                    spawned = True
                     break
-                attempts += 1
+        if spawned:
+            game.last_asteroid_spawn = current_time
 
 def spawn_boss(game):
     if not game.state.phase_spawned:

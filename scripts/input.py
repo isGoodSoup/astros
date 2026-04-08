@@ -75,6 +75,56 @@ class Input:
                 self.charge_active = True
                 self.charge_start_time = now
 
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_TAB:
+                    if game.hud.stats_tab.active:
+                        game.hud.stats_tab.close()
+                    else:
+                        game.hud.stats_tab.open((game.screen_size[0] // 2 -
+                                                 game.hud.stats_tab.rect.width // 2,
+                                                 game.screen_size[1] // 2))
+
+                if event.key == pygame.K_g:
+                    game.ship.switch_gun()
+
+                if event.key == pygame.K_l:
+                    from scripts.movement import lock_y
+                    lock_y = not lock_y
+
+                if event.key == pygame.K_ESCAPE:
+                    if not game.hud.skill_tab.active:
+                        game.state.pause = not game.state.pause
+
+                if event.key == pygame.K_q:
+                    if event.mod & pygame.KMOD_CTRL:
+                        if game.state.pause and not game.hud.skill_tab.active:
+                            game.running = False
+
+            elif event.type == pygame.JOYBUTTONDOWN:
+                if event.button == 1:
+                    if game.hud.stats_tab.active:
+                        game.hud.stats_tab.close()
+                    else:
+                        game.hud.stats_tab.open((game.screen_size[0] // 2 -
+                                                 game.hud.stats_tab.rect.width // 2,
+                                                 game.screen_size[1] // 2))
+
+                if event.button == 2:
+                    game.ship.switch_gun()
+
+                if event.button == 4:
+                    from scripts.movement import lock_y
+                    lock_y = not lock_y
+
+                if event.button == 6:
+                    if game.state.pause and not game.hud.skill_tab.active:
+                        game.running = False
+
+                if event.button == 7:
+                    if not game.hud.skill_tab.active:
+                        game.state.pause = not game.state.pause
+
         if self.charge_active:
             game.screen_shake = 20
             for event in events:
@@ -90,19 +140,6 @@ class Input:
                                                game.explosions, game.entities,game.frame_explode,
                                                game.frame_big_explode)
                         self.charge_active = False
-
-        pause_input = joysticks and controller.get_button(7) or keys[pygame.K_ESCAPE]
-        if pause_input and not game.hud.skill_tab.active:
-            game.state.pause = not game.state.pause
-
-        lock_input = joysticks and controller.get_button(4) or keys[pygame.K_l]
-        if lock_input:
-            from scripts.movement import lock_y
-            lock_y = not lock_y
-
-        switch_gun_input = joysticks and controller.get_button(2) or keys[pygame.K_g]
-        if switch_gun_input:
-            game.ship.switch_gun()
 
         volume_up = keys[pygame.K_PLUS] or keys[pygame.K_KP_PLUS] or (
                     joysticks and controller.get_hat(0)[1] == 1)
@@ -134,19 +171,6 @@ class Input:
                             or keys[pygame.K_F12])
         if screenshot_input:
             take_screenshot(game, game.screen)
-
-        stats_input = joysticks and controller.get_button(1) or keys[pygame.K_TAB]
-        if stats_input and not game.hud.skill_tab.active:
-            if game.hud.stats_tab.active:
-                game.hud.stats_tab.close()
-            else:
-                game.hud.stats_tab.open((game.screen_size[0] // 2 -
-                                         game.hud.stats_tab.rect.width // 2,
-                                        game.screen_size[1] // 2))
-
-        quit_input = joysticks and controller.get_button(6) or keys[pygame.K_q]
-        if game.state.pause and quit_input:
-            game.running = False
 
         if game.hud.skill_tab.active and game.state.current_phase_options and self.mode == "mouse":
             mouse_rect = pygame.Rect(self.cursor_pos[0], self.cursor_pos[1], 1, 1)
