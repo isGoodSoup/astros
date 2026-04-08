@@ -91,8 +91,7 @@ class Ship(pygame.sprite.Sprite):
         projectiles = []
         pos = self.hitbox.center
         if gun_type == "beam":
-            projectiles.append(
-                Projectile(pos, (255, 255, 0), direction=(0, -1), speed=16,
+            projectiles.append(Projectile(pos, (0, 255, 255), direction=(0, -1), speed=16,
                            damage=1))
 
         elif gun_type == "shotgun":
@@ -105,9 +104,8 @@ class Ship(pygame.sprite.Sprite):
                 angle = (-spread_angle / 2) + (i * (spread_angle / (num_pellets - 1)))
                 rad = math.radians(angle)
                 direction = (math.sin(rad), -math.cos(rad))
-                proj = Projectile(pos, (255, 200, 0), direction=direction,
-                                  speed=12, damage=3, range_limit=200)
-                projectiles.append(proj)
+                projectiles.append(Projectile(pos, (0, 255, 255), direction=direction,
+                               speed=12, damage=1))
             if not unlimited_ammo:
                 self.ammo -= num_pellets
 

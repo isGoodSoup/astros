@@ -1,5 +1,6 @@
 import pygame
 
+from scripts.game_over import reboot
 from scripts.shared import joysticks, controller
 from scripts.soundlib import decrease_volume, increase_volume
 from scripts.utils import take_screenshot
@@ -91,6 +92,9 @@ class Input:
                 if event.key == pygame.K_g:
                     game.ship.switch_gun()
 
+                if event.key == pygame.K_r and game.state.game_over:
+                    reboot(game, game.screen_size)
+
                 if event.key == pygame.K_l:
                     from scripts.movement import lock_y
                     lock_y = not lock_y
@@ -115,6 +119,9 @@ class Input:
 
                 if event.button == 2:
                     game.ship.switch_gun()
+
+                if event.button == 3 and game.state.game_over:
+                    reboot(game, game.screen_size)
 
                 if event.button == 4:
                     from scripts.movement import lock_y
