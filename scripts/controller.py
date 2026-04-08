@@ -11,6 +11,9 @@ def update_controller(game, screen_size, delta):
     lx = 0 if abs(lx) < game.input.deadzone else lx
     ly = 0 if abs(ly) < game.input.deadzone else ly
 
+    game.input.left_joystick[0] = lx
+    game.input.left_joystick[1] = ly
+
     game.ship.rect.x += int(lx * game.ship.velocity * delta)
     game.ship.rect.y += int(ly * game.ship.velocity * delta)
     game.ship.hitbox.center = game.ship.rect.center
