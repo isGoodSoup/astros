@@ -41,10 +41,11 @@ def update_phase(game):
         fleets_alive
     ])
 
-    if (game.state.phase_ending and not game.hud.skill_tab.active and not enemies_alive
+    if (not game.hud.skill_tab.active and game.state.phase_ending and not enemies_alive
             and not game.state.skills_generated):
         game.hud.skill_tab.open((pygame.display.Info().current_w // 2 -
                              game.hud.skill_tab.width // 2, 200))
+        game.ship.perk_points += 1
         available_skills = [s for s in game.skills.skills if not s.unlocked]
         if not available_skills:
             available_skills = game.skills.skills
@@ -54,11 +55,11 @@ def update_phase(game):
 
     if game.hud.skill_tab.active:
         game.state.pause = True
-        if game.state.pause:
-            game.ship.perk_points += 1
-
-    if not game.hud.skill_tab.active and game.state.phase_ending and not enemies_alive:
+    else:
         game.state.pause = False
+
+    if (game.state.phase_ending and not enemies_alive
+            and not game.hud.skill_tab.active):
         game.state.phase_index = (game.state.phase_index + 1) % len(game.state.phases)
         game.state.current_phase = game.state.phases[game.state.phase_index]
         game.state.phase_start_time = current_time

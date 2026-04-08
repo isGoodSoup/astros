@@ -50,7 +50,7 @@ class Input:
         self.cursor_visible = (self.has_moved and pygame.time.get_ticks() -
                                self.last_move_time <= self.cursor_hide_delay)
 
-    def act(self, game):
+    def act(self, game, events):
         self.moving_hud = False
         adjusting_hud = False
         now = pygame.time.get_ticks()
@@ -74,6 +74,22 @@ class Input:
             if not self.charge_active and game.ship.charges > 0:
                 self.charge_active = True
                 self.charge_start_time = now
+
+        if self.charge_active:
+            game.screen_shake = 20
+            for event in events:
+                if event.type == pygame.KEYUP:
+                    if event.key == pygame.K_f:
+                        game.ship.super_charge(joysticks, game.state.score, game.explosions, game.entities,
+                                               game.frame_explode,game.frame_big_explode)
+                        self.charge_active = False
+
+                elif event.type == pygame.JOYBUTTONUP:
+                    if controller.get_button(4) and controller.get_button(5):
+                        game.ship.super_charge(joysticks, game.state.score,
+                                               game.explosions, game.entities,game.frame_explode,
+                                               game.frame_big_explode)
+                        self.charge_active = False
 
         pause_input = joysticks and controller.get_button(7) or keys[pygame.K_ESCAPE]
         if pause_input and not game.hud.skill_tab.active:
@@ -136,8 +152,8 @@ class Input:
             mouse_rect = pygame.Rect(self.cursor_pos[0], self.cursor_pos[1], 1, 1)
             clicked_skill = None
 
-            for event in pygame.event.get([pygame.MOUSEBUTTONDOWN]):
-                if event.button == 1:  # Left mouse button
+            for event in events:
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     for skill in game.state.current_phase_options:
                         skill_rect = pygame.Rect(skill.pos[0], skill.pos[1], skill.rect.width,
                                                  skill.rect.height)

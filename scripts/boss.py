@@ -20,7 +20,7 @@ class Boss(pygame.sprite.Sprite):
 
         self.colors = {'red' : 100, 'green' : 200, 'yellow' : 300}
         self.level = ship.level + 5
-        self.max_hitpoints = 50 * self.level + self.colors.get(color)
+        self.max_hitpoints = 100 * self.level + self.colors.get(color)
         self.hitpoints = self.max_hitpoints
         self.base_damage = ship.damage * self.level
         self.last_shot_time = 0

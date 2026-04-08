@@ -166,8 +166,7 @@ def check_collision(game):
             if current_time > game.ship.maniac_boost_end:
                 game.ship.maniac_boost = 0
 
-            effective_crit_chance = min(1.0, (
-                        game.ship.crit_chance / 100) + game.ship.maniac_boost)
+            effective_crit_chance = min(1.0, (game.ship.crit_chance / 100) + game.ship.maniac_boost)
             if random.random() < effective_crit_chance:
                 damage_per_frame = game.ship.damage * game.ship.crit_multiplier
                 color = (255, 50, 50)

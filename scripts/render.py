@@ -65,7 +65,7 @@ def render_frame(game, screen, font, hud_padding):
                 break
 
         mouse_pressed = pygame.mouse.get_pressed()[0]
-        if mouse_pressed and game.input.selected_skill :
+        if mouse_pressed and game.input.selected_skill:
             game.skills.unlock_or_upgrade(game.input.selected_skill , game.ship)
             if game.input.selected_skill .unlocked and game.input.selected_skill  not in game.ship.skills:
                 game.ship.add_skill(game.input.selected_skill )

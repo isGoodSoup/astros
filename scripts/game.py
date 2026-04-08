@@ -185,7 +185,7 @@ class Game:
             delta = clock.tick(self.fps) / 1000
 
             self.input.update(events)
-            self.input.act(self)
+            self.input.act(self, events)
 
             if self.input.charge_active:
                 if joysticks:
