@@ -38,7 +38,7 @@ class Ship(pygame.sprite.Sprite):
         self.base_ammo = 100
         self.ammo = self.base_ammo
         self.evasion = 0.01
-        self.shot_cooldown = 400
+        self.shot_cooldown = 250
 
         self.maniac_boost = 0
         self.maniac_boost_end = 0
