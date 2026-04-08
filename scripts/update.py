@@ -129,8 +129,9 @@ def update_game(game, delta, screen_size, hud_padding):
             y = random.randint(-200, -50)
 
             game.last_upgrade = upgd.get_upgrade()
-            upgrade = f"assets/{game.last_upgrade}.png"
-            new_upgrade = Upgrade(upgrade, x, y, upgrade_type=upgrade)
+            upgrade_type = game.last_upgrade
+            upgrade_path = f"assets/{upgrade_type}.png"
+            new_upgrade = Upgrade(upgrade_path, x, y, upgrade_type=upgrade_type)
             game.upgrades.add(new_upgrade)  # type: ignore
 
     now = pygame.time.get_ticks()

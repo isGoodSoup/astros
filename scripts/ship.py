@@ -81,7 +81,7 @@ class Ship(pygame.sprite.Sprite):
         else:
             self.damage_multiplier = 1.0
 
-        if getattr(self, "shield_regen_active", False):
+        if getattr(self, "shield_regen", False):
             if now < self.shield_regen_end:
                 self.shield += self.shield_regen_rate / 60
                 self.shield = min(self.shield, self.max_shield)
