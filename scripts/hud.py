@@ -66,8 +66,8 @@ class HUD:
                             hud_ratio, ['right', 'bottom'], 33, [0, -175])
         self.ammo = Interface("assets/ui/ammo.png", 0, 11, 40,
                               hud_ratio, ['right', 'bottom'], 35, [-160, 0])
-        self.guns = Interface("assets/ui/guns.png", 0, 20, 16, hud_ratio,
-                              ['right', 'bottom'], 3, [-210, 0])
+        self.guns = Interface("assets/ui/guns.png", 0, 32, 32, hud_ratio,
+                              ['right', 'bottom'], 3, [-220, -10])
         self.credits = 0
 
         self.skill_tab = Tab("assets/ui/skill_tab.png",
