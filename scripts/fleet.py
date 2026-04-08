@@ -75,6 +75,7 @@ class AlienFleet:
 
             for alien in self.aliens:
                 alien.rect.x += self.direction * self.step
+                alien.update()
             self.move_timer = now
 
         alive = len(self.aliens)
