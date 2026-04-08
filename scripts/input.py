@@ -133,14 +133,18 @@ class Input:
             game.running = False
 
         if game.hud.skill_tab.active and game.state.current_phase_options and self.mode == "mouse":
-            mouse_rect = pygame.Rect(self.cursor_pos[0], self.cursor_pos[1],  1, 1)
+            mouse_rect = pygame.Rect(self.cursor_pos[0], self.cursor_pos[1], 1, 1)
             clicked_skill = None
-            for skill in game.state.current_phase_options:
-                skill_rect = pygame.Rect(skill.pos[0], skill.pos[1],
-                                         skill.rect.width, skill.rect.height)
-                if skill_rect.colliderect(mouse_rect):
-                    clicked_skill = skill
-                    break
+
+            for event in pygame.event.get([pygame.MOUSEBUTTONDOWN]):
+                if event.button == 1:  # Left mouse button
+                    for skill in game.state.current_phase_options:
+                        skill_rect = pygame.Rect(skill.pos[0], skill.pos[1], skill.rect.width,
+                                                 skill.rect.height)
+                        if skill_rect.colliderect(mouse_rect):
+                            clicked_skill = skill
+                            break
+
             if clicked_skill:
                 game.skills.unlock_or_upgrade(clicked_skill, game.ship)
                 game.hud.skill_tab.close()
