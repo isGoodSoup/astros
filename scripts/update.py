@@ -49,7 +49,7 @@ def update_phase(game):
     ])
 
     if (game.state.phase_ending and not game.hud.skill_tab.active and not enemies_alive
-            and not game.skills_generated):
+            and not game.state.skills_generated):
         game.hud.skill_tab.open((pygame.display.Info().current_w // 2 -
                              game.hud.skill_tab.width // 2, 200))
         available_skills = [s for s in game.skills.skills if not s.unlocked]
@@ -57,7 +57,7 @@ def update_phase(game):
             available_skills = game.skills.skills
         game.state.current_phase_options = random.sample(
             available_skills, k=min(3, len(available_skills)))
-        game.skills_generated = True
+        game.state.skills_generated = True
 
     if game.hud.skill_tab.active:
         game.state.pause = True
@@ -74,7 +74,7 @@ def update_phase(game):
         game.last_asteroid_spawn = 0
         game.state.phase_spawned = False
         game.state.current_phase_options = []
-        game.skills_generated = False
+        game.state.skills_generated = False
 
 def spawn_asteroids(game):
     current_time = pygame.time.get_ticks()
@@ -105,7 +105,7 @@ def update_game(game, delta, screen_size, hud_padding):
     game.ship.hit = False
     for i in game.stars:
         if not game.state.pause:
-            i[1] += game.stars_speed
+            i[1] += game.state.stars_speed
         if i[1] > screen_size[1]:
             i[1] = 0
             i[0] = random.randint(0, screen_size[0])

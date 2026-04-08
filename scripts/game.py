@@ -2,7 +2,7 @@ import json
 import os
 
 from scripts.celestial import *
-from scripts.clock import update_time
+from scripts.clock import Clock
 from scripts.controller import update_controller
 from scripts.credits import update_credits
 from scripts.game_over import game_lost
@@ -21,7 +21,6 @@ from scripts.tutorial import Tutorial
 from scripts.update import update_game
 from scripts.utils import hide_cursor
 
-
 # Copyright (c) 2026 Diego
 # Licensed under the MIT License. See LICENSE file for details.
 # All assets in this game are © 2026 Diego. See ASSETS_LICENSE.txt.
@@ -36,19 +35,17 @@ class Game:
 
         self.state = GameState()
         self.input = Input(screen_size)
+        self.clock = Clock()
         self.hud = HUD(self, screen_size, hud_ratio, game_font)
 
         self.screen = screen
+        self.screen_size = screen_size
         self.fps = 60
         self.frame = 0
-        self.screen_size = screen_size
-        self.prev_state = None
         self.scale = 4
         self.sounds = load_sounds()
         self.theme = load_ost()
         self.volume = 0.5
-
-        self.boss_alive = False
 
         self.celestials = pygame.sprite.Group()
         self.projectiles = pygame.sprite.Group()
@@ -62,19 +59,17 @@ class Game:
         self.entities = pygame.sprite.Group()
         self.fleets = []
         self.particles = []
-        self.stars_speed = 2
 
-        self.cols = 9
+        self.ship_frames = 9
         self.explosion_frames = 7
-        self.destroy_all = False
         self.ship_sprite = [SpriteSheet("assets/ship.png"), SpriteSheet(
             "assets/ship_v2.png"), SpriteSheet("assets/ship_v3.png")]
         self.explosion_sheet = SpriteSheet("assets/explosion.png")
         self.megaexplosion_sheet = SpriteSheet("assets/explosion_charge.png")
-        framew = self.ship_sprite[0].sheet.get_width() // self.cols
+        framew = self.ship_sprite[0].sheet.get_width() // self.ship_frames
         frameh = self.ship_sprite[0].sheet.get_height()
-        self.ship = Ship(self.ship_sprite[0], 0, 0, self.frame, framew, frameh, columns=self.cols)
-        self.spawnpoint(self.ship, screen_size, self.ship_sprite, self.cols)
+        self.ship = Ship(self.ship_sprite[0], 0, 0, self.frame, framew, frameh, columns=self.ship_frames)
+        self.spawnpoint(self.ship, screen_size, self.ship_sprite, self.ship_frames)
 
         self.ship_alive = True
         self.ship_x = screen_size[0] // 2 - framew // 2 - 25
@@ -90,20 +85,16 @@ class Game:
         self.anim_base_index = 0
         self.anim_base_direction = 1
 
-        self.last_update_base = pygame.time.get_ticks()
-        self.last_update_overlay = pygame.time.get_ticks()
-        self.last_update = pygame.time.get_ticks()
-        self.last_update_left = pygame.time.get_ticks()
-        self.last_update_right = pygame.time.get_ticks()
-        self.last_direction = None
-        self.last_time = pygame.time.get_ticks()
-        self.direction_set = None
+        self.last_update_base = self.last_update_overlay = (
+            self).last_update = self.last_update_left = (
+            self).last_update_right = self.last_time = pygame.time.get_ticks()
+        self.last_direction = self.direction_set = None
 
         self.frames = []
 
-        for i in range(self.cols):
+        for i in range(self.ship_frames):
             img = self.ship_sprite[0].get_image(i, framew, frameh, scale=self.scale,
-                                                columns=self.cols)
+                                                columns=self.ship_frames)
             self.frames.append(img)
 
         self.left_frames_movement = self.frames[0:2]
@@ -154,12 +145,6 @@ class Game:
 
         self.skills = SkillManager()
 
-        self.hours = 0
-        self.minutes = 0
-        self.seconds = 0
-        self.milliseconds = 0
-        self.stopwatch = None
-
         self.screen_shake = 0
         self.count = 0
         self.last_blink = 0
@@ -170,13 +155,10 @@ class Game:
         if tutorial_on:
             self.tutorial = Tutorial()
 
-        self.game_over_fx = True
-        self.skills_generated = False
-        fade.start("in")
-
         self.load_config()
         apply_volume(self)
 
+        fade.start("in")
         pygame.mixer.music.play(-1)
 
     def run(self, running, clock, screen, screen_size, hud_padding, hud_ratio,
@@ -222,7 +204,7 @@ class Game:
 
             if not self.state.pause and not self.state.game_over:
                 update_game(self, delta, screen_size, hud_padding)
-                update_time(self)
+                self.clock.update_time(self)
 
             if tutorial_on:
                 self.tutorial.update(self, delta)

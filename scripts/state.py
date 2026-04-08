@@ -15,6 +15,7 @@ class GameState:
         self.total_phases = 6
         self.phases = [f"wave_{i+1}" for i in range(self.total_phases)]
         self.current_phase = self.phases[0]
+        self.current_phase_options = []
         self.phase_index = 0
         self.phase_start_time = pygame.time.get_ticks()
         self.phase_to_sprite = {self.phases[i]: i for i in range(self.total_phases)}
@@ -22,4 +23,11 @@ class GameState:
         self.phase_length = 30_000
         self.phase_ending = False
         self.phase_spawned = False
-        self.current_phase_options = []
+
+        self.boss_spawned = False
+        self.boss_alive = False
+
+        self.game_over_fx = True
+        self.skills_generated = False
+
+        self.stars_speed = 2

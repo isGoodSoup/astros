@@ -14,7 +14,7 @@ def game_lost(game, font, screen, screen_size):
 
     if game.state.play_sound and getattr(game, "game_over_fx", True):
         game.sounds[-1].play()
-        game.game_over_fx = False
+        game.state.game_over_fx = False
 
     if game.state.score > game.state.high_score:
         game.state.high_score = game.state.score
@@ -43,15 +43,15 @@ def reboot(game, screen_size):
     game.floating_numbers.empty()
     game.particles.clear()
 
-    framew = game.ship_sprite[0].sheet.get_width() // game.cols
+    framew = game.ship_sprite[0].sheet.get_width() // game.ship_frames
     frameh = game.ship_sprite[0].sheet.get_height()
     game.ship = Ship(game.ship_sprite[0], 0, 0, game.frame, framew, frameh,
-                     columns=game.cols)
+                     columns=game.ship_frames)
 
     for attr, value in saved_stats.items():
         setattr(game.ship, attr, value)
 
-    game.spawnpoint(game.ship, screen_size, game.ship_sprite, game.cols)
+    game.spawnpoint(game.ship, screen_size, game.ship_sprite, game.ship_frames)
 
     game.ship_alive = True
     game.ship.hitpoints = game.ship.max_hitpoints
@@ -64,14 +64,15 @@ def reboot(game, screen_size):
     game.last_asteroid_spawn = 0
     game.last_shot_time = 0
     game.state.score = 0
-    game.hours = game.minutes = game.seconds = game.milliseconds = 0
-    game.stopwatch = None
+    game.clock.hours = game.clock.minutes\
+        = game.clock.seconds = game.clock.milliseconds = 0
+    game.clock.stopwatch = None
     game.state.current_phase = game.state.phases[0]
     game.state.phase_index = 0
     game.state.phase_start_time = pygame.time.get_ticks()
     game.state.phase_ending = False
     game.state.game_over = False
-    game.game_over_fx = True
+    game.state.game_over_fx = True
 
     if game.state.play_sound:
         pygame.mixer.music.play(-1)

@@ -44,9 +44,10 @@ class HUD:
             content_renderer=render_stats_tab)
 
     def update(self, game, font, screen, hud_ratio):
-        game.stopwatch = font.render(f"{game.hours:02}:{game.minutes:02}:{game.seconds:02}", True, "WHITE")
-        screen.blit(game.stopwatch,[hud_ratio['left'] + hud_ratio['width'] // 2 -
-                     game.stopwatch.get_width() // 2, hud_ratio['top']])
+        game.clock.stopwatch = font.render(f"{game.clock.hours:02}:{game.clock.minutes:02}"
+                                      f":{game.clock.seconds:02}", True, "WHITE")
+        screen.blit(game.clock.stopwatch,[hud_ratio['left'] + hud_ratio['width'] // 2 -
+                     game.clock.stopwatch.get_width() // 2, hud_ratio['top']])
 
         score_text = f"{int(game.state.score):06}"
         high_score = f"{int(game.state.high_score):06}"
