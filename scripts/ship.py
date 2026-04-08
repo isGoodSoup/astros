@@ -35,7 +35,7 @@ class Ship(pygame.sprite.Sprite):
         self.crit_chance = self.base_crit_chance
         self.crit_multiplier = 3
 
-        self.base_charges = 3
+        self.base_charges = 1
         self.charges = self.base_charges
         self.base_ammo = 200
         self.ammo = self.base_ammo
