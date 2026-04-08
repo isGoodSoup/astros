@@ -156,7 +156,7 @@ def check_collision(game):
                 if game.state.play_sound:
                     game.sounds[1].play()
                 game.state.score_multiplier = game.ship.damage_multiplier
-                game.score += game.ship.level * 10 * game.state.score_multiplier
+                game.state.score += (game.ship.level * 10 * game.state.score_multiplier)
                 game.ship.gain_xp(formulize(game, game.ship.level), game.sounds)
 
     hits2 = pygame.sprite.groupcollide(game.projectiles, game.aliens, True, False)

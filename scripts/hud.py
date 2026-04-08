@@ -15,6 +15,15 @@ def padded_pos(base_x, base_y, alignment_x, alignment_y, hud_padding):
         base_y -= hud_padding
     return base_x, base_y
 
+def value_to_frame(value, max_value, frame_count, reverse=False):
+    if max_value <= 0:
+        return 0
+    ratio = max(0, min(value / max_value, 1))
+    frame = int(ratio * (frame_count - 1))
+    if reverse:
+        frame = (frame_count - 1) - frame
+    return frame
+
 class Interface(pygame.sprite.Sprite):
     def __init__(self, path, frame, width, height, hud_ratio, hud_pos,
                  columns=29, offset=(0, 0), scale=4):
@@ -29,6 +38,7 @@ class Interface(pygame.sprite.Sprite):
 
     def update(self, ship, hud_ratio, hud_pos, frame, screen, hud_padding=0):
         frame = int(min(frame, len(self.frames) - 1))
+        self.image = self.frames[frame]
 
         if hud_pos[0] == 'left':
             self.hud_x = hud_ratio['left'] + hud_padding + self.offset_x
@@ -40,7 +50,7 @@ class Interface(pygame.sprite.Sprite):
         elif hud_pos[1] == 'bottom':
             self.hud_y = hud_ratio['bottom'] - hud_padding - self.image.get_height() + self.offset_y
 
-        screen.blit(self.frames[frame], (self.hud_x, self.hud_y))
+        screen.blit(self.image, (self.hud_x, self.hud_y))
 
 class HUD:
     def __init__(self, game, screen_size, hud_ratio, game_font):
@@ -103,15 +113,17 @@ class HUD:
         sw_y = hud_ratio['top'] + hud_padding
         screen.blit(stopwatch_surface, [sw_x, sw_y])
 
-        def update_interface(interface, pos):
-            interface.update(game.ship, hud_ratio, pos,
-                             interface.frames.index(interface.image), screen,
-                             hud_padding)
+        interfaces = [
+            (self.hitpoints, game.ship.hitpoints, game.ship.max_hitpoints, True),
+            (self.shield, game.ship.shield, game.ship.max_shield, True),
+            (self.xp, game.ship.xp, game.ship.xp_to_next_level, True),
+            (self.ammo, game.ship.ammo, game.ship.base_ammo, True),
+        ]
 
-        update_interface(self.hitpoints, ['right', 'bottom'])
-        update_interface(self.shield, ['right', 'bottom'])
-        update_interface(self.xp, ['right', 'bottom'])
-        update_interface(self.ammo, ['right', 'bottom'])
+        for interface, value, max_value, reverse in interfaces:
+            frame = value_to_frame(value, max_value, len(interface.frames), reverse)
+            interface.update(game.ship, hud_ratio, ['right', 'bottom'], frame,
+                             screen, hud_padding)
 
         self.skill_tab.update()
         self.stats_tab.update()
