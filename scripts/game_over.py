@@ -12,7 +12,7 @@ def game_lost(game, font, screen, screen_size):
     colors = ["RED", (0, 0, 0, 0)]
     game_over = font.render("GAME OVER", True, colors[game.count % 2])
 
-    if game.play_sound and getattr(game, "game_over_fx", True):
+    if game.state.play_sound and getattr(game, "game_over_fx", True):
         game.sounds[-1].play()
         game.game_over_fx = False
 
@@ -73,5 +73,5 @@ def reboot(game, screen_size):
     game.state.game_over = False
     game.game_over_fx = True
 
-    if game.play_sound:
+    if game.state.play_sound:
         pygame.mixer.music.play(-1)

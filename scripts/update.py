@@ -48,10 +48,10 @@ def update_phase(game):
         fleets_alive
     ])
 
-    if (game.state.phase_ending and not game.skill_tab.active and not enemies_alive
+    if (game.state.phase_ending and not game.hud.skill_tab.active and not enemies_alive
             and not game.skills_generated):
-        game.skill_tab.open((pygame.display.Info().current_w // 2 -
-                             game.skill_tab.width // 2, 200))
+        game.hud.skill_tab.open((pygame.display.Info().current_w // 2 -
+                             game.hud.skill_tab.width // 2, 200))
         available_skills = [s for s in game.skills.skills if not s.unlocked]
         if not available_skills:
             available_skills = game.skills.skills
@@ -59,14 +59,14 @@ def update_phase(game):
             available_skills, k=min(3, len(available_skills)))
         game.skills_generated = True
 
-    if game.skill_tab.active:
+    if game.hud.skill_tab.active:
         game.state.pause = True
         if game.state.pause:
             game.ship.perk_points += 1
 
-    if not game.skill_tab.active and game.state.phase_ending and not enemies_alive:
+    if not game.hud.skill_tab.active and game.state.phase_ending and not enemies_alive:
         game.state.pause = False
-        game.phase_index = (game.phase_index + 1) % len(game.state.phases)
+        game.state.phase_index = (game.state.phase_index + 1) % len(game.state.phases)
         game.state.current_phase = game.state.phases[game.phase_index]
         game.state.phase_start_time = current_time
         game.state.phase_ending = False
@@ -228,75 +228,3 @@ def update_game(game, delta, screen_size, hud_padding):
         game.state.score += 1 * game.state.score_multiplier
 
     update_phase(game)
-
-def update_hud(game, font, screen, hud_ratio):
-    game.stopwatch = font.render(f"{game.hours:02}:{game.minutes:02}:{game.seconds:02}", True, "WHITE")
-    screen.blit(game.stopwatch,
-                [hud_ratio['left'] + hud_ratio['width'] // 2 -
-                 game.stopwatch.get_width() // 2, hud_ratio['top']])
-
-    score_text = f"{int(game.state.score):06}"
-    high_score = f"{int(game.state.high_score):06}"
-    score_surface = font.render(score_text, True, "WHITE")
-    high_score_surface = font.render(high_score, True, "WHITE")
-
-    line_spacing = 2
-
-    score_lines = ["", "SCORE"]
-    score_line_surfs = [font.render(line, True, "WHITE") for line in score_lines]
-
-    title_height = sum(s.get_height() for s in score_line_surfs) + line_spacing * (len(score_line_surfs) - 1)
-    score_value_y = hud_ratio['top'] + title_height + 5
-
-    screen.blit(score_surface, [hud_ratio['left'], score_value_y])
-
-    y = score_value_y - 5
-    for surf in reversed(score_line_surfs):
-        y -= surf.get_height()
-        screen.blit(surf, [hud_ratio['left'], y])
-        y -= line_spacing
-
-    high_lines = ["HIGH", "SCORE"]
-    high_line_surfs = [font.render(line, True, "WHITE") for line in high_lines]
-
-    block_width = max(s.get_width() for s in high_line_surfs + [high_score_surface])
-    x_pos = hud_ratio['right'] - block_width
-    screen.blit(high_score_surface, [x_pos, score_value_y])
-
-    y = score_value_y - 5
-    for surf in reversed(high_line_surfs):
-        y -= surf.get_height()
-        screen.blit(surf, [x_pos, y])
-        y -= line_spacing
-
-    total_frames = len(game.hitpoints.frames) - 1
-    if game.ship.hitpoints <= 0:
-        hitpoints_frame = total_frames
-    else:
-        hitpoints_frame = (total_frames - (game.ship.hitpoints * total_frames)
-                    // game.ship.max_hitpoints)
-        hitpoints_frame = max(0, min(hitpoints_frame, total_frames))
-    game.hitpoints.update(game.ship, hud_ratio, ['right', 'bottom'],
-                          hitpoints_frame, screen)
-
-    shield_total_frames = len(game.shield.frames) - 1
-    shield_frame = (shield_total_frames - (
-                game.ship.shield * shield_total_frames)
-                    // game.ship.max_shield)
-    shield_frame = max(0, min(shield_total_frames, shield_frame))
-    game.shield.update(game.ship, hud_ratio, ['right', 'bottom'],
-                       shield_frame, screen)
-
-    experience_total_frames = len(game.xp.frames) - 1
-    xp_frame = (experience_total_frames - (
-                experience_total_frames * game.ship.xp)
-                // game.ship.xp_to_next_level)
-    game.xp.update(game.ship, hud_ratio, ['right', 'bottom'], xp_frame,
-                   screen)
-
-    ammo_total_frames = len(game.ammo.frames) - 1
-    ammo_frame = (ammo_total_frames - (game.ship.ammo * ammo_total_frames)
-                  // game.ship.base_ammo)
-    ammo_frame = max(0, min(ammo_total_frames, ammo_frame))
-    game.ammo.update(game.ship, hud_ratio, ['right', 'bottom'], ammo_frame,
-                     screen)

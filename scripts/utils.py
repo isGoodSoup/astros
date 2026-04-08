@@ -25,13 +25,7 @@ def level_enemies(game):
         game.asteroid_speed = 1 + 10 * game.ship.level
 
 def debug(game):
-    if game.debugging:
-        game.debugging = False
-        return
-
-    if not game.debugging:
-        game.debugging = True
-        return
+    game.state.debugging = not game.debugging
 
 def apply_curve(game, v):
     return v * abs(v)
@@ -41,6 +35,7 @@ def hide_cursor(game, mouse_pos):
         game.input.last_cursor_pos = mouse_pos
         game.input.last_move_time = pygame.time.get_ticks()
         game.input.cursor_visible = True
+        game.input.has_moved = False
 
 def center(game, text, screen_size):
     return screen_size[0] // 2 - text.get_width() // 2

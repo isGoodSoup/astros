@@ -31,7 +31,7 @@ def render_frame(game, screen, font, hud_padding):
     overlay_frame = game.frames_flying[overlay_index]
     img.blit(overlay_frame, (0, 0))
 
-    if game.debugging:
+    if game.state.debugging:
         for i in game.asteroids:
             pygame.draw.rect(screen, (255, 0, 0), i.hitbox, 2)
 
@@ -50,16 +50,16 @@ def render_frame(game, screen, font, hud_padding):
     if game.ship_alive:
         game.ship.rect.topleft = (game.ship_x, game.ship_y)
         screen.blit(img, game.ship.rect)
-        if game.debugging:
+        if game.state.debugging:
             pygame.draw.rect(screen, (255, 0, 0), game.ship.hitbox, 2)
 
     game.explosions.draw(screen)
 
-    if game.skill_tab.active and game.current_phase_options:
+    if game.hud.skill_tab.active and game.state.current_phase_options:
         cursor_pos = game.input.cursor_pos if joysticks else pygame.mouse.get_pos()
         game.input.selected_skill  = None
 
-        for skill in game.current_phase_options:
+        for skill in game.state.current_phase_options:
             if skill.is_hovered(cursor_pos):
                 game.input.selected_skill  = skill
                 break
@@ -69,12 +69,12 @@ def render_frame(game, screen, font, hud_padding):
             game.skills.unlock_or_upgrade(game.input.selected_skill , game.ship)
             if game.input.selected_skill .unlocked and game.input.selected_skill  not in game.ship.skills:
                 game.ship.add_skill(game.input.selected_skill )
-            game.skill_tab.close()
+            game.hud.skill_tab.close()
 
-    game.stats_tab.render(game, screen, font, hud_padding)
-    game.skill_tab.render(game, screen, font, hud_padding)
+    game.hud.stats_tab.render(game, screen, font, hud_padding)
+    game.hud.skill_tab.render(game, screen, font, hud_padding)
 
-    screen.blit(game.credits, [hud_padding, 190])
+    screen.blit(game.hud.credits, [hud_padding, 190])
 
     if tutorial_on:
         game.tutorial.render(screen, font)

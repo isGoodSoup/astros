@@ -1,6 +1,5 @@
 import pygame
 
-
 class GameState:
     def __init__(self):
         self.score = 0
@@ -10,6 +9,8 @@ class GameState:
 
         self.game_over = False
         self.pause = False
+        self.debugging = False
+        self.play_sound = True
 
         self.total_phases = 6
         self.phases = [f"wave_{i+1}" for i in range(self.total_phases)]

@@ -86,7 +86,7 @@ def update_movement(game, delta, screen_size):
         game.ship.shield += game.ship.tower_boost
         game.ship.tower_boost_applied = True
 
-    if game.skill_tab.active:
+    if game.hud.skill_tab.active:
         cursor_speed = game.input.cursor_speed * delta
 
         mouse_pos = pygame.mouse.get_pos()

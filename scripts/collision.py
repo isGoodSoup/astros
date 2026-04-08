@@ -63,7 +63,7 @@ def check_collision(game):
             game.particles.append(
                 Particle((ship_center_x, ship_center_y), vel))
 
-        if game.play_sound:
+        if game.state.play_sound:
             game.sounds[1].play()
 
         if asteroid_hit:
@@ -153,7 +153,7 @@ def check_collision(game):
                 explosion = Explosion(asteroid.rect.centerx,
                                       asteroid.rect.centery, game.frame_explode)
                 game.explosions.add(explosion)
-                if game.play_sound:
+                if game.state.play_sound:
                     game.sounds[1].play()
                 game.state.score_multiplier = game.ship.damage_multiplier
                 game.score += game.ship.level * 10 * game.state.score_multiplier
@@ -213,7 +213,7 @@ def check_collision(game):
                 explosion = Explosion(alien.rect.centerx, alien.rect.centery,
                                       game.frame_explode)
                 game.explosions.add(explosion)
-                if game.play_sound:
+                if game.state.play_sound:
                     game.sounds[1].play()
                 game.state.score_multiplier = game.ship.damage_multiplier
                 game.state.score += (game.ship.level * 10 * game.state.score_multiplier)
@@ -274,7 +274,7 @@ def check_collision(game):
                 explosion = Explosion(boss.rect.centerx, boss.rect.centery,
                                       game.frame_explode)
                 game.explosions.add(explosion)
-                if game.play_sound:
+                if game.state.play_sound:
                     game.sounds[1].play()
                 game.state.score_multiplier = game.ship.damage_multiplier
                 game.score += game.ship.level * 10 * game.state.score_multiplier
@@ -285,7 +285,7 @@ def check_collision(game):
     if upgrade_hit:
         for upgrade in upgrade_hit:
             upgrade.kill()
-            if game.play_sound:
+            if game.state.play_sound:
                 game.sounds[2].play()
             if game.last_upgrade == "power_up":
                 game.active_upgrade = "power_up"
