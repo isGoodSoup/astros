@@ -6,20 +6,19 @@ from scripts.clock import update_time
 from scripts.controller import update_controller
 from scripts.credits import update_credits
 from scripts.game_over import game_lost
-from scripts.hud import Interface
+from scripts.hud import HUD
 from scripts.input import Input
 from scripts.movement import update_movement
-from scripts.render import render_stats_tab, render_skills_tab, render_frame
+from scripts.render import render_frame
 from scripts.shared import joysticks, controller, fade
 from scripts.sheet import SpriteSheet
 from scripts.ship import Ship
 from scripts.skill import SkillManager
-from scripts.skill_tab import Tab
 from scripts.soundlib import load_sounds, load_ost, apply_volume
 from scripts.state import GameState
 from scripts.toggles import tutorial_on
 from scripts.tutorial import Tutorial
-from scripts.update import update_game, update_hud
+from scripts.update import update_game
 from scripts.utils import hide_cursor
 
 
@@ -37,6 +36,7 @@ class Game:
 
         self.state = GameState()
         self.input = Input(screen_size)
+        self.hud = HUD(self, screen_size, hud_ratio, game_font)
 
         self.screen = screen
         self.fps = 60
@@ -80,16 +80,6 @@ class Game:
         self.ship_x = screen_size[0] // 2 - framew // 2 - 25
         self.ship_y = screen_size[1] // 2 + 200
         self.ship_pos = [self.ship_x, self.ship_y]
-
-        self.hitpoints = Interface("assets/ui/status.png", 0, 40, 40,
-                                   hud_ratio, ['right', 'bottom'])
-        self.shield = Interface("assets/ui/shield_bar.png", 0, 40, 17,
-                                hud_ratio, ['right', 'bottom'], 33, [0, -150])
-        self.xp = Interface("assets/ui/xp.png", -1, 40, 17,
-                            hud_ratio, ['right', 'bottom'], 33, [0, -175])
-        self.ammo = Interface("assets/ui/ammo.png", 0, 11, 40,
-                              hud_ratio, ['right', 'bottom'], 35, [-160, 0])
-        self.credits = game_font.render(f"{self.ship.credits}€$", True, (255, 200, 0))
 
         self.anim_frame_base = 0
         self.anim_frame_overlay = 0
@@ -162,20 +152,7 @@ class Game:
         self.upgrade_start_time = 0
         self.upgrade_duration = 16_000
 
-        self.skill_tab = Tab(
-            "assets/ui/skill_tab.png",
-            start_pos=(screen_size[0], 200),
-            content_renderer=render_skills_tab)
-
-        self.stats_tab = Tab(
-            "assets/ui/skill_tab.png",
-            start_pos=(100, screen_size[1]),
-            content_renderer=render_stats_tab)
-
         self.skills = SkillManager()
-
-        self.play_sound = True
-        self.debugging = False
 
         self.hours = 0
         self.minutes = 0
@@ -211,7 +188,7 @@ class Game:
                     running = False
                 elif event.type == self.ALIENLASER and not self.state.pause:
                     shooters = random.sample(self.aliens.sprites(),
-                                             k=min(3, len(self.aliens)))
+                                             k=min(1, len(self.aliens)))
                     shots_this_frame = 0
                     for alien in shooters:
                         new_projectiles = alien.shoot(self.ship,
@@ -219,7 +196,7 @@ class Game:
                         if new_projectiles:
                             shots_this_frame += len(new_projectiles)
                             self.enemy_projectiles.add(*new_projectiles)
-                    if shots_this_frame > 0 and self.play_sound:
+                    if shots_this_frame > 0 and self.state.play_sound:
                         self.sounds[0].play()
 
             screen.fill((0, 0, 0))
@@ -235,29 +212,24 @@ class Game:
                 charge_ratio = min(1.0,
                                    charge_elapsed / self.input.charge_duration)
 
-            if not self.state.pause or self.skill_tab.active:
+            if not self.state.pause or self.hud.skill_tab.active:
                 update_controller(self, screen_size, delta)
-                if not self.skill_tab.active:
+                if not self.hud.skill_tab.active:
                     update_movement(self, delta, screen_size)
                     update_credits(self, font)
 
             hide_cursor(self, self.input.cursor_pos)
-            self.input.cursor_visible = (
-                        pygame.time.get_ticks() - self.input.last_move_time <= self.input.cursor_hide_delay)
 
             if not self.state.pause and not self.state.game_over:
                 update_game(self, delta, screen_size, hud_padding)
                 update_time(self)
-
-            self.skill_tab.update()
-            self.stats_tab.update()
 
             if tutorial_on:
                 self.tutorial.update(self, delta)
 
             render_frame(self, screen, font, hud_padding)
             if not self.state.game_over:
-                update_hud(self, font, screen, hud_ratio)
+                self.hud.update(self, font, screen, hud_ratio)
 
             if self.input.cursor_visible:
                 pos = self.input.cursor_pos if self.input.mode == "controller" else pygame.mouse.get_pos()
@@ -297,7 +269,7 @@ class Game:
     def save_config(self):
         config_data = {
             "volume" : self.volume,
-            "play_sound" : self.play_sound,
+            "play_sound" : self.state.play_sound,
             "credits" : self.ship.credits,
             "high_score" : self.state.high_score
         }
@@ -313,6 +285,6 @@ class Game:
                 config_data = {}
 
             self.volume = config_data.get("volume", 1)
-            self.play_sound = config_data.get("play_sound", True)
+            self.state.play_sound = config_data.get("play_sound", True)
             self.ship.credits = config_data.get("credits", 0)
             self.state.high_score = config_data.get("high_score", 0)
