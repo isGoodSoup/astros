@@ -130,7 +130,7 @@ class Game:
         self.alien_spawn_count = random.randint(1, 5)
 
         self.ALIENLASER = pygame.USEREVENT + 1
-        pygame.time.set_timer(self.ALIENLASER, 800)
+        pygame.time.set_timer(self.ALIENLASER, 1000)
 
         self.last_asteroid_spawn = 0
         self.asteroid_spawn_interval = 600
@@ -174,7 +174,7 @@ class Game:
                 elif (event.type == self.ALIENLASER and not self.state.pause
                       and not self.state.game_over):
                     shooters = random.sample(self.aliens.sprites(),
-                        k=min(1, len(self.aliens)))
+                        k=min(4, len(self.aliens)))
                     shots_this_frame = 0
                     for alien in shooters:
                         new_projectiles = alien.shoot(self.ship,
