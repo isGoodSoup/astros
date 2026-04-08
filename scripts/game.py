@@ -61,6 +61,7 @@ class Game:
         self.entities = pygame.sprite.Group()
         self.fleets = []
         self.particles = []
+        self.hit_this_frame = set()
 
         self.ship_frames = 9
         self.explosion_frames = 7

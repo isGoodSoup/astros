@@ -10,8 +10,8 @@ from scripts.collision import check_collision
 from scripts.fleet import spawn_fleet
 from scripts.particle import Particle
 from scripts.shared import joysticks, controller
-from scripts.toggles import tutorial_on
 from scripts.upgd import Upgrade
+
 
 def set_hud(screen_size):
     width, height = screen_size
@@ -98,6 +98,11 @@ def spawn_boss(game):
 
 def update_game(game, delta, screen_size, hud_padding):
     game.ship.hit = False
+    game.hit_this_frame.clear()
+
+    if game.ship.hit:
+        game.ship.damage_multiplier = 1.0
+
     for i in game.stars:
         if not game.state.pause:
             i[1] += game.state.stars_speed
@@ -105,29 +110,28 @@ def update_game(game, delta, screen_size, hud_padding):
             i[1] = 0
             i[0] = random.randint(0, screen_size[0])
 
-    if not tutorial_on:
-        current_time = pygame.time.get_ticks()
-        if current_time - game.last_celestial_spawn > game.celestial_spawn_interval:
-            game.last_celestial_spawn = current_time
-            for _ in range(random.randint(1, 4)):
-                for _ in range(10):
-                    new_celestial = random_celestial()
-                    if new_celestial and is_valid_spawn(new_celestial, game.celestials,
-                                                        200):
-                        game.celestials.add(new_celestial)
-                        break
+    current_time = pygame.time.get_ticks()
+    if current_time - game.last_celestial_spawn > game.celestial_spawn_interval:
+        game.last_celestial_spawn = current_time
+        for _ in range(random.randint(1, 4)):
+            for _ in range(10):
+                new_celestial = random_celestial()
+                if new_celestial and is_valid_spawn(new_celestial, game.celestials,
+                                                    200):
+                    game.celestials.add(new_celestial)
+                    break
 
-        if current_time - game.last_upgrade_spawn > game.upgrade_spawn_interval:
-            game.last_upgrade_spawn = current_time
+    if current_time - game.last_upgrade_spawn > game.upgrade_spawn_interval:
+        game.last_upgrade_spawn = current_time
 
-            for _ in range(random.randint(1, 2)):
-                x = random.randint(0, screen_size[0])
-                y = random.randint(-200, -50)
+        for _ in range(random.randint(1, 2)):
+            x = random.randint(0, screen_size[0])
+            y = random.randint(-200, -50)
 
-                game.last_upgrade = upgd.get_upgrade()
-                upgrade = f"assets/{game.last_upgrade}.png"
-                new_upgrade = Upgrade(upgrade, x, y)
-                game.upgrades.add(new_upgrade)  # type: ignore
+            game.last_upgrade = upgd.get_upgrade()
+            upgrade = f"assets/{game.last_upgrade}.png"
+            new_upgrade = Upgrade(upgrade, x, y, upgrade_type=upgrade)
+            game.upgrades.add(new_upgrade)  # type: ignore
 
     now = pygame.time.get_ticks()
     if now - game.last_update_base > game.cooldown_base:
@@ -176,13 +180,16 @@ def update_game(game, delta, screen_size, hud_padding):
     if game.ship_alive:
         game.ship.update_position(game.ship_x, game.ship_y)
         if game.ship_alive:
-            if game.ship.hitpoints // game.ship.max_hitpoints < 0.3:
+            game.ship.update_upgrades()
+            if game.ship.hitpoints < (game.ship.max_hitpoints * 0.25):
                 game.ship.critical = True
+                frequency = 0
                 if game.ship.critical:
                     game.screen_shake = 60
                     if joysticks:
-                        controller.rumble(0.5, 1, 80)
+                        controller.rumble(0.5, frequency, 80)
                     game.sounds[5].play()
+                    frequency += 0.1
 
             game.ship.update_position(game.ship_x, game.ship_y)
             trail_pos = game.ship.hitbox.midbottom
@@ -224,12 +231,6 @@ def update_game(game, delta, screen_size, hud_padding):
         game.ship.direction = "idle"
 
     check_collision(game)
-    current_time = pygame.time.get_ticks()
-    if game.active_upgrade == "power_up":
-        game.ship.damage = game.ship.base_damage * game.ship.damage_multiplier * 2
-        if current_time - game.upgrade_start_time >= game.upgrade_duration:
-            game.active_upgrade = None
-            game.ship.damage = game.ship.base_damage
 
     game.state.survival_bonus += 1
     if game.state.survival_bonus >= 60:

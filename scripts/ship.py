@@ -40,6 +40,7 @@ class Ship(pygame.sprite.Sprite):
         self.ammo = self.base_ammo
         self.evasion = 0.01
         self.shot_cooldown = 250
+        self.power_ups = []
 
         self.maniac_boost = 0
         self.maniac_boost_end = 0
@@ -63,8 +64,29 @@ class Ship(pygame.sprite.Sprite):
         self.hit = False
         self.critical = False
 
+        self.shield_regen = False
+        self.shield_regen_end = 0
+        self.shield_regen_rate = int(self.max_shield * 0.05)
+
     def add_skill(self, skill):
         self.skills.append(skill)
+
+    def update_upgrades(self):
+        now = pygame.time.get_ticks()
+
+        self.power_ups = [end for end in getattr(self, "power_ups", []) if
+                          end > now]
+        if self.power_ups:
+            self.damage_multiplier = 2 ** len(self.power_ups)
+        else:
+            self.damage_multiplier = 1.0
+
+        if getattr(self, "shield_regen_active", False):
+            if now < self.shield_regen_end:
+                self.shield += self.shield_regen_rate / 60
+                self.shield = min(self.shield, self.max_shield)
+            else:
+                self.shield_regen = False
 
     def update_damage(self):
         base = self.base_damage
