@@ -4,6 +4,16 @@ from scripts.render import render_skills_tab, render_stats_tab
 from scripts.sheet import SpriteSheet
 from scripts.skill_tab import Tab
 
+def padded_pos(base_x, base_y, alignment_x, alignment_y, hud_padding):
+    if alignment_x == 'left':
+        base_x += hud_padding
+    elif alignment_x == 'right':
+        base_x -= hud_padding
+    if alignment_y == 'top':
+        base_y += hud_padding
+    elif alignment_y == 'bottom':
+        base_y -= hud_padding
+    return base_x, base_y
 
 class Interface(pygame.sprite.Sprite):
     def __init__(self, path, frame, width, height, hud_ratio, hud_pos,
@@ -17,10 +27,20 @@ class Interface(pygame.sprite.Sprite):
         self.hud_y = hud_ratio[hud_pos[1]] - self.image.get_height()
         self.offset_x, self.offset_y = offset
 
-    def update(self, ship, hud_ratio, hud_pos, frame, screen):
+    def update(self, ship, hud_ratio, hud_pos, frame, screen, hud_padding=0):
         frame = int(min(frame, len(self.frames) - 1))
         self.hud_x = hud_ratio[hud_pos[0]] - self.image.get_width() + self.offset_x
         self.hud_y = hud_ratio[hud_pos[1]] - self.image.get_height() + self.offset_y
+
+        if hud_pos[0] == 'left':
+            self.hud_x += hud_padding
+        elif hud_pos[0] == 'right':
+            self.hud_x -= hud_padding
+        if hud_pos[1] == 'top':
+            self.hud_y += hud_padding
+        elif hud_pos[1] == 'bottom':
+            self.hud_y -= hud_padding
+
         screen.blit(self.frames[frame], (self.hud_x, self.hud_y))
 
 class HUD:
@@ -42,84 +62,49 @@ class HUD:
             start_pos=(screen_size[0] // 2 - self.skill_tab.rect.width // 2,
                        screen_size[1]), content_renderer=render_stats_tab)
 
-    def update(self, game, font, screen, hud_ratio):
-        game.clock.stopwatch = font.render(f"{game.clock.hours:02}:{game.clock.minutes:02}"
-                                      f":{game.clock.seconds:02}", True, "WHITE")
-        screen.blit(game.clock.stopwatch,[hud_ratio['left'] + hud_ratio['width'] // 2 -
-                     game.clock.stopwatch.get_width() // 2, hud_ratio['top']])
-
-        score_text = f"{int(game.state.score):06}"
-        high_score = f"{int(game.state.high_score):06}"
-        score_surface = font.render(score_text, True, "WHITE")
-        high_score_surface = font.render(high_score, True, "WHITE")
-
-        line_spacing = 2
+    def update(self, game, font, screen, hud_ratio, hud_padding):
+        cr_x, cr_y = padded_pos(hud_ratio['left'], hud_ratio['top'], 'left',
+                                'top', hud_padding)
+        credits_text = font.render(f"{game.ship.credits} CRD", True, "YELLOW")
+        screen.blit(credits_text, [cr_x, cr_y])
 
         score_lines = ["", "SCORE"]
-        score_line_surfs = [font.render(line, True, "WHITE") for line in
-                            score_lines]
+        score_line_surfs = [font.render(line, True, "WHITE") for line in score_lines]
+        score_value_surface = font.render(f"{int(game.state.score):06}", True, "WHITE")
 
-        title_height = sum(
-            s.get_height() for s in score_line_surfs) + line_spacing * (
-                                   len(score_line_surfs) - 1)
-        score_value_y = hud_ratio['top'] + title_height + 5
+        score_x = cr_x
+        score_y = cr_y + credits_text.get_height() + 5
+        screen.blit(score_value_surface, [score_x, score_y])
 
-        screen.blit(score_surface, [hud_ratio['left'], score_value_y])
-
-        y = score_value_y - 5
+        y = score_y - 5
         for surf in reversed(score_line_surfs):
             y -= surf.get_height()
-            screen.blit(surf, [hud_ratio['left'], y])
-            y -= line_spacing
+            screen.blit(surf, [score_x, y])
+            y -= 2
 
-        high_lines = ["HIGH", "SCORE"]
-        high_line_surfs = [font.render(line, True, "WHITE") for line in
-                           high_lines]
+        high_score_surface = font.render(f"{int(game.state.high_score):06}",
+                                         True, "WHITE")
+        hs_x, hs_y = padded_pos(hud_ratio['right'], hud_ratio['top'], 'right',
+                                'top', hud_padding)
+        hs_x -= high_score_surface.get_width()
+        screen.blit(high_score_surface, [hs_x, hs_y])
 
-        block_width = max(
-            s.get_width() for s in high_line_surfs + [high_score_surface])
-        x_pos = hud_ratio['right'] - block_width
-        screen.blit(high_score_surface, [x_pos, score_value_y])
+        stopwatch_text = f"{game.clock.hours:02}:{game.clock.minutes:02}:{game.clock.seconds:02}"
+        stopwatch_surface = font.render(stopwatch_text, True, "WHITE")
+        sw_x = hud_ratio['left'] + hud_ratio[
+            'width'] // 2 - stopwatch_surface.get_width() // 2
+        sw_y = hud_ratio['top'] + hud_padding
+        screen.blit(stopwatch_surface, [sw_x, sw_y])
 
-        y = score_value_y - 5
-        for surf in reversed(high_line_surfs):
-            y -= surf.get_height()
-            screen.blit(surf, [x_pos, y])
-            y -= line_spacing
+        def update_interface(interface, pos):
+            interface.update(game.ship, hud_ratio, pos,
+                             interface.frames.index(interface.image), screen,
+                             hud_padding)
 
-        total_frames = len(self.hitpoints.frames) - 1
-        if game.ship.hitpoints <= 0:
-            hitpoints_frame = total_frames
-        else:
-            hitpoints_frame = (
-                        total_frames - (game.ship.hitpoints * total_frames)
-                        // game.ship.max_hitpoints)
-            hitpoints_frame = max(0, min(hitpoints_frame, total_frames))
-        self.hitpoints.update(game.ship, hud_ratio, ['right', 'bottom'],
-                              hitpoints_frame, screen)
-
-        shield_total_frames = len(self.shield.frames) - 1
-        shield_frame = (shield_total_frames - (
-                game.ship.shield * shield_total_frames)
-                        // game.ship.max_shield)
-        shield_frame = max(0, min(shield_total_frames, shield_frame))
-        self.shield.update(game.ship, hud_ratio, ['right', 'bottom'],
-                           shield_frame, screen)
-
-        experience_total_frames = len(self.xp.frames) - 1
-        xp_frame = (experience_total_frames - (
-                experience_total_frames * game.ship.xp)
-                    // game.ship.xp_to_next_level)
-        self.xp.update(game.ship, hud_ratio, ['right', 'bottom'], xp_frame,
-                       screen)
-
-        ammo_total_frames = len(self.ammo.frames) - 1
-        ammo_frame = (
-                    ammo_total_frames - (game.ship.ammo * ammo_total_frames)
-                    // game.ship.base_ammo)
-        ammo_frame = max(0, min(ammo_total_frames, ammo_frame))
-        self.ammo.update(game.ship, hud_ratio, ['right', 'bottom'], ammo_frame,
-                         screen)
+        update_interface(self.hitpoints, ['right', 'bottom'])
+        update_interface(self.shield, ['right', 'bottom'])
+        update_interface(self.xp, ['right', 'bottom'])
+        update_interface(self.ammo, ['right', 'bottom'])
 
         self.skill_tab.update()
         self.stats_tab.update()

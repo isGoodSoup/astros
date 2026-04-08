@@ -74,8 +74,6 @@ def render_frame(game, screen, font, hud_padding):
     game.hud.stats_tab.render(game, screen, font, hud_padding)
     game.hud.skill_tab.render(game, screen, font, hud_padding)
 
-    screen.blit(game.hud.credits, [hud_padding, 190])
-
     if tutorial_on:
         game.tutorial.render(screen, font)
 

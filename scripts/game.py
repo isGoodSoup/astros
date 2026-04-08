@@ -4,7 +4,6 @@ import os
 from scripts.celestial import *
 from scripts.clock import Clock
 from scripts.controller import update_controller
-from scripts.credits import update_credits
 from scripts.game_over import game_lost
 from scripts.hud import HUD
 from scripts.input import Input
@@ -20,6 +19,7 @@ from scripts.toggles import tutorial_on
 from scripts.tutorial import Tutorial
 from scripts.update import update_game
 from scripts.utils import hide_cursor
+
 
 # Copyright (c) 2026 Diego
 # Licensed under the MIT License. See LICENSE file for details.
@@ -199,11 +199,8 @@ class Game:
                 update_controller(self, screen_size, delta)
                 if not self.hud.skill_tab.active:
                     update_movement(self, delta, screen_size)
-                    update_credits(self, font)
 
             hide_cursor(self, self.input.cursor_pos)
-
-            self.hud_padding = self.input.padding
 
             if not self.state.pause and not self.state.game_over:
                 update_game(self, delta, screen_size, self.hud_padding)
@@ -215,7 +212,7 @@ class Game:
             render_frame(self, screen, font, self.hud_padding)
 
             if not self.state.game_over:
-                self.hud.update(self, font, screen, hud_ratio)
+                self.hud.update(self, font, screen, hud_ratio, self.hud_padding)
 
             if self.input.cursor_visible:
                 pos = self.input.cursor_pos if self.input.mode == "controller" else pygame.mouse.get_pos()

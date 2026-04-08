@@ -29,7 +29,6 @@ class Input:
         self.last_move_time = pygame.time.get_ticks()
         self.cursor_hide_delay = 3000
         self.has_moved = False
-        self.padding = 100
 
     def update(self, events):
         self.last_input_time = pygame.time.get_ticks()
@@ -103,9 +102,9 @@ class Input:
         hud_padding_decrease = keys[pygame.K_F3]
 
         if hud_padding_increase:
-            self.padding += 1
+            game.hud_padding += 1
         elif hud_padding_decrease:
-            self.padding -= 1
+            game.hud_padding -= 1
 
         screenshot_input = keys[pygame.K_F12] or (
                     joysticks and controller.get_hat(0)[0] == 1)
