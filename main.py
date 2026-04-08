@@ -16,7 +16,7 @@ class Menu:
         self.width = int(pygame.display.Info().current_w)
         self.height = int(pygame.display.Info().current_h)
         self.screen_size = (self.width, self.height)
-        self.hud_ratio = set_hud(self.screen_size, 100)
+        self.hud_ratio = set_hud(self.screen_size)
         self.virtual_screen = pygame.display.set_mode(self.screen_size)
         self.render_surface = pygame.Surface((1920, 1080))
         self.screen = pygame.display.set_mode(self.screen_size, DOUBLEBUF|OPENGL, vsync=1)
@@ -92,8 +92,8 @@ class Menu:
     def init_game(self):
         game = Game(self.screen, self.screen_size,
                     self.hud_ratio, self.text_font)
-        game.run(self.running, self.clock, self.screen,
-                 self.screen_size, self.hud_ratio, self.crt, self.text_font)
+        game.run(self.clock, self.screen, self.screen_size, self.hud_ratio,
+                 self.crt, self.text_font)
 
 if __name__ == '__main__':
     menu = Menu()

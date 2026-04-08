@@ -50,11 +50,15 @@ class Input:
                                self.last_move_time <= self.cursor_hide_delay)
 
     def act(self, game):
+        adjusting_hud = False
         now = pygame.time.get_ticks()
         keys = pygame.key.get_pressed()
 
-        shooting_input = (joysticks and controller.get_button(0)) or keys[
-            pygame.K_SPACE]
+        try:
+            shooting_input = joysticks and controller.get_button(0)
+        except pygame.error:
+            shooting_input = keys[pygame.K_SPACE]
+
         if shooting_input:
             if now - game.last_shot_time >= game.ship.shot_cooldown:
                 new_projectiles = game.ship.shoot(gun_type=game.ship.gun)
@@ -67,25 +71,34 @@ class Input:
                 if game.ship.gun == "shotgun" and game.ship.ammo > 0:
                     game.screen_shake = 20
 
-        if ((joysticks and controller.get_button(4) and controller.get_button(5))
-                or keys[pygame.K_f]):
+        if (keys[pygame.K_f] or (joysticks and controller.get_button(4) and
+                              controller.get_button(5))):
             if not self.charge_active and game.ship.charges > 0:
                 self.charge_active = True
                 self.charge_start_time = now
 
-        pause_input = ((joysticks and controller.get_button(7))
-                       or keys[pygame.K_ESCAPE])
+        try:
+            pause_input = joysticks and controller.get_button(7)
+        except pygame.error:
+            pause_input = keys[pygame.K_ESCAPE]
+
         if pause_input and not game.hud.skill_tab.active:
             game.state.pause = not game.state.pause
 
-        lock_input = (keys[pygame.K_l]
-            or (joysticks and controller.get_button(4)))
+        try:
+            lock_input = joysticks and controller.get_button(4)
+        except pygame.error:
+            lock_input = keys[pygame.K_l]
+
         if lock_input:
             from scripts.movement import lock_y
             lock_y = not lock_y
 
-        switch_gun_input = (keys[pygame.K_g]
-            or (joysticks and controller.get_button(2)))
+        try:
+            switch_gun_input = joysticks and controller.get_button(2)
+        except pygame.error:
+            switch_gun_input = keys[pygame.K_g]
+
         if switch_gun_input:
             game.ship.switch_gun()
 
@@ -98,26 +111,52 @@ class Input:
         if volume_down:
             decrease_volume(game)
 
-        hud_padding_increase = keys[pygame.K_F4]
-        hud_padding_decrease = keys[pygame.K_F3]
+        axis_y = 0.0
+        if joysticks and controller.get_button(9):
+            axis_y = controller.get_axis(3)
+            if abs(axis_y) < game.input.deadzone:
+                axis_y = 0.0
+
+        try:
+            hud_padding_increase = (axis_y < -0.2)
+            hud_padding_decrease = (axis_y > 0.2)
+        except pygame.error:
+            hud_padding_increase = keys[pygame.K_F4]
+            hud_padding_decrease = keys[pygame.K_F3]
 
         if hud_padding_increase:
             game.hud_padding += 1
         elif hud_padding_decrease:
             game.hud_padding -= 1
 
-        screenshot_input = keys[pygame.K_F12] or (
-                    joysticks and controller.get_hat(0)[0] == 1)
+        try:
+            screenshot_input = joysticks and controller.get_hat(0)[0] == 1
+        except pygame.error:
+            screenshot_input = keys[pygame.K_F12]
+
         if screenshot_input:
             take_screenshot(game, game.screen)
 
-        stats_input = keys[pygame.K_TAB] or (joysticks and controller.get_button(1))
+        try:
+            stats_input = joysticks and controller.get_button(1)
+        except pygame.error:
+            stats_input = keys[pygame.K_TAB]
+
         if stats_input and not game.hud.skill_tab.active:
             if game.hud.stats_tab.active:
                 game.hud.stats_tab.close()
             else:
-                game.hud.stats_tab.open((game.screen_size[0] // 2 - game.hud.stats_tab.rect.width // 2,
+                game.hud.stats_tab.open((game.screen_size[0] // 2 -
+                                         game.hud.stats_tab.rect.width // 2,
                                         game.screen_size[1] // 2))
+
+        try:
+            quit_input = joysticks and controller.get_button(6)
+        except pygame.error:
+            quit_input = keys[pygame.K_q]
+
+        if game.state.pause and quit_input:
+            game.running = False
 
         if game.hud.skill_tab.active and game.state.current_phase_options and self.mode == "mouse":
             mouse_rect = pygame.Rect(self.cursor_pos[0], self.cursor_pos[1],  1, 1)

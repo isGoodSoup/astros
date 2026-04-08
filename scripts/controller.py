@@ -2,7 +2,7 @@ import pygame
 from scripts.shared import joysticks, controller
 from scripts.utils import apply_curve
 
-def update_controller(game, screen_size, dt):
+def update_controller(game, screen_size, delta):
     if not joysticks:
         return
 
@@ -11,8 +11,8 @@ def update_controller(game, screen_size, dt):
     lx = 0 if abs(lx) < game.input.deadzone else lx
     ly = 0 if abs(ly) < game.input.deadzone else ly
 
-    game.ship.rect.x += int(lx * game.ship.speed * dt)
-    game.ship.rect.y += int(ly * game.ship.speed * dt)
+    game.ship.rect.x += int(lx * game.ship.velocity * delta)
+    game.ship.rect.y += int(ly * game.ship.velocity * delta)
     game.ship.hitbox.center = game.ship.rect.center
 
     rx = controller.get_axis(2)
@@ -23,12 +23,14 @@ def update_controller(game, screen_size, dt):
     rx = apply_curve(game, rx)
     ry = apply_curve(game, ry)
 
+    if lx != 0 or ly != 0:
+        game.input.mode = "controller"
+
     if rx != 0 or ry != 0:
         game.input.mode = "controller"
-        game.input.cursor_pos[0] += rx * game.input.cursor_speed * dt
-        game.input.cursor_pos[1] += ry * game.input.cursor_speed * dt
+        game.input.cursor_pos[0] += rx * game.input.cursor_speed * delta
+        game.input.cursor_pos[1] += ry * game.input.cursor_speed * delta
 
-        # Clamp to screen
         game.input.cursor_pos[0] = max(0, min(screen_size[0], game.input.cursor_pos[0]))
         game.input.cursor_pos[1] = max(0, min(screen_size[1], game.input.cursor_pos[1]))
 

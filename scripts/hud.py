@@ -29,17 +29,16 @@ class Interface(pygame.sprite.Sprite):
 
     def update(self, ship, hud_ratio, hud_pos, frame, screen, hud_padding=0):
         frame = int(min(frame, len(self.frames) - 1))
-        self.hud_x = hud_ratio[hud_pos[0]] - self.image.get_width() + self.offset_x
-        self.hud_y = hud_ratio[hud_pos[1]] - self.image.get_height() + self.offset_y
 
         if hud_pos[0] == 'left':
-            self.hud_x += hud_padding
+            self.hud_x = hud_ratio['left'] + hud_padding + self.offset_x
         elif hud_pos[0] == 'right':
-            self.hud_x -= hud_padding
+            self.hud_x = hud_ratio['right'] - hud_padding - self.image.get_width() + self.offset_x
+
         if hud_pos[1] == 'top':
-            self.hud_y += hud_padding
+            self.hud_y = hud_ratio['top'] + hud_padding + self.offset_y
         elif hud_pos[1] == 'bottom':
-            self.hud_y -= hud_padding
+            self.hud_y = hud_ratio['bottom'] - hud_padding - self.image.get_height() + self.offset_y
 
         screen.blit(self.frames[frame], (self.hud_x, self.hud_y))
 
@@ -63,18 +62,26 @@ class HUD:
                        screen_size[1]), content_renderer=render_stats_tab)
 
     def update(self, game, font, screen, hud_ratio, hud_padding):
-        cr_x, cr_y = padded_pos(hud_ratio['left'], hud_ratio['top'], 'left',
-                                'top', hud_padding)
-        credits_text = font.render(f"{game.ship.credits} CRD", True, "YELLOW")
-        screen.blit(credits_text, [cr_x, cr_y])
+        score_x, score_y = padded_pos(hud_ratio['left'], hud_ratio['top'],
+                                      'left', 'top', hud_padding)
+
+        score_value_surface = font.render(f"{int(game.state.score):06}", True,
+                                          "WHITE")
+        screen.blit(score_value_surface, [score_x, score_y])
 
         score_lines = ["", "SCORE"]
-        score_line_surfs = [font.render(line, True, "WHITE") for line in score_lines]
-        score_value_surface = font.render(f"{int(game.state.score):06}", True, "WHITE")
+        score_line_surfs = [font.render(line, True, "WHITE") for line in
+                            score_lines]
 
-        score_x = cr_x
-        score_y = cr_y + credits_text.get_height() + 5
-        screen.blit(score_value_surface, [score_x, score_y])
+        y = score_y - 5
+        for surf in reversed(score_line_surfs):
+            y -= surf.get_height()
+            screen.blit(surf, [score_x, y])
+            y -= 2
+
+        credits_text = font.render(f"${game.ship.credits}", True, (255, 210, 0))
+        credits_y = score_y + score_value_surface.get_height() + 5
+        screen.blit(credits_text, [score_x, credits_y])
 
         y = score_y - 5
         for surf in reversed(score_line_surfs):

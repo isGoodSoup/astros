@@ -40,7 +40,8 @@ class Game:
 
         self.screen = screen
         self.screen_size = screen_size
-        self.hud_padding = 100
+        self.running = True
+        self.hud_padding = 80
         self.fps = 60
         self.frame = 0
         self.scale = 4
@@ -162,13 +163,12 @@ class Game:
         fade.start("in")
         pygame.mixer.music.play(-1)
 
-    def run(self, running, clock, screen, screen_size, hud_ratio,
-            crt, font):
-        while running:
+    def run(self, clock, screen, screen_size, hud_ratio, crt, font):
+        while self.running:
             events = pygame.event.get()
             for event in events:
                 if event.type == pygame.QUIT:
-                    running = False
+                    self.running = False
                 elif event.type == self.ALIENLASER and not self.state.pause:
                     shooters = random.sample(self.aliens.sprites(),
                                              k=min(1, len(self.aliens)))
@@ -181,7 +181,6 @@ class Game:
                             self.enemy_projectiles.add(*new_projectiles)
                     if shots_this_frame > 0 and self.state.play_sound:
                         self.sounds[0].play()
-
             screen.fill((0, 0, 0))
             delta = clock.tick(self.fps) / 1000
 

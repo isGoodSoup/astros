@@ -12,16 +12,9 @@ from scripts.particle import Particle
 from scripts.toggles import tutorial_on
 from scripts.upgd import Upgrade
 
-def set_hud(screen_size, padding):
+def set_hud(screen_size):
     width, height = screen_size
-    return {
-        'left': padding,
-        'top': padding,
-        'right': width - padding,
-        'bottom': height - padding,
-        'width': width - 2 * padding,
-        'height': height - 2 * padding
-    }
+    return {'left': 0, 'top': 0, 'right': width, 'bottom': height, 'width': width, 'height': height}
 
 def update_phase(game):
     current_time = pygame.time.get_ticks()
@@ -67,7 +60,7 @@ def update_phase(game):
     if not game.hud.skill_tab.active and game.state.phase_ending and not enemies_alive:
         game.state.pause = False
         game.state.phase_index = (game.state.phase_index + 1) % len(game.state.phases)
-        game.state.current_phase = game.state.phases[game.phase_index]
+        game.state.current_phase = game.state.phases[game.state.phase_index]
         game.state.phase_start_time = current_time
         game.state.phase_ending = False
         game.last_alien_spawn = 0
