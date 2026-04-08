@@ -40,6 +40,7 @@ class Game:
 
         self.screen = screen
         self.screen_size = screen_size
+        self.font = game_font
         self.running = True
         self.hud_padding = 80
         self.fps = 60

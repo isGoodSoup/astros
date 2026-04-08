@@ -77,6 +77,13 @@ def render_frame(game, screen, font, hud_padding):
     if tutorial_on:
         game.tutorial.render(screen, font)
 
+    if game.state.pause and (not game.hud.skill_tab.active or not
+            game.hud.stats_tab.active):
+        pause_text = "PAUSED"
+        pause = game.font.render(pause_text, True, (255, 255, 255))
+        screen.blit(pause, [game.screen_size[0]//2 - pause.get_width()//2,
+                    game.screen_size[1]//2 - pause.get_height()//2])
+
 def render_skills_tab(game, screen, rect, game_font):
     title_text, perks = "Victory!", f"Perks: {game.ship.perk_points}"
     title = game_font.render(title_text, True, (255, 255, 255))
