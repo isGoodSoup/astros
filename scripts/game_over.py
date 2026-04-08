@@ -21,7 +21,7 @@ def game_lost(game, font, screen, screen_size):
         game.save_config()
 
     score_text = font.render(f"{int(game.state.score):05}", True, "WHITE")
-    stopwatch = game.stopwatch if game.stopwatch is not None else (
+    stopwatch = game.clock.stopwatch if game.clock.stopwatch is not None else (
         font.render("00:00:00", True, "WHITE"))
     game_over_x = center(game, game_over, screen_size)
     game_over_y = screen_size[1] // 2

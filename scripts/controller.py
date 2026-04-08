@@ -31,6 +31,9 @@ def update_controller(game, screen_size, delta):
 
     if rx != 0 or ry != 0:
         game.input.mode = "controller"
+        if game.input.moving_hud:
+            return
+
         game.input.cursor_pos[0] += rx * game.input.cursor_speed * delta
         game.input.cursor_pos[1] += ry * game.input.cursor_speed * delta
 
