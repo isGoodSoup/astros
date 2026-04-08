@@ -25,9 +25,9 @@ class Ship(pygame.sprite.Sprite):
         self.max_shield = 25
         self.base_max_shield = self.max_shield
         self.shield = self.max_shield
-        self.gun_order = ["beam", "auto", "shotgun"]
+        self.gun_order = ["beam", "shotgun", "auto"]
         self.gun = "beam"
-        self.guns = {"beam": 250, "auto": 150, "shotgun": 400}
+        self.guns = {"beam": 250, "shotgun": 400, "auto": 150}
         self.base_damage = 4
         self.damage = self.base_damage
         self.damage_multiplier = 1.0

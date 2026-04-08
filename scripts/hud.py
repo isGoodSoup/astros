@@ -36,9 +36,13 @@ class Interface(pygame.sprite.Sprite):
         self.hud_y = hud_ratio[hud_pos[1]] - self.image.get_height()
         self.offset_x, self.offset_y = offset
 
-    def update(self, ship, hud_ratio, hud_pos, frame, screen, hud_padding=0):
+    def update(self, ship, hud_ratio, hud_pos, frame, screen, hud_padding=0,
+               scale=False):
         frame = int(min(frame, len(self.frames) - 1))
         self.image = self.frames[frame]
+        if scale:
+            self.image = pygame.transform.scale(self.image,(self.image.get_width() * 2,
+                                                 self.image.get_height() * 2))
 
         if hud_pos[0] == 'left':
             self.hud_x = hud_ratio['left'] + hud_padding + self.offset_x
@@ -62,6 +66,8 @@ class HUD:
                             hud_ratio, ['right', 'bottom'], 33, [0, -175])
         self.ammo = Interface("assets/ui/ammo.png", 0, 11, 40,
                               hud_ratio, ['right', 'bottom'], 35, [-160, 0])
+        self.guns = Interface("assets/ui/guns.png", 0, 20, 16, hud_ratio,
+                              ['right', 'bottom'], 3, [-210, 0])
         self.credits = 0
 
         self.skill_tab = Tab("assets/ui/skill_tab.png",
@@ -113,6 +119,7 @@ class HUD:
         sw_y = hud_ratio['top'] + hud_padding
         screen.blit(stopwatch_surface, [sw_x, sw_y])
 
+        current_gun_frame = game.ship.gun_order.index(game.ship.gun)
         interfaces = [
             (self.hitpoints, game.ship.hitpoints, game.ship.max_hitpoints, True),
             (self.shield, game.ship.shield, game.ship.max_shield, True),
@@ -124,6 +131,10 @@ class HUD:
             frame = value_to_frame(value, max_value, len(interface.frames), reverse)
             interface.update(game.ship, hud_ratio, ['right', 'bottom'], frame,
                              screen, hud_padding)
+
+        current_gun_frame = game.ship.gun_order.index(game.ship.gun)
+        self.guns.update(game.ship, hud_ratio, ['right', 'bottom'],
+                         current_gun_frame, screen, hud_padding)
 
         self.skill_tab.update()
         self.stats_tab.update()
