@@ -62,7 +62,10 @@ class Input:
                 new_projectiles = game.ship.shoot(gun_type=game.ship.gun)
                 game.projectiles.add(*new_projectiles)
                 game.last_shot_time = now
-                
+
+                if game.ship.ammo <= 0 and game.ship.gun != "beam":
+                    game.sounds[4].play()
+
                 if game.state.play_sound:
                     game.sounds[0].play()
 

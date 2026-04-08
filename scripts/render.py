@@ -9,7 +9,7 @@ def render_frame(game, screen, font, hud_padding):
         pygame.draw.circle(screen, (255, 255, 255), (int(i[0]), int(i[1])), i[2])
 
     game.celestials.draw(screen)
-    if game.state.current_phase in [game.state.phases[3], game.state.phases[5]]:
+    if game.state.current_phase in [game.state.phases[2], game.state.phases[4]]:
         game.asteroids.draw(screen)
 
     if game.state.current_phase in game.state.phases:

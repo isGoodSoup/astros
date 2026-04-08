@@ -3,14 +3,14 @@ from typing import override
 
 import pygame
 
-upgrades = ["power_up", "shield"]
+upgrades = ["power_up", "shield", "ammo"]
 def get_upgrade():
     return random.choice(upgrades)
 
 class Upgrade(pygame.sprite.Sprite):
     def __init__(self, path, x, y, scale=4):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(path)
+        self.image = pygame.image.load(f"assets/{path}.png")
         self.image = pygame.transform.scale(self.image,(self.image.get_width() * scale,
                                              self.image.get_height() * scale))
         self.rect = self.image.get_rect()

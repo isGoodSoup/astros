@@ -9,12 +9,13 @@ from scripts.celestial import random_celestial, is_valid_spawn
 from scripts.collision import check_collision
 from scripts.fleet import spawn_fleet
 from scripts.particle import Particle
-from scripts.toggles import tutorial_on
+from scripts.toggles import tutorial_on, enable_trail
 from scripts.upgd import Upgrade
 
 def set_hud(screen_size):
     width, height = screen_size
-    return {'left': 0, 'top': 0, 'right': width, 'bottom': height, 'width': width, 'height': height}
+    return {'left': 0, 'top': 0, 'right': width, 'bottom': height,
+            'width': width, 'height': height}
 
 def update_phase(game):
     current_time = pygame.time.get_ticks()
@@ -27,7 +28,7 @@ def update_phase(game):
     if not game.state.phase_spawned:
         if game.state.current_phase == game.state.phases[-1]:
             spawn_boss(game)
-        elif game.state.current_phase in [game.state.phases[3], game.state.phases[5]]:
+        elif game.state.current_phase in [game.state.phases[2], game.state.phases[4]]:
             spawn_asteroids(game)
         else:
             spawn_fleet(game, game.state.current_phase)
@@ -58,8 +59,7 @@ def update_phase(game):
     else:
         game.state.pause = False
 
-    if (game.state.phase_ending and not enemies_alive
-            and not game.hud.skill_tab.active):
+    if game.state.phase_ending and not enemies_alive and not game.hud.skill_tab.active:
         game.state.phase_index = (game.state.phase_index + 1) % len(game.state.phases)
         game.state.current_phase = game.state.phases[game.state.phase_index]
         game.state.phase_start_time = current_time
@@ -174,7 +174,7 @@ def update_game(game, delta, screen_size, hud_padding):
 
     if game.ship_alive:
         game.ship.update_position(game.ship_x, game.ship_y)
-        if not game.ship.moved_down:
+        if not game.ship.moved_down and enable_trail:
             trail_pos = game.ship.hitbox.midbottom
             for _ in range(8):
                 velocity = pygame.Vector2(random.uniform(-1, 1),

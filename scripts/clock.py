@@ -42,7 +42,7 @@ class Clock:
                         game.state.current_phase = game.state.phases[game.state.phase_index]
                         game.last_alien_spawn = 0
                         game.last_asteroid_spawn = 0
-                        if game.state.current_phase in [game.state.phases[3], game.state.phases[5]]:
+                        if game.state.current_phase in game.state.phases:
                             level_enemies(game)
                         game.state.stars_speed += 1
             if self.seconds >= 60:

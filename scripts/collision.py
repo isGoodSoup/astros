@@ -11,7 +11,7 @@ from scripts.utils import add_multiplier, formulize
 
 
 def check_collision(game):
-    if game.state.current_phase in [game.state.phases[3], game.state.phases[5]]:
+    if game.state.current_phase in [game.state.phases[2], game.state.phases[4]]:
         asteroid_hit = pygame.sprite.spritecollideany(game.ship, game.asteroids, # type: ignore
             collided=lambda s,m: s.hitbox.colliderect(m.hitbox))
     else:
@@ -276,7 +276,7 @@ def check_collision(game):
                 if game.state.play_sound:
                     game.sounds[1].play()
                 game.state.score_multiplier = game.ship.damage_multiplier
-                game.score += game.ship.level * 10 * game.state.score_multiplier
+                game.state.score += (game.ship.level * 10 * game.state.score_multiplier)
                 game.ship.gain_xp(formulize(game, game.ship.level), game.sounds)
 
     upgrade_hit = pygame.sprite.spritecollide(game.ship, game.upgrades, False, # type: ignore
@@ -292,3 +292,5 @@ def check_collision(game):
             elif game.last_upgrade == "shield":
                 game.ship.shield = min(game.ship.shield + 10,
                                        game.ship.max_shield)
+            elif game.last_upgrade == "ammo":
+                game.ship.ammo += 300

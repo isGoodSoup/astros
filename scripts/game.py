@@ -181,6 +181,7 @@ class Game:
                             self.enemy_projectiles.add(*new_projectiles)
                     if shots_this_frame > 0 and self.state.play_sound:
                         self.sounds[0].play()
+
             screen.fill((0, 0, 0))
             delta = clock.tick(self.fps) / 1000
 
