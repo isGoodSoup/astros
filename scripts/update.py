@@ -29,8 +29,6 @@ def update_phase(game):
     if not game.state.phase_spawned:
         if game.state.current_phase == game.state.phases[-1]:
             spawn_boss(game)
-        elif game.state.current_phase in [game.state.phases[2], game.state.phases[4]]:
-            spawn_asteroids(game)
         else:
             spawn_fleet(game, game.state.current_phase)
         game.state.phase_spawned = True
@@ -72,19 +70,22 @@ def update_phase(game):
         game.state.skills_generated = False
 
 def spawn_asteroids(game):
-    current_time = pygame.time.get_ticks()
-    if current_time - game.last_asteroid_spawn > game.asteroid_spawn_interval:
-        spawned = False
-        for _ in range(random.randint(1, game.asteroid_spawn_count)):
-            for attempt in range(50):
-                new_asteroid = Asteroid(game.screen_size[0], min_y=-200, max_y=-50)
-                if all(abs(new_asteroid.rect.y - a.rect.y) >= 40 for a in game.asteroids) or attempt > 30:
-                    game.asteroids.add(new_asteroid)
-                    game.entities.add(new_asteroid)
-                    spawned = True
-                    break
-        if spawned:
-            game.last_asteroid_spawn = current_time
+    spawns = random.randint(5, 10)
+
+    for _ in range(spawns):
+        x = random.randint(0, game.screen_size[0] - 50)
+        y = random.randint(-200, -50)
+
+        asteroid = Asteroid(game.screen_size[0], min_y=y, max_y=y)
+
+        too_close = any(abs(asteroid.rect.y - a.rect.y) < 40 for a in game.asteroids)
+        if too_close:
+            asteroid.rect.y -= 50
+
+        game.asteroids.add(asteroid)
+        game.entities.add(asteroid)
+
+    game.last_asteroid_spawn = pygame.time.get_ticks()
 
 def spawn_boss(game):
     if not game.state.phase_spawned:
@@ -120,6 +121,11 @@ def update_game(game, delta, screen_size, hud_padding):
                                                     200):
                     game.celestials.add(new_celestial)
                     break
+
+    if game.state.current_phase in [game.state.phases[2], game.state.phases[4]]:
+        current_time = pygame.time.get_ticks()
+        if current_time - game.last_asteroid_spawn >= game.asteroid_spawn_interval:
+            spawn_asteroids(game)
 
     if current_time - game.last_upgrade_spawn > game.upgrade_spawn_interval:
         game.last_upgrade_spawn = current_time
