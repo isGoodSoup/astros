@@ -11,7 +11,7 @@ from scripts.utils import add_multiplier, formulize
 
 
 def check_collision(game):
-    if game.state.current_phase in [game.state.phases[3], game.state.phases[5]]:
+    if game.state.current_phase in [game.state.phases[2], game.state.phases[4]]:
         asteroid_hit = pygame.sprite.spritecollideany(game.ship, game.asteroids, # type: ignore
             collided=lambda s,m: s.hitbox.colliderect(m.hitbox))
     else:
@@ -29,6 +29,9 @@ def check_collision(game):
     else:
         alien_proj = None
 
+    now = pygame.time.get_ticks()
+    can_take_damage = now - game.ship.last_hit_time >= game.ship.hit_cooldown
+
     if asteroid_hit or alien_hit or alien_proj:
         if random.random() <= game.ship.evasion:
             if asteroid_hit:
@@ -45,57 +48,62 @@ def check_collision(game):
                     x, y, "MISS", color=(255, 255, 100)))
             return
 
-        game.ship.hit = True
-        if game.ship.damage_multiplier > 1.0:
-            x, y = game.ship.rect.centerx, game.ship.rect.top
-            game.floating_numbers.add(FloatingNumber(
-                x, y, "NO MULT!", color=(255, 0, 0)))  # type: ignore
-            game.ship.damage_multiplier = 1.0
+        if alien_proj:
+            alien_proj.kill()
 
-        ship_center_x = game.ship.rect.centerx
-        ship_center_y = game.ship.rect.centery
-        explosion = Explosion(ship_center_x, ship_center_y,
-                              game.frame_explode)
-        game.explosions.add(explosion)  # type: ignore
+        if can_take_damage:
+            game.ship.last_hit_time = now
+            game.ship.hit = True
 
-        for _ in range(10):
-            vel = [random.uniform(-2, 2), random.uniform(-2, 2)]
-            game.particles.append(
-                Particle((ship_center_x, ship_center_y), vel))
+            previous_combo = game.ship.combo_multiplier
+            game.ship.combo_multiplier = 1.0
 
-        if game.state.play_sound:
-            game.sounds[1].play()
+            if asteroid_hit:
+                asteroid_hit.kill()
 
-        if asteroid_hit:
-            asteroid_hit.kill()
+            if alien_hit:
+                alien_hit.kill()
 
-        if alien_hit:
-            alien_hit.kill()
+            game.ship.hit = True
+            if previous_combo > 1.0:
+                x, y = game.ship.rect.centerx, game.ship.rect.top
+                game.floating_numbers.add(FloatingNumber(x, y, "NO MULT!",
+                        color=(255, 0, 0)))  # type: ignore
 
-        damage_per_frame = 0
-        if not invincible:
-            if game.ship.shield > 0:
-                damage_per_frame = (max(1,game.ship.max_shield // 33) * game.ship.level)
-                game.ship.shield -= damage_per_frame
-            else:
-                damage_per_frame = max(1,game.ship.max_hitpoints // 28) * game.ship.level
-                game.ship.hitpoints -= damage_per_frame
+            game.explosions.add(Explosion(*game.ship.rect.center,
+                                  game.frame_explode))  # type: ignore
 
-        if hasattr(game.ship, "fortified_percent"):
-            if game.ship.fortified_percent > 0:
-                shield_gain = int(damage_per_frame * game.ship.fortified_percent)
-                if hasattr(game.ship, "fortified_cap"):
-                    shield_gain = min(shield_gain, game.ship.fortified_cap)
-                game.ship.shield += shield_gain
+            for _ in range(10):
+                vel = [random.uniform(-2, 2), random.uniform(-2, 2)]
+                game.particles.append(Particle(game.ship.rect.center, vel))
 
-        game.screen_shake = 20
+            if game.state.play_sound:
+                game.sounds[1].play()
 
-        if game.ship.hitpoints <= 0:
-            game.state.game_over = True
-            game.ship.kill()
-            game.ship_alive = False
-            pygame.mixer.music.stop()
-            game.state.game_over = True
+            damage_per_frame = 0
+            if not invincible:
+                if game.ship.shield > 0:
+                    damage_per_frame = (max(1,game.ship.max_shield // 33) * game.ship.level)
+                    game.ship.shield -= damage_per_frame
+                else:
+                    damage_per_frame = max(1,game.ship.max_hitpoints // 28) * game.ship.level
+                    game.ship.hitpoints -= damage_per_frame
+
+            if hasattr(game.ship, "fortified_percent"):
+                if game.ship.fortified_percent > 0:
+                    shield_gain = int(damage_per_frame * game.ship.fortified_percent)
+                    if hasattr(game.ship, "fortified_cap"):
+                        shield_gain = min(shield_gain, game.ship.fortified_cap)
+                    game.ship.shield += shield_gain
+
+            game.screen_shake = 20
+
+            if game.ship.hitpoints <= 0:
+                game.state.game_over = True
+                game.ship.kill()
+                game.ship_alive = False
+                pygame.mixer.music.stop()
+                game.state.game_over = True
 
     hits1 = pygame.sprite.groupcollide(game.projectiles, game.asteroids, True,
                                    False)
@@ -105,7 +113,7 @@ def check_collision(game):
             if current_time > game.ship.maniac_boost_end:
                 game.ship.maniac_boost = 0
 
-            effective_crit_chance = min(1.0, (game.ship.crit_chance / 100) + game.ship.maniac_boost)
+            effective_crit_chance = min(1.0, game.ship.crit_chance + game.ship.maniac_boost)
             if random.random() < effective_crit_chance:
                 damage_per_frame = game.ship.damage * game.ship.crit_multiplier
                 color = (255, 50, 50)
@@ -116,11 +124,12 @@ def check_collision(game):
                 size = 24
 
             if not game.ship.hit:
-                game.ship.damage_multiplier += 0.1
-            damage_per_frame *= game.ship.damage_multiplier
+                game.ship.combo_multiplier += 0.1
+            total_multiplier = game.ship.combo_multiplier * game.ship.powerup_multiplier
+            damage_per_frame *= total_multiplier
 
             if game.ship.hit:
-                game.ship.damage_multiplier = 1.0
+                game.ship.combo_multiplier = 1.0
 
             asteroid.hitpoints -= damage_per_frame
             x, y = asteroid.rect.center
@@ -128,20 +137,18 @@ def check_collision(game):
             if not game.ship.hit:
                 mult_x, mult_y = game.ship.rect.centerx, game.ship.rect.top
                 add_multiplier(game, mult_x, mult_y,
-                               f"x{game.ship.damage_multiplier:.2f}",
+                               f"x{total_multiplier:.2f}",
                                color=color, font_size=size)
 
-            game.floating_numbers.add(
-                FloatingNumber(x, y, int(damage_per_frame), color=color,
+            game.floating_numbers.add(FloatingNumber(x, y, int(damage_per_frame), color=color,
                                font_size=size))
             impact = ImpactFrame(asteroid.rect.centerx, asteroid.rect.centery,
                                  game.frame_explode[0])
             game.explosions.add(impact)
             for _ in range(10):
                 vel = [random.uniform(-2, 2), random.uniform(-2, 2)]
-                game.particles.append(
-                    Particle((asteroid.rect.centerx, asteroid.rect.centery),
-                             vel))
+                game.particles.append(Particle((asteroid.rect.centerx,
+                                                asteroid.rect.centery), vel))
 
             if asteroid.hitpoints <= 0:
                 asteroid.kill()
@@ -155,7 +162,7 @@ def check_collision(game):
                 game.explosions.add(explosion)
                 if game.state.play_sound:
                     game.sounds[1].play()
-                game.state.score_multiplier = game.ship.damage_multiplier
+                game.state.score_multiplier = game.ship.combo_multiplier
                 game.state.score += (game.ship.level * 10 *
                                 game.state.score_multiplier)
                 game.ship.gain_xp(formulize(game, game.ship.level), game.sounds)
@@ -167,8 +174,7 @@ def check_collision(game):
             if current_time > game.ship.maniac_boost_end:
                 game.ship.maniac_boost = 0
 
-            effective_crit_chance = min(1.0, (
-                        game.ship.crit_chance / 100) + game.ship.maniac_boost)
+            effective_crit_chance = min(1.0, game.ship.crit_chance + game.ship.maniac_boost)
             if random.random() < effective_crit_chance:
                 damage_per_frame = game.ship.damage * game.ship.crit_multiplier
                 color = (255, 50, 50)
@@ -179,11 +185,12 @@ def check_collision(game):
                 size = 24
 
             if not game.ship.hit:
-                game.ship.damage_multiplier += 0.1
-            damage_per_frame *= game.ship.damage_multiplier
+                game.ship.combo_multiplier += 0.1
+            total_multiplier = game.ship.combo_multiplier * game.ship.powerup_multiplier
+            damage_per_frame *= total_multiplier
 
             if game.ship.hit:
-                game.ship.damage_multiplier = 1.0
+                game.ship.combo_multiplier = 1.0
 
             alien.hitpoints -= damage_per_frame
             x, y = alien.rect.center
@@ -191,7 +198,7 @@ def check_collision(game):
             if not game.ship.hit:
                 mult_x, mult_y = game.ship.rect.centerx, game.ship.rect.top
                 add_multiplier(game, mult_x, mult_y,
-                               f"x{game.ship.damage_multiplier:.2f}",
+                               f"x{total_multiplier:.2f}",
                                color=color, font_size=size)
 
             game.floating_numbers.add(FloatingNumber(x, y, int(damage_per_frame), color=color,
@@ -216,7 +223,7 @@ def check_collision(game):
                 game.explosions.add(explosion)
                 if game.state.play_sound:
                     game.sounds[1].play()
-                game.state.score_multiplier = game.ship.damage_multiplier
+                game.state.score_multiplier = game.ship.combo_multiplier
                 game.state.score += (game.ship.level * 10 * game.state.score_multiplier)
                 game.ship.gain_xp(formulize(game, game.ship.level), game.sounds)
 
@@ -227,8 +234,7 @@ def check_collision(game):
             if current_time > game.ship.maniac_boost_end:
                 game.ship.maniac_boost = 0
 
-            effective_crit_chance = min(1.0, (
-                    game.ship.crit_chance / 100) + game.ship.maniac_boost)
+            effective_crit_chance = min(1.0, game.ship.crit_chance + game.ship.maniac_boost)
             if random.random() < effective_crit_chance:
                 damage_per_frame = game.ship.damage * game.ship.crit_multiplier
                 color = (255, 50, 50)
@@ -239,11 +245,12 @@ def check_collision(game):
                 size = 24
 
             if not game.ship.hit:
-                game.ship.damage_multiplier += 0.1
-            damage_per_frame *= game.ship.damage_multiplier
+                game.ship.combo_multiplier += 0.1
+            total_multiplier = game.ship.combo_multiplier * game.ship.powerup_multiplier
+            damage_per_frame *= total_multiplier
 
             if game.ship.hit:
-                game.ship.damage_multiplier = 1.0
+                game.ship.combo_multiplier = 1.0
 
             boss.hitpoints -= damage_per_frame
             x, y = boss.rect.center
@@ -251,11 +258,10 @@ def check_collision(game):
             if not game.ship.hit:
                 mult_x, mult_y = game.ship.rect.centerx, game.ship.rect.top
                 add_multiplier(game, mult_x, mult_y,
-                               f"x{game.ship.damage_multiplier:.2f}",
+                               f"x{total_multiplier:.2f}",
                                color=color, font_size=size)
 
-            game.floating_numbers.add(
-                FloatingNumber(x, y, int(damage_per_frame), color=color,
+            game.floating_numbers.add(FloatingNumber(x, y, int(damage_per_frame), color=color,
                                font_size=size))
             impact = ImpactFrame(boss.rect.centerx, boss.rect.centery,
                                  game.frame_explode[0])
@@ -277,7 +283,7 @@ def check_collision(game):
                 game.explosions.add(explosion)
                 if game.state.play_sound:
                     game.sounds[1].play()
-                game.state.score_multiplier = game.ship.damage_multiplier
+                game.state.score_multiplier = game.ship.combo_multiplier
                 game.state.score += game.ship.level * 10 * game.state.score_multiplier
                 game.ship.gain_xp(formulize(game, game.ship.level), game.sounds)
 
@@ -288,4 +294,4 @@ def check_collision(game):
             upgrade.kill()
             if game.state.play_sound:
                 game.sounds[2].play()
-                upgrade.apply(game.ship, upgrade)
+                upgrade.apply(game.ship)

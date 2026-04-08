@@ -31,19 +31,16 @@ class Upgrade(pygame.sprite.Sprite):
         now = pygame.time.get_ticks()
 
         if self.type == "power_up":
-            print("It's a power up")
             if not hasattr(ship, "power_ups"):
                 ship.power_ups = []
             ship.power_ups.append(now + 10_000)
 
         elif self.type == "shield":
-            print("It's a shield")
             ship.shield_regen_active = True
             ship.shield_regen_end = now + 30_000
             ship.shield_regen_rate = int(ship.max_shield * 0.15)
 
         elif self.type == "ammo":
-            print("It's ammo")
             ship.base_ammo += 400
             ship.ammo = ship.base_ammo
 

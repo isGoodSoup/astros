@@ -29,7 +29,8 @@ class Ship(pygame.sprite.Sprite):
         self.guns = {"beam": 250, "shotgun": 400, "auto": 150}
         self.base_damage = 4
         self.damage = self.base_damage
-        self.damage_multiplier = 1.0
+        self.combo_multiplier = 1.0
+        self.powerup_multiplier = 1.0
         self.base_crit_chance = 0.05
         self.crit_chance = self.base_crit_chance
         self.crit_multiplier = 3
@@ -68,6 +69,9 @@ class Ship(pygame.sprite.Sprite):
         self.shield_regen_end = 0
         self.shield_regen_rate = int(self.max_shield * 0.05)
 
+        self.last_hit_time = 0
+        self.hit_cooldown = 200
+
     def add_skill(self, skill):
         self.skills.append(skill)
 
@@ -77,9 +81,9 @@ class Ship(pygame.sprite.Sprite):
         self.power_ups = [end for end in getattr(self, "power_ups", []) if
                           end > now]
         if self.power_ups:
-            self.damage_multiplier = 2 ** len(self.power_ups)
+            self.powerup_multiplier = 2 ** len(self.power_ups)
         else:
-            self.damage_multiplier = 1.0
+            self.powerup_multiplier = 1.0
 
         if getattr(self, "shield_regen", False):
             if now < self.shield_regen_end:

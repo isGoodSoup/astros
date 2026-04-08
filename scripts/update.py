@@ -101,7 +101,7 @@ def update_game(game, delta, screen_size, hud_padding):
     game.hit_this_frame.clear()
 
     if game.ship.hit:
-        game.ship.damage_multiplier = 1.0
+        game.ship.combo_multiplier = 1.0
 
     for i in game.stars:
         if not game.state.pause:

@@ -16,8 +16,8 @@ class Explorer(Ability):
 class DamageBoost(Ability):
     @override
     def apply(self, ship, level):
-        ship.damage_multiplier += (1 + 0.2 * level)
-        return [ship.damage_multiplier]
+        ship.combo_multiplier += (1 + 0.2 * level)
+        return [ship.combo_multiplier]
 
 class Maniac(Ability):
     @override
