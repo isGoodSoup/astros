@@ -9,7 +9,8 @@ from scripts.celestial import random_celestial, is_valid_spawn
 from scripts.collision import check_collision
 from scripts.fleet import spawn_fleet
 from scripts.particle import Particle
-from scripts.toggles import tutorial_on, enable_trail
+from scripts.shared import joysticks, controller
+from scripts.toggles import tutorial_on
 from scripts.upgd import Upgrade
 
 def set_hud(screen_size):
@@ -174,13 +175,27 @@ def update_game(game, delta, screen_size, hud_padding):
 
     if game.ship_alive:
         game.ship.update_position(game.ship_x, game.ship_y)
-        if not game.ship.moved_down and enable_trail:
+        if game.ship_alive:
+            if game.ship.hitpoints // game.ship.max_hitpoints < 0.3:
+                game.ship.critical = True
+                if game.ship.critical:
+                    game.screen_shake = 60
+                    if joysticks:
+                        controller.rumble(0.5, 1, 80)
+                    game.sounds[5].play()
+
+            game.ship.update_position(game.ship_x, game.ship_y)
             trail_pos = game.ship.hitbox.midbottom
-            for _ in range(8):
+            hp_ratio = game.ship.hitpoints / game.ship.max_hitpoints
+            num_particles = int(8 * (1 - hp_ratio))
+            if hp_ratio < 0.2:
+                color = (255, random.randint(50, 150), 0)
+            color = (255, 255, 255) if hp_ratio > 0.5 else (100, 100, 100)
+            for _ in range(num_particles):
                 velocity = pygame.Vector2(random.uniform(-1, 1),
-                                      random.uniform(2, 4))
+                                          random.uniform(2, 4))
                 particle = Particle(trail_pos, velocity, timer=80,
-                                    color=(255, 255, 255), radius=4)
+                                    color=color, radius=4)
                 game.particles.append(particle)
 
     alive_fleets = []

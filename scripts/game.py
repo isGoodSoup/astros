@@ -169,9 +169,10 @@ class Game:
             for event in events:
                 if event.type == pygame.QUIT:
                     self.running = False
-                elif event.type == self.ALIENLASER and not self.state.pause:
+                elif (event.type == self.ALIENLASER and not self.state.pause
+                      and not self.state.game_over):
                     shooters = random.sample(self.aliens.sprites(),
-                                             k=min(1, len(self.aliens)))
+                        k=min(1, len(self.aliens)))
                     shots_this_frame = 0
                     for alien in shooters:
                         new_projectiles = alien.shoot(self.ship,

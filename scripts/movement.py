@@ -45,20 +45,16 @@ def update_movement(game, delta, screen_size):
 
     if key_pressed[K_LEFT]:
         movement_x -= game.ship.velocity * delta * 60
-        game.ship.moved_down = False
 
     if key_pressed[K_RIGHT]:
         movement_x += game.ship.velocity * delta * 60
-        game.ship.moved_down = False
 
     if not lock_y:
         if key_pressed[K_UP]:
             movement_y -= game.ship.velocity * delta * 60
-            game.ship.moved_down = False
 
         if key_pressed[K_DOWN]:
             movement_y += game.ship.velocity * delta * 60
-            game.ship.moved_down = True
 
     movement_x += game.input.left_joystick[0] * game.ship.velocity * delta * 60
     if not lock_y:

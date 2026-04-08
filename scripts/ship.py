@@ -19,7 +19,6 @@ class Ship(pygame.sprite.Sprite):
         self.direction = "idle"
         self.shooting = False
         self.moving = False
-        self.moved_down = False
         self.max_hitpoints = 200
         self.hitpoints = self.max_hitpoints
         self.max_shield = 25
@@ -62,6 +61,7 @@ class Ship(pygame.sprite.Sprite):
         self.credits = 0
 
         self.hit = False
+        self.critical = False
 
     def add_skill(self, skill):
         self.skills.append(skill)

@@ -12,6 +12,7 @@ def load_sounds():
     sounds.append(pygame.mixer.Sound("assets/fx/power_up.ogg"))
     sounds.append(pygame.mixer.Sound("assets/fx/level_up.ogg"))
     sounds.append(pygame.mixer.Sound("assets/fx/menu.ogg"))
+    sounds.append(pygame.mixer.Sound("assets/fx/critical.ogg"))
     sounds.append(pygame.mixer.Sound("assets/fx/game_over.ogg"))
     return sounds
 
