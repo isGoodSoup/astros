@@ -95,7 +95,7 @@ class HUD:
             screen.blit(surf, [score_x, y])
             y -= 2
 
-        credits_text = font.render(f"${game.ship.credits}", True, (255, 210, 0))
+        credits_text = font.render(f"${game.ship.credits:,}", True, (255, 210, 0))
         credits_y = score_y + score_value_surface.get_height() + 5
         screen.blit(credits_text, [score_x, credits_y])
 
