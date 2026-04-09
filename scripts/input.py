@@ -92,9 +92,6 @@ class Input:
                 if event.key == pygame.K_g:
                     game.ship.switch_gun()
 
-                if event.key == pygame.K_h:
-                    game.font.update()
-
                 if event.key == pygame.K_r and game.state.game_over:
                     reboot(game, game.screen_size)
 
@@ -110,6 +107,9 @@ class Input:
 
                 if event.key == pygame.K_F2:
                     game.state.debugging = not game.state.debugging
+
+                if event.key == pygame.K_F5:
+                    game.font.update()
 
                 if event.key == pygame.K_F12:
                     take_screenshot(game, game.screen)
