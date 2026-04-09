@@ -1,14 +1,14 @@
 from pygame.constants import *
 from pygame.display import toggle_fullscreen
 
-from scripts.fonts import FontManager
-from scripts.shared import fade
-
 from scripts.celestial import *
 from scripts.crt import CRT
-from scripts.game import Game
+from scripts.fonts import FontManager
+from scripts.mods import Mods
+from scripts.shared import fade
 from scripts.soundlib import load_sounds
 from scripts.update import set_hud
+
 
 class Menu:
     def __init__(self):
@@ -89,8 +89,9 @@ class Menu:
                 return
 
     def init_game(self):
-        game = Game(self.screen, self.screen_size, self.hud_ratio)
-        game.run(self.clock, self.screen, self.screen_size, self.hud_ratio, self.crt)
+        mods = Mods(self.screen, self.screen_size, self.hud_ratio)
+        mods.run(self.clock, self.screen, self.screen_size, self.hud_ratio,
+              self.crt)
 
 if __name__ == '__main__':
     menu = Menu()

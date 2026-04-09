@@ -26,7 +26,7 @@ from scripts.utils import hide_cursor
 # All assets in this game are © 2026 Diego. See ASSETS_LICENSE.txt.
 
 class Game:
-    def __init__(self, screen, screen_size, hud_ratio):
+    def __init__(self, screen, screen_size, hud_ratio, ships, ship_index=0):
         home_dir = os.path.expanduser("~")
         save_dir = os.path.join(home_dir, ".saves")
         os.makedirs(save_dir, exist_ok=True)
@@ -63,16 +63,21 @@ class Game:
         self.particles = []
         self.hit_this_frame = set()
 
+        self.ship_sprite = ships
+
         self.ship_frames = 9
         self.explosion_frames = 7
-        self.ship_sprite = [SpriteSheet("assets/ship.png"), SpriteSheet(
-            "assets/ship_v2.png"), SpriteSheet("assets/ship_v3.png")]
+
         self.explosion_sheet = SpriteSheet("assets/explosion.png")
         self.megaexplosion_sheet = SpriteSheet("assets/explosion_charge.png")
-        framew = self.ship_sprite[0].sheet.get_width() // self.ship_frames
-        frameh = self.ship_sprite[0].sheet.get_height()
-        self.ship = Ship(self.ship_sprite[0], 0, 0, self.frame, framew, frameh, columns=self.ship_frames)
-        self.spawnpoint(self.ship, screen_size, self.ship_sprite, self.ship_frames)
+        self.selected_sheet = self.ship_sprite[ship_index]
+
+        framew = self.selected_sheet.sheet.get_width() // self.ship_frames
+        frameh = self.selected_sheet.sheet.get_height()
+        self.ship = Ship(self.selected_sheet, 0, 0, self.frame, framew, frameh,
+                         columns=self.ship_frames)
+        self.spawnpoint(self.ship, screen_size, self.selected_sheet,
+                        self.ship_frames)
 
         self.ship_alive = True
         self.ship_x = screen_size[0] // 2 - framew // 2 - 25
@@ -96,7 +101,7 @@ class Game:
         self.frames = []
 
         for i in range(self.ship_frames):
-            img = self.ship_sprite[0].get_image(i, framew, frameh, scale=self.scale,
+            img = self.selected_sheet.get_image(i, framew, frameh, scale=self.scale,
                                                 columns=self.ship_frames)
             self.frames.append(img)
 
@@ -129,7 +134,7 @@ class Game:
         self.alien_spawn_count = random.randint(1, 5)
 
         self.ALIENLASER = pygame.USEREVENT + 1
-        pygame.time.set_timer(self.ALIENLASER, 1000)
+        pygame.time.set_timer(self.ALIENLASER, 200)
 
         self.last_asteroid_spawn = 0
         self.asteroid_spawn_interval = 600
@@ -173,7 +178,7 @@ class Game:
                 elif (event.type == self.ALIENLASER and not self.state.pause
                       and not self.state.game_over):
                     shooters = random.sample(self.aliens.sprites(),
-                        k=min(4, len(self.aliens)))
+                        k=min(1, len(self.aliens)))
                     shots_this_frame = 0
                     for alien in shooters:
                         new_projectiles = alien.shoot(self.ship,
@@ -243,7 +248,7 @@ class Game:
         pygame.quit()
 
     def spawnpoint(self, ship, screen_size, ship_sprite, cols):
-        framew = ship_sprite[0].sheet.get_width() // cols
+        framew = ship_sprite.sheet.get_width() // cols
         x = screen_size[0] // 2 - framew // 2
         y = screen_size[1] // 2 + 200
         ship.rect.topleft = (x, y)

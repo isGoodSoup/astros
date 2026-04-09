@@ -46,15 +46,15 @@ def reboot(game, screen_size):
     game.fleets.clear()
     game.particles.clear()
 
-    framew = game.ship_sprite[0].sheet.get_width() // game.ship_frames
-    frameh = game.ship_sprite[0].sheet.get_height()
-    game.ship = Ship(game.ship_sprite[0], 0, 0, game.frame, framew, frameh,
+    framew = game.selected_sheet.sheet.get_width() // game.ship_frames
+    frameh = game.selected_sheet.sheet.get_height()
+    game.ship = Ship(game.selected_sheet, 0, 0, game.frame, framew, frameh,
                      columns=game.ship_frames)
 
     for attr, value in saved_stats.items():
         setattr(game.ship, attr, value)
 
-    game.spawnpoint(game.ship, screen_size, game.ship_sprite, game.ship_frames)
+    game.spawnpoint(game.ship, screen_size, game.selected_sheet, game.ship_frames)
     game.ship_x = game.ship.rect.x
     game.ship_y = game.ship.rect.y
     game.ship_pos = [game.ship_x, game.ship_y]
