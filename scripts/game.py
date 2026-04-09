@@ -194,8 +194,7 @@ class Game:
                 if joysticks:
                     controller.rumble(self.input.charge_rumble, 1, 50)
                 charge_elapsed = pygame.time.get_ticks() - self.input.charge_start_time
-                charge_ratio = min(1.0,
-                                   charge_elapsed / self.input.charge_duration)
+                charge_ratio = min(1.0, charge_elapsed / self.input.charge_duration)
 
             if not self.state.pause or self.hud.skill_tab.active:
                 update_controller(self, screen_size, delta)

@@ -81,12 +81,11 @@ class HUD:
         score_x, score_y = padded_pos(hud_ratio['left'], hud_ratio['top'],
                                       'left', 'top', hud_padding)
 
-        score_value_surface = font.render(f"{int(game.state.score):06}", True,
-                                          "WHITE")
+        score_value_surface = font.render(f"{int(game.state.score):06}", True, (255, 255, 255))
         screen.blit(score_value_surface, [score_x, score_y])
 
         score_lines = ["", "SCORE"]
-        score_line_surfs = [font.render(line, True, "WHITE") for line in
+        score_line_surfs = [font.render(line, True, (255, 255, 255)) for line in
                             score_lines]
 
         y = score_y - 5
@@ -106,14 +105,14 @@ class HUD:
             y -= 2
 
         high_score_surface = font.render(f"{int(game.state.high_score):06}",
-                                         True, "WHITE")
+                                         True, (255, 255, 255))
         hs_x, hs_y = padded_pos(hud_ratio['right'], hud_ratio['top'], 'right',
                                 'top', hud_padding)
         hs_x -= high_score_surface.get_width()
         screen.blit(high_score_surface, [hs_x, hs_y])
 
         stopwatch_text = f"{game.clock.hours:02}:{game.clock.minutes:02}:{game.clock.seconds:02}"
-        stopwatch_surface = font.render(stopwatch_text, True, "WHITE")
+        stopwatch_surface = font.render(stopwatch_text, True, (255, 255, 255))
         sw_x = hud_ratio['left'] + hud_ratio[
             'width'] // 2 - stopwatch_surface.get_width() // 2
         sw_y = hud_ratio['top'] + hud_padding

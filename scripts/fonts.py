@@ -10,8 +10,9 @@ class FontManager:
         self.size = size
 
         self.fonts = [
+            pygame.font.Font("assets/fonts/Bytesized.ttf", size * 2),
             pygame.font.Font("assets/fonts/PressStart2P.ttf", size),
-            pygame.font.Font("assets/fonts/BoldPixels.ttf", size * 2)
+            pygame.font.Font("assets/fonts/BoldPixels.ttf", size * 2),
         ]
 
         if name is not None:

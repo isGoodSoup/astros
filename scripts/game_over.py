@@ -20,9 +20,9 @@ def game_lost(game, font, screen, screen_size):
         game.state.high_score = game.state.score
         game.save_config()
 
-    score_text = font.render(f"{int(game.state.score):05}", True, "WHITE")
+    score_text = font.render(f"{int(game.state.score):05}", True, (255, 255, 255))
     stopwatch = game.clock.stopwatch if game.clock.stopwatch is not None else (
-        font.render("00:00:00", True, "WHITE"))
+        font.render("00:00:00", True, (255, 255, 255)))
     game_over_x = center(game, game_over, screen_size)
     game_over_y = screen_size[1] // 2
     screen.blit(game_over, [game_over_x, game_over_y])
