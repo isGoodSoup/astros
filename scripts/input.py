@@ -92,12 +92,27 @@ class Input:
                 if event.key == pygame.K_g:
                     game.ship.switch_gun()
 
+                if event.key == pygame.K_h:
+                    game.font.update()
+
                 if event.key == pygame.K_r and game.state.game_over:
                     reboot(game, game.screen_size)
 
                 if event.key == pygame.K_l:
                     from scripts.movement import lock_y
                     lock_y = not lock_y
+
+                if event.key == pygame.K_PLUS or event.key == pygame.K_KP_PLUS:
+                    increase_volume(game)
+
+                elif event.key == pygame.K_MINUS or event.key == pygame.K_KP_MINUS:
+                    decrease_volume(game)
+
+                if event.key == pygame.K_F2:
+                    game.state.debugging = not game.state.debugging
+
+                if event.key == pygame.K_F12:
+                    take_screenshot(game, game.screen)
 
                 if event.key == pygame.K_ESCAPE:
                     if not game.hud.skill_tab.active:
@@ -135,6 +150,20 @@ class Input:
                     if not game.hud.skill_tab.active:
                         game.state.pause = not game.state.pause
 
+
+            elif event.type == pygame.JOYHATMOTION:
+                if event.hat == 0 and event.value == (0, 1):
+                    increase_volume(game)
+
+                elif event.hat == 0 and event.value == (0, -1):
+                    decrease_volume(game)
+
+                if event.hat == 0 and event.value == (-1, 0):
+                    game.font.update()
+
+                if event.hat == 0 and event.value == (1, 0):
+                    take_screenshot(game, game.screen)
+
         if self.charge_active:
             game.screen_shake = 20
             for event in events:
@@ -150,15 +179,6 @@ class Input:
                                                game.explosions, game.entities,game.frame_explode,
                                                game.frame_big_explode)
                         self.charge_active = False
-
-        volume_up = keys[pygame.K_PLUS] or keys[pygame.K_KP_PLUS] or (
-                    joysticks and controller.get_hat(0)[1] == 1)
-        volume_down = keys[pygame.K_MINUS] or keys[pygame.K_KP_MINUS] or (
-                    joysticks and controller.get_hat(0)[1] == -1)
-        if volume_up:
-            increase_volume(game)
-        if volume_down:
-            decrease_volume(game)
 
         axis_y = 0.0
         if joysticks and controller.get_button(9):
@@ -176,11 +196,6 @@ class Input:
                 game.hud_padding -= 1
         finally:
             self.moving_hud = True
-
-        screenshot_input = (joysticks and controller.get_hat(0)[0] == 1
-                            or keys[pygame.K_F12])
-        if screenshot_input:
-            take_screenshot(game, game.screen)
 
         if game.hud.skill_tab.active and game.state.current_phase_options and self.mode == "mouse":
             mouse_rect = pygame.Rect(self.cursor_pos[0], self.cursor_pos[1], 1, 1)

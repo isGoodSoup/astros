@@ -4,6 +4,7 @@ import os
 from scripts.celestial import *
 from scripts.clock import Clock
 from scripts.controller import update_controller
+from scripts.fonts import FontManager
 from scripts.game_over import game_lost
 from scripts.hud import HUD
 from scripts.input import Input
@@ -20,14 +21,12 @@ from scripts.tutorial import Tutorial
 from scripts.update import update_game
 from scripts.utils import hide_cursor
 
-
 # Copyright (c) 2026 Diego
 # Licensed under the MIT License. See LICENSE file for details.
 # All assets in this game are © 2026 Diego. See ASSETS_LICENSE.txt.
 
 class Game:
-    def __init__(self, screen, screen_size, hud_ratio,
-                 game_font):
+    def __init__(self, screen, screen_size, hud_ratio):
         home_dir = os.path.expanduser("~")
         save_dir = os.path.join(home_dir, ".saves")
         os.makedirs(save_dir, exist_ok=True)
@@ -36,11 +35,11 @@ class Game:
         self.state = GameState()
         self.input = Input(screen_size)
         self.clock = Clock()
-        self.hud = HUD(self, screen_size, hud_ratio, game_font)
+        self.font = FontManager(None, 24)
+        self.hud = HUD(self, screen_size, hud_ratio, self.font.get_font())
 
         self.screen = screen
         self.screen_size = screen_size
-        self.font = game_font
         self.running = True
         self.hud_padding = 80
         self.fps = 60
@@ -165,7 +164,7 @@ class Game:
         fade.start("in")
         pygame.mixer.music.play(-1)
 
-    def run(self, clock, screen, screen_size, hud_ratio, crt, font):
+    def run(self, clock, screen, screen_size, hud_ratio, crt):
         while self.running:
             events = pygame.event.get()
             for event in events:
@@ -185,7 +184,7 @@ class Game:
                     if shots_this_frame > 0 and self.state.play_sound:
                         self.sounds[0].play()
 
-            screen.fill((0, 0, 0))
+            screen.fill((16, 19, 31))
             delta = clock.tick(self.fps) / 1000
 
             self.input.update(events)
@@ -212,17 +211,17 @@ class Game:
             if tutorial_on:
                 self.tutorial.update(self, delta)
 
-            render_frame(self, screen, font, self.hud_padding)
+            render_frame(self, screen, self.font, self.hud_padding)
 
             if not self.state.game_over:
-                self.hud.update(self, font, screen, hud_ratio, self.hud_padding)
+                self.hud.update(self, self.font, screen, hud_ratio, self.hud_padding)
 
             if self.input.cursor_visible:
                 pos = self.input.cursor_pos if self.input.mode == "controller" else pygame.mouse.get_pos()
                 screen.blit(self.cursor_sprite, (int(pos[0]), int(pos[1])))
 
             if self.state.game_over:
-                game_lost(self, font, screen, screen_size)
+                game_lost(self, self.font, screen, screen_size)
 
             if self.screen_shake > 0:
                 self.screen_shake -= 1
