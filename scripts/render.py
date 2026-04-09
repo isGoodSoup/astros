@@ -105,10 +105,15 @@ def render_skills_tab(game, screen, rect, game_font):
         screen.blit(skill.icon_image, skill.rect)
 
 def render_stats_tab(game, screen, rect, game_font):
+
+    available_ammo = 0
+    for ammo in game.ship.guns_ammo:
+        available_ammo += game.ship.guns_ammo[ammo]
+
     stats = [
         f"Hitpoints: {int(game.ship.hitpoints)}/{int(game.ship.max_hitpoints)}",
         f"Shield: {int(game.ship.shield)}/{int(game.ship.max_shield)}",
-        f"Ammo: {int(game.ship.ammo)}/{int(game.ship.base_ammo)}",
+        f"Ammo: {int(available_ammo)}/{int(game.ship.arsenal)}",
         f"Level: {int(game.ship.level)}",
         f"XP: {int(game.ship.xp)}/{int(game.ship.xp_to_next_level)}",
         f"Crit Chance: {int(game.ship.crit_chance * 100)}%",

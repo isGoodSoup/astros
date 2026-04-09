@@ -140,7 +140,6 @@ class Game:
         self.asteroid_spawn_count = 6
         self.asteroid_hitpoints = 8
         self.asteroid_speed = 8
-        self.asteroid_increment_speed = 10
         self.last_upgrade_spawn = 0
         self.upgrade_spawn_interval = 24_000
         self.last_boss_spawn = 0

@@ -4,7 +4,7 @@ import pygame
 
 from scripts.soundlib import sounds
 
-upgrades = ["power_up", "shield", "ammo"]
+upgrades = ['power_up', 'shield', 'ammo']
 def get_upgrade():
     return random.choice(upgrades)
 
@@ -23,7 +23,7 @@ class Upgrade(pygame.sprite.Sprite):
     def update(self):
         self.y += self.speed
         self.rect.topleft = (self.x, self.y)
-        self.hitbox.topleft = self.rect.topleft  # keep hitbox in sync
+        self.hitbox.topleft = self.rect.topleft
         if self.rect.top > pygame.display.get_surface().get_height():
             self.kill()
 
@@ -41,7 +41,7 @@ class Upgrade(pygame.sprite.Sprite):
             ship.shield_regen_rate = int(ship.max_shield * 0.15)
 
         elif self.type == "ammo":
-            ship.base_ammo += 400
-            ship.ammo = ship.base_ammo
+            for ammo in ship.guns_ammo:
+                ship.guns_ammo[ammo] += 10
 
         sounds[2].play()

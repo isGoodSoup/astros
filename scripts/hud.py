@@ -110,12 +110,16 @@ class HUD:
         sw_y = hud_ratio['top'] + hud_padding
         screen.blit(stopwatch_surface, [sw_x, sw_y])
 
+        available_ammo = 0
+        for ammo in game.ship.guns_ammo:
+            available_ammo += game.ship.guns_ammo[ammo]
+
         current_gun_frame = game.ship.gun_order.index(game.ship.gun)
         interfaces = [
             (self.hitpoints, game.ship.hitpoints, game.ship.max_hitpoints, True),
             (self.shield, game.ship.shield, game.ship.max_shield, True),
             (self.xp, game.ship.xp, game.ship.xp_to_next_level, True),
-            (self.ammo, game.ship.ammo, game.ship.base_ammo, True),
+            (self.ammo, available_ammo, game.ship.arsenal, True),
         ]
 
         for interface, value, max_value, reverse in interfaces:

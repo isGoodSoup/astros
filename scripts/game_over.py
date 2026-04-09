@@ -67,7 +67,10 @@ def reboot(game, screen_size):
     game.ship_alive = True
     game.ship.hitpoints = game.ship.max_hitpoints
     game.ship.shield = game.ship.max_shield
-    game.ship.ammo = game.ship.base_ammo
+
+    for ammo in game.ship.guns_ammo:
+        game.ship.guns_ammo[ammo] = game.ship.base_guns_ammo[ammo]
+
     game.ship.charges = game.ship.base_charges
     game.ship.damage = game.ship.base_damage
     game.ship.critical = False
