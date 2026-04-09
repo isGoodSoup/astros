@@ -56,6 +56,7 @@ class Ship(pygame.sprite.Sprite):
         self.skills = []
 
         self.level = 1
+        self.level_cap = False
         self.xp = 0
         self.xp_to_next_level = 256
         self.perk_points = 0
@@ -175,12 +176,18 @@ class Ship(pygame.sprite.Sprite):
         return [random.randint(0,10) - 4, random.randint(0,10) - 4]
 
     def gain_xp(self, amount, sound):
+        if self.level_cap and self.level == 10:
+            return
+
         self.xp += amount
         while self.xp >= self.xp_to_next_level:
             self.xp -= self.xp_to_next_level
             self.level_up(sound)
 
     def level_up(self, sound):
+        if self.level_cap and self.level == 10:
+            return
+
         self.level += 1
         self.base_damage += 1
         self.max_hitpoints += 10

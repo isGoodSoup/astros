@@ -46,11 +46,12 @@ def update_phase(game):
         game.hud.skill_tab.open((pygame.display.Info().current_w // 2 -
                              game.hud.skill_tab.width // 2, 200))
         game.ship.perk_points += 1
-        available_skills = [s for s in game.skills.skills if not s.unlocked]
-        if not available_skills:
-            available_skills = game.skills.skills
-        game.state.current_phase_options = random.sample(
-            available_skills, k=min(3, len(available_skills)))
+
+        available_skills = game.skills.skills
+        current_choices = [s for s in available_skills if
+                               s not in game.state.current_phase_options]
+        game.state.current_phase_options = random.sample(current_choices,
+            k=min(3, len(current_choices)))
         game.state.skills_generated = True
 
     if game.hud.skill_tab.active:
