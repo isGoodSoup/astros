@@ -101,11 +101,11 @@ class Mods:
                     self.ship_flying = True
                     self.selected_ship_index = self.current_ship_index
 
-                if event.button == 1:
+                if event.button == 5:
                     self.current_ship_index = ((self.current_ship_index + 1)
                                                % len(self.ship_previews))
 
-                if event.button == 2:
+                if event.button == 4:
                     self.current_ship_index = ((self.current_ship_index - 1)
                                                % len(self.ship_previews))
 
