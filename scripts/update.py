@@ -110,7 +110,7 @@ def update_game(game, delta, screen_size, hud_padding):
 
     for i in game.stars:
         if not game.state.pause:
-            i[1] = game.state.stars_speed
+            i[1] += game.state.stars_speed
         if i[1] > screen_size[1]:
             i[1] = 0
             i[0] = random.randint(0, screen_size[0])
