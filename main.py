@@ -22,7 +22,7 @@ class Menu:
         self.render_surface = pygame.Surface((1920, 1080))
         self.screen = pygame.display.set_mode(self.screen_size, DOUBLEBUF|OPENGL, vsync=1)
         self.crt = CRT(self.screen, style=1, virtual_resolution=(1920, 1080),cpu_only=False)
-        self.crt.prog['curvature'].value = 0.7
+        self.crt.prog['curvature'].value = 0.5
         self.font = FontManager(None, 24)
         self.logo_img = pygame.image.load("assets/ui/logo.png")
         self.logo_img = pygame.transform.scale(self.logo_img,
