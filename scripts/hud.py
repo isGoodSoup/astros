@@ -78,31 +78,23 @@ class HUD:
                        screen_size[1]), content_renderer=render_stats_tab)
 
     def update(self, game, font, screen, hud_ratio, hud_padding):
-        score_x, score_y = padded_pos(hud_ratio['left'], hud_ratio['top'],
-                                      'left', 'top', hud_padding)
+        line_spacing = font.get_linesize()  # fixed per-font value from FontManager
+        score_x, y = padded_pos(hud_ratio['left'], hud_ratio['top'], 'left',
+                                'top', hud_padding)
 
-        score_value_surface = font.render(f"{int(game.state.score):06}", True, (255, 255, 255))
-        screen.blit(score_value_surface, [score_x, score_y])
+        score_title_surf = font.render("SCORE", True, (255, 255, 255))
+        screen.blit(score_title_surf, [score_x, y])
 
-        score_lines = ["", "SCORE"]
-        score_line_surfs = [font.render(line, True, (255, 255, 255)) for line in
-                            score_lines]
+        y += line_spacing
+        score_value_surf = font.render(f"{int(game.state.score):06}", True,
+                                       (255, 255, 255))
+        screen.blit(score_value_surf, [score_x, y])
+        y += line_spacing
 
-        y = score_y - 5
-        for surf in reversed(score_line_surfs):
-            y -= surf.get_height()
-            screen.blit(surf, [score_x, y])
-            y -= 2
-
-        credits_text = font.render(f"${game.ship.credits:,}", True, (255, 210, 0))
-        credits_y = score_y + score_value_surface.get_height() + 5
-        screen.blit(credits_text, [score_x, credits_y])
-
-        y = score_y - 5
-        for surf in reversed(score_line_surfs):
-            y -= surf.get_height()
-            screen.blit(surf, [score_x, y])
-            y -= 2
+        credits_surf = font.render(f"${game.ship.credits:,}", True,
+                                   (255, 210, 0))
+        screen.blit(credits_surf, [score_x, y])
+        y += line_spacing
 
         high_score_surface = font.render(f"{int(game.state.high_score):06}",
                                          True, (255, 255, 255))

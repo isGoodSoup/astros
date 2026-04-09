@@ -18,11 +18,17 @@ class FontManager:
         if name is not None:
             self.fonts.insert(0, pygame.font.Font(name, size))
 
+        self.linesizes = [32, 32, 32]
         self.font_index = 0
+        self.linesize = self.linesizes[self.font_index]
         self.current_font = self.fonts[self.font_index]
 
     def get_font(self) -> pygame.font.Font:
         return self.current_font
+
+    def get_linesize(self):
+        self.linesize = self.linesizes[self.font_index]
+        return self.linesize
 
     def render(self, text: str, antialias: bool, color, background=None) -> pygame.Surface:
         return self.current_font.render(text, antialias, color, background)
