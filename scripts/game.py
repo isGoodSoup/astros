@@ -7,8 +7,8 @@ from scripts.controller import update_controller
 from scripts.fonts import FontManager
 from scripts.game_over import game_lost
 from scripts.hud import HUD
-from scripts.input import Input
-from scripts.movement import update_movement
+from scripts.input import Input, update_cursor
+from scripts.movement import update_movement, update_ship_angle
 from scripts.render import render_frame
 from scripts.shared import joysticks, controller, fade
 from scripts.sheet import SpriteSheet
@@ -20,6 +20,7 @@ from scripts.toggles import tutorial_on
 from scripts.tutorial import Tutorial
 from scripts.update import update_game
 from scripts.utils import hide_cursor
+
 
 # Copyright (c) 2026 Diego
 # Licensed under the MIT License. See LICENSE file for details.
@@ -157,7 +158,7 @@ class Game:
         self.last_blink = 0
 
         self.cursor_sprite = pygame.image.load(
-            "assets/ui/cursor.png").convert_alpha()
+            "assets/ui/crosshair.png").convert_alpha()
 
         if tutorial_on:
             self.tutorial = Tutorial()
@@ -208,6 +209,8 @@ class Game:
                 update_controller(self, screen_size, delta)
                 if not self.hud.skill_tab.active:
                     update_movement(self, delta, screen_size)
+                    update_cursor(self, delta, screen_size)
+                    update_ship_angle(self)
 
             hide_cursor(self, self.input.cursor_pos)
 
