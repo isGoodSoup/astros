@@ -26,9 +26,12 @@ class Ship(pygame.sprite.Sprite):
         self.max_shield = 25
         self.base_max_shield = self.max_shield
         self.shield = self.max_shield
-        self.gun_order = ["beam", "shotgun", "auto"]
+        self.gun_order = ['beam', 'shotgun', 'auto', 'missile']
         self.gun = "beam"
-        self.guns = {"beam": 250, "shotgun": 400, "auto": 150}
+        self.guns = {"beam": 250, "shotgun": 400, "auto": 150, "missile": 900}
+        self.guns_ammo = {"beam": -1, "shotgun": 20, "auto": 400, "missile": 10}
+        self.base_guns_ammo = self.guns_ammo.copy()
+        self.arsenal = sum(self.guns_ammo.values())
         self.base_damage = 4
         self.damage = self.base_damage
         self.combo_multiplier = 1.0
@@ -39,9 +42,7 @@ class Ship(pygame.sprite.Sprite):
 
         self.base_charges = 1
         self.charges = self.base_charges
-        self.base_ammo = 200
-        self.ammo = self.base_ammo
-        self.evasion = 0.01
+        self.evasion = 0.02
         self.shot_cooldown = 250
         self.power_ups = []
 
@@ -142,13 +143,13 @@ class Ship(pygame.sprite.Sprite):
         projectiles = []
 
         if gun_type == "beam":
-            projectiles.append(
-                Projectile(pos, (0, 255, 255), direction=(dir_x, dir_y),
+            self.guns_ammo['beam'] = -1
+            projectiles.append(Projectile(pos, (0, 255, 255), direction=(dir_x, dir_y),
                            speed=16,
                            damage=1))
 
         elif gun_type == "shotgun":
-            if self.ammo <= 0:
+            if self.guns_ammo['shotgun'] <= 0:
                 return projectiles
             num_pellets = 6
             spread_angle = 30
@@ -168,10 +169,10 @@ class Ship(pygame.sprite.Sprite):
                     Projectile(pos, (0, 255, 255), direction=direction,
                                speed=12, damage=1))
             if not unlimited_ammo:
-                self.ammo -= num_pellets
+                self.guns_ammo['shotgun'] -= num_pellets
 
         if gun_type == "auto":
-            if self.ammo <= 0:
+            if self.guns_ammo['auto'] <= 0:
                 return projectiles
 
             num_bullets = 3
@@ -191,7 +192,17 @@ class Ship(pygame.sprite.Sprite):
                                speed=12, damage=1))
 
             if not unlimited_ammo:
-                self.ammo -= num_bullets
+                self.guns_ammo['auto'] -= num_bullets
+
+        if gun_type == "missile":
+            if self.guns_ammo['missile'] <= 0:
+                return projectiles
+
+            projectiles.append(Projectile(pos, (255, 0, 0), direction=(dir_x, dir_y),
+                           speed=8, damage=self.base_damage * 50))
+
+            if not unlimited_ammo:
+                self.guns_ammo['missile'] -= 1
 
         return projectiles
 
