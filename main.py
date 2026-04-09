@@ -35,7 +35,6 @@ class Menu:
         self.sounds = load_sounds()
         self.running = True
         self.transitioning = False
-        self.count = 0
         self.last_blink = 0
         pygame.mouse.set_visible(False)
         toggle_fullscreen()
@@ -56,24 +55,26 @@ class Menu:
                         fade.start("out")
                         self.transitioning = True
 
+            if not self.running:
+                break
+
             alpha = fade.update()
             self.screen.fill((0, 0, 0))
 
             now = pygame.time.get_ticks()
             if now - self.last_blink > 500:
-                self.count += 1
                 self.last_blink = now
 
-            colors = [(255, 255, 255), (0, 0, 0, 0)]
-            start = (self.font.render("Press any key to start", True,
-                                          colors[self.count % 2]))
+            start = self.font.render("Press any key to start", True,
+                                     (255, 255, 255))
             title_y = 200
             self.render_surface.fill((0, 0, 0))
             surface_width, surface_height = self.render_surface.get_size()
             title_x = surface_width // 2 - self.logo_img.get_width() // 2
             start_x = surface_width // 2 - start.get_width() // 2
             self.render_surface.blit(self.logo_img, (title_x, title_y))
-            self.render_surface.blit(start, (start_x, title_y + 600))
+            if (now // 500) % 2 == 0:
+                self.render_surface.blit(start, (start_x, title_y + 600))
             self.screen.blit(pygame.transform.scale(self.render_surface, self.screen_size),(0, 0))
             if alpha > 0:
                 fade_surface = pygame.Surface((1920, 1080))
@@ -92,6 +93,7 @@ class Menu:
         mods = Mods(self.screen, self.screen_size, self.hud_ratio)
         mods.run(self.clock, self.screen, self.screen_size, self.hud_ratio,
               self.crt)
+        self.running = False
 
 if __name__ == '__main__':
     menu = Menu()

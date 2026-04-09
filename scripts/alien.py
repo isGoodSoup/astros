@@ -38,6 +38,10 @@ class Alien(pygame.sprite.Sprite):
         self.shooting = False
         new_projectiles = []
 
+        # direction_x = 0
+        # if self.ship is not None:
+        #     direction_x = self.ship.rect - self.rect.centerx
+
         if current_time - self.last_shot_time >= shot_cooldown:
             projectile = Projectile(
                 pos=[self.rect.centerx, self.rect.bottom],

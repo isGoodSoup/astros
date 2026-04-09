@@ -6,11 +6,9 @@ from scripts.utils import center
 def game_lost(game, font, screen, screen_size):
     now = pygame.time.get_ticks()
     if now - game.last_blink > 500:
-        game.count += 1
         game.last_blink = now
 
-    colors = ["RED", (0, 0, 0, 0)]
-    game_over = font.render("GAME OVER", True, colors[game.count % 2])
+    game_over = font.render("GAME OVER", True, (255, 0, 0))
 
     if game.state.play_sound and getattr(game, "game_over_fx", True):
         game.sounds[-1].play()
@@ -20,15 +18,22 @@ def game_lost(game, font, screen, screen_size):
         game.state.high_score = game.state.score
         game.save_config()
 
+    game.clock.milliseconds = 0
+    game.clock.seconds = 0
+    game.clock.minutes = 0
+    game.clock.hours = 0
+
     score_text = font.render(f"{int(game.state.score):05}", True, (255, 255, 255))
-    stopwatch = game.clock.stopwatch if game.clock.stopwatch is not None else (
-        font.render("00:00:00", True, (255, 255, 255)))
+    stopwatch = game.clock.stopwatch if game.clock.stopwatch is not None else \
+        (font.render("00:00:00", True, (255, 255, 255)))
     game_over_x = center(game, game_over, screen_size)
     game_over_y = screen_size[1] // 2
-    screen.blit(game_over, [game_over_x, game_over_y])
+
+    if (now // 500) % 2 == 0:
+        screen.blit(game_over, [game_over_x, game_over_y])
+
     screen.blit(score_text, [center(game, score_text, screen_size), game_over_y + 25])
     screen.blit(stopwatch, [center(game, stopwatch, screen_size), game_over_y + 50])
-
 
 def reboot(game, screen_size):
     saved_stats = game.ship.get_stats()
@@ -94,6 +99,5 @@ def reboot(game, screen_size):
 
     game.screen_shake = 0
 
-    # Reset music
     if game.state.play_sound:
         pygame.mixer.music.play(-1)

@@ -154,7 +154,6 @@ class Game:
         self.skills = SkillManager()
 
         self.screen_shake = 0
-        self.count = 0
         self.last_blink = 0
 
         self.cursor_sprite = pygame.image.load(
@@ -175,17 +174,21 @@ class Game:
             for event in events:
                 if event.type == pygame.QUIT:
                     self.running = False
-                elif (event.type == self.ALIENLASER and not self.state.pause
-                      and not self.state.game_over):
-                    shooters = random.sample(self.aliens.sprites(),
-                        k=min(1, len(self.aliens)))
+                if event.type == self.ALIENLASER and not self.state.pause and not self.state.game_over:
                     shots_this_frame = 0
+                    if random.random() > 0.5:
+                        shooters = random.sample(self.aliens.sprites(),
+                                                 k=min(1, len(self.aliens)))
+                    else:
+                        shooters = [alien for alien in self.aliens.sprites()
+                                    if abs(alien.rect.centerx - self.ship.rect.centerx) <= 10]
+
                     for alien in shooters:
-                        new_projectiles = alien.shoot(self.ship,
-                                                      alien.shot_cooldown)
+                        new_projectiles = alien.shoot(self.ship,alien.shot_cooldown)
                         if new_projectiles:
                             shots_this_frame += len(new_projectiles)
                             self.enemy_projectiles.add(*new_projectiles)
+
                     if shots_this_frame > 0 and self.state.play_sound:
                         self.sounds[0].play()
 
