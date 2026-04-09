@@ -50,8 +50,11 @@ def update_phase(game):
         available_skills = game.skills.skills
         current_choices = [s for s in available_skills if
                                s not in game.state.current_phase_options]
-        game.state.current_phase_options = random.sample(current_choices,
-            k=min(3, len(current_choices)))
+        game.state.current_phase_options = random.sample(
+            current_choices, k=min(3, len(current_choices))
+        )
+        game.input.selected_skill_index = 0
+        game.input.selected_skill = game.state.current_phase_options[0]
         game.state.skills_generated = True
 
     if game.hud.skill_tab.active:
@@ -107,7 +110,7 @@ def update_game(game, delta, screen_size, hud_padding):
 
     for i in game.stars:
         if not game.state.pause:
-            i[1] += game.state.stars_speed
+            i[1] = game.state.stars_speed
         if i[1] > screen_size[1]:
             i[1] = 0
             i[0] = random.randint(0, screen_size[0])

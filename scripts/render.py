@@ -94,10 +94,12 @@ def render_skills_tab(game, screen, rect, game_font):
     screen.blit(perk_points, (rect.x + 300 + offset, rect.y + padding + 40))
 
     grid = [(250, 200), (350, 200), (450, 200)]
-    for skill, pos in zip(game.state.current_phase_options, grid):
+    for i, (skill, pos) in enumerate(zip(game.state.current_phase_options, grid)):
         skill.pos = (rect.x + pos[0] + offset, rect.y + pos[1])
         skill.rect.topleft = skill.pos
-        skill.hovered = (skill == game.input.selected_skill )
+
+        skill.hovered = (i == game.input.selected_skill_index)
+
         frame = pygame.transform.scale(skill.current_frame(), (64, 64))
         screen.blit(frame, skill.rect)
         screen.blit(skill.icon_image, skill.rect)
