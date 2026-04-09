@@ -2,6 +2,7 @@ import pygame
 
 from scripts.game_over import reboot
 from scripts.shared import joysticks, controller
+from scripts.ship import get_nearest_enemy
 from scripts.soundlib import decrease_volume, increase_volume
 from scripts.utils import take_screenshot
 
@@ -56,22 +57,27 @@ class Input:
         adjusting_hud = False
         now = pygame.time.get_ticks()
         keys = pygame.key.get_pressed()
+        mouse = pygame.mouse.get_pressed()
 
-        shooting_input = joysticks and controller.get_button(0)or keys[pygame.K_SPACE]
-        if shooting_input:
-            if now - game.last_shot_time >= game.ship.shot_cooldown:
-                new_projectiles = game.ship.shoot(gun_type=game.ship.gun)
-                game.projectiles.add(*new_projectiles)
-                game.last_shot_time = now
+        shooting_input = (joysticks and (controller.get_button(5) if
+            game.state.phases[-1] else controller.get_button(0)) or keys[
+            pygame.K_SPACE] or mouse[0])
+        if shooting_input and now - game.last_shot_time >= game.ship.shot_cooldown:
+            target = get_nearest_enemy((game.ship_x, game.ship_y),
+                list(game.aliens) + list(game.asteroids) + list(game.bosses))
+            new_projectiles = game.ship.shoot(gun_type=game.ship.gun,
+                                              target=target)
+            game.projectiles.add(*new_projectiles)
+            game.last_shot_time = now
 
-                if game.ship.ammo <= 0 and game.ship.gun != "beam":
-                    game.sounds[4].play()
+            if game.ship.ammo <= 0 and game.ship.gun != "beam":
+                game.sounds[4].play()
 
-                if game.state.play_sound:
-                    game.sounds[0].play()
+            if game.state.play_sound:
+                game.sounds[0].play()
 
-                if game.ship.gun == "shotgun" and game.ship.ammo > 0:
-                    game.screen_shake = 20
+            if game.ship.gun == "shotgun" and game.ship.ammo > 0:
+                game.screen_shake = 20
 
         if (joysticks and controller.get_button(4) and controller.get_button(5)
                 or keys[pygame.K_f]):
@@ -216,3 +222,38 @@ class Input:
                 game.state.current_phase_options = []
                 game.state.phase_ending = False
                 game.state.pause = False
+
+def update_axis(game):
+    if joysticks:
+        rx = controller.get_axis(2)
+        ry = controller.get_axis(3)
+
+        rx = 0 if abs(rx) < game.input.deadzone else rx
+        ry = 0 if abs(ry) < game.input.deadzone else ry
+
+        game.input.right_joystick[0] = rx
+        game.input.right_joystick[1] = ry
+
+        lx = controller.get_axis(0)
+        ly = controller.get_axis(1)
+        lx = 0 if abs(lx) < game.input.deadzone else lx
+        ly = 0 if abs(ly) < game.input.deadzone else ly
+        game.input.left_joystick[0] = lx
+        game.input.left_joystick[1] = ly
+
+def update_cursor(game, delta, screen_size):
+    update_axis(game)
+    rx, ry = game.input.right_joystick
+    deadzone = game.input.deadzone
+
+    if abs(rx) > deadzone or abs(ry) > deadzone:
+        game.input.cursor_pos[0] += rx * game.input.cursor_speed * delta
+        game.input.cursor_pos[1] += ry * game.input.cursor_speed * delta
+
+        game.input.cursor_pos[0] = max(0, min(screen_size[0],
+                                              game.input.cursor_pos[0]))
+        game.input.cursor_pos[1] = max(0, min(screen_size[1],
+                                              game.input.cursor_pos[1]))
+
+        game.input.mode = "controller"
+        game.input.last_move_time = pygame.time.get_ticks()

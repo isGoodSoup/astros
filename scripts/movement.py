@@ -1,3 +1,5 @@
+import math
+
 import pygame
 from pygame.constants import *
 
@@ -106,6 +108,7 @@ def update_movement(game, delta, screen_size):
                                             game.input.cursor_pos[1]))
 
         current_time = pygame.time.get_ticks()
+
         dx, dy = game.input.right_joystick
         threshold = 0.5
 
@@ -143,3 +146,12 @@ def update_movement(game, delta, screen_size):
         game.input.selected_skill = closest_skill
         for skill in game.state.current_phase_options:
             skill.hovered = (skill == game.input.selected_skill)
+
+def update_ship_angle(game):
+    cx, cy = game.ship.rect.center
+    mx, my = game.input.cursor_pos
+    dx = mx - cx
+    dy = my - cy
+    angle_rad = math.atan2(-dy, dx)
+    target_angle = math.degrees(angle_rad)
+    game.ship.rotate_to(target_angle, smooth=False)

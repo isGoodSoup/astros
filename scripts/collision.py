@@ -29,10 +29,16 @@ def check_collision(game):
     else:
         alien_proj = None
 
+    if game.state.current_phase == game.state.phases[-1]:
+        boss_hit = pygame.sprite.spritecollideany(game.ship, game.bosses, # type: ignore
+            collided=lambda s,m: s.hitbox.colliderect(m.rect))
+    else:
+        boss_hit = None
+
     now = pygame.time.get_ticks()
     can_take_damage = now - game.ship.last_hit_time >= game.ship.hit_cooldown
 
-    if asteroid_hit or alien_hit or alien_proj:
+    if asteroid_hit or alien_hit or alien_proj or boss_hit:
         if random.random() <= game.ship.evasion:
             if asteroid_hit:
                 x, y = asteroid_hit.rect.center
@@ -81,13 +87,14 @@ def check_collision(game):
                 game.sounds[1].play()
 
             damage_per_frame = 0
+            boss_damage = 9999 if boss_hit else 0
             if not invincible:
                 if game.ship.shield > 0:
                     damage_per_frame = (max(1,game.ship.max_shield // 33) * game.ship.level)
-                    game.ship.shield -= damage_per_frame
+                    game.ship.shield -= damage_per_frame + boss_damage
                 else:
                     damage_per_frame = max(1,game.ship.max_hitpoints // 28) * game.ship.level
-                    game.ship.hitpoints -= damage_per_frame
+                    game.ship.hitpoints -= damage_per_frame + boss_damage
 
             if hasattr(game.ship, "fortified_percent"):
                 if game.ship.fortified_percent > 0:

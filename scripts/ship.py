@@ -12,9 +12,11 @@ class Ship(pygame.sprite.Sprite):
     def __init__(self, sprite_sheet, x, y, frame, width, height, scale=4,
                  columns=1):
         super().__init__()
-        self.image = sprite_sheet.get_image(frame, width, height, scale, columns)
+        self.original_image = sprite_sheet.get_image(frame, width, height,scale, columns)
+        self.image = self.original_image
         self.rect = self.image.get_rect(topleft=(x, y))
         self.hitbox = self.rect.inflate(self.rect.width * -0.6, self.rect.height * -0.6)
+        self.current_angle = 90
         self.velocity = 12
         self.direction = "idle"
         self.shooting = False
@@ -111,27 +113,59 @@ class Ship(pygame.sprite.Sprite):
         self.update_damage()
         self.update_fire_rate()
 
-    def shoot(self, gun_type=None):
+    def rotate_to(self, target_angle, smooth=True):
+        if smooth:
+            angle_diff = (target_angle - self.current_angle + 180) % 360 - 180
+            self.current_angle += angle_diff * 0.3
+        else:
+            self.current_angle = target_angle
+        self.image = pygame.transform.rotate(self.original_image,
+                                             -self.current_angle)
+        self.rect = self.image.get_rect(center=self.rect.center)
+        self.hitbox = self.rect.inflate(self.rect.width * -0.6,
+                                        self.rect.height * -0.6)
+
+    def shoot(self, gun_type=None, target=None):
         if gun_type is None:
             gun_type = self.gun
 
-        projectiles = []
         pos = self.hitbox.center
+
+        if target:
+            direction_vec = aim_at_target(pos, target)
+            dir_x, dir_y = direction_vec.x, direction_vec.y
+        else:
+            rad = math.radians(self.current_angle)
+            dir_x = math.cos(rad)
+            dir_y = -math.sin(rad)
+
+        projectiles = []
+
         if gun_type == "beam":
-            projectiles.append(Projectile(pos, (0, 255, 255), direction=(0, -1), speed=16,
+            projectiles.append(
+                Projectile(pos, (0, 255, 255), direction=(dir_x, dir_y),
+                           speed=16,
                            damage=1))
 
         elif gun_type == "shotgun":
             if self.ammo <= 0:
                 return projectiles
-
             num_pellets = 6
             spread_angle = 30
+
             for i in range(num_pellets):
-                angle = (-spread_angle / 2) + (i * (spread_angle / (num_pellets - 1)))
-                rad = math.radians(angle)
-                direction = (math.sin(rad), -math.cos(rad))
-                projectiles.append(Projectile(pos, (0, 255, 255), direction=direction,
+                angle_offset = (-spread_angle / 2) + i * (
+                        spread_angle / (num_pellets - 1))
+                if target:
+                    # Rotate around auto-aim direction
+                    angle_rad = math.atan2(-dir_y, dir_x) + math.radians(
+                        angle_offset)
+                    direction = (math.cos(angle_rad), -math.sin(angle_rad))
+                else:
+                    rad = math.radians(self.current_angle + angle_offset)
+                    direction = (math.cos(rad), -math.sin(rad))
+                projectiles.append(
+                    Projectile(pos, (0, 255, 255), direction=direction,
                                speed=12, damage=1))
             if not unlimited_ammo:
                 self.ammo -= num_pellets
@@ -143,13 +177,19 @@ class Ship(pygame.sprite.Sprite):
             num_bullets = 3
             spread_angle = 5
             for i in range(num_bullets):
-                angle = (-spread_angle / 2) + i * (
-                            spread_angle / (num_bullets - 1))
-                rad = math.radians(angle)
-                direction = (math.sin(rad), -math.cos(rad))
+                angle_offset = (-spread_angle / 2) + i * (
+                        spread_angle / (num_bullets - 1))
+                if target:
+                    angle_rad = math.atan2(-dir_y, dir_x) + math.radians(
+                        angle_offset)
+                    direction = (math.cos(angle_rad), -math.sin(angle_rad))
+                else:
+                    rad = math.radians(self.current_angle + angle_offset)
+                    direction = (math.cos(rad), -math.sin(rad))
                 projectiles.append(
                     Projectile(pos, (0, 255, 255), direction=direction,
                                speed=12, damage=1))
+
             if not unlimited_ammo:
                 self.ammo -= num_bullets
 
@@ -206,3 +246,27 @@ class Ship(pygame.sprite.Sprite):
             "crit_multiplier": self.crit_multiplier,
             "velocity": self.velocity,
         }
+
+def get_nearest_enemy(ship_pos, enemies):
+    closest = None
+    min_dist = float('inf')
+    for enemy in enemies:
+        ex, ey = enemy.rect.center
+        dx = ex - ship_pos[0]
+        dy = ey - ship_pos[1]
+        dist_sq = dx*dx + dy*dy
+        if dist_sq < min_dist:
+            min_dist = dist_sq
+            closest = enemy
+    return closest
+
+def aim_at_target(ship_pos, target):
+    if not target:
+        return pygame.Vector2(1, 0)
+    ex, ey = target.rect.center
+    dx = ex - ship_pos[0]
+    dy = ey - ship_pos[1]
+    direction = pygame.Vector2(dx, dy)
+    if direction.length() != 0:
+        direction = direction.normalize()
+    return direction
