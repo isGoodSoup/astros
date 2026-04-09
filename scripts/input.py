@@ -15,6 +15,7 @@ class Input:
 
         self.cursor_pos = [screen_size[0] // 2, screen_size[1] // 2]
         self.cursor_speed = 1000
+        self.selected_skill_index = 0
         self.selected_skill = None
         self.nav_cooldown = 150
         self.last_nav_time = 0
@@ -140,6 +141,23 @@ class Input:
                             game.running = False
 
             elif event.type == pygame.JOYBUTTONDOWN:
+                if (event.button == 0 and
+                        game.hud.skill_tab.active and
+                        game.state.current_phase_options):
+
+                    selected = (game.state.current_phase_options
+                    [self.selected_skill_index])
+
+                    game.skills.unlock_or_upgrade(selected, game.ship)
+
+                    if selected.unlocked and selected not in game.ship.skills:
+                        game.ship.add_skill(selected)
+
+                    game.hud.skill_tab.close()
+                    game.state.current_phase_options = []
+                    game.state.phase_ending = False
+                    game.state.pause = False
+
                 if event.button == 1:
                     if game.hud.stats_tab.active:
                         game.hud.stats_tab.close()
@@ -168,17 +186,30 @@ class Input:
 
 
             elif event.type == pygame.JOYHATMOTION:
-                if event.hat == 0 and event.value == (0, 1):
-                    increase_volume(game)
+                if game.hud.skill_tab.active and game.state.current_phase_options:
+                    now = pygame.time.get_ticks()
 
-                elif event.hat == 0 and event.value == (0, -1):
-                    decrease_volume(game)
+                    if now - self.last_nav_time > self.nav_cooldown:
+                        dx, dy = event.value
+                        num_skills = len(game.state.current_phase_options)
 
-                if event.hat == 0 and event.value == (-1, 0):
-                    game.font.update()
+                        if dx == -1:
+                            self.selected_skill_index = ((self.selected_skill_index - 1)
+                                                         % num_skills)
 
-                if event.hat == 0 and event.value == (1, 0):
-                    take_screenshot(game, game.screen)
+                        elif dx == 1:
+                            self.selected_skill_index = ((self.selected_skill_index + 1)
+                                                         % num_skills)
+
+                        self.selected_skill = (game.state.current_phase_options
+                            [self.selected_skill_index])
+                        self.last_nav_time = now
+                else:
+                    if event.hat == 0 and event.value == (-1, 0):
+                        game.font.update()
+
+                    if event.hat == 0 and event.value == (1, 0):
+                        take_screenshot(game, game.screen)
 
         if self.charge_active:
             game.screen_shake = 20
