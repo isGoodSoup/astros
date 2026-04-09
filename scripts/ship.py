@@ -3,7 +3,6 @@ import random
 
 import pygame
 
-from scripts.explode import Explosion
 from scripts.proj import Projectile
 from scripts.toggles import unlimited_ammo
 
@@ -97,9 +96,12 @@ class Ship(pygame.sprite.Sprite):
                 self.shield_regen = False
 
     def update_damage(self):
-        base = self.base_damage
+        self.damage = self.base_damage
+
         if self.gun == "shotgun":
-            base *= 10
+            self.damage *= 10
+        elif self.gun == "missile":
+            self.damage *= 50
 
     def update_fire_rate(self):
         self.shot_cooldown = self.guns[self.gun]
@@ -111,7 +113,6 @@ class Ship(pygame.sprite.Sprite):
     def switch_gun(self):
         idx = self.gun_order.index(self.gun)
         self.gun = self.gun_order[(idx + 1) % len(self.gun_order)]
-        self.update_damage()
         self.update_fire_rate()
 
     def rotate_to(self, target_angle, smooth=True):
@@ -127,6 +128,7 @@ class Ship(pygame.sprite.Sprite):
                                         self.rect.height * -0.6)
 
     def shoot(self, gun_type=None, target=None):
+        self.update_damage()
         if gun_type is None:
             gun_type = self.gun
 
@@ -158,7 +160,6 @@ class Ship(pygame.sprite.Sprite):
                 angle_offset = (-spread_angle / 2) + i * (
                         spread_angle / (num_pellets - 1))
                 if target:
-                    # Rotate around auto-aim direction
                     angle_rad = math.atan2(-dir_y, dir_x) + math.radians(
                         angle_offset)
                     direction = (math.cos(angle_rad), -math.sin(angle_rad))
@@ -167,9 +168,9 @@ class Ship(pygame.sprite.Sprite):
                     direction = (math.cos(rad), -math.sin(rad))
                 projectiles.append(
                     Projectile(pos, (0, 255, 255), direction=direction,
-                               speed=12, damage=1))
+                               speed=12, damage=self.damage))
             if not unlimited_ammo:
-                self.guns_ammo['shotgun'] -= num_pellets
+                self.guns_ammo['shotgun'] -= max(0, num_pellets)
 
         if gun_type == "auto":
             if self.guns_ammo['auto'] <= 0:
@@ -189,39 +190,20 @@ class Ship(pygame.sprite.Sprite):
                     direction = (math.cos(rad), -math.sin(rad))
                 projectiles.append(
                     Projectile(pos, (0, 255, 255), direction=direction,
-                               speed=12, damage=1))
+                               speed=12, damage=self.damage))
 
             if not unlimited_ammo:
-                self.guns_ammo['auto'] -= num_bullets
+                self.guns_ammo['auto'] -= max(0, num_bullets)
 
         if gun_type == "missile":
             if self.guns_ammo['missile'] <= 0:
                 return projectiles
 
-            projectiles.append(Projectile(pos, (255, 0, 0), direction=(dir_x, dir_y),
-                           speed=8, damage=self.base_damage * 50))
-
-            if not unlimited_ammo:
-                self.guns_ammo['missile'] -= 1
+            projectiles.append(Projectile(pos,(255, 50, 0),
+                    direction=(dir_x, dir_y), speed=4,damage=0))
+            projectiles[-1].nuke = True
 
         return projectiles
-
-    def super_charge(self, joysticks, score, explosions, entities,
-                             frame_explode, frame_big_explode):
-        if self.charges <= 0:
-            return
-
-        if joysticks:
-            joysticks[0].rumble(0.5, 1.0, 1000)
-        explosions.add(Explosion(self.hitbox.centerx, self.hitbox.centery, frame_big_explode))
-
-        for entity in entities:
-            entity.kill()
-            explosions.add(Explosion(entity.rect.centerx, entity.rect.centery, frame_explode))
-            score += self.level * 10
-
-        if not unlimited_ammo:
-            self.charges -= 1
 
     def taken_damage(self):
         return [random.randint(0,10) - 4, random.randint(0,10) - 4]

@@ -35,6 +35,16 @@ class Game:
         self.input = Input(screen_size)
         self.clock = Clock()
         self.font = FontManager(None, 24)
+        self.ship_sprite = ships
+        self.selected_sheet = self.ship_sprite[ship_index]
+        self.ship_frames = 9
+        framew = self.selected_sheet.sheet.get_width() // self.ship_frames
+        frameh = self.selected_sheet.sheet.get_height()
+        self.frame = 0
+        self.ship = Ship(self.selected_sheet, 0, 0, self.frame, framew, frameh,
+                         columns=self.ship_frames)
+        self.spawnpoint(self.ship, screen_size, self.selected_sheet,
+                        self.ship_frames)
         self.hud = HUD(self, screen_size, hud_ratio, self.font.get_font())
 
         self.screen = screen
@@ -42,7 +52,6 @@ class Game:
         self.running = True
         self.hud_padding = 80
         self.fps = 60
-        self.frame = 0
         self.scale = 4
         self.sounds = load_sounds()
         self.theme = load_ost()
@@ -62,22 +71,9 @@ class Game:
         self.particles = []
         self.hit_this_frame = set()
 
-        self.ship_sprite = ships
-
-        self.ship_frames = 9
         self.explosion_frames = 7
-
         self.explosion_sheet = SpriteSheet("assets/explosion.png")
         self.megaexplosion_sheet = SpriteSheet("assets/explosion_charge.png")
-        self.selected_sheet = self.ship_sprite[ship_index]
-
-        framew = self.selected_sheet.sheet.get_width() // self.ship_frames
-        frameh = self.selected_sheet.sheet.get_height()
-        self.ship = Ship(self.selected_sheet, 0, 0, self.frame, framew, frameh,
-                         columns=self.ship_frames)
-        self.spawnpoint(self.ship, screen_size, self.selected_sheet,
-                        self.ship_frames)
-
         self.ship_alive = True
         self.ship_x = screen_size[0] // 2 - framew // 2 - 25
         self.ship_y = screen_size[1] // 2 + 200
@@ -150,6 +146,9 @@ class Game:
         self.upgrade_duration = 16_000
 
         self.skills = SkillManager()
+
+        self.shockwaves = []
+        self.nuke_flash = 0
 
         self.screen_shake = 0
         self.last_blink = 0

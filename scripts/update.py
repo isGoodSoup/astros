@@ -7,6 +7,7 @@ from scripts.asteroid import Asteroid
 from scripts.boss import Boss
 from scripts.celestial import random_celestial, is_valid_spawn
 from scripts.collision import check_collision
+from scripts.explode import Explosion
 from scripts.fleet import spawn_fleet
 from scripts.particle import Particle
 from scripts.shared import joysticks, controller
@@ -100,6 +101,20 @@ def spawn_boss(game):
         game.bosses.add(boss)
         game.state.phase_spawned = True
         game.boss_alive = True
+
+def update_shockwaves(game):
+    for wave in list(game.shockwaves):
+        wave.update()
+
+        for entity_group in [game.entities]:
+            for entity in list(entity_group):
+                if wave.affects(entity.rect.center):
+                    game.explosions.add(Explosion(entity.rect.centerx, entity.rect.centery,
+                                  game.frame_big_explode))
+                    entity.kill()
+
+        if not wave.alive:
+            game.shockwaves.remove(wave)
 
 def update_game(game, delta, screen_size, hud_padding):
     game.ship.hit = False
@@ -242,6 +257,7 @@ def update_game(game, delta, screen_size, hud_padding):
         game.ship.direction = "idle"
 
     check_collision(game)
+    update_shockwaves(game)
 
     game.state.survival_bonus += 1
     if game.state.survival_bonus >= 60:
