@@ -1,6 +1,7 @@
 from pygame.constants import *
 from pygame.display import toggle_fullscreen
 
+from scripts.fonts import FontManager
 from scripts.shared import fade
 
 from scripts.celestial import *
@@ -22,13 +23,11 @@ class Menu:
         self.screen = pygame.display.set_mode(self.screen_size, DOUBLEBUF|OPENGL, vsync=1)
         self.crt = CRT(self.screen, style=1, virtual_resolution=(1920, 1080),cpu_only=False)
         self.crt.prog['curvature'].value = 0.7
-        self.font = "assets/ui/PressStart2P.ttf"
+        self.font = FontManager(None, 24)
         self.logo_img = pygame.image.load("assets/ui/logo.png")
         self.logo_img = pygame.transform.scale(self.logo_img,
             (self.logo_img.get_width() * 4, self.logo_img.get_height() * 4))
         self.cursor_sprite = pygame.image.load("assets/ui/cursor.png")
-        self.game_font = pygame.font.Font(self.font, 96)
-        self.text_font = pygame.font.Font(self.font, 24)
         icon = pygame.image.load("assets/ui/icon.png")
         pygame.display.set_caption("Astros")
         pygame.display.set_icon(icon)
@@ -66,8 +65,8 @@ class Menu:
                 self.last_blink = now
 
             colors = [(255, 255, 255), (0, 0, 0, 0)]
-            start = self.text_font.render("Press any key to start", True,
-                                          colors[self.count % 2])
+            start = (self.font.render("Press any key to start", True,
+                                          colors[self.count % 2]))
             title_y = 200
             self.render_surface.fill((0, 0, 0))
             surface_width, surface_height = self.render_surface.get_size()
@@ -90,10 +89,8 @@ class Menu:
                 return
 
     def init_game(self):
-        game = Game(self.screen, self.screen_size,
-                    self.hud_ratio, self.text_font)
-        game.run(self.clock, self.screen, self.screen_size, self.hud_ratio,
-                 self.crt, self.text_font)
+        game = Game(self.screen, self.screen_size, self.hud_ratio)
+        game.run(self.clock, self.screen, self.screen_size, self.hud_ratio, self.crt)
 
 if __name__ == '__main__':
     menu = Menu()

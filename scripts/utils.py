@@ -16,7 +16,7 @@ def add_multiplier(game, x, y, text, color=(255, 255, 0), font_size=24):
                 fn.rect.centery - y - offset) < 5:
             offset -= 30
     game.floating_numbers.add(
-        FloatingNumber(x, y + offset, text, color=color, # type: ignore
+        FloatingNumber(x, y + offset, text, game.font, color=color, # type: ignore
                        font_size=font_size))
 
 def level_enemies(game):

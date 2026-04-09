@@ -2,11 +2,12 @@ import random
 
 import pygame
 
+
 class FloatingNumber(pygame.sprite.Sprite):
-    def __init__(self, x, y, text, color=(255,255,0), lifetime=800, speed=-60, font_size=24):
+    def __init__(self, x, y, text, font, color=(255,255,0), lifetime=800,
+                 speed=-60, font_size=24):
         super().__init__()
-        self.font = pygame.font.Font("assets/ui/PressStart2P.ttf", font_size)
-        self.base_image = self.font.render(str(text), True, color)
+        self.base_image = font.render(str(text), True, color)
         self.image = self.base_image.copy()
         self.rect = self.image.get_rect(center=(x, y))
         self.start_y = y

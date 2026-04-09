@@ -37,15 +37,15 @@ def check_collision(game):
             if asteroid_hit:
                 x, y = asteroid_hit.rect.center
                 game.floating_numbers.add(FloatingNumber(
-                    x, y, "MISS", color=(255, 255, 100)))
+                    x, y, "MISS", game.font, color=(255, 255, 100)))
             elif alien_hit:
                 x, y = alien_hit.rect.center
                 game.floating_numbers.add(FloatingNumber(
-                    x, y, "MISS", color=(255, 255, 100)))
+                    x, y, "MISS", game.font, color=(255, 255, 100)))
             elif alien_proj:
                 x, y = alien_proj.rect.center
                 game.floating_numbers.add(FloatingNumber(
-                    x, y, "MISS", color=(255, 255, 100)))
+                    x, y, "MISS", game.font, color=(255, 255, 100)))
             return
 
         if alien_proj:
@@ -68,7 +68,7 @@ def check_collision(game):
             if previous_combo > 1.0:
                 x, y = game.ship.rect.centerx, game.ship.rect.top
                 game.floating_numbers.add(FloatingNumber(x, y, "NO MULT!",
-                        color=(255, 0, 0)))  # type: ignore
+                        game.font, color=(255, 0, 0)))  # type: ignore
 
             game.explosions.add(Explosion(*game.ship.rect.center,
                                   game.frame_explode))  # type: ignore
@@ -140,7 +140,7 @@ def check_collision(game):
                                f"x{total_multiplier:.2f}",
                                color=color, font_size=size)
 
-            game.floating_numbers.add(FloatingNumber(x, y, int(damage_per_frame), color=color,
+            game.floating_numbers.add(FloatingNumber(x, y, int(damage_per_frame), game.font, color=color,
                                font_size=size))
             impact = ImpactFrame(asteroid.rect.centerx, asteroid.rect.centery,
                                  game.frame_explode[0])
@@ -201,7 +201,7 @@ def check_collision(game):
                                f"x{total_multiplier:.2f}",
                                color=color, font_size=size)
 
-            game.floating_numbers.add(FloatingNumber(x, y, int(damage_per_frame), color=color,
+            game.floating_numbers.add(FloatingNumber(x, y, int(damage_per_frame), game.font, color=color,
                                font_size=size))
             impact = ImpactFrame(alien.rect.centerx, alien.rect.centery,
                                  game.frame_explode[0])
@@ -261,7 +261,7 @@ def check_collision(game):
                                f"x{total_multiplier:.2f}",
                                color=color, font_size=size)
 
-            game.floating_numbers.add(FloatingNumber(x, y, int(damage_per_frame), color=color,
+            game.floating_numbers.add(FloatingNumber(x, y, int(damage_per_frame), game.font, color=color,
                                font_size=size))
             impact = ImpactFrame(boss.rect.centerx, boss.rect.centery,
                                  game.frame_explode[0])
