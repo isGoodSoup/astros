@@ -19,8 +19,6 @@ from scripts.state import GameState
 from scripts.toggles import tutorial_on
 from scripts.tutorial import Tutorial
 from scripts.update import update_game
-from scripts.utils import hide_cursor
-
 
 # Copyright (c) 2026 Diego
 # Licensed under the MIT License. See LICENSE file for details.
@@ -211,8 +209,6 @@ class Game:
                     update_movement(self, delta, screen_size)
                     update_cursor(self, delta, screen_size)
                     update_ship_angle(self)
-
-            hide_cursor(self, self.input.cursor_pos)
 
             if not self.state.pause and not self.state.game_over:
                 update_game(self, delta, screen_size, self.hud_padding)

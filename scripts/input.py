@@ -30,27 +30,31 @@ class Input:
         self.last_cursor_pos = pygame.mouse.get_pos()
         self.last_move_time = pygame.time.get_ticks()
         self.cursor_hide_delay = 3000
-        self.has_moved = False
         self.moving_hud = False
 
     def update(self, events):
+        now = pygame.time.get_ticks()
         self.last_input_time = pygame.time.get_ticks()
+        moved = False
+
         for event in events:
             if event.type in (pygame.MOUSEMOTION, pygame.MOUSEBUTTONDOWN,
                               pygame.MOUSEBUTTONUP):
                 self.mode = "mouse"
-                self.has_moved = True
                 self.cursor_pos = list(pygame.mouse.get_pos())
                 self.last_move_time = pygame.time.get_ticks()
+                moved = True
 
             elif event.type in (pygame.JOYAXISMOTION, pygame.JOYBUTTONDOWN,
                                 pygame.JOYBUTTONUP, pygame.JOYHATMOTION):
                 self.mode = "controller"
-                self.has_moved = True
                 self.last_move_time = pygame.time.get_ticks()
 
-        self.cursor_visible = (self.has_moved and pygame.time.get_ticks() -
-                               self.last_move_time <= self.cursor_hide_delay)
+        if moved:
+            self.last_move_time = now
+            self.cursor_visible = True
+        else:
+            self.cursor_visible = (now - self.last_move_time <= self.cursor_hide_delay)
 
     def act(self, game, events):
         self.moving_hud = False
@@ -59,12 +63,18 @@ class Input:
         keys = pygame.key.get_pressed()
         mouse = pygame.mouse.get_pressed()
 
+        is_boss_phase = game.state.current_phase == game.state.phases[-1]
+
         shooting_input = (joysticks and (controller.get_button(5) if
-            game.state.phases[-1] else controller.get_button(0)) or keys[
-            pygame.K_SPACE] or mouse[0])
+            game.state.phases[-1] else controller.get_button(0)) or
+                          keys[pygame.K_SPACE] or mouse[0])
         if shooting_input and now - game.last_shot_time >= game.ship.shot_cooldown:
-            target = get_nearest_enemy((game.ship_x, game.ship_y),
-                list(game.aliens) + list(game.asteroids) + list(game.bosses))
+            if is_boss_phase:
+                enemies = list(game.bosses)
+                target = get_nearest_enemy((game.ship_x, game.ship_y), enemies
+                ) if enemies else None
+            else:
+                target = None
             new_projectiles = game.ship.shoot(gun_type=game.ship.gun,
                                               target=target)
             game.projectiles.add(*new_projectiles)
