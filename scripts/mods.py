@@ -4,7 +4,7 @@ import pygame
 
 from scripts.fonts import FontManager
 from scripts.game import Game
-from scripts.shared import fade
+from scripts.shared import fade, joysticks
 from scripts.sheet import SpriteSheet
 
 class Mods:
@@ -95,6 +95,20 @@ class Mods:
                 self.ship_flying = True
                 self.selected_ship_index = self.current_ship_index
 
+        if joysticks:
+            if event.type == pygame.JOYBUTTONDOWN:
+                if event.button == 0:
+                    self.ship_flying = True
+                    self.selected_ship_index = self.current_ship_index
+
+                if event.button == 1:
+                    self.current_ship_index = ((self.current_ship_index + 1)
+                                               % len(self.ship_previews))
+
+                if event.button == 2:
+                    self.current_ship_index = ((self.current_ship_index - 1)
+                                               % len(self.ship_previews))
+
     def draw(self, screen):
         center_x = self.screen_size[0] // 2
         center_y = self.screen_size[1] // 2
@@ -132,7 +146,7 @@ class Mods:
 
         header_float = 4 * math.sin(time * 0.002)
 
-        header = "SHIP MODS"
+        header = "STYLES"
         header_surf = self.font.render(header, True, (255, 206, 0))
         header_rect = header_surf.get_rect(
             center=(center_x, 100 + int(header_float)))
