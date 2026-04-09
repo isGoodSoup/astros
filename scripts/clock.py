@@ -44,7 +44,6 @@ class Clock:
                         game.last_asteroid_spawn = 0
                         if game.state.current_phase in game.state.phases:
                             level_enemies(game)
-                        game.state.stars_speed += 1
             if self.seconds >= 60:
                 self.seconds = 0
                 self.minutes += 1
