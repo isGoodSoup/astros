@@ -71,7 +71,6 @@ def reboot(game, screen_size):
     for ammo in game.ship.guns_ammo:
         game.ship.guns_ammo[ammo] = game.ship.base_guns_ammo[ammo]
 
-    game.ship.charges = game.ship.base_charges
     game.ship.damage = game.ship.base_damage
     game.ship.critical = False
 

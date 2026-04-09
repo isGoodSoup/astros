@@ -2,6 +2,7 @@ import random
 
 import pygame
 
+from scripts.events import trigger_nuke
 from scripts.explode import Explosion
 from scripts.floaty import FloatingNumber
 from scripts.impact import ImpactFrame
@@ -293,6 +294,11 @@ def check_collision(game):
                 game.state.score_multiplier = game.ship.combo_multiplier
                 game.state.score += game.ship.level * 10 * game.state.score_multiplier
                 game.ship.gain_xp(formulize(game, game.ship.level), game.sounds)
+
+    for projectile in list(game.projectiles):
+        if getattr(projectile, "nuke", False):
+            trigger_nuke(projectile.rect.center, game)
+            projectile.kill()
 
     upgrade_hit = pygame.sprite.spritecollide(game.ship, game.upgrades, False, # type: ignore
                                           collided=lambda s,u: s.hitbox.colliderect(u.rect))

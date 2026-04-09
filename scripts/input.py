@@ -66,9 +66,9 @@ class Input:
 
         is_boss_phase = game.state.current_phase == game.state.phases[-1]
 
-        shooting_input = (joysticks and (controller.get_button(5) if
+        shooting_input = ((joysticks and (controller.get_button(5) if
             game.state.phases[-1] else controller.get_button(0)) or
-                          keys[pygame.K_SPACE] or mouse[0])
+                          keys[pygame.K_SPACE] or mouse[0]) and not game.state.pause)
         if shooting_input and now - game.last_shot_time >= game.ship.shot_cooldown:
             if is_boss_phase:
                 enemies = list(game.bosses)
@@ -89,12 +89,6 @@ class Input:
 
             if game.ship.gun == "shotgun" and game.ship.guns_ammo['shotgun'] > 0:
                 game.screen_shake = 20
-
-        if (joysticks and controller.get_button(4) and controller.get_button(5)
-                or keys[pygame.K_f]):
-            if not self.charge_active and game.ship.charges > 0:
-                self.charge_active = True
-                self.charge_start_time = now
 
         for event in events:
             if event.type == pygame.KEYDOWN:
@@ -210,22 +204,6 @@ class Input:
 
                     if event.hat == 0 and event.value == (1, 0):
                         take_screenshot(game, game.screen)
-
-        if self.charge_active:
-            game.screen_shake = 20
-            for event in events:
-                if event.type == pygame.KEYUP:
-                    if event.key == pygame.K_f:
-                        game.ship.super_charge(joysticks, game.state.score, game.explosions, game.entities,
-                                               game.frame_explode,game.frame_big_explode)
-                        self.charge_active = False
-
-                elif event.type == pygame.JOYBUTTONUP:
-                    if controller.get_button(4) and controller.get_button(5):
-                        game.ship.super_charge(joysticks, game.state.score,
-                                               game.explosions, game.entities,game.frame_explode,
-                                               game.frame_big_explode)
-                        self.charge_active = False
 
         axis_y = 0.0
         if joysticks and controller.get_button(9):

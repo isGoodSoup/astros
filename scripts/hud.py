@@ -67,7 +67,15 @@ class HUD:
         self.ammo = Interface("assets/ui/ammo.png", 0, 11, 40,
                               hud_ratio, ['right', 'bottom'], 35, [-160, 0])
         self.guns = Interface("assets/ui/guns.png", 0, 32, 32, hud_ratio,
-                              ['right', 'bottom'], 3, [-210, -20])
+                              ['right', 'bottom'], 4, [-210, -20])
+
+        self.guns_ammo = {
+            "beam": game.ship.guns_ammo["beam"],
+            "shotgun": game.ship.guns_ammo["shotgun"],
+            "auto": game.ship.guns_ammo["auto"],
+            "missile": game.ship.guns_ammo["missile"],
+        }
+
         self.credits = 0
 
         self.skill_tab = Tab("assets/ui/skill_tab.png",
@@ -130,6 +138,18 @@ class HUD:
         current_gun_frame = game.ship.gun_order.index(game.ship.gun)
         self.guns.update(game.ship, hud_ratio, ['right', 'bottom'],
                          current_gun_frame, screen, hud_padding)
+
+        current_ammo = game.ship.guns_ammo[game.ship.gun]
+        total_ammo = game.ship.base_guns_ammo[game.ship.gun]
+
+        guns_center_x = self.guns.hud_x + self.guns.image.get_width() // 2
+        guns_bottom_y = self.guns.hud_y + self.guns.image.get_height()
+
+        ammo_text = f"{current_ammo}/{total_ammo}"
+        ammo_surface = font.render(ammo_text, True, (255, 255, 255))
+        ammo_x = guns_center_x - ammo_surface.get_width() // 2
+        ammo_y = guns_bottom_y + 5
+        screen.blit(ammo_surface, [ammo_x, ammo_y])
 
         self.skill_tab.update()
         self.stats_tab.update()
