@@ -23,6 +23,7 @@ from scripts.state import GameState
 from scripts.tutorial import Tutorial
 from scripts.update import update_game
 
+
 # Copyright (c) 2026 Diego
 # Licensed under the MIT License. See LICENSE file for details.
 # All assets in this game are © 2026 Diego. See ASSETS_LICENSE.txt.
@@ -98,7 +99,8 @@ class Game:
         self.frames = []
 
         for i in range(self.ship_frames):
-            img = self.selected_sheet.get_image(i, framew, frameh, scale=self.scale,
+            img = self.selected_sheet.get_image(i, framew, frameh,
+                                                scale=self.scale,
                                                 columns=self.ship_frames)
             self.frames.append(img)
 
@@ -110,14 +112,17 @@ class Game:
 
         framew = self.explosion_sheet.sheet.get_width() // self.explosion_frames
         frameh = self.explosion_sheet.sheet.get_height()
-        self.frame_explode = [self.explosion_sheet.get_image(i, framew, frameh, scale=self.scale,
+        self.frame_explode = [
+            self.explosion_sheet.get_image(i, framew, frameh, scale=self.scale,
                                            columns=self.explosion_frames)
             for i in range(self.explosion_frames)]
 
         framew = self.megaexplosion_sheet.sheet.get_width() // 4
         frameh = self.megaexplosion_sheet.sheet.get_height()
-        self.frame_big_explode = [self.megaexplosion_sheet.get_image(i, framew, frameh,
-                                               scale=self.scale * 2, columns=4) for i in range(4)]
+        self.frame_big_explode = [
+            self.megaexplosion_sheet.get_image(i, framew, frameh,
+                                               scale=self.scale * 2, columns=4)
+            for i in range(4)]
 
         self.stars = [[random.randint(0, screen_size[0]),
                        random.randint(0, screen_size[1]),
@@ -127,7 +132,8 @@ class Game:
         self.boss_invisible_duration = BOSS_INVISIBLE_DURATION
 
         self.last_celestial_spawn = 0
-        self.celestial_spawn_interval = random.randint(*CELESTIAL_SPAWN_INTERVAL)
+        self.celestial_spawn_interval = random.randint(
+            *CELESTIAL_SPAWN_INTERVAL)
         self.last_alien_spawn = 0
         self.alien_spawn_interval = random.randint(*ALIEN_SPAWN_INTERVAL_RANGE)
 
@@ -184,7 +190,8 @@ class Game:
                                            self.ship.rect.centerx) <= CROSSHAIRS]
 
                     for alien in shooters:
-                        new_projectiles = alien.shoot(self.ship,alien.shot_cooldown)
+                        new_projectiles = alien.shoot(self.ship,
+                                                      alien.shot_cooldown)
                         if new_projectiles:
                             shots_this_frame += len(new_projectiles)
                             self.enemy_projectiles.add(*new_projectiles)
@@ -215,7 +222,8 @@ class Game:
             render_frame(self, screen, self.font, self.hud_padding)
 
             if not self.state.game_over:
-                self.hud.update(self, self.font, screen, hud_ratio, self.hud_padding)
+                self.hud.update(self, self.font, screen, hud_ratio,
+                                self.hud_padding)
 
             if self.input.cursor_visible:
                 pos = self.input.cursor_pos if self.input.mode == "controller" else pygame.mouse.get_pos()
@@ -226,7 +234,8 @@ class Game:
 
             if self.screen_shake > 0:
                 self.screen_shake -= 1
-            render_offset = self.ship.taken_damage() if self.screen_shake else [0, 0]
+            render_offset = self.ship.taken_damage() if self.screen_shake else [
+                0, 0]
             if joysticks and self.screen_shake:
                 controller.rumble(0.5, 1, BASE_RUMBLE_MS)
 
@@ -253,10 +262,10 @@ class Game:
 
     def save_config(self):
         config_data = {
-            "volume" : self.volume,
-            "play_sound" : self.state.play_sound,
-            "credits" : self.ship.credits,
-            "high_score" : self.state.high_score
+            "volume": self.volume,
+            "play_sound": self.state.play_sound,
+            "credits": self.ship.credits,
+            "high_score": self.state.high_score
         }
         with open(self.config_path, "w") as f:
             json.dump(config_data, f, indent=4)
