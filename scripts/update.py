@@ -69,7 +69,7 @@ def update_phase(game):
         game.state.pause = False
 
     if (game.state.phase_ending and not enemies_alive and not
-            game.hud.skill_tab.active and not game.state.phase_transitioning):
+            game.hud.skill_tab.active and not game.state.phase_transitioned):
         game.state.phase_transitioned = True
         game.state.phase_index += 1
         if game.state.phase_index >= len(game.state.phases):
