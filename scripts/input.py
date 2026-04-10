@@ -103,6 +103,30 @@ class Input:
                                                  game.hud.stats_tab.rect.width // 2,
                                                  game.screen_size[1] // 2))
 
+                if game.hud.skill_tab.active:
+                    num_skills = len(game.state.current_phase_options)
+                    if event.key == pygame.K_LEFT:
+                        self.selected_skill_index = ((self.selected_skill_index - 1) % num_skills)
+                    elif event.key == pygame.K_RIGHT:
+                        self.selected_skill_index = ((self.selected_skill_index + 1) % num_skills)
+
+                    if (event.key == pygame.K_RETURN and
+                            game.hud.skill_tab.active and
+                            game.state.current_phase_options):
+
+                        selected = (game.state.current_phase_options
+                        [self.selected_skill_index])
+
+                        game.skills.unlock_or_upgrade(selected, game.ship)
+
+                        if selected.unlocked and selected not in game.ship.skills:
+                            game.ship.add_skill(selected)
+
+                        game.hud.skill_tab.close()
+                        game.state.current_phase_options = []
+                        game.state.phase_ending = False
+                        game.state.pause = False
+
                 if event.key == pygame.K_g:
                     game.ship.switch_gun()
 
