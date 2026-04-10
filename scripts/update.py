@@ -99,7 +99,7 @@ def spawn_boss(game):
         color = ['red', 'green', 'yellow']
         boss = Boss(game, game.ship, game.enemy_projectiles, x, y,
                     random.choice(color))
-        game.play_music('boss')
+        game.play_music('flight')
         game.bosses.add(boss)
         game.state.phase_spawned = True
         game.boss_alive = True

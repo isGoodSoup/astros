@@ -14,7 +14,7 @@ class GameState:
 
         self.total_phases = 6
         self.phases = [f"wave_{i+1}" for i in range(self.total_phases)]
-        self.phase_index = 0
+        self.phase_index = -1
         self.current_phase = self.phases[self.phase_index]
         self.current_phase_options = []
         self.phase_start_time = pygame.time.get_ticks()
