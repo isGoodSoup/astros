@@ -123,9 +123,6 @@ class Ship(pygame.sprite.Sprite):
             self.current_angle = target_angle
         self.image = pygame.transform.rotate(self.original_image,
                                              -self.current_angle)
-        self.rect = self.image.get_rect(center=self.rect.center)
-        self.hitbox = self.rect.inflate(self.rect.width * -0.6,
-                                        self.rect.height * -0.6)
 
     def shoot(self, gun_type=None, target=None):
         self.update_damage()
