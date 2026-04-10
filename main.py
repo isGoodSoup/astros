@@ -38,6 +38,7 @@ class Menu:
         self.last_blink = 0
         pygame.mouse.set_visible(False)
         toggle_fullscreen()
+        fade.start('in')
 
     def run(self):
         while self.running:
@@ -47,12 +48,12 @@ class Menu:
                 elif event.type == pygame.KEYDOWN:
                     if any(pygame.key.get_pressed()) and not self.transitioning:
                         self.sounds[4].play()
-                        fade.start("out")
+                        fade.start('out')
                         self.transitioning = True
                 elif event.type == JOYBUTTONDOWN:
                     if event.button in range(0, 9):
                         self.sounds[4].play()
-                        fade.start("out")
+                        fade.start('out')
                         self.transitioning = True
 
             if not self.running:

@@ -6,7 +6,7 @@ import pygame
 from scripts.proj import Projectile
 
 class Boss(pygame.sprite.Sprite):
-    def __init__(self, ship, projectiles, x, y, color, frame=0, width=32,
+    def __init__(self, game, ship, projectiles, x, y, color, frame=0, width=32,
                  height=32, scale=8, columns=1, offset_x=0, offset_y=0):
         super().__init__()
         self.image = pygame.image.load(f"assets/aliens/{color}.png").convert_alpha()
@@ -15,6 +15,7 @@ class Boss(pygame.sprite.Sprite):
         self.hitbox = self.rect.inflate(self.rect.width * -0.5, self.rect.height * -0.5)
 
         self.pos = pygame.Vector2(x, y)
+        self.game = game
         self.ship = ship
         self.step = max(1, ship.velocity + 1)
         self.offset_x = offset_x

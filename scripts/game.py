@@ -56,7 +56,9 @@ class Game:
         self.fps = 60
         self.scale = 4
         self.sounds = load_sounds()
-        self.theme = load_ost()
+        self.ost = load_ost()
+        self.current_track = None
+        self.is_boss_music_playing = False
         self.volume = 0.5
 
         self.celestials = pygame.sprite.Group()
@@ -155,17 +157,16 @@ class Game:
         self.screen_shake = 0
         self.last_blink = 0
 
-        self.cursor_sprite = pygame.image.load(
-            "assets/ui/crosshair.png").convert_alpha()
+        self.cursor_sprite = (pygame.image.load
+            ("assets/ui/crosshair.png").convert_alpha())
 
         if tutorial_on:
             self.tutorial = Tutorial()
 
         self.load_config()
         apply_volume(self)
-
-        fade.start("in")
-        pygame.mixer.music.play(-1)
+        fade.start('in')
+        self.play_music('theme')
 
     def run(self, clock, screen, screen_size, hud_ratio, crt):
         while self.running:
@@ -279,3 +280,15 @@ class Game:
             self.state.play_sound = config_data.get("play_sound", True)
             self.ship.credits = config_data.get("credits", 0)
             self.state.high_score = config_data.get("high_score", 0)
+
+    def play_music(self, track_name, loop=True, fade_ms=1000):
+        if self.current_track == track_name:
+            return
+
+        if track_name not in self.ost:
+            raise ValueError(f"Track '{track_name}' not found in OST.")
+
+        pygame.mixer.music.fadeout(fade_ms)
+        pygame.mixer.music.load(self.ost[track_name])
+        pygame.mixer.music.play(-1 if loop else 0, fade_ms=fade_ms)
+        self.current_track = track_name

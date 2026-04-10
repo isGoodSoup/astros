@@ -17,7 +17,10 @@ def load_sounds():
     return sounds
 
 def load_ost():
-    return pygame.mixer.music.load("assets/fx/theme.ogg")
+    return {
+        "theme": "assets/fx/theme.ogg",
+        "flight": "assets/fx/flight.ogg",
+    }
 
 def increase_volume(game):
     game.volume = min(game.volume + 0.1, 1.0)
