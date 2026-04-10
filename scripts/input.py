@@ -75,8 +75,8 @@ class Input:
         if shooting_input and now - game.last_shot_time >= game.ship.shot_cooldown:
             if is_boss_phase:
                 enemies = list(game.bosses)
-                target = get_nearest_enemy((game.ship_x, game.ship_y), enemies
-                ) if enemies else None
+                target = get_nearest_enemy((game.ship.rect.x, game.ship.rect.y), enemies) \
+                    if enemies else None
             else:
                 target = None
             new_projectiles = game.ship.shoot(gun_type=game.ship.gun,

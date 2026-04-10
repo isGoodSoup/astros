@@ -80,9 +80,6 @@ class Game:
         self.explosion_sheet = assets.EXPLOSION_SHEET
         self.megaexplosion_sheet = assets.MEGAEXPLOSION_SHEET
         self.ship_alive = True
-        self.ship_x = screen_size[0] // 2 - framew // 2
-        self.ship_y = screen_size[1] // 2 + SHIP_OFFSETS[0]
-        self.ship_pos = [self.ship_x, self.ship_y]
 
         self.anim_frame_base = 0
         self.anim_frame_overlay = 0
@@ -248,7 +245,6 @@ class Game:
         y = screen_size[1] // 2 + SHIP_OFFSETS[1]
         ship.rect.topleft = (x, y)
         ship.hitbox.center = ship.rect.center
-        self.ship_pos = [x, y]
 
     def save_config(self):
         config_data = {

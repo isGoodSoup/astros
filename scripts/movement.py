@@ -64,10 +64,10 @@ def update_movement(game, delta, screen_size):
     if not lock_y:
         movement_y += game.input.left_joystick[1] * game.ship.velocity * delta * FPS
 
-    game.ship_x = max(0, min(screen_size[0] - game.base.get_width(),
-                             game.ship_x + movement_x))
-    game.ship_y = max(0, min(screen_size[1] - game.base.get_height(),
-                             game.ship_y + movement_y))
+    game.ship.rect.x = max(0, min(screen_size[0] - game.base.get_width(),
+                             game.ship.rect.x + movement_x))
+    game.ship.rect.y = max(0, min(screen_size[1] - game.base.get_height(),
+                             game.ship.rect.y + movement_y))
 
     if movement_x < 0:
         game.ship.direction = "left"

@@ -61,9 +61,6 @@ def reboot(game, screen_size):
         setattr(game.ship, attr, value)
 
     game.spawnpoint(game.ship, screen_size, game.selected_sheet, game.ship_frames)
-    game.ship_x = game.ship.rect.x
-    game.ship_y = game.ship.rect.y
-    game.ship_pos = [game.ship_x, game.ship_y]
 
     game.ship_alive = True
     game.ship.hitpoints = game.ship.max_hitpoints

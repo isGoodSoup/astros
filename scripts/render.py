@@ -15,7 +15,7 @@ def render_frame(game, screen, font, hud_padding):
     if len(game.aliens) > 0:
         game.aliens.draw(screen)
 
-    if game.state.phase_index == len(game.state.phases) - 1:
+    if game.state.phase_index == len(game.state.phases):
         game.bosses.draw(screen)
 
     game.projectiles.draw(screen)
@@ -48,7 +48,7 @@ def render_frame(game, screen, font, hud_padding):
             pygame.draw.rect(screen, COLOR_RED, b.rect, 2)
 
     if game.ship_alive:
-        game.ship.rect.topleft = (game.ship_x, game.ship_y)
+        game.ship.rect.topleft = (game.ship.rect.x, game.ship.rect.y)
         screen.blit(img, game.ship.rect)
         if game.state.debugging:
             pygame.draw.rect(screen, COLOR_RED, game.ship.hitbox, 2)

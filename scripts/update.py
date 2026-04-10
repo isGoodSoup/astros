@@ -73,6 +73,8 @@ def update_phase(game):
         game.state.phase_index += 1
         if game.state.phase_index >= len(game.state.phases):
             game.state.phase_index = 0
+        game.spawnpoint(game.ship, game.screen_size, game.selected_sheet,
+                        game.ship_frames)
         game.state.current_phase = game.state.phases[game.state.phase_index]
         game.state.phase_start_time = current_time
         game.state.phase_ending = False
@@ -218,32 +220,30 @@ def update_game(game, delta, screen_size, hud_padding):
     game.asteroids.update()
 
     if game.ship_alive:
-        game.ship.update_position(game.ship_x, game.ship_y)
-        if game.ship_alive:
-            game.ship.update_upgrades()
-            if game.ship.hitpoints < (game.ship.max_hitpoints * 0.25):
-                game.ship.critical = True
-                frequency = 0
-                if game.ship.critical:
-                    game.screen_shake = SCREEN_SHAKE * 2
-                    if joysticks:
-                        controller.rumble(0.5, frequency, BASE_RUMBLE_MS * 2)
-                    game.sounds[5].play()
-                    frequency += 0.1
+        game.ship.update_upgrades()
+        if game.ship.hitpoints < (game.ship.max_hitpoints * 0.25):
+            game.ship.critical = True
+            frequency = 0
+            if game.ship.critical:
+                game.screen_shake = SCREEN_SHAKE * 2
+                if joysticks:
+                    controller.rumble(0.5, frequency, BASE_RUMBLE_MS * 2)
+                game.sounds[5].play()
+                frequency += 0.1
 
-            game.ship.update_position(game.ship_x, game.ship_y)
-            trail_pos = game.ship.hitbox.midbottom
-            hp_ratio = game.ship.hitpoints / game.ship.max_hitpoints
-            num_particles = int(8 * (1 - hp_ratio))
-            if hp_ratio < 0.2:
-                color = get_ship_ember()
-            color = COLOR_WHITE if hp_ratio > 0.5 else COLOR_SMOKE
-            for _ in range(num_particles):
-                velocity = pygame.Vector2(random.uniform(-1, 1),
-                                          random.uniform(2, 4))
-                particle = Particle(trail_pos, velocity, timer=80,
-                                    color=color, radius=4)
-                game.particles.append(particle)
+        game.ship.update_position(game.ship.rect.x, game.ship.rect.y)
+        trail_pos = game.ship.hitbox.midbottom
+        hp_ratio = game.ship.hitpoints / game.ship.max_hitpoints
+        num_particles = int(8 * (1 - hp_ratio))
+        if hp_ratio < 0.2:
+            color = get_ship_ember()
+        color = COLOR_WHITE if hp_ratio > 0.5 else COLOR_SMOKE
+        for _ in range(num_particles):
+            velocity = pygame.Vector2(random.uniform(-1, 1),
+                                      random.uniform(2, 4))
+            particle = Particle(trail_pos, velocity, timer=80,
+                                color=color, radius=4)
+            game.particles.append(particle)
 
     game.fleets = [f for f in game.fleets if any(a.alive() for a in f.aliens)]
     for fleet in game.fleets:
