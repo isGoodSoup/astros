@@ -18,7 +18,7 @@ def load_sounds():
 
 def load_ost():
     return {
-        "theme": "assets/fx/theme.ogg",
+        "odyssey": "assets/fx/odyssey.ogg",
         "flight": "assets/fx/flight.ogg",
     }
 

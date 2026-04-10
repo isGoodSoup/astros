@@ -102,4 +102,4 @@ def reboot(game, screen_size):
     game.screen_shake = 0
 
     if game.state.play_sound:
-        pygame.mixer.music.play(-1)
+        game.play_music('odyssey')
