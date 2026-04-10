@@ -37,6 +37,13 @@ class Boss(pygame.sprite.Sprite):
         self.current_phase = self.boss_phases[0]
         self.phase_index = 0
 
+        self.velocity = pygame.Vector2(
+            random.choice([-1, 1]) * random.uniform(3, 6),
+            random.choice([-1, 1]) * random.uniform(3, 6)
+        )
+        self.phase2_change_time = pygame.time.get_ticks()
+        self.phase2_change_interval = 1000
+
         self.projectiles = projectiles
 
         self.target = pygame.Vector2(
@@ -65,28 +72,79 @@ class Boss(pygame.sprite.Sprite):
                     self.shoot()
 
         if self.current_phase == 'phase2':
-            screen_width = pygame.display.Info().current_w
+            screen = pygame.display.get_surface()
+            screen_width, screen_height = screen.get_size()
 
-            if self.rect.right >= screen_width or self.rect.left <= 0:
-                self.direction = random.choice([-1, 1])
-            self.rect.x += self.direction * self.step
+            if now - self.phase2_change_time > self.phase2_change_interval:
+                self.velocity.x += random.uniform(-2, 2)
+                self.velocity.y += random.uniform(-2, 2)
 
-            if self.ship.rect.centery > self.rect.centery:
-                self.rect.y += self.step
-            else:
-                self.rect.y -= self.step
+                max_speed = 16
+                if self.velocity.length() > max_speed:
+                    self.velocity.scale_to_length(max_speed)
+
+                self.phase2_change_time = now
+
+            self.rect.x += int(self.velocity.x)
+            self.rect.y += int(self.velocity.y)
+
+            if self.rect.left <= 0:
+                self.rect.left = 0
+                self.velocity.x *= -1
+            elif self.rect.right >= screen_width:
+                self.rect.right = screen_width
+                self.velocity.x *= -1
+
+            if self.rect.top <= 0:
+                self.rect.top = 0
+                self.velocity.y *= -1
+            elif self.rect.bottom >= screen_height:
+                self.rect.bottom = screen_height
+                self.velocity.y *= -1
 
             if now - self.last_shot_time >= self.shot_cooldown:
                 self.last_shot_time = now
                 self.shoot()
 
         if self.current_phase == 'phase3':
-            pass
+            screen = pygame.display.get_surface()
+            screen_width, screen_height = screen.get_size()
+
+            if now - self.phase2_change_time > self.phase2_change_interval:
+                self.velocity.x += random.uniform(-4, 4)
+                self.velocity.y += random.uniform(-4, 4)
+
+                max_speed = 32
+                if self.velocity.length() > max_speed:
+                    self.velocity.scale_to_length(max_speed)
+
+                self.phase2_change_time = now
+
+            self.rect.x += int(self.velocity.x)
+            self.rect.y += int(self.velocity.y)
+
+            if self.rect.left <= 0:
+                self.rect.left = 0
+                self.velocity.x *= -1
+            elif self.rect.right >= screen_width:
+                self.rect.right = screen_width
+                self.velocity.x *= -1
+
+            if self.rect.top <= 0:
+                self.rect.top = 0
+                self.velocity.y *= -1
+            elif self.rect.bottom >= screen_height:
+                self.rect.bottom = screen_height
+                self.velocity.y *= -1
+
+            if now - self.last_shot_time >= self.shot_cooldown:
+                self.last_shot_time = now
+                self.shoot()
 
         health_ratio = self.hitpoints / self.max_hitpoints
         if health_ratio < 0.7 and self.current_phase == 'phase1':
             self.current_phase = 'phase2'
-        elif health_ratio < 0.4 and self.current_phase == 'phase2':
+        elif health_ratio < 0.5 and self.current_phase == 'phase2':
             self.current_phase = 'phase3'
 
     def shoot(self):

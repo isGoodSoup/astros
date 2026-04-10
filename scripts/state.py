@@ -27,6 +27,9 @@ class GameState:
         self.boss_spawned = False
         self.boss_alive = False
 
+        self.last_hole_spawn = 0
+        self.black_hole_spawn_delay = 120_000
+
         self.game_over_fx = True
         self.skills_generated = False
 
