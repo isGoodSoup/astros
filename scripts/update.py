@@ -264,7 +264,10 @@ def update_game(game, delta, screen_size, hud_padding):
         game.state.survival_bonus = 0
         game.state.score += 1 * game.state.score_multiplier
 
-    if random.random() > 0.9:
-        game.events.black_hole_event(game)
+    now = pygame.time.get_ticks()
+    if now - game.state.last_hole_spawn >= game.state.black_hole_spawn_delay:
+        game.state.last_hole_spawn = now
+        if random.random() < 0.1:
+            game.events.black_hole_event(game)
 
     update_phase(game)
