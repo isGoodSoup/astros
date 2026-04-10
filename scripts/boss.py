@@ -169,6 +169,5 @@ class Boss(pygame.sprite.Sprite):
         direction.rotate_ip(math.degrees(angle_offset))
         self.projectiles.add(Projectile(self.rect.center, COLOR_RED,
                           direction=(direction.x, direction.y),
-                          speed=16,
-                          damage=BOSS_BASE_DAMAGE * self.ship.level,
+                          speed=16, damage=BOSS_BASE_DAMAGE * self.ship.level,
                           range_limit=ONE_SECOND))
