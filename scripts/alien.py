@@ -10,7 +10,7 @@ from scripts.utils import resource_path
 
 class Alien(pygame.sprite.Sprite):
     def __init__(self, ship, x, y, color, frame, width=ALIEN_WIDTH, height=ALIEN_HEIGHT,
-                 scale=SCALE, columns=1, offset_x=0, offset_y=0):
+                 scale=SCALE/3, columns=1, offset_x=0, offset_y=0):
         super().__init__()
         self.image = pygame.image.load(resource_path(f"assets/aliens/{color}.png")).convert_alpha()
         self.image = pygame.transform.scale(self.image, (width * scale, height * scale))
