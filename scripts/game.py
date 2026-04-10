@@ -37,7 +37,7 @@ class Game:
         self.state = GameState()
         self.input = Input(screen_size)
         self.clock = Clock()
-        self.font = FontManager(None, 24)
+        self.font = FontManager(None, FONT_DEFAULT_SIZE)
         self.ship_sprite = ships
         self.selected_sheet = self.ship_sprite[ship_index]
         self.ship_frames = SHIP_FRAMES
