@@ -167,7 +167,10 @@ class Ship(pygame.sprite.Sprite):
                     Projectile(pos, COLOR_BLUE, direction=direction,
                                speed=12, damage=self.damage))
             if not TOGGLE_UNLIMITED_AMMO:
-                self.guns_ammo['shotgun'] -= max(0, num_pellets)
+                if self.guns_ammo['shotgun'] < 0:
+                    self.guns_ammo['shotgun'] = 0
+                else:
+                    self.guns_ammo['shotgun'] -= num_pellets
 
         if gun_type == "auto":
             if self.guns_ammo['auto'] <= 0:
@@ -190,7 +193,10 @@ class Ship(pygame.sprite.Sprite):
                                speed=12, damage=self.damage))
 
             if not TOGGLE_UNLIMITED_AMMO:
-                self.guns_ammo['auto'] -= max(0, num_bullets)
+                if self.guns_ammo['auto'] < 0:
+                    self.guns_ammo['auto'] = 0
+                else:
+                    self.guns_ammo['auto'] -= num_bullets
 
         if gun_type == "missile":
             if self.guns_ammo['missile'] <= 0:
