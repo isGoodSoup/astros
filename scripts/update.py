@@ -37,9 +37,6 @@ def update_phase(game):
         if game.state.phase_index in ASTEROID_PHASES:
             spawn_asteroids(game)
 
-        if game.state.current_phase == game.state.phases[-1]:
-            spawn_boss(game)
-
         game.state.phase_spawned = True
 
     enemies_alive = (

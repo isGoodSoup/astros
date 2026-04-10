@@ -32,8 +32,6 @@ class Clock:
                 game.state.boss_alive = True
                 game.state.boss_spawned = True
             else:
-                game.state.phase_index = (game.state.phase_index + 1) % len(
-                    game.state.phases)
                 game.state.current_phase = game.state.phases[
                     game.state.phase_index]
                 game.last_alien_spawn = 0
