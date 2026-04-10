@@ -1,16 +1,16 @@
 import pygame
 
 from scripts.alien import Alien
-from scripts.settings import ASTEROID_PHASES, ALIEN_PHASES
+from scripts.settings import ASTEROID_PHASES, ALIEN_PHASES, SCALE
 
 
 class AlienFleet:
     def __init__(self, game, rows=2, cols=4, start_y=200,
-                 spacing_x=15, spacing_y=15, scale=4):
+                 spacing_x=15, spacing_y=15, scale=SCALE):
         self.game = game
-        self.aliens = []
         self.rows = rows
         self.cols = cols
+        self.aliens = pygame.sprite.Group()
         self.spacing_x = spacing_x
         self.spacing_y = spacing_y
         self.alien_width = 16 * scale
@@ -39,8 +39,8 @@ class AlienFleet:
         for x, y in positions:
             color = game.state.phase_colors[game.state.phase_index % len(game.state.phase_colors)]
             alien = Alien(game.ship, x, y, color, 0)
+            self.aliens.add(alien) # type: ignore
             game.aliens.add(alien)
-            self.aliens.append(alien)
 
     def grid(self, rows, cols, cell_w, cell_h, spacing_x,
                                 spacing_y, origin_x, origin_y):
@@ -53,22 +53,26 @@ class AlienFleet:
         return positions
 
     def update(self):
-        def update(self):
-            self.aliens = [a for a in self.aliens if a.alive()]
-            if not self.aliens:
-                return
+        for a in list(self.aliens):
+            if not a.alive():
+                self.aliens.remove(a)
+
+        if len(self.aliens) == 0:
+            return
 
         now = pygame.time.get_ticks()
         if now - self.move_timer >= self.move_delay:
-            left = min(alien.rect.left for alien in self.aliens)
-            right = max(alien.rect.right for alien in self.aliens)
+            if len(self.aliens) == 0:
+                return
+            left = min(a.rect.left for a in self.aliens.sprites())
+            right = max(a.rect.right for a in self.aliens.sprites())
 
             if right >= self.game.screen_size[0] or left <= 0:
                 self.direction *= -1
-                for alien in self.aliens:
+                for alien in list(self.aliens):
                     alien.rect.y += 10
 
-            for alien in self.aliens:
+            for alien in list(self.aliens):
                 alien.rect.x += self.direction * self.step
                 alien.update()
             self.move_timer = now
@@ -101,7 +105,5 @@ def spawn_fleet(game, phase):
         game.fleets.append(fleet)
         for alien in fleet.aliens:
             game.entities.add(alien)
+            game.aliens.add(alien)
     game.last_alien_spawn = pygame.time.get_ticks()
-
-def should_spawn(game):
-    return not any(fleet.aliens for fleet in game.fleets)

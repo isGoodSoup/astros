@@ -8,7 +8,7 @@ from scripts.boss import Boss
 from scripts.celestial import random_celestial, is_valid_spawn
 from scripts.collision import check_collision
 from scripts.explode import Explosion
-from scripts.fleet import spawn_fleet, should_spawn
+from scripts.fleet import spawn_fleet
 from scripts.particle import Particle
 from scripts.runtime import get_boss_pos, get_upgrade_position, get_ship_ember
 from scripts.settings import *
@@ -29,13 +29,23 @@ def update_phase(game):
     if elapsed >= game.state.phase_length - buffer_time:
         game.state.phase_ending = True
 
-    if should_spawn(game):
-        spawn_fleet(game, game.state.phase_index)
+    if not game.state.phase_spawned:
+        if game.state.phase_index < len(game.state.phases) - 1:
+            spawn_fleet(game, game.state.phase_index)
+
+        if game.state.phase_index in ASTEROID_PHASES:
+            spawn_asteroids(game)
+
         if game.state.current_phase == game.state.phases[-1]:
             spawn_boss(game)
+
         game.state.phase_spawned = True
 
-    enemies_alive = any(sprite.alive() for sprite in game.entities)
+    enemies_alive = (
+            any(alien.alive() for alien in game.aliens) or
+            any(boss.alive() for boss in game.bosses)
+    )
+
     if (not game.hud.skill_tab.active and game.state.phase_ending and not enemies_alive
             and not game.state.skills_generated):
         game.hud.skill_tab.open((pygame.display.Info().current_w // 2 -
@@ -57,8 +67,8 @@ def update_phase(game):
     else:
         game.state.pause = False
 
-    if (game.state.phase_ending and not game.fleets and not game.aliens
-            and not game.hud.skill_tab.active):
+    if (game.state.phase_ending and not enemies_alive and not
+            game.hud.skill_tab.active):
         game.state.phase_index += 1
         if game.state.phase_index >= len(game.state.phases):
             game.state.phase_index = 0
@@ -72,6 +82,9 @@ def update_phase(game):
         game.state.skills_generated = False
 
 def spawn_asteroids(game):
+    if game.state.phase_ending:
+        return
+
     if game.state.phase_index not in ASTEROID_PHASES:
         return
 
@@ -107,12 +120,19 @@ def update_shockwaves(game):
     for wave in list(game.shockwaves):
         wave.update()
 
-        for entity_group in [game.entities]:
-            for entity in list(entity_group):
-                if wave.affects(entity.rect.center):
-                    game.explosions.add(Explosion(entity.rect.centerx, entity.rect.centery,
-                                  game.frame_big_explode))
-                    entity.kill()
+        for asteroid in list(game.asteroids):
+            if wave.affects(asteroid.rect.center):
+                game.explosions.add(Explosion(asteroid.rect.centerx,
+                              asteroid.rect.centery,
+                              game.frame_big_explode))
+                asteroid.kill()
+
+        for alien in list(game.aliens):
+            if wave.affects(alien.rect.center):
+                game.explosions.add(Explosion(alien.rect.centerx,
+                              alien.rect.centery,
+                              game.frame_big_explode))
+                alien.kill()
 
         if not wave.alive:
             game.shockwaves.remove(wave)
@@ -141,11 +161,6 @@ def update_game(game, delta, screen_size, hud_padding):
                                                     CELESTIAL_MIN_DISTANCE):
                     game.celestials.add(new_celestial)
                     break
-
-    if game.state.phase_index in ASTEROID_PHASES:
-        current_time = pygame.time.get_ticks()
-        if current_time - game.last_asteroid_spawn >= game.asteroid_spawn_interval:
-            spawn_asteroids(game)
 
     if current_time - game.last_upgrade_spawn > game.upgrade_spawn_interval:
         game.last_upgrade_spawn = current_time
@@ -230,11 +245,9 @@ def update_game(game, delta, screen_size, hud_padding):
                                     color=color, radius=4)
                 game.particles.append(particle)
 
-    alive_fleets = []
+    game.fleets = [f for f in game.fleets if any(a.alive() for a in f.aliens)]
     for fleet in game.fleets:
         fleet.update()
-        alive_fleets.append(fleet)
-    game.fleets = alive_fleets
 
     if game.state.current_phase == game.state.phases[-1]:
         game.bosses.update()

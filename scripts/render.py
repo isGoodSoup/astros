@@ -12,7 +12,7 @@ def render_frame(game, screen, font, hud_padding):
     if game.state.phase_index in ASTEROID_PHASES:
         game.asteroids.draw(screen)
 
-    if game.state.phase_index < len(game.state.phases) - 1:
+    if len(game.aliens) > 0:
         game.aliens.draw(screen)
 
     if game.state.phase_index == len(game.state.phases) - 1:
