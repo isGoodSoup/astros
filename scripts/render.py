@@ -1,10 +1,19 @@
 import pygame
 
-from scripts.settings import TOGGLE_TUTORIAL, COLOR_BLUE, COLOR_RED, \
-    COLOR_GREEN, COLOR_WHITE, STAT_Y_OFFSET, SKILL_TAB_OFFSETS, ASTEROID_PHASES
+from scripts.settings import (TOGGLE_TUTORIAL, COLOR_BLUE, COLOR_RED, \
+                              COLOR_GREEN, COLOR_WHITE, STAT_Y_OFFSET,
+                              SKILL_TAB_OFFSETS, ASTEROID_PHASES)
 from scripts.shared import joysticks
 
+
 def render_frame(game, screen, font, hud_padding):
+    now = pygame.time.get_ticks()
+
+    boss_invisible = (
+            hasattr(game, "boss_invisible_start") and
+            now - game.boss_invisible_start < game.boss_invisible_duration
+    )
+
     for i in game.stars:
         pygame.draw.circle(screen, COLOR_WHITE, (int(i[0]), int(i[1])), i[2])
 
@@ -15,13 +24,14 @@ def render_frame(game, screen, font, hud_padding):
     if len(game.aliens) > 0:
         game.aliens.draw(screen)
 
-    if game.state.phase_index == len(game.state.phases):
+    if not boss_invisible:
         game.bosses.draw(screen)
 
     game.projectiles.draw(screen)
     game.enemy_projectiles.draw(screen)
     game.upgrades.draw(screen)
     game.floating_numbers.draw(screen)
+
     for particle in game.particles:
         particle.draw(screen)
 

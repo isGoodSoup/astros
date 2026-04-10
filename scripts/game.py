@@ -116,13 +116,15 @@ class Game:
 
         framew = self.megaexplosion_sheet.sheet.get_width() // 4
         frameh = self.megaexplosion_sheet.sheet.get_height()
-        self.frame_big_explode = [
-            self.megaexplosion_sheet.get_image(i, framew, frameh,
+        self.frame_big_explode = [self.megaexplosion_sheet.get_image(i, framew, frameh,
                                                scale=self.scale, columns=4) for i in range(4)]
 
         self.stars = [[random.randint(0, screen_size[0]),
                        random.randint(0, screen_size[1]),
                        random.randint(1, 3)] for _ in range(STAR_COUNT)]
+
+        self.boss_invisible_start = pygame.time.get_ticks()
+        self.boss_invisible_duration = BOSS_INVISIBLE_DURATION
 
         self.last_celestial_spawn = 0
         self.celestial_spawn_interval = random.randint(*CELESTIAL_SPAWN_INTERVAL)
