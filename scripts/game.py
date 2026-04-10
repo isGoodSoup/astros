@@ -117,7 +117,7 @@ class Game:
         framew = self.megaexplosion_sheet.sheet.get_width() // 4
         frameh = self.megaexplosion_sheet.sheet.get_height()
         self.frame_big_explode = [self.megaexplosion_sheet.get_image(i, framew, frameh,
-                                               scale=self.scale, columns=4) for i in range(4)]
+                                               scale=self.scale * 2, columns=4) for i in range(4)]
 
         self.stars = [[random.randint(0, screen_size[0]),
                        random.randint(0, screen_size[1]),
