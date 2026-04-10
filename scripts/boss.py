@@ -9,13 +9,15 @@ from scripts.settings import (COLOR_RED, BOSS_BASE_SPEED, \
                               BOSS_ADVANTAGE, SCALE,
                               BOSS_BASE_HITPOINTS, HIGH_FIRE_RATE, BOSS_COLORS,
                               BOSS_BASE_DAMAGE)
+from scripts.utils import resource_path
+
 
 class Boss(pygame.sprite.Sprite):
     def __init__(self, game, ship, projectiles, x, y, color, frame=0,
                  width=32, height=32, scale=SCALE*2,
                  columns=1, offset_x=0, offset_y=0):
         super().__init__()
-        self.image = pygame.image.load(f"assets/aliens/{color}.png").convert_alpha()
+        self.image = pygame.image.load(resource_path(f"assets/aliens/{color}.png")).convert_alpha()
         self.image = pygame.transform.scale(self.image, (width * scale, height * scale))
         self.rect = self.image.get_rect(center=(x,y))
         self.hitbox = self.rect.inflate(self.rect.width * -0.5, self.rect.height * -0.5)

@@ -3,13 +3,14 @@ import pygame
 from scripts.proj import Projectile
 from scripts.settings import ONE_SECOND, SHIP_HITBOX, ALIEN_HEIGHT, ALIEN_WIDTH, \
     SCALE, ALIEN_ADVANTAGE, COLOR_GREEN
+from scripts.utils import resource_path
 
 
 class Alien(pygame.sprite.Sprite):
     def __init__(self, ship, x, y, color, frame, width=ALIEN_WIDTH, height=ALIEN_HEIGHT,
                  scale=SCALE, columns=1, offset_x=0, offset_y=0):
         super().__init__()
-        self.image = pygame.image.load(f"assets/aliens/{color}.png").convert_alpha()
+        self.image = pygame.image.load(resource_path(f"assets/aliens/{color}.png")).convert_alpha()
         self.image = pygame.transform.scale(self.image, (width * scale, height * scale))
         self.rect = self.image.get_rect(topleft=(x, y))
         self.hitbox = self.rect.inflate(self.rect.width * SHIP_HITBOX, self.rect.height * SHIP_HITBOX)

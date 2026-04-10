@@ -23,7 +23,6 @@ from scripts.state import GameState
 from scripts.tutorial import Tutorial
 from scripts.update import update_game
 
-
 # Copyright (c) 2026 Diego
 # Licensed under the MIT License. See LICENSE file for details.
 # All assets in this game are © 2026 Diego. See ASSETS_LICENSE.txt.
@@ -62,7 +61,6 @@ class Game:
         self.sounds = load_sounds()
         self.ost = load_ost()
         self.current_track = None
-        self.is_boss_music_playing = False
 
         self.celestials = pygame.sprite.Group()
         self.projectiles = pygame.sprite.Group()
@@ -76,7 +74,6 @@ class Game:
         self.floating_numbers = pygame.sprite.Group()
         self.fleets = []
         self.particles = []
-        self.hit_this_frame = set()
 
         self.ship_frames = SHIP_FRAMES
         self.explosion_frames = 7

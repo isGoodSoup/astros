@@ -11,6 +11,8 @@ from scripts.settings import (COLOR_WHITE, COLOR_LIGHT_ORANGE, SKILL_TAB_Y, \
                               INTERFACE_AMMO, INTERFACE_XP_COLS)
 from scripts.sheet import SpriteSheet
 from scripts.skill_tab import Tab
+from scripts.utils import resource_path
+
 
 def padded_pos(base_x, base_y, alignment_x, alignment_y, hud_padding):
     if alignment_x == 'left':
@@ -75,16 +77,25 @@ class Interface(pygame.sprite.Sprite):
 
 class HUD:
     def __init__(self, game, screen_size, hud_ratio, game_font):
-        self.hitpoints = Interface("assets/ui/status.png", 0, *INTERFACE_HITPOINTS,
+        self.hitpoints = Interface(resource_path("assets/ui/status.png"), 0,
+                                   *INTERFACE_HITPOINTS,
                                    hud_ratio, ['right', 'bottom'])
-        self.shield = Interface("assets/ui/shield_bar.png", 0, INTERFACE_SHIELD[0], INTERFACE_SHIELD[1],
-                                   hud_ratio, ['right', 'bottom'],INTERFACE_SHIELD_COLS, INTERFACE_SHIELD_OFFSET)
-        self.xp = Interface("assets/ui/xp.png", 0, INTERFACE_XP[0], INTERFACE_XP[1],
-                                hud_ratio, ['right', 'bottom'], INTERFACE_XP_COLS, INTERFACE_XP_OFFSET)
-        self.ammo = Interface("assets/ui/ammo.png", 0, INTERFACE_AMMO[0], INTERFACE_AMMO[1],
-                              hud_ratio, ['right', 'bottom'], INTERFACE_AMMO_COLS, INTERFACE_AMMO_OFFSET)
-        self.guns = Interface("assets/ui/guns.png", 0, INTERFACE_GUNS[0], INTERFACE_GUNS[1],
-                              hud_ratio,['right', 'bottom'], INTERFACE_GUNS_COLS, INTERFACE_GUNS_OFFSET)
+        self.shield = Interface(resource_path("assets/ui/shield_bar.png"), 0,
+                                INTERFACE_SHIELD[0], INTERFACE_SHIELD[1],
+                                hud_ratio, ['right', 'bottom'],
+                                INTERFACE_SHIELD_COLS, INTERFACE_SHIELD_OFFSET)
+        self.xp = Interface(resource_path("assets/ui/xp.png"), 0,
+                            INTERFACE_XP[0], INTERFACE_XP[1],
+                            hud_ratio, ['right', 'bottom'],
+                            INTERFACE_XP_COLS, INTERFACE_XP_OFFSET)
+        self.ammo = Interface(resource_path("assets/ui/ammo.png"), 0,
+                              INTERFACE_AMMO[0], INTERFACE_AMMO[1],
+                              hud_ratio, ['right', 'bottom'],
+                              INTERFACE_AMMO_COLS, INTERFACE_AMMO_OFFSET)
+        self.guns = Interface(resource_path("assets/ui/guns.png"), 0,
+                              INTERFACE_GUNS[0], INTERFACE_GUNS[1],
+                              hud_ratio,['right', 'bottom'],
+                              INTERFACE_GUNS_COLS, INTERFACE_GUNS_OFFSET)
         self.xp.image = self.xp.frames[len(self.xp.frames) - 1]
 
         self.guns_ammo = {
@@ -96,10 +107,10 @@ class HUD:
 
         self.credits = 0
 
-        self.skill_tab = Tab("assets/ui/skill_tab.png",
+        self.skill_tab = Tab(resource_path("assets/ui/skill_tab.png"),
             start_pos=(screen_size[0], SKILL_TAB_Y), content_renderer=render_skills_tab)
 
-        self.stats_tab = Tab("assets/ui/skill_tab.png",
+        self.stats_tab = Tab(resource_path("assets/ui/skill_tab.png"),
             start_pos=(screen_size[0] // 2 - self.skill_tab.rect.width // 2,
                        screen_size[1]), content_renderer=render_stats_tab)
 

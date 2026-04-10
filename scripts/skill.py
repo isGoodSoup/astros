@@ -2,13 +2,16 @@ from scripts.all_skills import *
 from scripts.sheet import SpriteSheet
 import pygame
 
+from scripts.utils import resource_path
+
+
 class Skill:
     def __init__(self, name, ability, icon, description=None, max_level=5):
         self.name = name
         self.description = description
         self.ability = ability
 
-        self.spritesheet = SpriteSheet("assets/ui/skills/skill_frame.png")
+        self.spritesheet = SpriteSheet(resource_path("assets/ui/skills/skill_frame.png"))
         cols = 7
         frame_width = self.spritesheet.sheet.get_width() // cols
         frame_height = self.spritesheet.sheet.get_height()
@@ -28,7 +31,7 @@ class Skill:
                 (lvl + 1, frame_width, frame_height, 4, cols))
 
         self.icon_image = pygame.transform.scale(pygame.image.load
-            (f"assets/ui/skills/{icon}.png"), (64, 64))
+            (resource_path(f"assets/ui/skills/{icon}.png")), (64, 64))
         self.x = 0
         self.y = 0
         self.rect = self.frames["locked"].get_rect(topleft=(self.x, self.y))

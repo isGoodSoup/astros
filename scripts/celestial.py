@@ -1,6 +1,9 @@
 import random
 import pygame
 
+from scripts.utils import resource_path
+
+
 class Celestial(pygame.sprite.Sprite):
     def __init__(self, path, x, y, speed=1):
         super().__init__()
@@ -22,18 +25,18 @@ class Celestial(pygame.sprite.Sprite):
 
 class Planet(Celestial):
     def __init__(self, x, y):
-        super().__init__(f"assets/galaxies/planet_"
-                                       f"{random.randint(1, 10)}.png", x, y)
+        super().__init__(resource_path(f"assets/galaxies/planet_"
+                                       f"{random.randint(1, 10)}.png"), x, y)
 
 class Galaxy(Celestial):
     def __init__(self, x, y):
-        super().__init__(f"assets/galaxies/galaxy_"
-                                       f"{random.randint(1, 2)}.png", x, y)
+        super().__init__(resource_path(f"assets/galaxies/galaxy_"
+                                       f"{random.randint(1, 2)}.png"), x, y)
 
 class BlackHole(Celestial):
     def __init__(self, x, y):
-        super().__init__(f"assets/galaxies/black_hole_"
-                         f"{random.randint(1, 2)}.png", x, y)
+        super().__init__(resource_path(f"assets/galaxies/black_hole_"
+                         f"{random.randint(1, 2)}.png"), x, y)
 
 def random_celestial():
     screen_w = pygame.display.Info().current_w

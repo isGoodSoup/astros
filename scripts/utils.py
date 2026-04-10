@@ -1,5 +1,6 @@
 import datetime
 import os
+import sys
 
 import pygame
 
@@ -40,3 +41,10 @@ def take_screenshot(self, screen):
     os.makedirs(save_dir, exist_ok=True)
     save_path = os.path.join(save_dir, f"{timestamp}.png")
     pygame.image.save(screen, save_path)
+
+def resource_path(relative_path):
+    if hasattr(sys, "_MEIPASS"):
+        base = sys._MEIPASS
+    else:
+        base = os.path.abspath(".")
+    return os.path.join(base, relative_path)

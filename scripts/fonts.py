@@ -1,6 +1,9 @@
-import pygame
-from typing import Optional, Union
 from os import PathLike
+from typing import Optional, Union
+
+import pygame
+
+from scripts.utils import resource_path
 
 FileArg = Optional[Union[str, PathLike]]
 
@@ -10,9 +13,9 @@ class FontManager:
         self.size = size
 
         self.fonts = [
-            pygame.font.Font("assets/fonts/PressStart2P.ttf", size),
-            pygame.font.Font("assets/fonts/BoldPixels.ttf", size * 2),
-            pygame.font.Font("assets/fonts/Bytesized.ttf", size * 2),
+            pygame.font.Font(resource_path("assets/fonts/PressStart2P.ttf"), size),
+            pygame.font.Font(resource_path("assets/fonts/BoldPixels.ttf"), size * 2),
+            pygame.font.Font(resource_path("assets/fonts/Bytesized.ttf"), size * 2),
         ]
 
         if name is not None:

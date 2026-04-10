@@ -14,6 +14,7 @@ from scripts.runtime import get_boss_pos, get_upgrade_position, get_ship_ember
 from scripts.settings import *
 from scripts.shared import joysticks, controller
 from scripts.upgd import Upgrade
+from scripts.utils import resource_path
 
 
 def set_hud(screen_size):
@@ -139,7 +140,6 @@ def update_shockwaves(game):
 
 def update_game(game, delta, screen_size, hud_padding):
     game.ship.hit = False
-    game.hit_this_frame.clear()
 
     if game.ship.hit:
         game.ship.combo_multiplier = 1.0
@@ -169,7 +169,7 @@ def update_game(game, delta, screen_size, hud_padding):
             x, y = get_upgrade_position()
             game.last_upgrade = upgd.get_upgrade()
             upgrade_type = game.last_upgrade
-            upgrade_path = f"assets/{upgrade_type}.png"
+            upgrade_path = resource_path(f"assets/{upgrade_type}.png")
             new_upgrade = Upgrade(upgrade_path, x, y, upgrade_type=upgrade_type)
             game.upgrades.add(new_upgrade)  # type: ignore
 
