@@ -147,7 +147,8 @@ BOSS_PHASES = ["phase1", "phase2", "phase3"]
 BOSS_COLORS = {
     "red": 100,
     "green": 200,
-    "yellow": 300
+    "yellow": 300,
+    "purple": 800
 }
 
 BOSS_DAMAGE = 9999
@@ -167,7 +168,7 @@ PHASE_BUFFER_TIME = 5000
 PHASES_TOTAL = 6
 
 PHASES = [f"wave_{i+1}" for i in range(PHASES_TOTAL)]
-PHASE_COLORS = ["red", "green", "yellow"]
+PHASE_COLORS = ['red', 'green', 'yellow', 'purple']
 
 STAR_COUNT = 100
 STAR_SPEED = 2
