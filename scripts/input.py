@@ -33,7 +33,7 @@ class Input:
         self.cursor_hide_delay = 3000
         self.moving_hud = False
 
-    def update(self, events):
+    def update(self, game, events):
         now = pygame.time.get_ticks()
         self.last_input_time = pygame.time.get_ticks()
         moved = False
@@ -54,6 +54,8 @@ class Input:
         if moved:
             self.last_move_time = now
             self.cursor_visible = True
+        elif game.state.current_phase == game.state.phases[-1]:
+            self.cursor_visible = False
         else:
             self.cursor_visible = (now - self.last_move_time <= self.cursor_hide_delay)
 
