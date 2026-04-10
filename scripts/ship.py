@@ -142,7 +142,6 @@ class Ship(pygame.sprite.Sprite):
         projectiles = []
 
         if gun_type == "beam":
-            self.guns_ammo['beam'] = -1
             projectiles.append(Projectile(pos, (0, 255, 255), direction=(dir_x, dir_y),
                            speed=16,
                            damage=1))
