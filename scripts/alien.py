@@ -1,3 +1,5 @@
+import random
+
 import pygame
 
 from scripts.proj import Projectile
@@ -41,15 +43,21 @@ class Alien(pygame.sprite.Sprite):
         self.shooting = False
         new_projectiles = []
 
-        # direction_x = 0
-        # if self.ship is not None:
-        #     direction_x = self.ship.rect - self.rect.centerx
+        direction = (0, 1)
+        if random.random() > 0.60:
+            target_vec = pygame.Vector2(self.ship.rect.center) - pygame.Vector2(
+                self.rect.center)
+            if target_vec.length() != 0:
+                direction = target_vec.normalize()
+            else:
+                direction = pygame.Vector2(0, 1)
+
+            angle_offset = random.uniform(-0.2, 0.2)
 
         if current_time - self.last_shot_time >= shot_cooldown:
             projectile = Projectile(
                 pos=[self.rect.centerx, self.rect.bottom],
-                color=COLOR_GREEN, direction=(0, 1),
-                speed=12)
+                color=COLOR_GREEN, direction=direction, speed=12)
             self.shooting = True
             new_projectiles.extend([projectile])
             self.last_shot_time = current_time
