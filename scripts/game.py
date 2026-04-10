@@ -4,6 +4,7 @@ import os
 from scripts.celestial import *
 from scripts.clock import Clock
 from scripts.controller import update_controller
+from scripts.events import Events
 from scripts.fonts import FontManager
 from scripts.game_over import game_lost
 from scripts.hud import HUD
@@ -46,6 +47,7 @@ class Game:
         self.spawnpoint(self.ship, screen_size, self.selected_sheet,
                         self.ship_frames)
         self.hud = HUD(self, screen_size, hud_ratio, self.font.get_font())
+        self.events = Events()
 
         self.screen = screen
         self.screen_size = screen_size

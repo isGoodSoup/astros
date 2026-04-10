@@ -7,6 +7,7 @@ from scripts.asteroid import Asteroid
 from scripts.boss import Boss
 from scripts.celestial import random_celestial, is_valid_spawn
 from scripts.collision import check_collision
+from scripts.events import black_hole_event
 from scripts.explode import Explosion
 from scripts.fleet import spawn_fleet
 from scripts.particle import Particle
@@ -263,5 +264,8 @@ def update_game(game, delta, screen_size, hud_padding):
     if game.state.survival_bonus >= 60:
         game.state.survival_bonus = 0
         game.state.score += 1 * game.state.score_multiplier
+
+    if random.random() > 0.9:
+        game.events.black_hole_event(game)
 
     update_phase(game)

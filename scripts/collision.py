@@ -2,7 +2,7 @@ import random
 
 import pygame
 
-from scripts.events import trigger_nuke
+from scripts.events import nuke_event
 from scripts.explode import Explosion
 from scripts.floaty import FloatingNumber
 from scripts.impact import ImpactFrame
@@ -297,7 +297,7 @@ def check_collision(game):
 
     for projectile in list(game.projectiles):
         if getattr(projectile, "nuke", False):
-            trigger_nuke(projectile.rect.center, game)
+            game.events.nuke_event(projectile.rect.center, game)
             projectile.kill()
 
     upgrade_hit = pygame.sprite.spritecollide(game.ship, game.upgrades, False, # type: ignore
