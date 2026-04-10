@@ -180,5 +180,12 @@ class HUD:
         ammo_y = guns_bottom_y + 5
         screen.blit(ammo_surface, [ammo_x, ammo_y])
 
+        wave_text = f"Wave {game.state.phase_index + 1}"
+        wave_surface = font.render(wave_text, True, COLOR_WHITE)
+        wave_x = score_x
+        y += line_spacing
+        wave_y = y
+        screen.blit(wave_surface, [wave_x, wave_y])
+
         self.skill_tab.update()
         self.stats_tab.update()

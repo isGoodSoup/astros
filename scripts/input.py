@@ -126,6 +126,7 @@ class Input:
                         game.state.current_phase_options = []
                         game.state.phase_ending = False
                         game.state.pause = False
+                        game.state.phase_transitioned = False
 
                 if event.key == pygame.K_g:
                     game.ship.switch_gun()

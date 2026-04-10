@@ -27,6 +27,7 @@ class GameState:
         self.phase_length = PHASE_LENGTH
         self.phase_ending = False
         self.phase_spawned = False
+        self.phase_transitioned = False
 
         self.boss_spawned = False
         self.boss_alive = False
