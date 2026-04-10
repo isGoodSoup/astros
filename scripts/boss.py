@@ -76,10 +76,9 @@ class Boss(pygame.sprite.Sprite):
             self.rect.x = max(0, min(self.rect.x, screen_width - self.rect.width))
             self.move_timer = now
 
-            if random.random() > 0.5:
-                if now - self.last_shot_time >= self.shot_cooldown:
-                    self.last_shot_time = now
-                    self.shoot()
+            if now - self.last_shot_time >= self.shot_cooldown:
+                self.last_shot_time = now
+                self.shoot()
 
         if self.current_phase == 'phase2':
             screen = pygame.display.get_surface()

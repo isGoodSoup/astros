@@ -69,7 +69,8 @@ def update_phase(game):
         game.state.pause = False
 
     if (game.state.phase_ending and not enemies_alive and not
-            game.hud.skill_tab.active):
+            game.hud.skill_tab.active and not game.state.phase_transitioning):
+        game.state.phase_transitioned = True
         game.state.phase_index += 1
         if game.state.phase_index >= len(game.state.phases):
             game.state.phase_index = 0
@@ -250,9 +251,7 @@ def update_game(game, delta, screen_size, hud_padding):
     for fleet in game.fleets:
         fleet.update()
 
-    if game.state.current_phase == game.state.phases[-1]:
-        game.bosses.update()
-
+    game.bosses.update()
     game.projectiles.update()
     game.enemy_projectiles.update()
 
