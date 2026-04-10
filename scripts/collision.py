@@ -2,7 +2,6 @@ import random
 
 import pygame
 
-from scripts.events import nuke_event
 from scripts.explode import Explosion
 from scripts.floaty import FloatingNumber
 from scripts.impact import ImpactFrame

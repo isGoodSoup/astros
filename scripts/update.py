@@ -7,7 +7,6 @@ from scripts.asteroid import Asteroid
 from scripts.boss import Boss
 from scripts.celestial import random_celestial, is_valid_spawn
 from scripts.collision import check_collision
-from scripts.events import black_hole_event
 from scripts.explode import Explosion
 from scripts.fleet import spawn_fleet
 from scripts.particle import Particle
