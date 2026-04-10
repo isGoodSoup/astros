@@ -132,6 +132,7 @@ class Game:
         self.ALIENLASER = pygame.USEREVENT + 1
         pygame.time.set_timer(self.ALIENLASER, ALIEN_SHOT_TIMER_MS)
 
+        self.delay = pygame.time.get_ticks() + ALIEN_INITIAL_DELAY
         self.last_asteroid_spawn = 0
         self.asteroid_spawn_interval = ASTEROID_SPAWN_INTERVAL
         self.asteroid_hitpoints = ASTEROID_HITPOINTS
@@ -169,6 +170,8 @@ class Game:
                 if event.type == pygame.QUIT:
                     self.running = False
                 if event.type == self.ALIENLASER and not self.state.pause and not self.state.game_over:
+                    if pygame.time.get_ticks() < self.delay:
+                        continue
                     shots_this_frame = 0
                     if random.random() > 0.5:
                         shooters = random.sample(self.aliens.sprites(),

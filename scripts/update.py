@@ -75,6 +75,7 @@ def update_phase(game):
             game.state.phase_index = 0
         game.spawnpoint(game.ship, game.screen_size, game.selected_sheet,
                         game.ship_frames)
+        game.delay = pygame.time.get_ticks() + ALIEN_INITIAL_DELAY
         game.state.current_phase = game.state.phases[game.state.phase_index]
         game.state.phase_start_time = current_time
         game.state.phase_ending = False
