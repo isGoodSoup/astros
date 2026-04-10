@@ -131,7 +131,7 @@ def check_collision(game):
                 size = SHIP_DAMAGE_SIZE
 
             if not game.ship.hit:
-                game.ship.combo_multiplier += 0.1
+                game.ship.combo_multiplier += SHIP_COMBO_ADDITION
             total_multiplier = game.ship.combo_multiplier * game.ship.powerup_multiplier
             damage_per_frame *= total_multiplier
 
@@ -192,7 +192,7 @@ def check_collision(game):
                 size = SHIP_DAMAGE_SIZE
 
             if not game.ship.hit:
-                game.ship.combo_multiplier += 0.1
+                game.ship.combo_multiplier += SHIP_COMBO_ADDITION
             total_multiplier = game.ship.combo_multiplier * game.ship.powerup_multiplier
             damage_per_frame *= total_multiplier
 
@@ -251,7 +251,7 @@ def check_collision(game):
                 size = SHIP_DAMAGE_SIZE
 
             if not game.ship.hit:
-                game.ship.combo_multiplier += 0.1
+                game.ship.combo_multiplier += SHIP_COMBO_ADDITION
             total_multiplier = game.ship.combo_multiplier * game.ship.powerup_multiplier
             damage_per_frame *= total_multiplier
 
