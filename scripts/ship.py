@@ -4,8 +4,7 @@ import random
 import pygame
 
 from scripts.proj import Projectile
-from scripts.toggles import unlimited_ammo
-
+from scripts.settings import *
 
 class Ship(pygame.sprite.Sprite):
     def __init__(self, sprite_sheet, x, y, frame, width, height, scale=4,
@@ -14,35 +13,36 @@ class Ship(pygame.sprite.Sprite):
         self.original_image = sprite_sheet.get_image(frame, width, height,scale, columns)
         self.image = self.original_image
         self.rect = self.image.get_rect(topleft=(x, y))
-        self.hitbox = self.rect.inflate(self.rect.width * -0.6, self.rect.height * -0.6)
-        self.current_angle = 90
-        self.velocity = 12
+        self.hitbox = self.rect.inflate(self.rect.width * SHIP_HITBOX,
+                                        self.rect.height * SHIP_HITBOX)
+        self.current_angle = SHIP_BASE_ANGLE
+        self.velocity = SHIP_VELOCITY
         self.direction = "idle"
         self.shooting = False
         self.moving = False
-        self.max_hitpoints = 200
+        self.max_hitpoints = SHIP_MAX_HITPOINTS
         self.hitpoints = self.max_hitpoints
-        self.max_shield = 25
+        self.max_shield = SHIP_MAX_SHIELD
         self.base_max_shield = self.max_shield
         self.shield = self.max_shield
-        self.gun_order = ['beam', 'shotgun', 'auto', 'missile']
-        self.gun = "beam"
-        self.guns = {"beam": 250, "shotgun": 400, "auto": 150, "missile": 900}
-        self.guns_ammo = {"beam": -1, "shotgun": 20, "auto": 400, "missile": 10}
+        self.gun_order = SHIP_GUNS
+        self.gun = SHIP_GUNS[0]
+        self.guns = SHIP_GUNS_RATES
+        self.guns_ammo = SHIP_AMMO
         self.base_guns_ammo = self.guns_ammo.copy()
         self.arsenal = sum(self.guns_ammo.values())
-        self.base_damage = 4
+        self.base_damage = SHIP_BASE_DAMAGE
         self.damage = self.base_damage
         self.combo_multiplier = 1.0
         self.powerup_multiplier = 1.0
-        self.base_crit_chance = 0.05
+        self.base_crit_chance = SHIP_BASE_CRIT_CHANCE
         self.crit_chance = self.base_crit_chance
         self.crit_multiplier = 3
 
         self.base_charges = 1
         self.charges = self.base_charges
         self.evasion = 0.02
-        self.shot_cooldown = 250
+        self.shot_cooldown = SHIP_FIRE_RATE
         self.power_ups = []
 
         self.maniac_boost = 0
@@ -60,9 +60,9 @@ class Ship(pygame.sprite.Sprite):
         self.level = 1
         self.level_cap = False
         self.xp = 0
-        self.xp_to_next_level = 256
+        self.xp_to_next_level = SHIP_XP_PER_LEVEL
         self.perk_points = 0
-        self.xp_growth = 2.0
+        self.xp_growth = SHIP_XP_GROWTH
         self.credits = 0
 
         self.hit = False
@@ -73,7 +73,7 @@ class Ship(pygame.sprite.Sprite):
         self.shield_regen_rate = int(self.max_shield * 0.05)
 
         self.last_hit_time = 0
-        self.hit_cooldown = 200
+        self.hit_cooldown = SHIP_IFRAMES
 
     def add_skill(self, skill):
         self.skills.append(skill)
@@ -99,9 +99,9 @@ class Ship(pygame.sprite.Sprite):
         self.damage = self.base_damage
 
         if self.gun == "shotgun":
-            self.damage *= 10
+            self.damage *= SHIP_SHOTGUN_DAMAGE
         elif self.gun == "missile":
-            self.damage *= 50
+            self.damage *= SHIP_MISSILE_DAMAGE
 
     def update_fire_rate(self):
         self.shot_cooldown = self.guns[self.gun]
@@ -117,7 +117,8 @@ class Ship(pygame.sprite.Sprite):
 
     def rotate_to(self, target_angle, smooth=True):
         if smooth:
-            angle_diff = (target_angle - self.current_angle + 180) % 360 - 180
+            angle_diff = ((target_angle - self.current_angle + FULL_360//2) %
+                          FULL_360 - FULL_360//2)
             self.current_angle += angle_diff * 0.3
         else:
             self.current_angle = target_angle
@@ -142,7 +143,7 @@ class Ship(pygame.sprite.Sprite):
         projectiles = []
 
         if gun_type == "beam":
-            projectiles.append(Projectile(pos, (0, 255, 255), direction=(dir_x, dir_y),
+            projectiles.append(Projectile(pos, COLOR_BLUE, direction=(dir_x, dir_y),
                            speed=16,
                            damage=1))
 
@@ -163,9 +164,9 @@ class Ship(pygame.sprite.Sprite):
                     rad = math.radians(self.current_angle + angle_offset)
                     direction = (math.cos(rad), -math.sin(rad))
                 projectiles.append(
-                    Projectile(pos, (0, 255, 255), direction=direction,
+                    Projectile(pos, COLOR_BLUE, direction=direction,
                                speed=12, damage=self.damage))
-            if not unlimited_ammo:
+            if not TOGGLE_UNLIMITED_AMMO:
                 self.guns_ammo['shotgun'] -= max(0, num_pellets)
 
         if gun_type == "auto":
@@ -185,19 +186,22 @@ class Ship(pygame.sprite.Sprite):
                     rad = math.radians(self.current_angle + angle_offset)
                     direction = (math.cos(rad), -math.sin(rad))
                 projectiles.append(
-                    Projectile(pos, (0, 255, 255), direction=direction,
+                    Projectile(pos, COLOR_BLUE, direction=direction,
                                speed=12, damage=self.damage))
 
-            if not unlimited_ammo:
+            if not TOGGLE_UNLIMITED_AMMO:
                 self.guns_ammo['auto'] -= max(0, num_bullets)
 
         if gun_type == "missile":
             if self.guns_ammo['missile'] <= 0:
                 return projectiles
 
-            projectiles.append(Projectile(pos,(255, 50, 0),
-                    direction=(dir_x, dir_y), speed=4,damage=0))
+            projectiles.append(Projectile(pos,COLOR_RED,
+                    direction=(dir_x, dir_y), speed=4, damage=0))
             projectiles[-1].nuke = True
+
+            if not TOGGLE_UNLIMITED_AMMO:
+                self.guns_ammo['auto'] -= 1
 
         return projectiles
 
@@ -219,9 +223,9 @@ class Ship(pygame.sprite.Sprite):
 
         self.level += 1
         self.base_damage += 1
-        self.max_hitpoints += 10
+        self.max_hitpoints += SHIP_LEVEL_ADDITION
         self.hitpoints = self.max_hitpoints
-        self.max_shield += 10
+        self.max_shield += SHIP_LEVEL_ADDITION
         self.shield = self.max_shield
         self.xp_to_next_level = int(self.xp_to_next_level * self.xp_growth)
         sound[3].play()

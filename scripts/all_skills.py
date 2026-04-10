@@ -3,6 +3,8 @@ from typing import override
 import pygame
 
 from scripts.ability import Ability
+from scripts.settings import SHIP_MANIC_BOOST
+
 
 class Explorer(Ability):
     @override
@@ -25,7 +27,7 @@ class Maniac(Ability):
         boost = 0.02 * level
         current_time = pygame.time.get_ticks()
         ship.maniac_boost += boost
-        ship.maniac_boost_end = current_time + 5000
+        ship.maniac_boost_end = current_time + SHIP_MANIC_BOOST
         return [ship.maniac_boost]
 
 class Madness(Ability):

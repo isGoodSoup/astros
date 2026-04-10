@@ -2,10 +2,11 @@ import math
 
 import pygame
 
+import scripts.assets as assets
 from scripts.fonts import FontManager
 from scripts.game import Game
 from scripts.shared import fade, joysticks
-from scripts.sheet import SpriteSheet
+
 
 class Mods:
     def __init__(self, screen, screen_size, hud_ratio):
@@ -21,11 +22,7 @@ class Mods:
         self.flight_offset = 0
         self.fade_started = False
 
-        self.ships = [
-            SpriteSheet("assets/ship.png"),
-            SpriteSheet("assets/ship_v2.png"),
-            SpriteSheet("assets/ship_v3.png")
-        ]
+        self.ships = assets.SHIPS
 
         self.selected_ship_index = None
         self.current_ship_index = 0

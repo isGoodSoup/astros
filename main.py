@@ -1,10 +1,12 @@
 from pygame.constants import *
 from pygame.display import toggle_fullscreen
 
+import scripts.assets as assets
 from scripts.celestial import *
 from scripts.crt import CRT
 from scripts.fonts import FontManager
 from scripts.mods import Mods
+from scripts.settings import *
 from scripts.shared import fade
 from scripts.soundlib import load_sounds
 from scripts.update import set_hud
@@ -19,18 +21,17 @@ class Menu:
         self.screen_size = (self.width, self.height)
         self.hud_ratio = set_hud(self.screen_size)
         self.virtual_screen = pygame.display.set_mode(self.screen_size)
-        self.render_surface = pygame.Surface((1920, 1080))
+        self.render_surface = pygame.Surface(HD_RESOLUTION)
         self.screen = pygame.display.set_mode(self.screen_size, DOUBLEBUF|OPENGL, vsync=1)
-        self.crt = CRT(self.screen, style=1, virtual_resolution=(1920, 1080),cpu_only=False)
-        self.crt.prog['curvature'].value = 0.5
-        self.font = FontManager(None, 24)
-        self.logo_img = pygame.image.load("assets/ui/logo.png")
+        assets.load_assets()
+        self.crt = CRT(self.screen, 1, HD_RESOLUTION, cpu_only=False)
+        self.crt.prog['curvature'].value = CRT_CURVATURE
+        self.font = FontManager(None, FONT_DEFAULT_SIZE)
+        self.logo_img = assets.LOGO
         self.logo_img = pygame.transform.scale(self.logo_img,
-            (self.logo_img.get_width() * 4, self.logo_img.get_height() * 4))
-        self.cursor_sprite = pygame.image.load("assets/ui/cursor.png")
-        icon = pygame.image.load("assets/ui/icon.png")
+            (self.logo_img.get_width() * SCALE, self.logo_img.get_height() * SCALE))
         pygame.display.set_caption("Astros")
-        pygame.display.set_icon(icon)
+        pygame.display.set_icon(assets.ICON)
         self.clock = pygame.time.Clock()
         self.sounds = load_sounds()
         self.running = True
@@ -60,31 +61,30 @@ class Menu:
                 break
 
             alpha = fade.update()
-            self.screen.fill((0, 0, 0))
+            self.screen.fill(COLOR_BLACK)
 
             now = pygame.time.get_ticks()
-            if now - self.last_blink > 500:
+            if now - self.last_blink > ONE_SECOND//2:
                 self.last_blink = now
 
-            start = self.font.render("Press any key to start", True,
-                                     (255, 255, 255))
-            title_y = 200
-            self.render_surface.fill((0, 0, 0))
+            start = self.font.render("Press any key to start", True,COLOR_WHITE)
+            title_y = TITLE_Y
+            self.render_surface.fill(COLOR_BLACK)
             surface_width, surface_height = self.render_surface.get_size()
             title_x = surface_width // 2 - self.logo_img.get_width() // 2
             start_x = surface_width // 2 - start.get_width() // 2
             self.render_surface.blit(self.logo_img, (title_x, title_y))
-            if (now // 500) % 2 == 0:
-                self.render_surface.blit(start, (start_x, title_y + 600))
+            if (now // ONE_SECOND//2) % 2 == 0:
+                self.render_surface.blit(start, (start_x, title_y + TITLE_OFFSET))
             self.screen.blit(pygame.transform.scale(self.render_surface, self.screen_size),(0, 0))
             if alpha > 0:
-                fade_surface = pygame.Surface((1920, 1080))
-                fade_surface.fill((0, 0, 0))
+                fade_surface = pygame.Surface(HD_RESOLUTION)
+                fade_surface.fill(COLOR_BLACK)
                 fade_surface.set_alpha(alpha)
                 self.render_surface.blit(fade_surface, (0, 0))
 
             self.crt.render(self.render_surface)
-            dt = self.clock.tick(60) / 1000
+            dt = self.clock.tick(FPS) / ONE_SECOND
 
             if self.transitioning and not fade.active:
                 self.init_game()

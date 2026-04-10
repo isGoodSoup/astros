@@ -1,6 +1,7 @@
 import pygame
 
 from scripts.alien import Alien
+from scripts.settings import ASTEROID_PHASES, ALIEN_PHASES
 
 
 class AlienFleet:
@@ -52,16 +53,10 @@ class AlienFleet:
         return positions
 
     def update(self):
-        if not self.aliens:
-            return
-
-        for alien in self.aliens[:]:
-            if not alien.alive():
-                self.aliens.remove(alien)
-                alien.kill()
-
-        if not self.aliens:
-            return
+        def update(self):
+            self.aliens = [a for a in self.aliens if a.alive()]
+            if not self.aliens:
+                return
 
         now = pygame.time.get_ticks()
         if now - self.move_timer >= self.move_delay:
@@ -89,15 +84,10 @@ def spawn_fleet(game, phase):
             fleet_sprites.remove(alien)
             game.entities.remove(alien)
 
-    if game.fleets:
-        alive = any(fleet.aliens for fleet in game.fleets)
-        if alive:
-            return
-
-    if phase == game.state.phases[2] or phase == game.state.phases[4]:
+    if phase in ASTEROID_PHASES:
         clusters = 1
         rows, cols = 3, 8
-    elif phase in (game.state.phases[0], game.state.phases[1], game.state.phases[3]):
+    elif phase in ALIEN_PHASES:
         clusters = 1
         rows, cols = 5, 8
     elif phase == game.state.phases[-1]:
@@ -112,3 +102,6 @@ def spawn_fleet(game, phase):
         for alien in fleet.aliens:
             game.entities.add(alien)
     game.last_alien_spawn = pygame.time.get_ticks()
+
+def should_spawn(game):
+    return not any(fleet.aliens for fleet in game.fleets)

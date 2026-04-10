@@ -8,8 +8,10 @@ from scripts.boss import Boss
 from scripts.celestial import random_celestial, is_valid_spawn
 from scripts.collision import check_collision
 from scripts.explode import Explosion
-from scripts.fleet import spawn_fleet
+from scripts.fleet import spawn_fleet, should_spawn
 from scripts.particle import Particle
+from scripts.runtime import get_boss_pos, get_upgrade_position, get_ship_ember
+from scripts.settings import *
 from scripts.shared import joysticks, controller
 from scripts.upgd import Upgrade
 
@@ -22,26 +24,18 @@ def set_hud(screen_size):
 def update_phase(game):
     current_time = pygame.time.get_ticks()
     elapsed = current_time - game.state.phase_start_time
-    buffer_time = 5000
+    buffer_time = PHASE_BUFFER_TIME
 
     if elapsed >= game.state.phase_length - buffer_time:
         game.state.phase_ending = True
 
-    if not game.state.phase_spawned:
+    if should_spawn(game):
+        spawn_fleet(game, game.state.phase_index)
         if game.state.current_phase == game.state.phases[-1]:
             spawn_boss(game)
-        else:
-            spawn_fleet(game, game.state.current_phase)
         game.state.phase_spawned = True
 
-    fleets_alive = any(len(fleet.aliens) > 0 for fleet in game.fleets)
-    enemies_alive = any([
-        len(game.aliens) > 0,
-        len(game.asteroids) > 0,
-        len(game.bosses) > 0,
-        fleets_alive
-    ])
-
+    enemies_alive = any(sprite.alive() for sprite in game.entities)
     if (not game.hud.skill_tab.active and game.state.phase_ending and not enemies_alive
             and not game.state.skills_generated):
         game.hud.skill_tab.open((pygame.display.Info().current_w // 2 -
@@ -63,8 +57,11 @@ def update_phase(game):
     else:
         game.state.pause = False
 
-    if game.state.phase_ending and not enemies_alive and not game.hud.skill_tab.active:
-        game.state.phase_index = (game.state.phase_index + 1) % len(game.state.phases)
+    if (game.state.phase_ending and not game.fleets and not game.aliens
+            and not game.hud.skill_tab.active):
+        game.state.phase_index += 1
+        if game.state.phase_index >= len(game.state.phases):
+            game.state.phase_index = 0
         game.state.current_phase = game.state.phases[game.state.phase_index]
         game.state.phase_start_time = current_time
         game.state.phase_ending = False
@@ -75,17 +72,20 @@ def update_phase(game):
         game.state.skills_generated = False
 
 def spawn_asteroids(game):
-    spawns = random.randint(5, 10)
+    if game.state.phase_index not in ASTEROID_PHASES:
+        return
 
+    spawns = random.randint(5, 10)
     for _ in range(spawns):
         x = random.randint(0, game.screen_size[0] - 50)
-        y = random.randint(-200, -50)
+        y = random.randint(*ASTEROID_POS)
 
         asteroid = Asteroid(game.screen_size[0], min_y=y, max_y=y)
 
-        too_close = any(abs(asteroid.rect.y - a.rect.y) < 40 for a in game.asteroids)
+        too_close = any(abs(asteroid.rect.y - a.rect.y) < ASTEROID_MIN_DISTANCE
+                        for a in game.asteroids)
         if too_close:
-            asteroid.rect.y -= 50
+            asteroid.rect.y -= ASTEROID_OFFSET
 
         game.asteroids.add(asteroid)
         game.entities.add(asteroid)
@@ -93,9 +93,8 @@ def spawn_asteroids(game):
     game.last_asteroid_spawn = pygame.time.get_ticks()
 
 def spawn_boss(game):
-    if not game.state.phase_spawned:
-        x = game.screen_size[0] // 2
-        y = 350
+    if not game.state.phase_spawned and not game.state.pause:
+        x, y = get_boss_pos()
         color = ['red', 'green', 'yellow']
         boss = Boss(game, game.ship, game.enemy_projectiles, x, y,
                     random.choice(color))
@@ -139,11 +138,11 @@ def update_game(game, delta, screen_size, hud_padding):
             for _ in range(10):
                 new_celestial = random_celestial()
                 if new_celestial and is_valid_spawn(new_celestial, game.celestials,
-                                                    200):
+                                                    CELESTIAL_MIN_DISTANCE):
                     game.celestials.add(new_celestial)
                     break
 
-    if game.state.current_phase in [game.state.phases[2], game.state.phases[4]]:
+    if game.state.phase_index in ASTEROID_PHASES:
         current_time = pygame.time.get_ticks()
         if current_time - game.last_asteroid_spawn >= game.asteroid_spawn_interval:
             spawn_asteroids(game)
@@ -152,9 +151,7 @@ def update_game(game, delta, screen_size, hud_padding):
         game.last_upgrade_spawn = current_time
 
         for _ in range(random.randint(1, 2)):
-            x = random.randint(0, screen_size[0])
-            y = random.randint(-200, -50)
-
+            x, y = get_upgrade_position()
             game.last_upgrade = upgd.get_upgrade()
             upgrade_type = game.last_upgrade
             upgrade_path = f"assets/{upgrade_type}.png"
@@ -213,9 +210,9 @@ def update_game(game, delta, screen_size, hud_padding):
                 game.ship.critical = True
                 frequency = 0
                 if game.ship.critical:
-                    game.screen_shake = 60
+                    game.screen_shake = SCREEN_SHAKE * 2
                     if joysticks:
-                        controller.rumble(0.5, frequency, 80)
+                        controller.rumble(0.5, frequency, BASE_RUMBLE_MS * 2)
                     game.sounds[5].play()
                     frequency += 0.1
 
@@ -224,8 +221,8 @@ def update_game(game, delta, screen_size, hud_padding):
             hp_ratio = game.ship.hitpoints / game.ship.max_hitpoints
             num_particles = int(8 * (1 - hp_ratio))
             if hp_ratio < 0.2:
-                color = (255, random.randint(50, 150), 0)
-            color = (255, 255, 255) if hp_ratio > 0.5 else (100, 100, 100)
+                color = get_ship_ember()
+            color = COLOR_WHITE if hp_ratio > 0.5 else COLOR_SMOKE
             for _ in range(num_particles):
                 velocity = pygame.Vector2(random.uniform(-1, 1),
                                           random.uniform(2, 4))
@@ -236,8 +233,7 @@ def update_game(game, delta, screen_size, hud_padding):
     alive_fleets = []
     for fleet in game.fleets:
         fleet.update()
-        if fleet.aliens:
-            alive_fleets.append(fleet)
+        alive_fleets.append(fleet)
     game.fleets = alive_fleets
 
     if game.state.current_phase == game.state.phases[-1]:
@@ -262,7 +258,7 @@ def update_game(game, delta, screen_size, hud_padding):
     update_shockwaves(game)
 
     game.state.survival_bonus += 1
-    if game.state.survival_bonus >= 60:
+    if game.state.survival_bonus >= FPS:
         game.state.survival_bonus = 0
         game.state.score += 1 * game.state.score_multiplier
 

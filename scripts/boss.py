@@ -4,10 +4,16 @@ import random
 import pygame
 
 from scripts.proj import Projectile
+from scripts.settings import (COLOR_RED, BOSS_BASE_SPEED, \
+                              BOSS_VERTICAL_STEP, ONE_SECOND, BOSS_PHASES,
+                              BOSS_ADVANTAGE, SCALE,
+                              BOSS_BASE_HITPOINTS, HIGH_FIRE_RATE, BOSS_COLORS,
+                              BOSS_BASE_DAMAGE)
 
 class Boss(pygame.sprite.Sprite):
-    def __init__(self, game, ship, projectiles, x, y, color, frame=0, width=32,
-                 height=32, scale=8, columns=1, offset_x=0, offset_y=0):
+    def __init__(self, game, ship, projectiles, x, y, color, frame=0,
+                 width=32, height=32, scale=SCALE*2,
+                 columns=1, offset_x=0, offset_y=0):
         super().__init__()
         self.image = pygame.image.load(f"assets/aliens/{color}.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (width * scale, height * scale))
@@ -24,17 +30,17 @@ class Boss(pygame.sprite.Sprite):
         self.shooting = False
         self.moving = False
 
-        self.colors = {'red' : 100, 'green' : 200, 'yellow' : 300}
-        self.level = ship.level + 20
-        self.max_hitpoints = 100 * self.level + self.colors.get(color)
+        self.colors = BOSS_COLORS
+        self.level = ship.level + BOSS_ADVANTAGE
+        self.max_hitpoints = BOSS_BASE_HITPOINTS * self.level + self.colors.get(color)
         self.hitpoints = self.max_hitpoints
         self.base_damage = ship.damage * self.level
         self.last_shot_time = 0
-        self.shot_cooldown = 150
+        self.shot_cooldown = HIGH_FIRE_RATE
         self.last_move = pygame.time.get_ticks()
         self.move_timer = pygame.time.get_ticks()
         self.hit = False
-        self.boss_phases = ['phase1', 'phase2', 'phase3']
+        self.boss_phases = BOSS_PHASES
         self.current_phase = self.boss_phases[0]
         self.phase_index = 0
 
@@ -43,7 +49,7 @@ class Boss(pygame.sprite.Sprite):
             random.choice([-1, 1]) * random.uniform(3, 6)
         )
         self.phase2_change_time = pygame.time.get_ticks()
-        self.phase2_change_interval = 1000
+        self.phase2_change_interval = ONE_SECOND
 
         self.projectiles = projectiles
 
@@ -61,7 +67,8 @@ class Boss(pygame.sprite.Sprite):
             screen_height = pygame.display.Info().current_h
             if self.rect.right >= screen_width or self.rect.left <= 0:
                 self.direction *= -1
-                self.rect.y += 30 if not self.rect.y <= screen_height else 30
+                self.rect.y += BOSS_VERTICAL_STEP if not (self.rect.y <=
+                    screen_height) else 0
 
             self.rect.x += self.direction * self.step
             self.rect.x = max(0, min(self.rect.x, screen_width - self.rect.width))
@@ -80,7 +87,7 @@ class Boss(pygame.sprite.Sprite):
                 self.velocity.x += random.uniform(-2, 2)
                 self.velocity.y += random.uniform(-2, 2)
 
-                max_speed = 16
+                max_speed = BOSS_BASE_SPEED
                 if self.velocity.length() > max_speed:
                     self.velocity.scale_to_length(max_speed)
 
@@ -115,7 +122,7 @@ class Boss(pygame.sprite.Sprite):
                 self.velocity.x += random.uniform(-4, 4)
                 self.velocity.y += random.uniform(-4, 4)
 
-                max_speed = 32
+                max_speed = BOSS_BASE_SPEED * 2
                 if self.velocity.length() > max_speed:
                     self.velocity.scale_to_length(max_speed)
 
@@ -159,8 +166,8 @@ class Boss(pygame.sprite.Sprite):
         angle_offset = random.uniform(-0.2, 0.2)
 
         direction.rotate_ip(math.degrees(angle_offset))
-        self.projectiles.add(Projectile(self.rect.center, (255, 0, 0),
+        self.projectiles.add(Projectile(self.rect.center, COLOR_RED,
                           direction=(direction.x, direction.y),
                           speed=16,
-                          damage=100 * self.ship.level,
-                          range_limit=1000))
+                          damage=BOSS_BASE_DAMAGE * self.ship.level,
+                          range_limit=ONE_SECOND))

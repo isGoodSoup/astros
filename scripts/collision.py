@@ -6,12 +6,12 @@ from scripts.explode import Explosion
 from scripts.floaty import FloatingNumber
 from scripts.impact import ImpactFrame
 from scripts.particle import Particle
-from scripts.toggles import invincible
+from scripts.settings import *
 from scripts.utils import add_multiplier, formulize
 
 
 def check_collision(game):
-    if game.state.current_phase in [game.state.phases[2], game.state.phases[4]]:
+    if game.state.phase_index in ASTEROID_PHASES:
         asteroid_hit = pygame.sprite.spritecollideany(game.ship, game.asteroids, # type: ignore
             collided=lambda s,m: s.hitbox.colliderect(m.hitbox))
     else:
@@ -43,15 +43,15 @@ def check_collision(game):
             if asteroid_hit:
                 x, y = asteroid_hit.rect.center
                 game.floating_numbers.add(FloatingNumber(
-                    x, y, "MISS", game.font, color=(255, 255, 100)))
+                    x, y, "MISS", game.font, color=COLOR_LIGHT_YELLOW))
             elif alien_hit:
                 x, y = alien_hit.rect.center
                 game.floating_numbers.add(FloatingNumber(
-                    x, y, "MISS", game.font, color=(255, 255, 100)))
+                    x, y, "MISS", game.font, color=COLOR_LIGHT_YELLOW))
             elif alien_proj:
                 x, y = alien_proj.rect.center
                 game.floating_numbers.add(FloatingNumber(
-                    x, y, "MISS", game.font, color=(255, 255, 100)))
+                    x, y, "MISS", game.font, color=COLOR_LIGHT_YELLOW))
             return
 
         if alien_proj:
@@ -74,12 +74,12 @@ def check_collision(game):
             if previous_combo > 1.0:
                 x, y = game.ship.rect.centerx, game.ship.rect.top
                 game.floating_numbers.add(FloatingNumber(x, y, "NO MULT!",
-                        game.font, color=(255, 0, 0)))  # type: ignore
+                        game.font, color=COLOR_RED))  # type: ignore
 
             game.explosions.add(Explosion(*game.ship.rect.center,
                                   game.frame_explode))  # type: ignore
 
-            for _ in range(10):
+            for _ in range(PARTICLES_AMOUNT):
                 vel = [random.uniform(-2, 2), random.uniform(-2, 2)]
                 game.particles.append(Particle(game.ship.rect.center, vel))
 
@@ -88,12 +88,12 @@ def check_collision(game):
 
             damage_per_frame = 0
             boss_damage = 9999 if boss_hit else 0
-            if not invincible:
+            if not TOGGLE_INVINCIBLE:
                 if game.ship.shield > 0:
-                    damage_per_frame = (max(1,game.ship.max_shield // 33) * game.ship.level)
+                    damage_per_frame = (max(1,game.ship.max_shield // SHIP_SHIELD_FRAMES) * game.ship.level)
                     game.ship.shield -= damage_per_frame + boss_damage
                 else:
-                    damage_per_frame = max(1,game.ship.max_hitpoints // 28) * game.ship.level
+                    damage_per_frame = max(1,game.ship.max_hitpoints // SHIP_HITPOINTS_FRAMES) * game.ship.level
                     game.ship.hitpoints -= damage_per_frame + boss_damage
 
             if hasattr(game.ship, "fortified_percent"):
@@ -103,7 +103,7 @@ def check_collision(game):
                         shield_gain = min(shield_gain, game.ship.fortified_cap)
                     game.ship.shield += shield_gain
 
-            game.screen_shake = 20
+            game.screen_shake = SCREEN_SHAKE // 2
 
             if game.ship.hitpoints <= 0:
                 game.state.game_over = True
@@ -123,12 +123,12 @@ def check_collision(game):
             effective_crit_chance = min(1.0, game.ship.crit_chance + game.ship.maniac_boost)
             if random.random() < effective_crit_chance:
                 damage_per_frame = game.ship.damage * game.ship.crit_multiplier
-                color = (255, 50, 50)
-                size = 36
+                color = COLOR_LIGHT_RED
+                size = SHIP_CRIT_CHANCE_SIZE
             else:
                 damage_per_frame = game.ship.damage
-                color = (255, 200, 0)
-                size = 24
+                color = COLOR_LIGHT_ORANGE
+                size = SHIP_DAMAGE_SIZE
 
             if not game.ship.hit:
                 game.ship.combo_multiplier += 0.1
@@ -152,14 +152,14 @@ def check_collision(game):
             impact = ImpactFrame(asteroid.rect.centerx, asteroid.rect.centery,
                                  game.frame_explode[0])
             game.explosions.add(impact)
-            for _ in range(10):
+            for _ in range(PARTICLES_AMOUNT):
                 vel = [random.uniform(-2, 2), random.uniform(-2, 2)]
                 game.particles.append(Particle((asteroid.rect.centerx,
                                                 asteroid.rect.centery), vel))
 
             if asteroid.hitpoints <= 0:
                 asteroid.kill()
-                game.ship.credits += random.randint(1, 50)
+                game.ship.credits += random.randint(1, SHIP_CREDITS_CAP)
                 if maniac_skill := next(
                         (s for s in game.skills.get_unlocked() if
                          s.name == "Maniac"), None):
@@ -170,7 +170,7 @@ def check_collision(game):
                 if game.state.play_sound:
                     game.sounds[1].play()
                 game.state.score_multiplier = game.ship.combo_multiplier
-                game.state.score += (game.ship.level * 10 *
+                game.state.score += (game.ship.level * SCORE_SCALING *
                                 game.state.score_multiplier)
                 game.ship.gain_xp(formulize(game, game.ship.level), game.sounds)
 
@@ -184,12 +184,12 @@ def check_collision(game):
             effective_crit_chance = min(1.0, game.ship.crit_chance + game.ship.maniac_boost)
             if random.random() < effective_crit_chance:
                 damage_per_frame = game.ship.damage * game.ship.crit_multiplier
-                color = (255, 50, 50)
-                size = 36
+                color = COLOR_LIGHT_RED
+                size = SHIP_CRIT_CHANCE_SIZE
             else:
                 damage_per_frame = game.ship.damage
-                color = (255, 200, 0)
-                size = 24
+                color = COLOR_LIGHT_ORANGE
+                size = SHIP_DAMAGE_SIZE
 
             if not game.ship.hit:
                 game.ship.combo_multiplier += 0.1
@@ -213,14 +213,13 @@ def check_collision(game):
             impact = ImpactFrame(alien.rect.centerx, alien.rect.centery,
                                  game.frame_explode[0])
             game.explosions.add(impact)
-            for _ in range(10):
+            for _ in range(PARTICLES_AMOUNT):
                 vel = [random.uniform(-2, 2), random.uniform(-2, 2)]
-                game.particles.append(
-                    Particle((alien.rect.centerx, alien.rect.centery), vel))
+                game.particles.append(Particle((alien.rect.centerx, alien.rect.centery), vel))
 
             if alien.hitpoints <= 0:
                 alien.kill()
-                game.ship.credits += random.randint(1, 100)
+                game.ship.credits += random.randint(1, SHIP_CREDITS_CAP)
                 if maniac_skill := next(
                         (s for s in game.skills.get_unlocked() if
                          s.name == "Maniac"), None):
@@ -231,7 +230,7 @@ def check_collision(game):
                 if game.state.play_sound:
                     game.sounds[1].play()
                 game.state.score_multiplier = game.ship.combo_multiplier
-                game.state.score += (game.ship.level * 10 * game.state.score_multiplier)
+                game.state.score += (game.ship.level * SCORE_SCALING * game.state.score_multiplier)
                 game.ship.gain_xp(formulize(game, game.ship.level), game.sounds)
 
     hits3 = pygame.sprite.groupcollide(game.projectiles, game.bosses, True, False)
@@ -244,12 +243,12 @@ def check_collision(game):
             effective_crit_chance = min(1.0, game.ship.crit_chance + game.ship.maniac_boost)
             if random.random() < effective_crit_chance:
                 damage_per_frame = game.ship.damage * game.ship.crit_multiplier
-                color = (255, 50, 50)
-                size = 36
+                color = COLOR_LIGHT_RED
+                size = SHIP_CRIT_CHANCE_SIZE
             else:
                 damage_per_frame = game.ship.damage
-                color = (255, 200, 0)
-                size = 24
+                color = COLOR_LIGHT_ORANGE
+                size = SHIP_DAMAGE_SIZE
 
             if not game.ship.hit:
                 game.ship.combo_multiplier += 0.1
@@ -273,14 +272,14 @@ def check_collision(game):
             impact = ImpactFrame(boss.rect.centerx, boss.rect.centery,
                                  game.frame_explode[0])
             game.explosions.add(impact)
-            for _ in range(10):
+            for _ in range(PARTICLES_AMOUNT):
                 vel = [random.uniform(-2, 2), random.uniform(-2, 2)]
                 game.particles.append(
                     Particle((boss.rect.centerx, boss.rect.centery), vel))
 
             if boss.hitpoints <= 0:
                 boss.kill()
-                game.ship.credits += random.randint(1, 100)
+                game.ship.credits += random.randint(1, SHIP_CREDITS_CAP)
                 if maniac_skill := next(
                         (s for s in game.skills.get_unlocked() if
                          s.name == "Maniac"), None):
@@ -291,7 +290,7 @@ def check_collision(game):
                 if game.state.play_sound:
                     game.sounds[1].play()
                 game.state.score_multiplier = game.ship.combo_multiplier
-                game.state.score += game.ship.level * 10 * game.state.score_multiplier
+                game.state.score += game.ship.level * SCORE_SCALING * game.state.score_multiplier
                 game.ship.gain_xp(formulize(game, game.ship.level), game.sounds)
 
     for projectile in list(game.projectiles):

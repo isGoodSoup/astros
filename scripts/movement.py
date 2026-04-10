@@ -3,6 +3,8 @@ import math
 import pygame
 from pygame.constants import *
 
+from scripts.settings import FPS
+
 lock_y = False
 
 def get_next_skill(current, skills, direction):
@@ -46,21 +48,21 @@ def update_movement(game, delta, screen_size):
     movement_y = 0
 
     if key_pressed[K_LEFT]:
-        movement_x -= game.ship.velocity * delta * 60
+        movement_x -= game.ship.velocity * delta * FPS
 
     if key_pressed[K_RIGHT]:
-        movement_x += game.ship.velocity * delta * 60
+        movement_x += game.ship.velocity * delta * FPS
 
     if not lock_y:
         if key_pressed[K_UP]:
-            movement_y -= game.ship.velocity * delta * 60
+            movement_y -= game.ship.velocity * delta * FPS
 
         if key_pressed[K_DOWN]:
-            movement_y += game.ship.velocity * delta * 60
+            movement_y += game.ship.velocity * delta * FPS
 
-    movement_x += game.input.left_joystick[0] * game.ship.velocity * delta * 60
+    movement_x += game.input.left_joystick[0] * game.ship.velocity * delta * FPS
     if not lock_y:
-        movement_y += game.input.left_joystick[1] * game.ship.velocity * delta * 60
+        movement_y += game.input.left_joystick[1] * game.ship.velocity * delta * FPS
 
     game.ship_x = max(0, min(screen_size[0] - game.base.get_width(),
                              game.ship_x + movement_x))

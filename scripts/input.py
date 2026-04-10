@@ -1,6 +1,7 @@
 import pygame
 
 from scripts.game_over import reboot
+from scripts.settings import (ONE_SECOND, SCREEN_SHAKE, INPUT_NAV_COOLDOWN)
 from scripts.shared import joysticks, controller
 from scripts.ship import get_nearest_enemy
 from scripts.soundlib import decrease_volume, increase_volume
@@ -14,23 +15,18 @@ class Input:
         self.deadzone = 0.2
 
         self.cursor_pos = [screen_size[0] // 2, screen_size[1] // 2]
-        self.cursor_speed = 1000
+        self.cursor_speed = ONE_SECOND
         self.selected_skill_index = 0
         self.selected_skill = None
-        self.nav_cooldown = 150
+        self.nav_cooldown = INPUT_NAV_COOLDOWN
         self.last_nav_time = 0
         self.mode = "mouse"
         self.last_input_time = pygame.time.get_ticks()
 
-        self.charge_active = False
-        self.charge_start_time = 0
-        self.charge_duration = 2000
-        self.charge_rumble = 0.3
-
         self.cursor_visible = False
         self.last_cursor_pos = pygame.mouse.get_pos()
         self.last_move_time = pygame.time.get_ticks()
-        self.cursor_hide_delay = 3000
+        self.cursor_hide_delay = ONE_SECOND * 3
         self.moving_hud = False
 
     def update(self, game, events):
@@ -95,7 +91,7 @@ class Input:
                 game.sounds[0].play()
 
             if game.ship.gun == "shotgun" and game.ship.guns_ammo['shotgun'] > 0:
-                game.screen_shake = 20
+                game.screen_shake = SCREEN_SHAKE // 2
 
         for event in events:
             if event.type == pygame.KEYDOWN:

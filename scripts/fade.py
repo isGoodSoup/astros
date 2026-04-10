@@ -1,6 +1,5 @@
 import pygame
 
-
 class Fade:
     def __init__(self, duration=1000):
         self.duration = duration

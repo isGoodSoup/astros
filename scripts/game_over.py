@@ -1,14 +1,15 @@
 import pygame
 
+from scripts.settings import ONE_SECOND, COLOR_WHITE, COLOR_RED
 from scripts.ship import Ship
 from scripts.utils import center
 
 def game_lost(game, font, screen, screen_size):
     now = pygame.time.get_ticks()
-    if now - game.last_blink > 500:
+    if now - game.last_blink > ONE_SECOND//2:
         game.last_blink = now
 
-    game_over = font.render("GAME OVER", True, (255, 0, 0))
+    game_over = font.render("GAME OVER", True, COLOR_RED)
 
     if game.state.play_sound and getattr(game, "game_over_fx", True):
         game.sounds[-1].play()
@@ -23,13 +24,13 @@ def game_lost(game, font, screen, screen_size):
     game.clock.minutes = 0
     game.clock.hours = 0
 
-    score_text = font.render(f"{int(game.state.score):05}", True, (255, 255, 255))
+    score_text = font.render(f"{int(game.state.score):05}", True, COLOR_WHITE)
     stopwatch = game.clock.stopwatch if game.clock.stopwatch is not None else \
-        (font.render("00:00:00", True, (255, 255, 255)))
+        (font.render("00:00:00", True, COLOR_WHITE))
     game_over_x = center(game, game_over, screen_size)
     game_over_y = screen_size[1] // 2
 
-    if (now // 500) % 2 == 0:
+    if (now // ONE_SECOND//2) % 2 == 0:
         screen.blit(game_over, [game_over_x, game_over_y])
 
     screen.blit(score_text, [center(game, score_text, screen_size), game_over_y + 25])

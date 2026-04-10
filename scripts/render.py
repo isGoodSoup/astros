@@ -1,21 +1,21 @@
 import pygame
 
+from scripts.settings import TOGGLE_TUTORIAL, COLOR_BLUE, COLOR_RED, \
+    COLOR_GREEN, COLOR_WHITE, STAT_Y_OFFSET, SKILL_TAB_OFFSETS, ASTEROID_PHASES
 from scripts.shared import joysticks
-from scripts.toggles import tutorial_on
-
 
 def render_frame(game, screen, font, hud_padding):
     for i in game.stars:
-        pygame.draw.circle(screen, (255, 255, 255), (int(i[0]), int(i[1])), i[2])
+        pygame.draw.circle(screen, COLOR_WHITE, (int(i[0]), int(i[1])), i[2])
 
     game.celestials.draw(screen)
-    if game.state.current_phase in [game.state.phases[2], game.state.phases[4]]:
+    if game.state.phase_index in ASTEROID_PHASES:
         game.asteroids.draw(screen)
 
-    if game.state.current_phase in game.state.phases:
+    if game.state.phase_index < len(game.state.phases) - 1:
         game.aliens.draw(screen)
 
-    if game.state.current_phase == game.state.phases[-1]:
+    if game.state.phase_index == len(game.state.phases) - 1:
         game.bosses.draw(screen)
 
     game.projectiles.draw(screen)
@@ -33,25 +33,25 @@ def render_frame(game, screen, font, hud_padding):
 
     if game.state.debugging:
         for i in game.asteroids:
-            pygame.draw.rect(screen, (255, 0, 0), i.hitbox, 2)
+            pygame.draw.rect(screen, COLOR_RED, i.hitbox, 2)
 
         for a in game.aliens:
-            pygame.draw.rect(screen, (255, 0, 0), a.rect, 2)
+            pygame.draw.rect(screen, COLOR_RED, a.rect, 2)
 
         for u in game.upgrades:
-            pygame.draw.rect(screen, (0, 255, 0), u.rect, 2)
+            pygame.draw.rect(screen, COLOR_GREEN, u.rect, 2)
 
         for p in game.projectiles:
-            pygame.draw.rect(screen, (0, 0, 255), p.rect, 2)
+            pygame.draw.rect(screen, COLOR_BLUE, p.rect, 2)
 
         for b in game.bosses:
-            pygame.draw.rect(screen, (255, 0, 0), b.rect, 2)
+            pygame.draw.rect(screen, COLOR_RED, b.rect, 2)
 
     if game.ship_alive:
         game.ship.rect.topleft = (game.ship_x, game.ship_y)
         screen.blit(img, game.ship.rect)
         if game.state.debugging:
-            pygame.draw.rect(screen, (255, 0, 0), game.ship.hitbox, 2)
+            pygame.draw.rect(screen, COLOR_RED, game.ship.hitbox, 2)
 
     game.explosions.draw(screen)
 
@@ -76,21 +76,21 @@ def render_frame(game, screen, font, hud_padding):
     game.hud.stats_tab.render(game, screen, font, hud_padding)
     game.hud.skill_tab.render(game, screen, font, hud_padding)
 
-    if tutorial_on:
+    if TOGGLE_TUTORIAL:
         game.tutorial.render(screen, font)
 
     if game.state.pause and (not game.hud.skill_tab.active or not
             game.hud.stats_tab.active):
         pause_text = "PAUSED"
-        pause = game.font.render(pause_text, True, (255, 255, 255))
+        pause = game.font.render(pause_text, True, COLOR_WHITE)
         screen.blit(pause, [game.screen_size[0]//2 - pause.get_width()//2,
                     game.screen_size[1]//2 - pause.get_height()//2])
 
 def render_skills_tab(game, screen, rect, game_font):
     title_text, perks = "Victory!", f"Perks: {game.ship.perk_points}"
-    title = game_font.render(title_text, True, (255, 255, 255))
-    perk_points = game_font.render(perks, True, (255, 255, 255))
-    padding, offset = 60, 20
+    title = game_font.render(title_text, True, COLOR_WHITE)
+    perk_points = game_font.render(perks, True, COLOR_WHITE)
+    padding, offset = SKILL_TAB_OFFSETS
 
     screen.blit(title, (rect.x + 300 + offset, rect.y + padding))
     screen.blit(perk_points, (rect.x + 300 + offset, rect.y + padding + 40))
@@ -122,9 +122,9 @@ def render_stats_tab(game, screen, rect, game_font):
         f"Crit Multiplier: {int(game.ship.crit_multiplier)}",
     ]
 
-    y_offset = 40
+    y_offset = STAT_Y_OFFSET
     for stat in stats:
-        text_surface = game_font.render(stat, True, (255, 255, 255))
+        text_surface = game_font.render(stat, True, COLOR_WHITE)
         screen.blit(text_surface, (rect.x + 40, rect.y + y_offset))
         y_offset += 50
 
