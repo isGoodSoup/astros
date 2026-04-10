@@ -54,8 +54,13 @@ class Input:
         if moved:
             self.last_move_time = now
             self.cursor_visible = True
+
+        elif game.hud.skill_tab.active:
+            self.cursor_visible = False
+
         elif game.state.current_phase == game.state.phases[-1]:
             self.cursor_visible = False
+
         else:
             self.cursor_visible = (now - self.last_move_time <= self.cursor_hide_delay)
 
