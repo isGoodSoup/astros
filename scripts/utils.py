@@ -1,10 +1,20 @@
 import datetime
+import functools
 import os
 import sys
 
 import pygame
 
 from scripts.floaty import FloatingNumber
+
+
+def legacy(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+
+    wrapper.__legacy__ = True
+    return wrapper
 
 def formulize(game, level, base_xp=5):
     score_factor = game.state.score ** 0.5
