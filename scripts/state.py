@@ -19,6 +19,7 @@ class GameState:
         self.total_phases = PHASES_TOTAL
         self.phases = PHASES
         self.phase_index = PHASE_START
+        self.real_phase_index = 0
         self.current_phase = self.phases[self.phase_index]
         self.current_phase_options = []
         self.phase_start_time = pygame.time.get_ticks()

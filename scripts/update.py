@@ -73,6 +73,7 @@ def update_phase(game):
             game.hud.skill_tab.active and not game.state.phase_transitioned):
         game.state.phase_transitioned = True
         game.state.phase_index += 1
+        game.state.real_phase_index += 1
         if game.state.phase_index >= len(game.state.phases):
             game.state.phase_index = 0
         game.spawnpoint(game.ship, game.screen_size, game.selected_sheet,

@@ -187,7 +187,7 @@ class HUD:
         ammo_y = gun_name_y + gun_name_surface.get_height() + LINE_SPACING
         screen.blit(ammo_surface, [ammo_x, ammo_y])
 
-        wave_text = local.t('game.hud.wave', wave=game.state.phase_index + 1)
+        wave_text = local.t('game.hud.wave', wave=game.real_phase_index + 1)
         wave_surface = font.render(wave_text, True, COLOR_WHITE)
         wave_x = score_x
         y += line_spacing
