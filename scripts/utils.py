@@ -24,6 +24,10 @@ def level_enemies(game):
         game.asteroid_hitpoints = 1 + 0.1 * game.ship.level
         game.asteroid_speed = 1 + 10 * game.ship.level
 
+    for alien in game.aliens:
+        game.alien_hitpoints = 1 + 0.1 * game.ship.level
+        game.alien_speed = 1 + 10 * game.ship.level
+
 def debug(game):
     game.state.debugging = not game.debugging
 

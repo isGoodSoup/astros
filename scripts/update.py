@@ -30,12 +30,16 @@ def update_phase(game):
     if elapsed >= game.state.phase_length - buffer_time:
         game.state.phase_ending = True
 
-    if not game.state.phase_spawned:
-        if game.state.phase_index < len(game.state.phases) - 1:
+    if (not game.aliens and not game.bosses and
+            not game.state.phase_spawned and
+            not game.state.pause):
+        if game.state.phase_index == len(game.state.phases) - 1:
+            spawn_boss(game)
+        else:
             spawn_fleet(game, game.state.phase_index)
 
-        if game.state.phase_index in ASTEROID_PHASES:
-            spawn_asteroids(game)
+            if game.state.phase_index in ASTEROID_PHASES:
+                spawn_asteroids(game)
 
         game.state.phase_spawned = True
 
