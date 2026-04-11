@@ -134,8 +134,9 @@ def render_skills_tab(game, screen, rect, game_font):
                                                    COLOR_WHITE)
             description_rect = description_surface.get_rect(center=desc_rect.center)
 
-            lines = wrap_text(skill.description, game_font.get_font(),
-                              desc_rect.width)
+            text = local.t(skill.description_key)
+            lines = wrap_text(text, game_font.get_font(), desc_rect.width)
+
             screen.set_clip(desc_rect)
 
             y = desc_rect.top
