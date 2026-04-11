@@ -7,10 +7,11 @@ from scripts.proj import Projectile
 from scripts.settings import *
 
 class Ship(pygame.sprite.Sprite):
-    def __init__(self, sprite_sheet, x, y, frame, width, height, scale=4,
+    def __init__(self, sprite_sheet, x, y, frame, width, height, scale=SCALE,
                  columns=1):
         super().__init__()
-        self.original_image = sprite_sheet.get_image(frame, width, height,scale, columns)
+        self.original_image = sprite_sheet.get_image(frame, width, height,
+                                                     scale, columns)
         self.image = self.original_image
         self.rect = self.image.get_rect(topleft=(x, y))
         self.hitbox = self.rect.inflate(self.rect.width * SHIP_HITBOX,
