@@ -1,9 +1,7 @@
 import pygame
 
 from scripts.settings import FPS, ONE_SECOND
-from scripts.update import spawn_boss
 from scripts.utils import level_enemies
-
 
 class Clock:
     def __init__(self):
@@ -28,10 +26,6 @@ class Clock:
             self.seconds += 1
             if (game.state.current_phase == game.state.phases[-1] and not
             game.state.boss_spawned):
-                spawn_boss(game)
-                game.state.boss_alive = True
-                game.state.boss_spawned = True
-            else:
                 game.state.current_phase = game.state.phases[
                     game.state.phase_index]
                 game.last_alien_spawn = 0
