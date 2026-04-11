@@ -47,6 +47,7 @@ class Ship(pygame.sprite.Sprite):
 
         self.maniac_boost = 0
         self.maniac_boost_end = 0
+        self.maniac_penalty = 0
 
         self.tower_boost = 0
         self.tower_boost_end = 0
@@ -70,7 +71,8 @@ class Ship(pygame.sprite.Sprite):
 
         self.shield_regen = False
         self.shield_regen_end = 0
-        self.shield_regen_rate = int(self.max_shield * 0.05)
+        self.shield_regen_multiplier = 0.05
+        self.shield_regen_rate = int(self.max_shield * self.shield_regen_multiplier)
 
         self.last_hit_time = 0
         self.hit_cooldown = SHIP_IFRAMES
