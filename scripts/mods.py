@@ -6,6 +6,7 @@ import scripts.assets as assets
 from scripts.fonts import FontManager
 from scripts.game import Game
 from scripts.lang import local
+from scripts.settings import SCALE, SHIP_FRAMES
 from scripts.shared import fade, joysticks
 
 
@@ -15,9 +16,8 @@ class Mods:
         self.running = True
         self.screen_size = screen_size
         self.font = FontManager(None, 36)
-        self.scale = 4
-        self.preview_scale = 2
-        self.ship_frames = 9
+        self.preview_scale = SCALE//2
+        self.ship_frames = SHIP_FRAMES
         self.ship_flying = False
         self.flight_speed = 16
         self.flight_offset = 0
@@ -35,8 +35,11 @@ class Mods:
             frameh = sheet.sheet.get_height()
             idle_frame_index = 2
 
-            preview = sheet.get_image(idle_frame_index,
-                framew, frameh, scale=self.scale, columns=self.ship_frames).convert_alpha()
+            preview = sheet.get_frame(idle_frame_index,
+                cols=self.ship_frames).convert_alpha()
+
+            preview = pygame.transform.scale(preview, (framew * SCALE,
+                                                       frameh * SCALE))
 
             large_preview = pygame.transform.scale(preview,
                 (preview.get_width() * self.preview_scale,
