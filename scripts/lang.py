@@ -1,5 +1,7 @@
 import json
-import os
+
+from scripts.utils import resource_path
+
 
 class Localization:
     def __init__(self, lang="en"):
@@ -8,7 +10,7 @@ class Localization:
         self.load(lang)
 
     def load(self, lang):
-        path = os.path.join("lang", f"{lang}.json")
+        path = resource_path(f"lang/{lang}.json")
 
         with open(path, "r", encoding="utf-8") as f:
             self.translations = json.load(f)
