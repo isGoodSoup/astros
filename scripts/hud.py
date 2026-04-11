@@ -169,7 +169,8 @@ class HUD:
                          current_gun_frame, screen, hud_padding)
 
         current_ammo = game.ship.guns_ammo[game.ship.gun]
-        total_ammo = game.ship.base_guns_ammo[game.ship.gun]
+        total_ammo = "inf" if game.ship.gun == "beam" else (
+            game.ship.base_guns_ammo)[game.ship.gun]
 
         guns_center_x = self.guns.hud_x + self.guns.image.get_width() // 2
         guns_bottom_y = self.guns.hud_y + self.guns.image.get_height()

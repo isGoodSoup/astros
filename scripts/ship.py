@@ -30,7 +30,13 @@ class Ship(pygame.sprite.Sprite):
         self.guns = SHIP_GUNS_RATES
         self.guns_ammo = SHIP_AMMO
         self.base_guns_ammo = self.guns_ammo.copy()
-        self.arsenal = sum(self.guns_ammo.values())
+
+        total_arsenal = 0
+        for ammo in self.guns_ammo:
+            if ammo == "beam": continue
+            total_arsenal += self.guns_ammo[ammo]
+
+        self.arsenal = total_arsenal
         self.base_damage = SHIP_BASE_DAMAGE
         self.damage = self.base_damage
         self.combo_multiplier = 1.0
