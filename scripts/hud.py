@@ -2,15 +2,7 @@ import pygame
 
 from scripts.lang import local
 from scripts.render import render_skills_tab, render_stats_tab
-from scripts.settings import (COLOR_WHITE, COLOR_LIGHT_ORANGE, SKILL_TAB_Y, \
-                              INTERFACE_HITPOINTS, INTERFACE_SHIELD,
-                              INTERFACE_SHIELD_COLS, \
-                              INTERFACE_SHIELD_OFFSET, INTERFACE_XP,
-                              INTERFACE_XP_OFFSET, INTERFACE_GUNS_COLS,
-                              INTERFACE_GUNS_OFFSET, INTERFACE_GUNS,
-                              INTERFACE_AMMO_OFFSET, INTERFACE_AMMO_COLS,
-                              INTERFACE_AMMO, INTERFACE_XP_COLS, SHIP_TAGS,
-                              TEXT_PADDING, LINE_SPACING)
+from scripts.settings import *
 from scripts.sheet import SpriteSheet
 from scripts.skill_tab import Tab
 from scripts.utils import resource_path
@@ -185,7 +177,7 @@ class HUD:
         gun_name_surface = font.render(gun_name, True, COLOR_LIGHT_ORANGE)
 
         gun_name_x = x_right_edge - gun_name_surface.get_width()
-        gun_name_y = self.guns.hud_y + 40
+        gun_name_y = self.guns.hud_y + GUN_LABEL_OFFSET
         screen.blit(gun_name_surface, (gun_name_x, gun_name_y))
         screen.blit(gun_name_surface, [gun_name_x, gun_name_y])
 
