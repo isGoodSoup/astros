@@ -1,12 +1,13 @@
 import pygame
 
 from scripts.game_over import reboot
-from scripts.lang import langs, current_lang, rotate_language
+from scripts.lang import rotate_language
 from scripts.settings import (ONE_SECOND, SCREEN_SHAKE, INPUT_NAV_COOLDOWN)
 from scripts.shared import joysticks, controller
 from scripts.ship import get_nearest_enemy
 from scripts.soundlib import decrease_volume, increase_volume
 from scripts.utils import take_screenshot
+
 
 class Input:
     def __init__(self, screen_size):
