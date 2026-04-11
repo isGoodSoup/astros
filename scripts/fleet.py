@@ -74,6 +74,9 @@ class AlienFleet:
         alive = len(self.aliens)
         total = self.rows * self.cols
 
+    def alive(self):
+        return any(a.alive() for a in self.aliens)
+
 def spawn_fleet(game, phase):
     fleet_sprites = pygame.sprite.Group()
     for alien in fleet_sprites.sprites():

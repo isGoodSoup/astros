@@ -23,17 +23,15 @@ def set_hud(screen_size):
             'width': width, 'height': height}
 
 def spawner(game):
+    now = pygame.time.get_ticks()
+
     if game.state.phase_state != PHASE_ACTIVE:
         return
-
-    now = pygame.time.get_ticks()
 
     if now - game.last_reinforcement_spawn < SPAWN_COOLDOWN:
         return
 
-    enemies_alive = len(game.aliens) > 0 or len(game.bosses) > 0
-
-    if enemies_alive:
+    if enemies_alive(game):
         return
 
     spawn_fleet(game, game.state.phase_index)
@@ -42,53 +40,61 @@ def spawner(game):
     if game.state.phase_index in ASTEROID_PHASES:
         spawn_asteroids(game)
 
+def enemies_alive(game):
+    return (any(a.alive() for a in game.aliens) or
+            any(b.alive() for b in game.bosses))
+
 def update_phase(game):
     now = pygame.time.get_ticks()
-
-    spawner(game)
-
-    enemies_alive = (any(a.alive() for a in game.aliens) or
-        any(b.alive() for b in game.bosses))
 
     score_goal = SCORE_BASE * game.state.score_scaling
 
     if game.state.phase_state == PHASE_ACTIVE:
-        if game.state.score >= score_goal:
+        spawner(game)
+        if (game.state.score >= SCORE_BASE * game.state.score_scaling or
+                now - game.state.phase_start_time >= game.state.phase_length):
             game.state.phase_state = PHASE_CLEANUP
 
-        elif now - game.state.phase_start_time >= game.state.phase_length - PHASE_BUFFER_TIME:
-            game.state.phase_state = PHASE_CLEANUP
+    elif game.state.phase_state == PHASE_CLEANUP:
+        if not enemies_alive(game):
+            game.state.phase_state = PHASE_TRANSITION
+            game.state.transition_started = False
 
-    if game.state.phase_state == PHASE_CLEANUP and not enemies_alive:
-        game.state.phase_state = PHASE_TRANSITION
+    elif game.state.phase_state == PHASE_TRANSITION:
+        if not game.state.transition_started:
+            game.state.transition_started = True
+            run_transition(game)
 
-    if game.state.phase_state == PHASE_TRANSITION:
-        game.hud.skill_tab.open((pygame.display.Info().current_w // 2
-                                 - game.hud.skill_tab.width // 2, 200))
+def run_transition(game):
+    if game.state.phase_state != PHASE_TRANSITION:
+        return
 
-        game.ship.perk_points += 1
-        game.state.score_scaling += 0.4
+    game.state.pause = True
+    game.hud.skill_tab.open((pygame.display.Info().current_w // 2 -
+                             game.hud.skill_tab.width // 2, 200))
 
-        available_skills = game.skills.skills
-        game.state.current_phase_options = random.sample(
-            available_skills, k=min(3, len(available_skills)))
+    game.ship.perk_points += 1
+    game.state.score_scaling += 0.4
 
-        game.input.selected_skill_index = 0
-        game.input.selected_skill = game.state.current_phase_options[0]
-        game.state.skills_generated = True
+    available_skills = game.skills.skills
+    game.state.current_phase_options = random.sample(available_skills,
+        k=min(3, len(available_skills)))
 
-        game.state.phase_index += 1
-        if game.state.phase_index >= len(game.state.phases):
-            game.state.phase_index = 0
+    game.input.selected_skill_index = 0
+    game.input.selected_skill = game.state.current_phase_options[0]
+    game.state.skills_generated = True
 
-        game.state.real_phase_index += 1
-        game.state.score = 0
+    game.state.phase_index = (game.state.phase_index + 1) % len(game.state.phases)
+    game.state.real_phase_index += 1
 
-        game.spawnpoint(game.ship, game.screen_size,
-            game.selected_sheet, game.ship_frames)
+    game.state.score = 0
 
-        game.last_reinforcement_spawn = pygame.time.get_ticks()
-        game.state.phase_state = PHASE_ACTIVE
+    game.spawnpoint(game.ship, game.screen_size,
+        game.selected_sheet, game.ship_frames)
+
+    game.last_reinforcement_spawn = pygame.time.get_ticks()
+    game.state.phase_start_time = pygame.time.get_ticks()
+    game.state.phase_state = PHASE_ACTIVE
 
 def spawn_asteroids(game):
     if game.state.phase_state != PHASE_ACTIVE:
@@ -256,7 +262,7 @@ def update_game(game, delta, screen_size, hud_padding):
                                 color=color, radius=4)
             game.particles.append(particle)
 
-    game.fleets = [f for f in game.fleets if any(a.alive() for a in f.aliens)]
+    game.fleets = [f for f in game.fleets if f.alive()]
     for fleet in game.fleets:
         fleet.update()
 

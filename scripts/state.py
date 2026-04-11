@@ -25,10 +25,10 @@ class GameState:
         self.current_phase = self.phases[self.phase_index]
         self.current_phase_options = []
         self.phase_start_time = pygame.time.get_ticks()
-        self.phase_to_sprite = {self.phases[i]: i for i in range(self.total_phases)}
         self.phase_colors = PHASE_COLORS
         self.phase_length = PHASE_LENGTH
         self.phase_spawned = False
+        self.transition_started = False
 
         self.boss_spawned = False
         self.boss_alive = False
