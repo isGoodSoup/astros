@@ -149,7 +149,7 @@ def update_shockwaves(game):
                               asteroid.rect.centery,
                               game.frame_big_explode))
                 game.state.score += game.ship.level * SCORE_SCALING * game.state.score_multiplier
-                game.ship.gain_xp(formulize(game, game.ship.level), game.sounds)
+                game.ship.gain_xp(formulize(game, game.ship.level), game.mixer.sounds)
                 asteroid.kill()
 
         for alien in list(game.aliens):
@@ -158,7 +158,7 @@ def update_shockwaves(game):
                               alien.rect.centery,
                               game.frame_big_explode))
                 game.state.score += (game.ship.level * SCORE_SCALING * game.state.score_multiplier)
-                game.ship.gain_xp(formulize(game, game.ship.level), game.sounds)
+                game.ship.gain_xp(formulize(game, game.ship.level), game.mixer.sounds)
                 alien.kill()
 
         game.aliens = pygame.sprite.Group([a for a in game.aliens if a.alive()])
@@ -255,7 +255,7 @@ def update_game(game, delta, screen_size, hud_padding):
                 game.screen_shake = SCREEN_SHAKE * 2
                 if joysticks:
                     controller.rumble(0.5, frequency, BASE_RUMBLE_MS * 2)
-                game.sounds[5].play()
+                game.mixer.sounds[5].play()
                 frequency += 0.1
 
         game.ship.update_position(game.ship.rect.x, game.ship.rect.y)

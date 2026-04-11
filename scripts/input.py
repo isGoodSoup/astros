@@ -91,10 +91,10 @@ class Input:
             game.last_shot_time = now
 
             if game.ship.guns_ammo[game.ship.gun] <= 0 and game.ship.gun != "beam":
-                game.sounds[4].play()
+                game.mixer.sounds[4].play()
 
             if game.state.play_sound:
-                game.sounds[0].play()
+                game.mixer.sounds[0].play()
 
             if game.ship.gun == "shotgun" and game.ship.guns_ammo['shotgun'] > 0:
                 game.screen_shake = SCREEN_SHAKE // 2
@@ -103,7 +103,7 @@ class Input:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_1:
                     rotate_language()
-                    game.sounds[4].play()
+                    game.mixer.sounds[4].play()
 
                 if event.key == pygame.K_TAB:
                     if not game.hud.skill_tab.active:

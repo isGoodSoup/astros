@@ -85,10 +85,10 @@ def check_collision(game):
                 game.particles.append(Particle(game.ship.rect.center, vel))
 
             if game.state.play_sound:
-                game.sounds[1].play()
+                game.mixer.sounds[1].play()
 
             damage_per_frame = 0
-            boss_damage = 9999 if boss_hit else 0
+            boss_damage = BOSS_DAMAGE if boss_hit else 0
             if not TOGGLE_INVINCIBLE:
                 if game.ship.shield > 0:
                     damage_per_frame = (max(1,game.ship.max_shield // SHIP_SHIELD_FRAMES) * game.ship.level)
@@ -169,11 +169,11 @@ def check_collision(game):
                                       asteroid.rect.centery, game.frame_explode)
                 game.explosions.add(explosion)
                 if game.state.play_sound:
-                    game.sounds[1].play()
+                    game.mixer.sounds[1].play()
                 game.state.score_multiplier = game.ship.combo_multiplier
                 game.state.score += (game.ship.level * SCORE_SCALING *
                                 game.state.score_multiplier)
-                game.ship.gain_xp(formulize(game, game.ship.level), game.sounds)
+                game.ship.gain_xp(formulize(game, game.ship.level), game.mixer.sounds)
 
     hits2 = pygame.sprite.groupcollide(game.projectiles, game.aliens, True, False)
     for projectile, aliens_hit in hits2.items():
@@ -229,10 +229,10 @@ def check_collision(game):
                                       game.frame_explode)
                 game.explosions.add(explosion)
                 if game.state.play_sound:
-                    game.sounds[1].play()
+                    game.mixer.sounds[1].play()
                 game.state.score_multiplier = game.ship.combo_multiplier
                 game.state.score += (game.ship.level * SCORE_SCALING * game.state.score_multiplier)
-                game.ship.gain_xp(formulize(game, game.ship.level), game.sounds)
+                game.ship.gain_xp(formulize(game, game.ship.level), game.mixer.sounds)
 
     hits3 = pygame.sprite.groupcollide(game.projectiles, game.bosses, True, False)
     for projectile, boss_hit in hits3.items():
@@ -289,10 +289,10 @@ def check_collision(game):
                                       game.frame_explode)
                 game.explosions.add(explosion)
                 if game.state.play_sound:
-                    game.sounds[1].play()
+                    game.mixer.sounds[1].play()
                 game.state.score_multiplier = game.ship.combo_multiplier
                 game.state.score += game.ship.level * SCORE_SCALING * game.state.score_multiplier
-                game.ship.gain_xp(formulize(game, game.ship.level), game.sounds)
+                game.ship.gain_xp(formulize(game, game.ship.level), game.mixer.sounds)
 
     for projectile in list(game.projectiles):
         if getattr(projectile, "nuke", False):
@@ -305,5 +305,5 @@ def check_collision(game):
         for upgrade in upgrade_hit:
             upgrade.kill()
             if game.state.play_sound:
-                game.sounds[2].play()
+                game.mixer.sounds[2].play()
                 upgrade.apply(game.ship)
