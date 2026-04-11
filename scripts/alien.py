@@ -4,7 +4,7 @@ import pygame
 
 from scripts.proj import Projectile
 from scripts.settings import ONE_SECOND, SHIP_HITBOX, ALIEN_HEIGHT, ALIEN_WIDTH, \
-    SCALE, ALIEN_ADVANTAGE, COLOR_GREEN
+    SCALE, ALIEN_ADVANTAGE, COLOR_GREEN, ALIEN_COLORS
 from scripts.utils import resource_path
 
 
@@ -25,7 +25,7 @@ class Alien(pygame.sprite.Sprite):
         self.shooting = False
         self.moving = False
 
-        self.level = ship.level + ALIEN_ADVANTAGE
+        self.level = ship.level + ALIEN_ADVANTAGE * ALIEN_COLORS[color]
         self.max_hitpoints = 2 * self.level
         self.hitpoints = self.max_hitpoints
         self.base_damage = ship.damage * self.level
