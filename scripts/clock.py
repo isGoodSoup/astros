@@ -1,7 +1,7 @@
 import pygame
 
 from scripts.settings import FPS, ONE_SECOND
-from scripts.utils import level_enemies
+
 
 class Clock:
     def __init__(self):
@@ -30,8 +30,6 @@ class Clock:
                     game.state.phase_index]
                 game.last_alien_spawn = 0
                 game.last_asteroid_spawn = 0
-                if game.state.current_phase in game.state.phases:
-                    level_enemies(game)
 
             if self.seconds >= FPS:
                 self.seconds = 0

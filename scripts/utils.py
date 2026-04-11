@@ -29,15 +29,6 @@ def add_multiplier(game, x, y, text, color=(255, 255, 0), font_size=24):
     game.floating_numbers.add(FloatingNumber(x, y + offset, text, game.font, color=color, # type: ignore
                        font_size=font_size))
 
-def level_enemies(game):
-    for asteroid in game.asteroids:
-        game.asteroid_hitpoints = 1 + 0.1 * game.ship.level
-        game.asteroid_speed = 1 + 10 * game.ship.level
-
-    for alien in game.aliens:
-        game.alien_hitpoints = 1 + 0.1 * game.ship.level
-        game.alien_speed = 1 + 10 * game.ship.level
-
 def debug(game):
     game.state.debugging = not game.debugging
 
