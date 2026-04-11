@@ -19,5 +19,15 @@
   "game.tutorial.move": "Mueve tu nave WASD o las flechas del teclado",
   "game.tutorial.shoot": "Presiona ESPACIO/A para disparar",
   "game.tutorial.switch": "Cambia G/X para cambiar el modo de disparo",
-  "game.tutorial.survive": "Sobrevive..."
+  "game.tutorial.survive": "Sobrevive...",
+  "game.skill.explorer": "Mejora la resistencia de tu nave, aumentando tanto la integridad del casco como la capacidad de los escudos. El aumento de masa reduce ligeramente la maniobrabilidad.",
+  "game.skill.berserk": "Abraza el poder destructivo a costa de la supervivencia. Tus armas infligen más daño, pero tus defensas se debilitan.",
+  "game.skill.maniac": "Entra en un estado de combate frenético que aumenta drásticamente la probabilidad de crítico durante un breve periodo. Una vez termina el frenesí, tus armas necesitan tiempo para recuperarse.",
+  "game.skill.madness": "Canaliza energía caótica para potenciar los golpes críticos, sacrificando estabilidad defensiva en el proceso.",
+  "game.skill.survivor": "Prioriza la supervivencia con escudos más fuertes y mejor evasión, a costa de la capacidad ofensiva.",
+  "game.skill.adventurer": "Mejora la agilidad y la velocidad para esquivar amenazas, sacrificando la resistencia de los escudos por movilidad.",
+  "game.skill.pilot": "La pericia de pilotaje mejora la supervivencia y la evasión, aunque el rendimiento ofensivo se reduce ligeramente.",
+  "game.skill.tank": "Transforma tu nave en una fortaleza fuertemente blindada. La enorme durabilidad se obtiene a costa de la agilidad y la maniobrabilidad.",
+  "game.skill.tower": "Conviértete en un bastión inamovible. Permanecer estático aumenta significativamente la capacidad de escudos, pero los refuerzos estructurales dificultan la movilidad.",
+  "game.skill.fortified": "Refuerza tus defensas para mitigar el daño recibido. Sin embargo, las pesadas fortificaciones ralentizan la recuperación de escudos."
 }

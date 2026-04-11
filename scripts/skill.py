@@ -1,4 +1,5 @@
 from scripts.all_skills import *
+from scripts.lang import local
 from scripts.sheet import SpriteSheet
 import pygame
 
@@ -84,40 +85,16 @@ class SkillManager:
         tower, fortified = (Skill("Tower", Tower(), "04a_tower"),
                             Skill("Fortified", Fortified(), "04b_fortified"))
 
-        explorer.set_description("Enhance your ship’s resilience, increasing both "
-                                 "hull integrity and shield capacity. The added bulk "
-                                 "slightly reduces maneuverability.")
-
-        berserk.set_description("Embrace raw destructive power at the cost of survivability. "
-                                "Your weapons hit harder, but your defenses suffer.")
-
-        maniac.set_description("Enter a manic combat state, dramatically increasing "
-                               "critical chance for a short time. Once the frenzy ends, "
-                               "your weapons require time to recover.")
-
-        madness.set_description("Channel chaotic energy to amplify critical strikes, "
-                                "sacrificing defensive stability in the process.")
-
-        survivor.set_description("Prioritize survival with stronger shields and "
-                                 "improved evasive maneuvers, at the expense of "
-                                 "offensive capability.")
-
-        adventurer.set_description("Enhance agility and speed to outmaneuver threats, "
-                                   "sacrificing shield strength for mobility.")
-
-        pilot.set_description("Expert piloting enhances survivability and evasiveness, "
-                              "though offensive output is modestly reduced.")
-
-        tank.set_description("Transform your ship into a heavily armored fortress. "
-                             "The immense durability comes at the cost of agility and "
-                             "maneuverability.")
-
-        tower.set_description("Become an immovable bastion. Remaining stationary "
-                              "significantly boosts shield capacity, but structural "
-                              "reinforcements hinder mobility.")
-
-        fortified.set_description("Reinforce your defenses to mitigate incoming damage. "
-                                  "However, the heavy fortifications slow shield recovery.")
+        explorer.set_description(local.t("game.skill.explorer"))
+        berserk.set_description(local.t("game.skill.berserk"))
+        maniac.set_description(local.t("game.skill.maniac"))
+        madness.set_description(local.t("game.skill.madness"))
+        survivor.set_description(local.t("game.skill.survivor"))
+        adventurer.set_description(local.t("game.skill.adventurer"))
+        pilot.set_description(local.t("game.skill.pilot"))
+        tank.set_description(local.t("game.skill.tank"))
+        tower.set_description(local.t("game.skill.tower"))
+        fortified.set_description(local.t("game.skill.fortified"))
 
         self.skills = [explorer, berserk, survivor, tank, maniac,
                        madness, adventurer, pilot, tower, fortified]

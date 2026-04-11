@@ -19,5 +19,15 @@
   "game.tutorial.move": "Move your ship WASD or Arrow Keys",
   "game.tutorial.shoot": "Press SPACE/A to shoot",
   "game.tutorial.switch": "Switch G/X to switch gun mode",
-  "game.tutorial.survive": "Survive..."
+  "game.tutorial.survive": "Survive...",
+  "game.skill.explorer": "Enhance your ship’s resilience, increasing both hull integrity and shield capacity. The added bulk slightly reduces maneuverability.",
+  "game.skill.berserk": "Embrace raw destructive power at the cost of survivability. Your weapons hit harder, but your defenses weaken.",
+  "game.skill.maniac": "Enter a manic combat state, dramatically increasing critical chance for a short time. Once the frenzy ends, your weapons require time to recover.",
+  "game.skill.madness": "Channel chaotic energy to amplify critical strikes, sacrificing defensive stability in the process.",
+  "game.skill.survivor": "Prioritize survival with stronger shields and improved evasive maneuvers, at the expense of offensive capability.",
+  "game.skill.adventurer": "Enhance agility and speed to outmaneuver threats, sacrificing shield strength for mobility.",
+  "game.skill.pilot": "Expert piloting enhances survivability and evasiveness, though offensive output is modestly reduced.",
+  "game.skill.tank": "Transform your ship into a heavily armored fortress. The immense durability comes at the cost of agility and maneuverability.",
+  "game.skill.tower": "Become an immovable bastion. Remaining stationary significantly boosts shield capacity, but structural reinforcements hinder mobility.",
+  "game.skill.fortified": "Reinforce your defenses to mitigate incoming damage. However, the heavy fortifications slow shield recovery."
 }

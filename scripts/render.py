@@ -129,7 +129,7 @@ def render_skills_tab(game, screen, rect, game_font):
         frame = pygame.transform.scale(skill.current_frame(), (64, 64))
 
         if skill.hovered and skill.description:
-            desc_rect = pygame.Rect(rect.x + 50, rect.y + 300, rect.width - 100, 150)
+            desc_rect = pygame.Rect(rect.x + 50, rect.y + 300, rect.width - 100, 180)
             description_surface = game_font.render(skill.description, True,
                                                    COLOR_WHITE)
             description_rect = description_surface.get_rect(center=desc_rect.center)
