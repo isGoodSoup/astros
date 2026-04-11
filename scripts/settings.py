@@ -110,6 +110,8 @@ SHIP_MISSILE_DAMAGE = 50
 
 FULL_360 = 360
 
+ALIEN_COLORS = {'red': 5, 'green': 10, 'yellow': 15, 'purple': 20,
+                'pink': 25, 'orange': 30}
 ALIEN_INITIAL_DELAY = 2500
 ALIEN_WIDTH = 44
 ALIEN_HEIGHT = 32
@@ -148,7 +150,9 @@ BOSS_COLORS = {
     "red": 100,
     "green": 200,
     "yellow": 300,
-    "purple": 800
+    "purple": 800,
+    "pink": 1000,
+    "orange": 2000
 }
 
 BOSS_DAMAGE = 9999
@@ -168,7 +172,7 @@ PHASE_BUFFER_TIME = 5000
 PHASES_TOTAL = 6
 
 PHASES = [f"wave_{i+1}" for i in range(PHASES_TOTAL)]
-PHASE_COLORS = ['red', 'green', 'yellow', 'purple']
+PHASE_COLORS = ['red', 'green', 'yellow', 'purple', 'pink', 'orange']
 
 STAR_COUNT = 100
 STAR_SPEED = 2
