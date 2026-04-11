@@ -69,9 +69,13 @@ class Input:
 
         is_boss_phase = game.state.current_phase == game.state.phases[-1]
 
-        shooting_input = ((joysticks and (controller.get_button(5) if
-            game.state.phases[-1] else controller.get_button(0)) or
-                          keys[pygame.K_SPACE] or mouse[0]) and not game.state.pause)
+        controller_shoot = False
+        if joysticks:
+            controller_shoot = (controller.get_button(5)
+                                or controller.get_button(0))
+
+        shooting_input = ((controller_shoot or keys[pygame.K_SPACE] or mouse[0])
+                          and not game.state.pause)
         if shooting_input and now - game.last_shot_time >= game.ship.shot_cooldown:
             if is_boss_phase:
                 enemies = list(game.bosses)
