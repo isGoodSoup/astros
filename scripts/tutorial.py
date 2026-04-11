@@ -1,5 +1,6 @@
 import pygame
 
+from scripts.lang import local
 from scripts.settings import COLOR_WHITE
 
 
@@ -34,21 +35,21 @@ class Tutorial:
 
     def render(self, screen, font):
         if self.step == 0:
-            text = font.render("Move your ship WASD or Arrow Keys", True, COLOR_WHITE)
+            text = font.render(local.t('game.tutorial.move'), True, COLOR_WHITE)
             screen.blit(text, (pygame.display.Info().current_w // 2 - text.get_width() // 2,
                                pygame.display.Info().current_h - 100))
 
         elif self.step == 1:
-            text = font.render("Press SPACE/A to shoot", True,COLOR_WHITE)
+            text = font.render(local.t('game.tutorial.shoot'), True,COLOR_WHITE)
             screen.blit(text, (pygame.display.Info().current_w // 2 - text.get_width() // 2,
                                pygame.display.Info().current_h - 100))
 
         elif self.step == 2:
-            text = font.render("Press G/X to switch gun mode", True, COLOR_WHITE)
+            text = font.render(local.t('game.tutorial.switch'), True, COLOR_WHITE)
             screen.blit(text, (pygame.display.Info().current_w // 2 - text.get_width() // 2,
                                pygame.display.Info().current_h - 100))
 
         elif self.step == 3:
-            text = font.render("Survive...", True,COLOR_WHITE)
+            text = font.render(local.t('game.tutorial.survive'), True, COLOR_WHITE)
             screen.blit(text, (pygame.display.Info().current_w // 2 - text.get_width() // 2,
                                pygame.display.Info().current_h - 100))

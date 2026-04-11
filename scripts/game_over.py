@@ -1,5 +1,6 @@
 import pygame
 
+from scripts.lang import local
 from scripts.settings import ONE_SECOND, COLOR_WHITE, COLOR_RED
 from scripts.ship import Ship
 from scripts.utils import center
@@ -9,7 +10,7 @@ def game_lost(game, font, screen, screen_size):
     if now - game.last_blink > ONE_SECOND//2:
         game.last_blink = now
 
-    game_over = font.render("GAME OVER", True, COLOR_RED)
+    game_over = font.render(local.t('game.defeat'), True, COLOR_RED)
 
     if game.state.play_sound and getattr(game, "game_over_fx", True):
         game.sounds[-1].play()

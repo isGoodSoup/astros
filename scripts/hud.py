@@ -1,5 +1,6 @@
 import pygame
 
+from scripts.lang import local
 from scripts.render import render_skills_tab, render_stats_tab
 from scripts.settings import (COLOR_WHITE, COLOR_LIGHT_ORANGE, SKILL_TAB_Y, \
                               INTERFACE_HITPOINTS, INTERFACE_SHIELD,
@@ -119,7 +120,7 @@ class HUD:
         score_x, y = padded_pos(hud_ratio['left'], hud_ratio['top'], 'left',
                                 'top', hud_padding)
 
-        score_title_surf = font.render("SCORE", True, COLOR_WHITE)
+        score_title_surf = font.render(local.t('game.score'), True, COLOR_WHITE)
         screen.blit(score_title_surf, [score_x, y])
 
         y += line_spacing
@@ -181,7 +182,7 @@ class HUD:
         ammo_y = guns_bottom_y + 5
         screen.blit(ammo_surface, [ammo_x, ammo_y])
 
-        wave_text = f"Wave {game.state.phase_index + 1}"
+        wave_text = local.t('game.hud.wave', wave=game.state.phase_index + 1)
         wave_surface = font.render(wave_text, True, COLOR_WHITE)
         wave_x = score_x
         y += line_spacing

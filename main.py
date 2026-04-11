@@ -5,6 +5,7 @@ import scripts.assets as assets
 from scripts.celestial import *
 from scripts.crt import CRT
 from scripts.fonts import FontManager
+from scripts.lang import local
 from scripts.mods import Mods
 from scripts.settings import *
 from scripts.shared import fade
@@ -66,7 +67,8 @@ class Menu:
             if now - self.last_blink > ONE_SECOND//2:
                 self.last_blink = now
 
-            start = self.font.render("Press any key to start", True,COLOR_WHITE)
+            start = self.font.render(local.t('menu.start'), True,
+                                     COLOR_WHITE)
             title_y = TITLE_Y
             self.render_surface.fill(COLOR_BLACK)
             surface_width, surface_height = self.render_surface.get_size()

@@ -1,5 +1,6 @@
 import pygame
 
+from scripts.lang import local
 from scripts.settings import (TOGGLE_TUTORIAL, COLOR_BLUE, COLOR_RED, \
                               COLOR_GREEN, COLOR_WHITE, STAT_Y_OFFSET,
                               SKILL_TAB_OFFSETS, ASTEROID_PHASES)
@@ -92,14 +93,15 @@ def render_frame(game, screen, font, hud_padding):
 
     if game.state.pause and (not game.hud.skill_tab.active or not
             game.hud.stats_tab.active):
-        pause_text = "PAUSED"
+        pause_text = local.t('game.pause')
         pause = game.font.render(pause_text, True, COLOR_WHITE)
         if not game.hud.skill_tab.active:
             screen.blit(pause, [game.screen_size[0]//2 - pause.get_width()//2,
                         game.screen_size[1]//2 - pause.get_height()//2])
 
 def render_skills_tab(game, screen, rect, game_font):
-    title_text, perks = "Victory!", f"Perks: {game.ship.perk_points}"
+    title_text, perks = local.t('game.victory'), local.t("game.hud.perks",
+                                                         perks=game.ship.perk_points)
     title = game_font.render(title_text, True, COLOR_WHITE)
     perk_points = game_font.render(perks, True, COLOR_WHITE)
     padding, offset = SKILL_TAB_OFFSETS
@@ -156,13 +158,19 @@ def render_stats_tab(game, screen, rect, game_font):
         available_ammo += game.ship.guns_ammo[ammo]
 
     stats = [
-        f"Hitpoints: {int(game.ship.hitpoints)}/{int(game.ship.max_hitpoints)}",
-        f"Shield: {int(game.ship.shield)}/{int(game.ship.max_shield)}",
-        f"Ammo: {int(available_ammo)}/{int(game.ship.arsenal)}",
-        f"Level: {int(game.ship.level)}",
-        f"XP: {int(game.ship.xp)}/{int(game.ship.xp_to_next_level)}",
-        f"Crit Chance: {int(game.ship.crit_chance * 100)}%",
-        f"Crit Multiplier: {int(game.ship.crit_multiplier)}",
+        local.t("game.hud.hitpoints", hp=int(game.ship.hitpoints),
+                max_hp=int(game.ship.max_hitpoints)),
+        local.t("game.hud.shield", shield=int(game.ship.shield),
+                max_shield=int(game.ship.max_shield)),
+        local.t("game.hud.ammo", ammo=int(available_ammo),
+                max_ammo=int(game.ship.arsenal)),
+        local.t("game.hud.level", level=int(game.ship.level)),
+        local.t("game.hud.xp", xp=int(game.ship.xp),
+                xp_to_next_level=int(game.ship.xp_to_next_level)),
+        local.t("game.hud.crit_chance",
+                crit_chance=int(game.ship.crit_chance * 100)),
+        local.t("game.hud.crit_multiplier",
+                crit_multiplier=int(game.ship.crit_multiplier)),
     ]
 
     y_offset = STAT_Y_OFFSET

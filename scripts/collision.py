@@ -5,6 +5,7 @@ import pygame
 from scripts.explode import Explosion
 from scripts.floaty import FloatingNumber
 from scripts.impact import ImpactFrame
+from scripts.lang import local
 from scripts.particle import Particle
 from scripts.settings import *
 from scripts.utils import add_multiplier, formulize
@@ -43,15 +44,15 @@ def check_collision(game):
             if asteroid_hit:
                 x, y = asteroid_hit.rect.center
                 game.floating_numbers.add(FloatingNumber(
-                    x, y, "MISS", game.font, color=COLOR_LIGHT_YELLOW))
+                    x, y, local.t('game.miss'), game.font, color=COLOR_LIGHT_YELLOW))
             elif alien_hit:
                 x, y = alien_hit.rect.center
                 game.floating_numbers.add(FloatingNumber(
-                    x, y, "MISS", game.font, color=COLOR_LIGHT_YELLOW))
+                    x, y, local.t('game.miss'), game.font, color=COLOR_LIGHT_YELLOW))
             elif alien_proj:
                 x, y = alien_proj.rect.center
                 game.floating_numbers.add(FloatingNumber(
-                    x, y, "MISS", game.font, color=COLOR_LIGHT_YELLOW))
+                    x, y, local.t('game.miss'), game.font, color=COLOR_LIGHT_YELLOW))
             return
 
         if alien_proj:
@@ -73,7 +74,7 @@ def check_collision(game):
             game.ship.hit = True
             if previous_combo > 1.0:
                 x, y = game.ship.rect.centerx, game.ship.rect.top
-                game.floating_numbers.add(FloatingNumber(x, y, "NO MULT!",
+                game.floating_numbers.add(FloatingNumber(x, y, local.t('game.lost_mult'),
                         game.font, color=COLOR_RED))  # type: ignore
 
             game.explosions.add(Explosion(*game.ship.rect.center,

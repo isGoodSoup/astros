@@ -1,0 +1,23 @@
+{
+  "menu.start": "Press any key to start",
+  "mods.header": "CHOOSE YOUR STYLE",
+  "game.pause": "PAUSED",
+  "game.victory": "VICTORY",
+  "game.defeat": "GAME OVER",
+  "game.score": "SCORE",
+  "game.hud.wave": "Wave {wave}",
+  "game.hud.perks": "Perks: {perks}",
+  "game.hud.hitpoints": "Hitpoints: {hp}/{max_hp}",
+  "game.hud.shield": "Shield: {shield}/{max_shield}",
+  "game.hud.ammo": "Ammo: {ammo}/{max_ammo}",
+  "game.hud.level": "Level: {level}",
+  "game.hud.xp": "XP: {xp}/{xp_to_next_level}",
+  "game.hud.crit_chance": "Crit Chance: {crit_chance}%",
+  "game.hud.crit_multiplier": "Crit Multiplier: {crit_multiplier}",
+  "game.lost_mult": "NO MULT!",
+  "game.miss": "MISS!",
+  "game.tutorial.move": "Move your ship WASD or Arrow Keys",
+  "game.tutorial.shoot": "Press SPACE/A to shoot",
+  "game.tutorial.switch": "Switch G/X to switch gun mode",
+  "game.tutorial.survive": "Survive..."
+}

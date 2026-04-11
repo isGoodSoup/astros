@@ -1,0 +1,23 @@
+{
+  "menu.start": "Presiona cualquier tecla para comenzar",
+  "mods.header": "Elige tu estilo",
+  "game.pause": "PAUSA",
+  "game.victory": "VICTORIA",
+  "game.defeat": "DERROTA",
+  "game.score": "PUNTUACIÓN",
+  "game.hud.wave": "Ola/Fase {wave}",
+  "game.hud.perks": "Puntos: {perks}",
+  "game.hud.hitpoints": "HP: {hp}/{max_hp}",
+  "game.hud.shield": "Escudo: {shield}/{max_shield}",
+  "game.hud.ammo": "Munición: {ammo}/{max_ammo}",
+  "game.hud.level": "Nivel: {level}",
+  "game.hud.xp": "XP: {xp}/{xp_to_next_level}",
+  "game.hud.crit_chance": "Golpe Crítico %: {crit_chance}%",
+  "game.hud.crit_multiplier": "Golpe Crítico Combo: {crit_multiplier}",
+  "game.lost_mult": "¡SIN MULTIPLICADOR!",
+  "game.miss": "¡EVASIÓN!",
+  "game.tutorial.move": "Mueve tu nave WASD o las flechas del teclado",
+  "game.tutorial.shoot": "Presiona ESPACIO/A para disparar",
+  "game.tutorial.switch": "Cambia G/X para cambiar el modo de disparo",
+  "game.tutorial.survive": "Sobrevive..."
+}

@@ -5,6 +5,7 @@ import pygame
 import scripts.assets as assets
 from scripts.fonts import FontManager
 from scripts.game import Game
+from scripts.lang import local
 from scripts.shared import fade, joysticks
 
 
@@ -143,7 +144,7 @@ class Mods:
 
         header_float = 4 * math.sin(time * 0.002)
 
-        header = "STYLES"
+        header = local.t('mods.header')
         header_surf = self.font.render(header, True, (255, 206, 0))
         header_rect = header_surf.get_rect(
             center=(center_x, 100 + int(header_float)))
