@@ -25,5 +25,11 @@ class Localization:
         else:
             return text
 
+current_lang = 0
 langs = ['en', 'es']
-local = Localization(langs[0])
+local = Localization(langs[current_lang])
+
+def rotate_language():
+    global current_lang, local
+    current_lang = (current_lang + 1) % len(langs)
+    local.set_language(langs[current_lang])

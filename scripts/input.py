@@ -1,12 +1,12 @@
 import pygame
 
 from scripts.game_over import reboot
+from scripts.lang import langs, current_lang, rotate_language
 from scripts.settings import (ONE_SECOND, SCREEN_SHAKE, INPUT_NAV_COOLDOWN)
 from scripts.shared import joysticks, controller
 from scripts.ship import get_nearest_enemy
 from scripts.soundlib import decrease_volume, increase_volume
 from scripts.utils import take_screenshot
-
 
 class Input:
     def __init__(self, screen_size):
@@ -99,6 +99,10 @@ class Input:
 
         for event in events:
             if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_1:
+                    rotate_language()
+                    game.sounds[4].play()
+
                 if event.key == pygame.K_TAB:
                     if game.hud.stats_tab.active:
                         game.hud.stats_tab.close()
