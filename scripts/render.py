@@ -82,7 +82,7 @@ def render_frame(game, screen, font, hud_padding):
                 game.ship.add_skill(game.input.selected_skill )
             game.hud.skill_tab.close()
 
-    render_waves(game)
+    render_waves(game, screen)
 
     game.hud.stats_tab.render(game, screen, font, hud_padding)
     game.hud.skill_tab.render(game, screen, font, hud_padding)
@@ -171,7 +171,7 @@ def render_stats_tab(game, screen, rect, game_font):
         screen.blit(text_surface, (rect.x + 40, rect.y + y_offset))
         y_offset += 50
 
-def render_waves(game):
+def render_waves(game, screen):
     for wave in game.shockwaves:
         alpha = max(0, 255 * (1 - wave.radius / wave.max_radius))
         surf = pygame.Surface((wave.radius * 2, wave.radius * 2),
@@ -179,5 +179,5 @@ def render_waves(game):
         pygame.draw.circle(surf, (255, 255, 255, int(alpha)),
             (wave.radius, wave.radius), int(wave.radius), 6)
 
-        game.screen.blit(surf,
+        screen.blit(surf,
             (wave.x - wave.radius, wave.y - wave.radius))

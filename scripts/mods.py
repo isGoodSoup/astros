@@ -71,7 +71,7 @@ class Mods:
             alpha = fade.update()
             if self.ship_flying and self.fade_started and alpha >= 255:
                 self.running = False
-                game = Game(screen, screen_size,
+                game = Game(screen, screen_size, crt,
                             hud_ratio, self.ships, self.selected_ship_index)
                 game.run(clock, screen, screen_size, hud_ratio, crt)
 

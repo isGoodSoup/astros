@@ -155,7 +155,7 @@ class Input:
                     game.font.update()
 
                 if event.key == pygame.K_F12:
-                    take_screenshot(game, game.screen)
+                    take_screenshot(game)
 
                 if event.key == pygame.K_ESCAPE:
                     if not game.hud.skill_tab.active:
@@ -234,7 +234,7 @@ class Input:
                         game.font.update()
 
                     if event.hat == 0 and event.value == (1, 0):
-                        take_screenshot(game, game.screen)
+                        take_screenshot(game)
 
         axis_y = 0.0
         if joysticks and controller.get_button(9):

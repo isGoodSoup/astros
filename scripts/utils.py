@@ -37,13 +37,18 @@ def apply_curve(game, v):
 def center(game, text, screen_size):
     return screen_size[0] // 2 - text.get_width() // 2
 
-def take_screenshot(self, screen):
+def take_screenshot(game):
     timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     home_dir = os.path.expanduser("~")
     save_dir = os.path.join(home_dir, ".imgs")
     os.makedirs(save_dir, exist_ok=True)
     save_path = os.path.join(save_dir, f"{timestamp}.png")
-    pygame.image.save(screen, save_path)
+    game.crt.ctx.finish()
+    data = game.crt.ctx.screen.read(components=4)
+    surface = pygame.image.fromstring(data,game.screen_size,
+        "RGBA",
+        True)
+    pygame.image.save(surface, save_path)
 
 def resource_path(relative_path):
     if hasattr(sys, "_MEIPASS"):

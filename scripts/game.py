@@ -29,12 +29,14 @@ from scripts.update import update_game
 # All assets in this game are © 2026 Diego. See ASSETS_LICENSE.txt.
 
 class Game:
-    def __init__(self, screen, screen_size, hud_ratio, ships, ship_index=0):
+    def __init__(self, screen, screen_size, crt, hud_ratio, ships,
+                 ship_index=0):
         home_dir = os.path.expanduser("~")
         save_dir = os.path.join(home_dir, SAVE_DIR_NAME)
         os.makedirs(save_dir, exist_ok=True)
         self.config_path = os.path.join(save_dir, CONFIG_FILE)
 
+        self.crt = crt
         self.state = GameState()
         self.input = Input(screen_size)
         self.clock = Clock()

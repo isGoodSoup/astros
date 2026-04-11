@@ -20,7 +20,6 @@ class Menu:
         self.height = int(pygame.display.Info().current_h)
         self.screen_size = (self.width, self.height)
         self.hud_ratio = set_hud(self.screen_size)
-        self.virtual_screen = pygame.display.set_mode(self.screen_size)
         self.render_surface = pygame.Surface(HD_RESOLUTION)
         self.screen = pygame.display.set_mode(self.screen_size, DOUBLEBUF|OPENGL, vsync=1)
         assets.load_assets()
