@@ -24,13 +24,6 @@ class Clock:
         if self.milliseconds >= ONE_SECOND:
             self.milliseconds -= ONE_SECOND
             self.seconds += 1
-            if (game.state.current_phase == game.state.phases[-1] and not
-            game.state.boss_spawned):
-                game.state.current_phase = game.state.phases[
-                    game.state.phase_index]
-                game.last_alien_spawn = 0
-                game.last_asteroid_spawn = 0
-
             if self.seconds >= FPS:
                 self.seconds = 0
                 self.minutes += 1

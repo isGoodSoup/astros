@@ -1,3 +1,5 @@
+import random
+
 import pygame
 
 from scripts.alien import Alien
@@ -16,9 +18,12 @@ class AlienFleet:
         self.alien_width = 16 * scale
         self.alien_height = 13 * scale
         self.direction = 1
-        color = game.state.phase_colors[
-            game.state.phase_index % len(game.state.phase_colors)]
-        self.step = ALIEN_COLORS[color] * 2
+
+        random.shuffle(game.state.phase_colors)
+        color = game.state.phase_colors[game.state.phase_index %
+                                        len(game.state.phase_colors)]
+
+        self.step = ALIEN_COLORS[color] * 1.4
         self.move_timer = pygame.time.get_ticks()
 
         cluster_width = cols * self.alien_width + (cols - 1) * spacing_x
