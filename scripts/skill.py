@@ -45,6 +45,8 @@ class Skill:
         self.parents = []
         self.children = []
 
+        self.show_description = False
+
     def set_description(self, description):
         self.description = description
 

@@ -4,6 +4,7 @@ from scripts.settings import (TOGGLE_TUTORIAL, COLOR_BLUE, COLOR_RED, \
                               COLOR_GREEN, COLOR_WHITE, STAT_Y_OFFSET,
                               SKILL_TAB_OFFSETS, ASTEROID_PHASES)
 from scripts.shared import joysticks
+from scripts.utils import wrap_text
 
 
 def render_frame(game, screen, font, hud_padding):
@@ -93,8 +94,9 @@ def render_frame(game, screen, font, hud_padding):
             game.hud.stats_tab.active):
         pause_text = "PAUSED"
         pause = game.font.render(pause_text, True, COLOR_WHITE)
-        screen.blit(pause, [game.screen_size[0]//2 - pause.get_width()//2,
-                    game.screen_size[1]//2 - pause.get_height()//2])
+        if not game.hud.skill_tab.active:
+            screen.blit(pause, [game.screen_size[0]//2 - pause.get_width()//2,
+                        game.screen_size[1]//2 - pause.get_height()//2])
 
 def render_skills_tab(game, screen, rect, game_font):
     title_text, perks = "Victory!", f"Perks: {game.ship.perk_points}"
@@ -105,14 +107,45 @@ def render_skills_tab(game, screen, rect, game_font):
     screen.blit(title, (rect.x + 300 + offset, rect.y + padding))
     screen.blit(perk_points, (rect.x + 300 + offset, rect.y + padding + 40))
 
+    cursor_pos = game.input.cursor_pos if game.input.mode == "controller" \
+        else pygame.mouse.get_pos()
     grid = [(250, 200), (350, 200), (450, 200)]
     for i, (skill, pos) in enumerate(zip(game.state.current_phase_options, grid)):
         skill.pos = (rect.x + pos[0] + offset, rect.y + pos[1])
         skill.rect.topleft = skill.pos
 
-        skill.hovered = (i == game.input.selected_skill_index)
+        mouse_hovered = skill.rect.collidepoint(cursor_pos)
+        controller_hovered = (i == game.input.selected_skill_index)
+        skill.hovered = mouse_hovered or controller_hovered
+
+        if skill.hovered:
+            game.input.selected_skill = skill
+            skill.show_description = True
+        else:
+            skill.show_description = False
 
         frame = pygame.transform.scale(skill.current_frame(), (64, 64))
+
+        if skill.hovered and skill.description:
+            desc_rect = pygame.Rect(rect.x + 50, rect.y + 300, rect.width - 100, 150)
+            description_surface = game_font.render(skill.description, True,
+                                                   COLOR_WHITE)
+            description_rect = description_surface.get_rect(center=desc_rect.center)
+
+            lines = wrap_text(skill.description, game_font.get_font(),
+                              desc_rect.width)
+            screen.set_clip(desc_rect)
+
+            y = desc_rect.top
+            line_height = game_font.get_linesize()
+
+            for line in lines:
+                text_surface = game_font.render(line, True, COLOR_WHITE)
+                screen.blit(text_surface, (desc_rect.x, y))
+                y += line_height
+
+            screen.set_clip(None)
+
         screen.blit(frame, skill.rect)
         screen.blit(skill.icon_image, skill.rect)
 

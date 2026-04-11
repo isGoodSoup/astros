@@ -222,7 +222,6 @@ class Input:
                         if dx == -1:
                             self.selected_skill_index = ((self.selected_skill_index - 1)
                                                          % num_skills)
-
                         elif dx == 1:
                             self.selected_skill_index = ((self.selected_skill_index + 1)
                                                          % num_skills)
