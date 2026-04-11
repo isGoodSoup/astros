@@ -4,7 +4,7 @@ from scripts.all_skills import Explorer, DamageBoost, Maniac, Madness, Survival,
     Adventurer, Pilot, Tank, Tower, Fortified
 from scripts.lang import local
 from scripts.sheet import SpriteSheet
-from scripts.utils import resource_path
+from scripts.utils import resource_path, legacy
 
 
 class Skill:
@@ -46,6 +46,11 @@ class Skill:
         if self.description_key:
             return local.t(self.description_key)
         return None
+
+    @legacy
+    def is_hovered(self, mouse_pos):
+        self.hovered = self.rect.collidepoint(mouse_pos)
+        return self.hovered
 
     def get_visual_tier(self):
         if self.level <= 0:
