@@ -12,13 +12,14 @@ from scripts.fonts import FontManager
 from scripts.game_over import game_lost
 from scripts.hud import HUD
 from scripts.input import Input, update_cursor
+from scripts.mixer import Mixer
 from scripts.movement import update_movement, update_ship_angle
 from scripts.render import render_frame
 from scripts.settings import *
 from scripts.shared import joysticks, controller, fade
 from scripts.ship import Ship
 from scripts.skill import SkillManager
-from scripts.soundlib import load_sounds, load_ost, apply_volume
+from scripts.soundlib import apply_volume
 from scripts.state import GameState
 from scripts.tutorial import Tutorial
 from scripts.update import update_game
@@ -52,6 +53,7 @@ class Game:
         self.spawnpoint(self.ship, screen_size, self.selected_sheet,
                         self.ship_frames)
         self.hud = HUD(self, screen_size, hud_ratio, self.font.get_font())
+        self.mixer = Mixer()
         self.events = Events()
 
         self.screen = screen
@@ -61,9 +63,6 @@ class Game:
         self.scale = SCALE
         self.volume = DEFAULT_VOLUME
         self.hud_padding = HUD_PADDING
-        self.sounds = load_sounds()
-        self.ost = load_ost()
-        self.current_track = None
 
         self.celestials = pygame.sprite.Group()
         self.projectiles = pygame.sprite.Group()
@@ -170,7 +169,7 @@ class Game:
         self.load_config()
         apply_volume(self)
         fade.start('in')
-        self.play_music('odyssey')
+        self.mixer.queue(['odyssey', 'starfield'], loop=True)
 
     def run(self, clock, screen, screen_size, hud_ratio, crt):
         while self.running:
@@ -178,6 +177,10 @@ class Game:
             for event in events:
                 if event.type == pygame.QUIT:
                     self.running = False
+
+                if event.type == self.mixer.MUSIC_END:
+                    self.mixer.next_track()
+
                 if event.type == self.ALIENLASER and not self.state.pause and not self.state.game_over:
                     if pygame.time.get_ticks() < self.delay:
                         continue
@@ -198,7 +201,7 @@ class Game:
                             self.enemy_projectiles.add(*new_projectiles)
 
                     if shots_this_frame > 0 and self.state.play_sound:
-                        self.sounds[0].play()
+                        self.mixer.sounds[0].play()
 
             screen.fill(BACKGROUND)
             delta = clock.tick(self.fps) / 1000
@@ -282,15 +285,3 @@ class Game:
             self.state.play_sound = config_data.get("play_sound", True)
             self.ship.credits = config_data.get("credits", 0)
             self.state.high_score = config_data.get("high_score", 0)
-
-    def play_music(self, track_name, loop=True, fade_ms=FADE_MS):
-        if self.current_track == track_name:
-            return
-
-        if track_name not in self.ost:
-            raise ValueError(f"Track '{track_name}' not found in OST.")
-
-        pygame.mixer.music.fadeout(fade_ms)
-        pygame.mixer.music.load(self.ost[track_name])
-        pygame.mixer.music.play(-1 if loop else 0, fade_ms=fade_ms)
-        self.current_track = track_name
