@@ -134,6 +134,7 @@ class Game:
         self.last_celestial_spawn = 0
         self.celestial_spawn_interval = random.randint(
             *CELESTIAL_SPAWN_INTERVAL)
+        self.last_reinforcement_spawn = 0
         self.last_alien_spawn = 0
         self.alien_spawn_interval = random.randint(*ALIEN_SPAWN_INTERVAL_RANGE)
 

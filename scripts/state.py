@@ -2,11 +2,12 @@ import pygame
 
 from scripts.settings import (PHASES_TOTAL, PHASE_START, PHASE_COLORS, \
                               PHASE_LENGTH, BLACK_HOLE_SPAWN, STAR_SPEED,
-                              PHASES)
+                              PHASES, SCORE_SCALING, PHASE_ACTIVE)
 
 class GameState:
     def __init__(self):
         self.score = 0
+        self.score_scaling = SCORE_SCALING
         self.score_multiplier = 1.0
         self.high_score = 0
         self.survival_bonus = 0
@@ -18,17 +19,16 @@ class GameState:
 
         self.total_phases = PHASES_TOTAL
         self.phases = PHASES
+        self.phase_state = PHASE_ACTIVE
         self.phase_index = PHASE_START
-        self.real_phase_index = 0
+        self.real_phase_index = self.phase_index
         self.current_phase = self.phases[self.phase_index]
         self.current_phase_options = []
         self.phase_start_time = pygame.time.get_ticks()
         self.phase_to_sprite = {self.phases[i]: i for i in range(self.total_phases)}
         self.phase_colors = PHASE_COLORS
         self.phase_length = PHASE_LENGTH
-        self.phase_ending = False
         self.phase_spawned = False
-        self.phase_transitioned = False
 
         self.boss_spawned = False
         self.boss_alive = False

@@ -14,7 +14,7 @@ from scripts.runtime import get_boss_pos, get_upgrade_position, get_ship_ember
 from scripts.settings import *
 from scripts.shared import joysticks, controller
 from scripts.upgd import Upgrade
-from scripts.utils import resource_path
+from scripts.utils import resource_path, formulize
 
 
 def set_hud(screen_size):
@@ -22,74 +22,76 @@ def set_hud(screen_size):
     return {'left': 0, 'top': 0, 'right': width, 'bottom': height,
             'width': width, 'height': height}
 
+def spawner(game):
+    if game.state.phase_state != PHASE_ACTIVE:
+        return
+
+    now = pygame.time.get_ticks()
+
+    if now - game.last_reinforcement_spawn < SPAWN_COOLDOWN:
+        return
+
+    enemies_alive = len(game.aliens) > 0 or len(game.bosses) > 0
+
+    if enemies_alive:
+        return
+
+    spawn_fleet(game, game.state.phase_index)
+    game.last_reinforcement_spawn = now
+
+    if game.state.phase_index in ASTEROID_PHASES:
+        spawn_asteroids(game)
+
 def update_phase(game):
-    current_time = pygame.time.get_ticks()
-    elapsed = current_time - game.state.phase_start_time
-    buffer_time = PHASE_BUFFER_TIME
+    now = pygame.time.get_ticks()
 
-    if elapsed >= game.state.phase_length - buffer_time:
-        game.state.phase_ending = True
+    spawner(game)
 
-    if (not game.aliens and not game.bosses and
-            not game.state.phase_spawned and
-            not game.state.pause):
-        if game.state.phase_index == len(game.state.phases) - 1:
-            spawn_boss(game)
-        else:
-            spawn_fleet(game, game.state.phase_index)
+    enemies_alive = (any(a.alive() for a in game.aliens) or
+        any(b.alive() for b in game.bosses))
 
-            if game.state.phase_index in ASTEROID_PHASES:
-                spawn_asteroids(game)
+    score_goal = SCORE_BASE * game.state.score_scaling
 
-        game.state.phase_spawned = True
+    if game.state.phase_state == PHASE_ACTIVE:
+        if game.state.score >= score_goal:
+            game.state.phase_state = PHASE_CLEANUP
 
-    enemies_alive = (
-            any(alien.alive() for alien in game.aliens) or
-            any(boss.alive() for boss in game.bosses)
-    )
+        elif now - game.state.phase_start_time >= game.state.phase_length - PHASE_BUFFER_TIME:
+            game.state.phase_state = PHASE_CLEANUP
 
-    if (not game.hud.skill_tab.active and game.state.phase_ending and not enemies_alive
-            and not game.state.skills_generated):
-        game.hud.skill_tab.open((pygame.display.Info().current_w // 2 -
-                             game.hud.skill_tab.width // 2, 200))
+    if game.state.phase_state == PHASE_CLEANUP and not enemies_alive:
+        game.state.phase_state = PHASE_TRANSITION
+
+    if game.state.phase_state == PHASE_TRANSITION:
+        game.hud.skill_tab.open((pygame.display.Info().current_w // 2
+                                 - game.hud.skill_tab.width // 2, 200))
+
         game.ship.perk_points += 1
+        game.state.score_scaling += 0.4
 
         available_skills = game.skills.skills
-        current_choices = [s for s in available_skills if
-                               s not in game.state.current_phase_options]
         game.state.current_phase_options = random.sample(
-            current_choices, k=min(3, len(current_choices))
-        )
+            available_skills, k=min(3, len(available_skills)))
+
         game.input.selected_skill_index = 0
         game.input.selected_skill = game.state.current_phase_options[0]
         game.state.skills_generated = True
 
-    if game.hud.skill_tab.active:
-        game.state.pause = True
-    else:
-        game.state.pause = False
-
-    if (game.state.phase_ending and not enemies_alive and not
-            game.hud.skill_tab.active and not game.state.phase_transitioned):
-        game.state.phase_transitioned = True
         game.state.phase_index += 1
-        game.state.real_phase_index += 1
         if game.state.phase_index >= len(game.state.phases):
             game.state.phase_index = 0
-        game.spawnpoint(game.ship, game.screen_size, game.selected_sheet,
-                        game.ship_frames)
-        game.delay = pygame.time.get_ticks() + ALIEN_INITIAL_DELAY
-        game.state.current_phase = game.state.phases[game.state.phase_index]
-        game.state.phase_start_time = current_time
-        game.state.phase_ending = False
-        game.last_alien_spawn = 0
-        game.last_asteroid_spawn = 0
-        game.state.phase_spawned = False
-        game.state.current_phase_options = []
-        game.state.skills_generated = False
+
+        game.state.real_phase_index += 1
+        game.state.score = 0
+
+        game.spawnpoint(game.ship, game.screen_size,
+            game.selected_sheet, game.ship_frames)
+
+        game.last_reinforcement_spawn = pygame.time.get_ticks()
+        game.state.phase_state = PHASE_ACTIVE
 
 def spawn_asteroids(game):
-    if game.state.phase_ending:
+    if game.state.phase_state != PHASE_ACTIVE:
         return
 
     if game.state.phase_index not in ASTEROID_PHASES:
@@ -109,8 +111,6 @@ def spawn_asteroids(game):
 
         game.asteroids.add(asteroid)
         game.entities.add(asteroid)
-
-    game.last_asteroid_spawn = pygame.time.get_ticks()
 
 def spawn_boss(game):
     if not game.state.phase_spawned and not game.state.pause:
@@ -132,6 +132,8 @@ def update_shockwaves(game):
                 game.explosions.add(Explosion(asteroid.rect.centerx,
                               asteroid.rect.centery,
                               game.frame_big_explode))
+                game.state.score += game.ship.level * SCORE_SCALING * game.state.score_multiplier
+                game.ship.gain_xp(formulize(game, game.ship.level), game.sounds)
                 asteroid.kill()
 
         for alien in list(game.aliens):
@@ -139,7 +141,12 @@ def update_shockwaves(game):
                 game.explosions.add(Explosion(alien.rect.centerx,
                               alien.rect.centery,
                               game.frame_big_explode))
+                game.state.score += (game.ship.level * SCORE_SCALING * game.state.score_multiplier)
+                game.ship.gain_xp(formulize(game, game.ship.level), game.sounds)
                 alien.kill()
+
+        game.aliens = pygame.sprite.Group([a for a in game.aliens if a.alive()])
+        game.asteroids = pygame.sprite.Group([a for a in game.asteroids if a.alive()])
 
         if not wave.alive:
             game.shockwaves.remove(wave)

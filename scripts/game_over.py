@@ -1,7 +1,7 @@
 import pygame
 
 from scripts.lang import local
-from scripts.settings import ONE_SECOND, COLOR_WHITE, COLOR_RED
+from scripts.settings import ONE_SECOND, COLOR_WHITE, COLOR_RED, PHASE_ACTIVE
 from scripts.ship import Ship
 from scripts.utils import center
 
@@ -85,7 +85,7 @@ def reboot(game, screen_size):
     game.state.phase_index = 0
     game.state.current_phase = game.state.phases[0]
     game.state.phase_start_time = pygame.time.get_ticks()
-    game.state.phase_ending = False
+    game.state.phase_state = PHASE_ACTIVE
     game.state.phase_spawned = False
     game.state.skills_generated = False
     game.state.game_over = False

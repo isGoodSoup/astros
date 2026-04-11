@@ -2,7 +2,8 @@ import pygame
 
 from scripts.game_over import reboot
 from scripts.lang import rotate_language
-from scripts.settings import (ONE_SECOND, SCREEN_SHAKE, INPUT_NAV_COOLDOWN)
+from scripts.settings import (ONE_SECOND, SCREEN_SHAKE, INPUT_NAV_COOLDOWN,
+                              PHASE_TRANSITION)
 from scripts.shared import joysticks, controller
 from scripts.ship import get_nearest_enemy
 from scripts.soundlib import decrease_volume, increase_volume
@@ -133,9 +134,8 @@ class Input:
 
                         game.hud.skill_tab.close()
                         game.state.current_phase_options = []
-                        game.state.phase_ending = False
+                        game.state.phase_state = PHASE_TRANSITION
                         game.state.pause = False
-                        game.state.phase_transitioned = False
 
                 if event.key == pygame.K_g:
                     game.ship.switch_gun()
@@ -186,7 +186,7 @@ class Input:
 
                     game.hud.skill_tab.close()
                     game.state.current_phase_options = []
-                    game.state.phase_ending = False
+                    game.state.phase_state = PHASE_TRANSITION
                     game.state.pause = False
 
                 if event.button == 1:
@@ -275,7 +275,7 @@ class Input:
                 game.skills.unlock_or_upgrade(clicked_skill, game.ship)
                 game.hud.skill_tab.close()
                 game.state.current_phase_options = []
-                game.state.phase_ending = False
+                game.state.phase_state = PHASE_TRANSITION
                 game.state.pause = False
 
 def update_axis(game):
