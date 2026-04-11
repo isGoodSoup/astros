@@ -9,7 +9,8 @@ from scripts.settings import (COLOR_WHITE, COLOR_LIGHT_ORANGE, SKILL_TAB_Y, \
                               INTERFACE_XP_OFFSET, INTERFACE_GUNS_COLS,
                               INTERFACE_GUNS_OFFSET, INTERFACE_GUNS,
                               INTERFACE_AMMO_OFFSET, INTERFACE_AMMO_COLS,
-                              INTERFACE_AMMO, INTERFACE_XP_COLS)
+                              INTERFACE_AMMO, INTERFACE_XP_COLS, SHIP_TAGS,
+                              TEXT_PADDING, LINE_SPACING)
 from scripts.sheet import SpriteSheet
 from scripts.skill_tab import Tab
 from scripts.utils import resource_path
@@ -103,7 +104,7 @@ class HUD:
             "beam": game.ship.guns_ammo["beam"],
             "shotgun": game.ship.guns_ammo["shotgun"],
             "auto": game.ship.guns_ammo["auto"],
-            "missile": game.ship.guns_ammo["missile"],
+            "nuke": game.ship.guns_ammo["nuke"],
         }
 
         self.credits = 0
@@ -176,10 +177,22 @@ class HUD:
         guns_center_x = self.guns.hud_x + self.guns.image.get_width() // 2
         guns_bottom_y = self.guns.hud_y + self.guns.image.get_height()
 
+        icon_left_x = self.guns.hud_x
+        x_right_edge = icon_left_x - TEXT_PADDING
+
+        gun_tag = SHIP_TAGS.get(game.ship.gun, game.ship.gun)
+        gun_name = local.t(gun_tag)
+        gun_name_surface = font.render(gun_name, True, COLOR_LIGHT_ORANGE)
+
+        gun_name_x = x_right_edge - gun_name_surface.get_width()
+        gun_name_y = self.guns.hud_y + 40
+        screen.blit(gun_name_surface, (gun_name_x, gun_name_y))
+        screen.blit(gun_name_surface, [gun_name_x, gun_name_y])
+
         ammo_text = f"{current_ammo}/{total_ammo}"
         ammo_surface = font.render(ammo_text, True, COLOR_WHITE)
-        ammo_x = guns_center_x - ammo_surface.get_width() // 2
-        ammo_y = guns_bottom_y + 5
+        ammo_x = x_right_edge - ammo_surface.get_width()
+        ammo_y = gun_name_y + gun_name_surface.get_height() + LINE_SPACING
         screen.blit(ammo_surface, [ammo_x, ammo_y])
 
         wave_text = local.t('game.hud.wave', wave=game.state.phase_index + 1)

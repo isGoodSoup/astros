@@ -109,8 +109,8 @@ class Ship(pygame.sprite.Sprite):
 
         if self.gun == "shotgun":
             self.damage *= SHIP_SHOTGUN_DAMAGE
-        elif self.gun == "missile":
-            self.damage *= SHIP_MISSILE_DAMAGE
+        elif self.gun == "nuke":
+            self.damage *= SHIP_NUKE_DAMAGE
 
     def update_fire_rate(self):
         self.shot_cooldown = self.guns[self.gun]
@@ -206,8 +206,8 @@ class Ship(pygame.sprite.Sprite):
                 else:
                     self.guns_ammo['auto'] -= num_bullets
 
-        if gun_type == "missile":
-            if self.guns_ammo['missile'] <= 0:
+        if gun_type == "nuke":
+            if self.guns_ammo['nuke'] <= 0:
                 return projectiles
 
             projectiles.append(Projectile(pos,COLOR_RED,

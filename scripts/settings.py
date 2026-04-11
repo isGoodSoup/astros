@@ -61,6 +61,9 @@ INTERFACE_XP = (40, 17)
 INTERFACE_XP_COLS = 33
 INTERFACE_XP_OFFSET = (0, -175)
 
+TEXT_PADDING = 10
+LINE_SPACING = 10
+
 SHIP_MAX_HITPOINTS = 200
 SHIP_MAX_SHIELD = 25
 
@@ -69,20 +72,24 @@ SHIP_SCALE = 4
 SHIP_HITBOX = -0.6
 SHIP_OFFSETS = (-25, 200)
 
-SHIP_GUNS = ["beam", "shotgun", "auto", "missile"]
+SHIP_GUNS = ["beam", "shotgun", "auto", "nuke"]
+SHIP_TAGS = {
+    gun: f"game.gun.{gun}"
+    for gun in SHIP_GUNS
+}
 
 SHIP_GUNS_RATES = {
     "beam": 250,
     "shotgun": 400,
     "auto": 150,
-    "missile": 900
+    "nuke": 900
 }
 
 SHIP_AMMO = {
     "beam": -1,
     "shotgun": 20,
     "auto": 400,
-    "missile": 2
+    "nuke": 2
 }
 
 SHIP_SHIELD_FRAMES = 33
@@ -106,7 +113,7 @@ SHIP_XP_GROWTH = 1.4
 SHIP_LEVEL_ADDITION = 10
 
 SHIP_SHOTGUN_DAMAGE = 10
-SHIP_MISSILE_DAMAGE = 50
+SHIP_NUKE_DAMAGE = 50
 
 FULL_360 = 360
 

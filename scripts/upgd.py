@@ -43,7 +43,7 @@ class Upgrade(pygame.sprite.Sprite):
         elif self.type == "ammo":
             for ammo in ship.guns_ammo:
                 if ammo == "beam": continue
-                if ammo == "missile":
+                if ammo == "nuke":
                     ship.guns_ammo[ammo] += 1
                     continue
                 ship.guns_ammo[ammo] += 10
