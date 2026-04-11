@@ -153,8 +153,7 @@ class Ship(pygame.sprite.Sprite):
 
         if gun_type == "beam":
             projectiles.append(Projectile(pos, COLOR_BLUE, direction=(dir_x, dir_y),
-                           speed=16,
-                           damage=1))
+                           speed=24, damage=1))
 
         elif gun_type == "shotgun":
             if self.guns_ammo['shotgun'] <= 0:
@@ -174,7 +173,7 @@ class Ship(pygame.sprite.Sprite):
                     direction = (math.cos(rad), -math.sin(rad))
                 projectiles.append(
                     Projectile(pos, COLOR_BLUE, direction=direction,
-                               speed=12, damage=self.damage))
+                               speed=24, damage=self.damage))
             if not TOGGLE_UNLIMITED_AMMO:
                 if self.guns_ammo['shotgun'] < 0:
                     self.guns_ammo['shotgun'] = 0
@@ -199,7 +198,7 @@ class Ship(pygame.sprite.Sprite):
                     direction = (math.cos(rad), -math.sin(rad))
                 projectiles.append(
                     Projectile(pos, COLOR_BLUE, direction=direction,
-                               speed=12, damage=self.damage))
+                               speed=24, damage=self.damage))
 
             if not TOGGLE_UNLIMITED_AMMO:
                 if self.guns_ammo['auto'] < 0:
