@@ -22,6 +22,7 @@ def load_ost():
     return {
         "odyssey": resource_path("assets/fx/odyssey.ogg"),
         "flight": resource_path("assets/fx/flight.ogg"),
+        "starfield": resource_path("assets/fx/starfield.ogg"),
     }
 
 def increase_volume(game):
@@ -35,6 +36,6 @@ def decrease_volume(game):
     game.save_config()
 
 def apply_volume(game):
-    for sound in game.sounds:
+    for sound in game.mixer.sounds:
         sound.set_volume(game.volume)
     pygame.mixer.music.set_volume(game.volume)
