@@ -9,9 +9,11 @@ from scripts.utils import resource_path
 
 
 class Alien(pygame.sprite.Sprite):
-    def __init__(self, ship, x, y, color, frame, width=ALIEN_WIDTH, height=ALIEN_HEIGHT,
+    def __init__(self, ship, x, y, color, frame, screen=None,
+                 width=ALIEN_WIDTH, height=ALIEN_HEIGHT,
                  scale=SCALE/3, columns=1, offset_x=0, offset_y=0):
         super().__init__()
+        self.screen = screen
         self.image = pygame.image.load(resource_path(f"assets/aliens/{color}.png")).convert_alpha()
         self.image = pygame.transform.scale(self.image, (width * scale, height * scale))
         self.rect = self.image.get_rect(topleft=(x, y))
@@ -38,7 +40,7 @@ class Alien(pygame.sprite.Sprite):
         if self.rect.top > pygame.display.Info().current_h or self.hitpoints <= 0:
             self.kill()
 
-    def shoot(self, base, shot_cooldown):
+    def shoot(self, target, shot_cooldown):
         current_time = pygame.time.get_ticks()
         self.shooting = False
         new_projectiles = []
@@ -57,7 +59,9 @@ class Alien(pygame.sprite.Sprite):
         if current_time - self.last_shot_time >= shot_cooldown:
             projectile = Projectile(
                 pos=[self.rect.centerx, self.rect.bottom],
-                color=COLOR_GREEN, direction=direction, speed=12)
+                color=COLOR_GREEN, direction=direction, speed=12,
+                range_limit=900, homing=random.choice([True, False]),
+                screen=self.screen)
             self.shooting = True
             new_projectiles.extend([projectile])
             self.last_shot_time = current_time

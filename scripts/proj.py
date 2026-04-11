@@ -4,9 +4,10 @@ import math
 class Projectile(pygame.sprite.Sprite):
     def __init__(self, pos, color, direction=(0, -1), speed=16,
                  damage=1, range_limit=900,
-                 homing=False, target=None,
+                 homing=False, screen=None, target=None,
                  explosive=False, explosion_radius=0):
         super().__init__()
+        self.screen = screen
         self.image = pygame.Surface([4, 20], pygame.SRCALPHA)
         self.image.fill((*color, 255))
         self.rect = self.image.get_rect(center=pos)
@@ -27,6 +28,8 @@ class Projectile(pygame.sprite.Sprite):
 
     def update(self, delta_time=1.0):
         if self.homing and self.target:
+            self.image = pygame.draw.circle(self.screen, pygame.SRCALPHA, self.image.get_rect(
+                                                center=self.target), 20)
             tx, ty = self.target.rect.center
             dx = tx - self.rect.centerx
             dy = ty - self.rect.centery

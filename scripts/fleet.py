@@ -18,7 +18,7 @@ class AlienFleet:
         self.direction = 1
         color = game.state.phase_colors[
             game.state.phase_index % len(game.state.phase_colors)]
-        self.step = 2 * ALIEN_COLORS[color]
+        self.step = ALIEN_COLORS[color] * 2
         self.move_timer = pygame.time.get_ticks()
 
         cluster_width = cols * self.alien_width + (cols - 1) * spacing_x
@@ -37,7 +37,7 @@ class AlienFleet:
         )
 
         for x, y in positions:
-            alien = Alien(game.ship, x, y, color, 0)
+            alien = Alien(game.ship, x, y, color, 0, game.screen)
             self.aliens.add(alien) # type: ignore
             game.aliens.add(alien)
 
