@@ -234,8 +234,7 @@ class Game:
 
             if self.screen_shake > 0:
                 self.screen_shake -= 1
-            render_offset = self.ship.taken_damage() if self.screen_shake else [
-                0, 0]
+            render_offset = self.ship.taken_damage() if self.screen_shake else [0, 0]
             if joysticks and self.screen_shake:
                 controller.rumble(0.5, 1, BASE_RUMBLE_MS)
 
