@@ -10,7 +10,7 @@ def get_upgrade_position():
 
 def get_boss_pos():
     info = pygame.display.Info()
-    return [info.current_w // 2, 350]
+    return [info.current_w // 2 + random.randint(-200, 200), 350]
 
 def get_ship_ember():
     return [255, random.randint(50, 150), 0]
