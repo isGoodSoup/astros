@@ -8,6 +8,8 @@
   "game.trait.desc.glass": "Tu nave no tiene suficiente escudo para defenderse contra los asteroides entrantes. Es necesario actualizar tus escudos para defenderse contra los asteroides",
   "game.trait.name.panonium": "Panonium",
   "game.trait.desc.panonium": "Las amenazas que llegan te impiden sobrevivir.",
+  "game.trait.name.none": "Ninguno",
+  "game.trait.desc.none": "Ningún modificador",
   "game.pause": "PAUSA",
   "game.victory": "VICTORIA",
   "game.defeat": "DERROTA",

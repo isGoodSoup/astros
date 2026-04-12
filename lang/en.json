@@ -8,6 +8,8 @@
   "game.trait.desc.glass": "Your ship does not have enough shields to defend against the incoming asteroids. You'll need to upgrade your shields to defend against the incoming asteroids.",
   "game.trait.name.panonium": "Panonium",
   "game.trait.desc.panonium": "Fear the incoming threats",
+  "game.trait.name.none": "None",
+  "game.trait.desc.none": "No trait",
   "game.pause": "PAUSED",
   "game.victory": "VICTORY",
   "game.defeat": "GAME OVER",
