@@ -106,6 +106,9 @@ def run_transition(game):
     game.spawns.boss_spawned = False
 
 def spawn_asteroids(game):
+    if not game.spawns.can_spawn_asteroids:
+        return
+
     if game.state.phase_state != PHASE_ACTIVE:
         return
 
@@ -131,10 +134,11 @@ def spawn_boss(game):
     if not game.state.phase_spawned and not game.state.pause:
         x, y = get_boss_pos()
         color = ['red', 'green', 'yellow']
-        boss = Boss(game, game.ship, game.sprites.enemy_projectiles, x, y,
-                    random.choice(color))
+        for i in range(game.sprites.boss_count):
+            game.sprites.bosses.add(Boss(game, game.ship, game.sprites.enemy_projectiles, x, y,
+                        random.choice(color)))
+
         game.play_music('flight')
-        game.sprites.bosses.add(boss)
         game.spawns.phase_spawned = True
         game.spawns.boss_alive = True
 
