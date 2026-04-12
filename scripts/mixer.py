@@ -13,7 +13,7 @@ class Mixer:
         self.playlist_index = 0
         self.loop_playlist = False
 
-        self.MUSIC_END = pygame.USEREVENT + 1
+        self.MUSIC_END = pygame.USEREVENT + 2
         pygame.mixer.music.set_endevent(self.MUSIC_END)
 
     def play_music(self, track_name, loop=True, fade_ms=FADE_MS):
