@@ -19,10 +19,6 @@ class AlienFleet:
         self.alien_height = 11 * scale
         self.direction = 1
 
-        random.shuffle(game.state.phase_colors)
-        color = game.state.phase_colors[game.state.phase_index %
-                                        len(game.state.phase_colors)]
-
         self.step = 10
         self.move_timer = pygame.time.get_ticks()
 
@@ -41,8 +37,14 @@ class AlienFleet:
             self.start_y
         )
 
+        if game.spawns.shuffle_enemies:
+            random.shuffle(positions)
+            self.rows += 2
+
         for x, y in positions:
-            alien = Alien(game.ship, x, y, color, 0, game.screen)
+            color = game.state.phase_colors[game.state.phase_index %
+                                            len(game.state.phase_colors)]
+            alien = Alien(game, game.ship, x, y, color, 0, game.screen)
             self.aliens.add(alien) # type: ignore
             game.sprites.aliens.add(alien)
 
