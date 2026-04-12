@@ -17,7 +17,7 @@ class Tutorial:
                 self.step += 1
 
         elif self.step == 1:
-            if len(game.projectiles) > 0:
+            if len(game.sprites.projectiles) > 0:
                 self.step += 1
 
         elif self.step == 2:

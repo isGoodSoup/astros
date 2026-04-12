@@ -13,25 +13,25 @@ from scripts.utils import add_multiplier, formulize
 
 def check_collision(game):
     if game.state.phase_index in ASTEROID_PHASES:
-        asteroid_hit = pygame.sprite.spritecollideany(game.ship, game.asteroids, # type: ignore
+        asteroid_hit = pygame.sprite.spritecollideany(game.ship, game.sprites.asteroids, # type: ignore
             collided=lambda s,m: s.hitbox.colliderect(m.hitbox))
     else:
         asteroid_hit = None
 
     if game.state.current_phase in game.state.phases:
-        alien_hit = pygame.sprite.spritecollideany(game.ship, game.aliens, # type: ignore
+        alien_hit = pygame.sprite.spritecollideany(game.ship, game.sprites.aliens, # type: ignore
             collided=lambda s,m: s.hitbox.colliderect(m.hitbox))
     else:
         alien_hit = None
 
     if game.state.current_phase in game.state.phases:
-        alien_proj = pygame.sprite.spritecollideany(game.ship, game.enemy_projectiles, # type: ignore
+        alien_proj = pygame.sprite.spritecollideany(game.ship, game.sprites.enemy_projectiles, # type: ignore
             collided=lambda s,m: s.hitbox.colliderect(m.rect))
     else:
         alien_proj = None
 
     if game.state.current_phase == game.state.phases[-1]:
-        boss_hit = pygame.sprite.spritecollideany(game.ship, game.bosses, # type: ignore
+        boss_hit = pygame.sprite.spritecollideany(game.ship, game.sprites.bosses, # type: ignore
             collided=lambda s,m: s.hitbox.colliderect(m.rect))
     else:
         boss_hit = None
@@ -43,15 +43,15 @@ def check_collision(game):
         if random.random() <= game.ship.evasion:
             if asteroid_hit:
                 x, y = asteroid_hit.rect.center
-                game.floating_numbers.add(FloatingNumber(
+                game.sprites.floating_numbers.add(FloatingNumber(
                     x, y, local.t('game.miss'), game.font, color=COLOR_LIGHT_YELLOW))
             elif alien_hit:
                 x, y = alien_hit.rect.center
-                game.floating_numbers.add(FloatingNumber(
+                game.sprites.floating_numbers.add(FloatingNumber(
                     x, y, local.t('game.miss'), game.font, color=COLOR_LIGHT_YELLOW))
             elif alien_proj:
                 x, y = alien_proj.rect.center
-                game.floating_numbers.add(FloatingNumber(
+                game.sprites.floating_numbers.add(FloatingNumber(
                     x, y, local.t('game.miss'), game.font, color=COLOR_LIGHT_YELLOW))
             return
 
@@ -74,15 +74,15 @@ def check_collision(game):
             game.ship.hit = True
             if previous_combo > 1.0:
                 x, y = game.ship.rect.centerx, game.ship.rect.top
-                game.floating_numbers.add(FloatingNumber(x, y, local.t('game.lost_mult'),
+                game.sprites.floating_numbers.add(FloatingNumber(x, y, local.t('game.lost_mult'),
                         game.font, color=COLOR_RED))  # type: ignore
 
-            game.explosions.add(Explosion(*game.ship.rect.center,
-                                  game.frame_explode))  # type: ignore
+            game.sprites.explosions.add(Explosion(*game.ship.rect.center,
+                                  game.sprites.frame_explode))  # type: ignore
 
             for _ in range(PARTICLES_AMOUNT):
                 vel = [random.uniform(-2, 2), random.uniform(-2, 2)]
-                game.particles.append(Particle(game.ship.rect.center, vel))
+                game.sprites.particles.append(Particle(game.ship.rect.center, vel))
 
             if game.state.play_sound:
                 game.mixer.sounds[1].play()
@@ -109,11 +109,11 @@ def check_collision(game):
             if game.ship.hitpoints <= 0:
                 game.state.game_over = True
                 game.ship.kill()
-                game.ship_alive = False
+                game.sprites.ship_alive = False
                 pygame.mixer.music.stop()
                 game.state.game_over = True
 
-    hits1 = pygame.sprite.groupcollide(game.projectiles, game.asteroids, True,
+    hits1 = pygame.sprite.groupcollide(game.sprites.projectiles, game.sprites.asteroids, True,
                                    False)
     for projectile, asteroids_hit in hits1.items():
         for asteroid in asteroids_hit:
@@ -148,14 +148,14 @@ def check_collision(game):
                                f"x{total_multiplier:.2f}",
                                color=color, font_size=size)
 
-            game.floating_numbers.add(FloatingNumber(x, y, int(damage_per_frame), game.font, color=color,
+            game.sprites.floating_numbers.add(FloatingNumber(x, y, int(damage_per_frame), game.font, color=color,
                                font_size=size))
             impact = ImpactFrame(asteroid.rect.centerx, asteroid.rect.centery,
-                                 game.frame_explode[0])
-            game.explosions.add(impact)
+                                 game.sprites.frame_explode[0])
+            game.sprites.explosions.add(impact)
             for _ in range(PARTICLES_AMOUNT):
                 vel = [random.uniform(-2, 2), random.uniform(-2, 2)]
-                game.particles.append(Particle((asteroid.rect.centerx,
+                game.sprites.particles.append(Particle((asteroid.rect.centerx,
                                                 asteroid.rect.centery), vel))
 
             if asteroid.hitpoints <= 0:
@@ -166,8 +166,8 @@ def check_collision(game):
                          s.name == "Maniac"), None):
                     maniac_skill.ability.apply(game.ship, maniac_skill.level)
                 explosion = Explosion(asteroid.rect.centerx,
-                                      asteroid.rect.centery, game.frame_explode)
-                game.explosions.add(explosion)
+                                      asteroid.rect.centery, game.sprites.frame_explode)
+                game.sprites.explosions.add(explosion)
                 if game.state.play_sound:
                     game.mixer.sounds[1].play()
                 game.state.score_multiplier = game.ship.combo_multiplier
@@ -175,7 +175,7 @@ def check_collision(game):
                                 game.state.score_multiplier)
                 game.ship.gain_xp(formulize(game, game.ship.level), game.mixer.sounds)
 
-    hits2 = pygame.sprite.groupcollide(game.projectiles, game.aliens, True, False)
+    hits2 = pygame.sprite.groupcollide(game.sprites.projectiles, game.sprites.aliens, True, False)
     for projectile, aliens_hit in hits2.items():
         for alien in aliens_hit:
             current_time = pygame.time.get_ticks()
@@ -209,14 +209,14 @@ def check_collision(game):
                                f"x{total_multiplier:.2f}",
                                color=color, font_size=size)
 
-            game.floating_numbers.add(FloatingNumber(x, y, int(damage_per_frame), game.font, color=color,
+            game.sprites.floating_numbers.add(FloatingNumber(x, y, int(damage_per_frame), game.font, color=color,
                                font_size=size))
             impact = ImpactFrame(alien.rect.centerx, alien.rect.centery,
-                                 game.frame_explode[0])
-            game.explosions.add(impact)
+                                 game.sprites.frame_explode[0])
+            game.sprites.explosions.add(impact)
             for _ in range(PARTICLES_AMOUNT):
                 vel = [random.uniform(-2, 2), random.uniform(-2, 2)]
-                game.particles.append(Particle((alien.rect.centerx, alien.rect.centery), vel))
+                game.sprites.particles.append(Particle((alien.rect.centerx, alien.rect.centery), vel))
 
             if alien.hitpoints <= 0:
                 alien.kill()
@@ -226,15 +226,15 @@ def check_collision(game):
                          s.name == "Maniac"), None):
                     maniac_skill.ability.apply(game.ship, maniac_skill.level)
                 explosion = Explosion(alien.rect.centerx, alien.rect.centery,
-                                      game.frame_explode)
-                game.explosions.add(explosion)
+                                      game.sprites.frame_explode)
+                game.sprites.explosions.add(explosion)
                 if game.state.play_sound:
                     game.mixer.sounds[1].play()
                 game.state.score_multiplier = game.ship.combo_multiplier
                 game.state.score += (game.ship.level * SCORE_SCALING * game.state.score_multiplier)
                 game.ship.gain_xp(formulize(game, game.ship.level), game.mixer.sounds)
 
-    hits3 = pygame.sprite.groupcollide(game.projectiles, game.bosses, True, False)
+    hits3 = pygame.sprite.groupcollide(game.sprites.projectiles, game.sprites.bosses, True, False)
     for projectile, boss_hit in hits3.items():
         for boss in boss_hit:
             current_time = pygame.time.get_ticks()
@@ -268,14 +268,14 @@ def check_collision(game):
                                f"x{total_multiplier:.2f}",
                                color=color, font_size=size)
 
-            game.floating_numbers.add(FloatingNumber(x, y, int(damage_per_frame), game.font, color=color,
+            game.sprites.floating_numbers.add(FloatingNumber(x, y, int(damage_per_frame), game.font, color=color,
                                font_size=size))
             impact = ImpactFrame(boss.rect.centerx, boss.rect.centery,
-                                 game.frame_explode[0])
-            game.explosions.add(impact)
+                                 game.sprites.frame_explode[0])
+            game.sprites.explosions.add(impact)
             for _ in range(PARTICLES_AMOUNT):
                 vel = [random.uniform(-2, 2), random.uniform(-2, 2)]
-                game.particles.append(
+                game.sprites.particles.append(
                     Particle((boss.rect.centerx, boss.rect.centery), vel))
 
             if boss.hitpoints <= 0:
@@ -286,20 +286,20 @@ def check_collision(game):
                          s.name == "Maniac"), None):
                     maniac_skill.ability.apply(game.ship, maniac_skill.level)
                 explosion = Explosion(boss.rect.centerx, boss.rect.centery,
-                                      game.frame_explode)
-                game.explosions.add(explosion)
+                                      game.sprites.frame_explode)
+                game.sprites.explosions.add(explosion)
                 if game.state.play_sound:
                     game.mixer.sounds[1].play()
                 game.state.score_multiplier = game.ship.combo_multiplier
                 game.state.score += game.ship.level * SCORE_SCALING * game.state.score_multiplier
                 game.ship.gain_xp(formulize(game, game.ship.level), game.mixer.sounds)
 
-    for projectile in list(game.projectiles):
+    for projectile in list(game.sprites.projectiles):
         if getattr(projectile, "nuke", False):
             game.events.nuke_event(projectile.rect.center, game)
             projectile.kill()
 
-    upgrade_hit = pygame.sprite.spritecollide(game.ship, game.upgrades, False, # type: ignore
+    upgrade_hit = pygame.sprite.spritecollide(game.ship, game.sprites.upgrades,False, # type: ignore
                                           collided=lambda s,u: s.hitbox.colliderect(u.rect))
     if upgrade_hit:
         for upgrade in upgrade_hit:

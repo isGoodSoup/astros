@@ -64,9 +64,9 @@ def update_movement(game, delta, screen_size):
     if not lock_y:
         movement_y += game.input.left_joystick[1] * game.ship.velocity * delta * FPS
 
-    game.ship.rect.x = max(0, min(screen_size[0] - game.base.get_width(),
+    game.ship.rect.x = max(0, min(screen_size[0] - game.sprites.base.get_width(),
                              game.ship.rect.x + movement_x))
-    game.ship.rect.y = max(0, min(screen_size[1] - game.base.get_height(),
+    game.ship.rect.y = max(0, min(screen_size[1] - game.sprites.base.get_height(),
                              game.ship.rect.y + movement_y))
 
     if movement_x < 0:

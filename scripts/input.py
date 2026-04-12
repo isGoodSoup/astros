@@ -78,17 +78,18 @@ class Input:
 
         shooting_input = ((controller_shoot or keys[pygame.K_SPACE] or mouse[0])
                           and not game.state.pause)
-        if shooting_input and now - game.last_shot_time >= game.ship.shot_cooldown:
+        if (shooting_input and now - game.spawns.last_shot_time >=
+                game.ship.shot_cooldown):
             if is_boss_phase:
-                enemies = list(game.bosses)
+                enemies = list(game.sprites.bosses)
                 target = get_nearest_enemy((game.ship.rect.x, game.ship.rect.y), enemies) \
                     if enemies else None
             else:
                 target = None
             new_projectiles = game.ship.shoot(gun_type=game.ship.gun,
                                               target=target)
-            game.projectiles.add(*new_projectiles)
-            game.last_shot_time = now
+            game.sprites.projectiles.add(*new_projectiles)
+            game.spawns.last_shot_time = now
 
             if game.ship.guns_ammo[game.ship.gun] <= 0 and game.ship.gun != "beam":
                 game.mixer.sounds[4].play()

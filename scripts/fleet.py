@@ -44,7 +44,7 @@ class AlienFleet:
         for x, y in positions:
             alien = Alien(game.ship, x, y, color, 0, game.screen)
             self.aliens.add(alien) # type: ignore
-            game.aliens.add(alien)
+            game.sprites.aliens.add(alien)
 
     def grid(self, rows, cols, cell_w, cell_h, spacing_x,
                                 spacing_y, origin_x, origin_y):
@@ -87,7 +87,7 @@ def spawn_fleet(game, phase):
     for alien in fleet_sprites.sprites():
         if not alien.alive():
             fleet_sprites.remove(alien)
-            game.entities.remove(alien)
+            game.sprites.entities.remove(alien)
 
     if phase in ASTEROID_PHASES:
         clusters = 1
@@ -103,8 +103,8 @@ def spawn_fleet(game, phase):
 
     for _ in range(clusters):
         fleet = AlienFleet(game, rows=rows, cols=cols, start_y=120)
-        game.fleets.append(fleet)
+        game.sprites.fleets.append(fleet)
         for alien in fleet.aliens:
-            game.entities.add(alien)
-            game.aliens.add(alien)
-    game.last_alien_spawn = pygame.time.get_ticks()
+            game.sprites.entities.add(alien)
+            game.sprites.aliens.add(alien)
+    game.spawns.last_alien_spawn = pygame.time.get_ticks()

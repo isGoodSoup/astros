@@ -2,8 +2,8 @@ import pygame
 
 from scripts.lang import local
 from scripts.settings import ONE_SECOND, COLOR_WHITE, COLOR_RED, PHASE_ACTIVE
-from scripts.ship import Ship
 from scripts.utils import center
+
 
 def game_lost(game, font, screen, screen_size):
     now = pygame.time.get_ticks()
@@ -40,30 +40,27 @@ def game_lost(game, font, screen, screen_size):
 def reboot(game, screen_size):
     saved_stats = game.ship.get_stats()
 
-    game.projectiles.empty()
-    game.enemy_projectiles.empty()
-    game.entities.empty()
-    game.aliens.empty()
-    game.asteroids.empty()
-    game.bosses.empty()
-    game.explosions.empty()
-    game.upgrades.empty()
-    game.floating_numbers.empty()
-    game.celestials.empty()
-    game.fleets.clear()
-    game.particles.clear()
+    game.sprites.projectiles.empty()
+    game.sprites.enemy_projectiles.empty()
+    game.sprites.entities.empty()
+    game.sprites.aliens.empty()
+    game.sprites.asteroids.empty()
+    game.sprites.bosses.empty()
+    game.sprites.explosions.empty()
+    game.sprites.upgrades.empty()
+    game.sprites.floating_numbers.empty()
+    game.sprites.celestials.empty()
+    game.sprites.fleets.clear()
+    game.sprites.particles.clear()
 
-    framew = game.selected_sheet.sheet.get_width() // game.ship_frames
-    frameh = game.selected_sheet.sheet.get_height()
-    game.ship = Ship(game.selected_sheet, 0, 0, game.frame, framew, frameh,
-                     columns=game.ship_frames)
+    game.ship = game.sprites.create_ship()
 
     for attr, value in saved_stats.items():
         setattr(game.ship, attr, value)
 
-    game.spawnpoint(game.ship, screen_size, game.selected_sheet, game.ship_frames)
+    game.ship.spawnpoint(screen_size, game.sprites.framew)
 
-    game.ship_alive = True
+    game.sprites.ship_alive = True
     game.ship.hitpoints = game.ship.max_hitpoints
     game.ship.shield = game.ship.max_shield
 
@@ -73,13 +70,13 @@ def reboot(game, screen_size):
     game.ship.damage = game.ship.base_damage
     game.ship.critical = False
 
-    game.frame = 0
-    game.last_update = pygame.time.get_ticks()
-    game.last_asteroid_spawn = 0
-    game.last_alien_spawn = 0
-    game.last_upgrade_spawn = 0
-    game.last_celestial_spawn = 0
-    game.last_shot_time = 0
+    game.sprites.frame = 0
+    game.sprites.last_update = pygame.time.get_ticks()
+    game.spawns.last_asteroid_spawn = 0
+    game.spawns.last_alien_spawn = 0
+    game.spawns.last_upgrade_spawn = 0
+    game.spawns.last_celestial_spawn = 0
+    game.spawns.last_shot_time = 0
 
     game.state.score = 0
     game.state.phase_index = 0
@@ -92,8 +89,8 @@ def reboot(game, screen_size):
     game.state.game_over_fx = True
     game.state.survival_bonus = 0
 
-    game.active_upgrade = None
-    game.upgrade_start_time = 0
+    game.spawns.active_upgrade = None
+    game.spawns.upgrade_start_time = 0
 
     if hasattr(game.hud, "skill_tab"):
         game.hud.skill_tab.active = False

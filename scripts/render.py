@@ -13,59 +13,60 @@ def render_frame(game, screen, font, hud_padding):
 
     boss_invisible = (
             hasattr(game, "boss_invisible_start") and
-            now - game.boss_invisible_start < game.boss_invisible_duration
+            now - game.sprites.boss_invisible_start <
+            game.sprites.boss_invisible_duration
     )
 
-    for i in game.stars:
+    for i in game.sprites.stars:
         pygame.draw.circle(screen, COLOR_WHITE, (int(i[0]), int(i[1])), i[2])
 
-    game.celestials.draw(screen)
+    game.sprites.celestials.draw(screen)
     if game.state.phase_index in ASTEROID_PHASES:
-        game.asteroids.draw(screen)
+        game.sprites.asteroids.draw(screen)
 
-    if len(game.aliens) > 0:
-        game.aliens.draw(screen)
+    if len(game.sprites.aliens) > 0:
+        game.sprites.aliens.draw(screen)
 
     if not boss_invisible:
-        game.bosses.draw(screen)
+        game.sprites.bosses.draw(screen)
 
-    game.projectiles.draw(screen)
-    game.enemy_projectiles.draw(screen)
-    game.upgrades.draw(screen)
-    game.floating_numbers.draw(screen)
+    game.sprites.projectiles.draw(screen)
+    game.sprites.enemy_projectiles.draw(screen)
+    game.sprites.upgrades.draw(screen)
+    game.sprites.floating_numbers.draw(screen)
 
-    for particle in game.particles:
+    for particle in game.sprites.particles:
         particle.draw(screen)
 
-    img = game.base.copy()
+    img = game.sprites.base.copy()
 
-    overlay_index = game.anim_frame_overlay % len(game.frames_flying)
-    overlay_frame = game.frames_flying[overlay_index]
+    overlay_index = game.sprites.anim_frame_overlay % len(game.sprites.frames_flying)
+    overlay_frame = game.sprites.frames_flying[overlay_index]
     img.blit(overlay_frame, (0, 0))
 
     if game.state.debugging:
-        for i in game.asteroids:
+        for i in game.sprites.asteroids:
             pygame.draw.rect(screen, COLOR_RED, i.hitbox, 2)
 
-        for a in game.aliens:
+        for a in game.sprites.aliens:
             pygame.draw.rect(screen, COLOR_RED, a.rect, 2)
 
-        for u in game.upgrades:
+        for u in game.sprites.upgrades:
             pygame.draw.rect(screen, COLOR_GREEN, u.rect, 2)
 
-        for p in game.projectiles:
+        for p in game.sprites.projectiles:
             pygame.draw.rect(screen, COLOR_BLUE, p.rect, 2)
 
-        for b in game.bosses:
+        for b in game.sprites.bosses:
             pygame.draw.rect(screen, COLOR_RED, b.rect, 2)
 
-    if game.ship_alive:
+    if game.sprites.ship_alive:
         game.ship.rect.topleft = (game.ship.rect.x, game.ship.rect.y)
         screen.blit(img, game.ship.rect)
         if game.state.debugging:
             pygame.draw.rect(screen, COLOR_RED, game.ship.hitbox, 2)
 
-    game.explosions.draw(screen)
+    game.sprites.explosions.draw(screen)
 
     if game.hud.skill_tab.active and game.state.current_phase_options:
         cursor_pos = game.input.cursor_pos if joysticks else pygame.mouse.get_pos()
@@ -181,7 +182,7 @@ def render_stats_tab(game, screen, rect, game_font):
         y_offset += 50
 
 def render_waves(game, screen):
-    for wave in game.shockwaves:
+    for wave in game.sprites.shockwaves:
         alpha = max(0, 255 * (1 - wave.radius / wave.max_radius))
         surf = pygame.Surface((wave.radius * 2, wave.radius * 2),
                               pygame.SRCALPHA)

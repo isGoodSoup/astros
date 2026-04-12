@@ -215,7 +215,10 @@ class Ship(pygame.sprite.Sprite):
             projectiles[-1].nuke = True
 
             if not TOGGLE_UNLIMITED_AMMO:
-                self.guns_ammo['auto'] -= 1
+                if self.guns_ammo['nuke'] < 0:
+                    self.guns_ammo['nuke'] = 0
+                else:
+                    self.guns_ammo['nuke'] -= 1
 
         return projectiles
 
@@ -253,6 +256,12 @@ class Ship(pygame.sprite.Sprite):
             "crit_multiplier": self.crit_multiplier,
             "velocity": self.velocity,
         }
+
+    def spawnpoint(self, screen_size, frame_width):
+        x = screen_size[0] // 2 - frame_width // 2
+        y = screen_size[1] // 2 + SHIP_OFFSETS[1]
+        self.rect.topleft = (x, y)
+        self.hitbox.center = self.rect.center
 
 def get_nearest_enemy(ship_pos, enemies):
     closest = None

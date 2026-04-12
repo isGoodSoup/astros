@@ -15,11 +15,11 @@ class Clock:
         current_time = pygame.time.get_ticks()
         elapsed = current_time - getattr(game, 'last_time', 0)
         if not hasattr(game, 'last_time'):
-            game.last_time = current_time
+            game.sprites.last_time = current_time
             return
 
         self.milliseconds += elapsed
-        game.last_time = current_time
+        game.sprites.last_time = current_time
 
         if self.milliseconds >= ONE_SECOND:
             self.milliseconds -= ONE_SECOND

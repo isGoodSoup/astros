@@ -22,11 +22,11 @@ def formulize(game, level, base_xp=5):
 
 def add_multiplier(game, x, y, text, color=(255, 255, 0), font_size=24):
     offset = 0
-    for fn in game.floating_numbers:
+    for fn in game.sprites.floating_numbers:
         if abs(fn.rect.centerx - x) < 50 and abs(
                 fn.rect.centery - y - offset) < 5:
             offset -= 30
-    game.floating_numbers.add(FloatingNumber(x, y + offset, text, game.font, color=color, # type: ignore
+    game.sprites.floating_numbers.add(FloatingNumber(x, y + offset, text, game.font, color=color, # type: ignore
                        font_size=font_size))
 
 def debug(game):

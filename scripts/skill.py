@@ -73,8 +73,6 @@ class Skill:
 
 class SkillManager:
     def __init__(self):
-        self.skills = []
-
         self.skills = [
             Skill("Explorer", Explorer(), "01_explorer", "game.skill.explorer"),
             Skill("Berserk", DamageBoost(), "02_berserk", "game.skill.berserk"),

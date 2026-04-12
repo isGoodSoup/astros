@@ -17,10 +17,12 @@ from scripts.movement import update_movement, update_ship_angle
 from scripts.render import render_frame
 from scripts.settings import *
 from scripts.shared import joysticks, controller, fade
-from scripts.ship import Ship
 from scripts.skill import SkillManager
 from scripts.soundlib import apply_volume
+from scripts.spawns import SpawnManager
+from scripts.sprites import SpriteManager
 from scripts.state import GameState
+from scripts.traits import TraitManager
 from scripts.tutorial import Tutorial
 from scripts.update import update_game
 
@@ -37,124 +39,31 @@ class Game:
         os.makedirs(save_dir, exist_ok=True)
         self.config_path = os.path.join(save_dir, CONFIG_FILE)
 
-        self.crt = crt
-        self.state = GameState()
-        self.input = Input(screen_size)
-        self.clock = Clock()
-        self.font = FontManager(None, FONT_DEFAULT_SIZE)
-        self.ship_sprite = ships
-        self.selected_sheet = self.ship_sprite[ship_index]
-        self.ship_frames = SHIP_FRAMES
-        framew = self.selected_sheet.sheet.get_width() // self.ship_frames
-        frameh = self.selected_sheet.sheet.get_height()
-        self.frame = 0
-        self.ship = Ship(self.selected_sheet, 0, 0, self.frame, framew, frameh,
-                         columns=self.ship_frames)
-        self.spawnpoint(self.ship, screen_size, self.selected_sheet,
-                        self.ship_frames)
-        self.hud = HUD(self, screen_size, hud_ratio, self.font.get_font())
-        self.mixer = Mixer()
-        self.events = Events()
-
         self.screen = screen
         self.screen_size = screen_size
+        self.crt = crt
         self.running = True
         self.fps = FPS
         self.scale = SCALE
         self.volume = DEFAULT_VOLUME
         self.hud_padding = HUD_PADDING
 
-        self.celestials = pygame.sprite.Group()
-        self.projectiles = pygame.sprite.Group()
-        self.enemy_projectiles = pygame.sprite.Group()
-        self.entities = pygame.sprite.Group()
-        self.aliens = pygame.sprite.Group()
-        self.bosses = pygame.sprite.Group()
-        self.asteroids = pygame.sprite.Group()
-        self.explosions = pygame.sprite.Group()
-        self.upgrades = pygame.sprite.Group()
-        self.floating_numbers = pygame.sprite.Group()
-        self.fleets = []
-        self.particles = []
-        self.shockwaves = []
-
-        self.ship_frames = SHIP_FRAMES
-        self.explosion_frames = 7
-        self.explosion_sheet = assets.EXPLOSION_SHEET
-        self.megaexplosion_sheet = assets.MEGAEXPLOSION_SHEET
-        self.ship_alive = True
-
-        self.anim_frame_base = 0
-        self.anim_frame_overlay = 0
-        self.anim_index_left = 0
-        self.anim_index_right = 0
-        self.cooldown_base = ANIM_COOLDOWN_BASE
-        self.cooldown_overlay = ANIM_COOLDOWN_OVERLAY
-        self.anim_base_index = 0
-        self.anim_base_direction = 1
-
-        self.last_update_base = self.last_update_overlay = (
-            self).last_update = self.last_update_left = (
-            self).last_update_right = self.last_time = pygame.time.get_ticks()
-        self.last_direction = self.direction_set = None
-
-        self.frames = []
-
-        for i in range(self.ship_frames):
-            img = self.selected_sheet.get_image(i, framew, frameh,scale=self.scale,
-                                                columns=self.ship_frames)
-            self.frames.append(img)
-
-        self.left_frames_movement = self.frames[0:2]
-        self.frame_idle = self.frames[2]
-        self.right_frames_movement = self.frames[3:5]
-        self.frames_flying = self.frames[5:9]
-        self.base = self.frame_idle
-
-        framew = self.explosion_sheet.sheet.get_width() // self.explosion_frames
-        frameh = self.explosion_sheet.sheet.get_height()
-        self.frame_explode = [
-            self.explosion_sheet.get_image(i, framew, frameh, scale=self.scale,
-                columns=self.explosion_frames) for i in range(
-                self.explosion_frames)]
-
-        framew = self.megaexplosion_sheet.sheet.get_width() // 4
-        frameh = self.megaexplosion_sheet.sheet.get_height()
-        self.frame_big_explode = [
-            self.megaexplosion_sheet.get_image(i, framew, frameh, scale=self.scale * 2,
-                                               columns=4) for i in range(4)]
-
-        self.stars = [[random.randint(0, screen_size[0]),
-                       random.randint(0, screen_size[1]),
-                       random.randint(1, 3)] for _ in range(STAR_COUNT)]
-
-        self.boss_invisible_start = pygame.time.get_ticks()
-        self.boss_invisible_duration = BOSS_INVISIBLE_DURATION
-
-        self.last_celestial_spawn = 0
-        self.celestial_spawn_interval = random.randint(
-            *CELESTIAL_SPAWN_INTERVAL)
-        self.last_reinforcement_spawn = 0
-        self.last_alien_spawn = 0
-        self.alien_spawn_interval = random.randint(*ALIEN_SPAWN_INTERVAL_RANGE)
-
-        self.ALIENLASER = pygame.USEREVENT + 1
-        pygame.time.set_timer(self.ALIENLASER, ALIEN_SHOT_TIMER_MS)
+        self.state = GameState()
+        self.input = Input(screen_size)
+        self.clock = Clock()
+        self.font = FontManager(None, FONT_DEFAULT_SIZE)
+        self.ships = ships
+        self.ship_index = ship_index
+        self.sprites = SpriteManager(self)
+        self.ship = self.sprites.ship
+        self.hud = HUD(self, screen_size, hud_ratio, self.font.get_font())
+        self.mixer = Mixer()
+        self.events = Events()
+        self.spawns = SpawnManager()
+        self.skills = SkillManager()
+        self.traits = TraitManager()
 
         self.delay = pygame.time.get_ticks() + ALIEN_INITIAL_DELAY
-        self.last_asteroid_spawn = 0
-        self.asteroid_spawn_interval = ASTEROID_SPAWN_INTERVAL
-        self.asteroid_hitpoints = ASTEROID_HITPOINTS
-        self.asteroid_speed = ASTEROID_SPEED
-        self.last_upgrade_spawn = 0
-        self.upgrade_spawn_interval = UPGRADE_SPAWN_INTERVAL
-        self.last_boss_spawn = 0
-        self.last_shot_time = 0
-        self.last_upgrade = None
-        self.active_upgrade = None
-        self.upgrade_start_time = 0
-
-        self.skills = SkillManager()
 
         self.screen_shake = 0
         self.last_blink = 0
@@ -176,18 +85,19 @@ class Game:
                 if event.type == pygame.QUIT:
                     self.running = False
 
-                if event.type == self.mixer.MUSIC_END:
+                if event.type == self.events.MUSIC_END:
                     self.mixer.next_track()
 
-                if event.type == self.ALIENLASER and not self.state.pause and not self.state.game_over:
+                if (event.type == self.events.ALIENLASER and not
+                self.state.pause and not self.state.game_over):
                     if pygame.time.get_ticks() < self.delay:
                         continue
                     shots_this_frame = 0
                     if random.random() > 0.5:
-                        shooters = random.sample(self.aliens.sprites(),
-                                                 k=min(1, len(self.aliens)))
+                        shooters = random.sample(self.sprites.aliens.sprites(),
+                                                 k=min(1, len(self.sprites.aliens)))
                     else:
-                        shooters = [alien for alien in self.aliens.sprites()
+                        shooters = [alien for alien in self.sprites.aliens.sprites()
                                     if abs(alien.rect.centerx -
                                            self.ship.rect.centerx) <= CROSSHAIRS]
 
@@ -196,7 +106,7 @@ class Game:
                                                       alien.shot_cooldown)
                         if new_projectiles:
                             shots_this_frame += len(new_projectiles)
-                            self.enemy_projectiles.add(*new_projectiles)
+                            self.sprites.enemy_projectiles.add(*new_projectiles)
 
                     if shots_this_frame > 0 and self.state.play_sound:
                         self.mixer.sounds[0].play()
@@ -253,13 +163,6 @@ class Game:
 
             crt.render(screen)
         pygame.quit()
-
-    def spawnpoint(self, ship, screen_size, ship_sprite, cols):
-        framew = ship_sprite.sheet.get_width() // cols
-        x = screen_size[0] // 2 - framew // 2
-        y = screen_size[1] // 2 + SHIP_OFFSETS[1]
-        ship.rect.topleft = (x, y)
-        ship.hitbox.center = ship.rect.center
 
     def save_config(self):
         config_data = {

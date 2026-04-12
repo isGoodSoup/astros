@@ -28,7 +28,7 @@ def spawner(game):
     if game.state.phase_state != PHASE_ACTIVE:
         return
 
-    if now - game.last_reinforcement_spawn < SPAWN_COOLDOWN:
+    if now - game.spawns.last_reinforcement_spawn < SPAWN_COOLDOWN:
         return
 
     if enemies_alive(game):
@@ -37,21 +37,21 @@ def spawner(game):
     is_boss_phase = (game.state.phase_index == len(game.state.phases) - 1)
 
     if is_boss_phase:
-        if not game.state.boss_spawned:
+        if not game.spawns.boss_spawned:
             spawn_boss(game)
-            game.state.boss_spawned = True
+            game.spawns.boss_spawned = True
         return
 
-    if not game.state.boss_spawned and not is_boss_phase:
+    if not game.spawns.boss_spawned and not is_boss_phase:
         spawn_fleet(game, game.state.phase_index)
-        game.last_reinforcement_spawn = now
+        game.spawns.last_reinforcement_spawn = now
 
         if game.state.phase_index in ASTEROID_PHASES:
             spawn_asteroids(game)
 
 def enemies_alive(game):
-    return (any(a.alive() for a in game.aliens) or
-            any(b.alive() for b in game.bosses))
+    return (any(a.alive() for a in game.sprites.aliens) or
+            any(b.alive() for b in game.sprites.bosses))
 
 def update_phase(game):
     now = pygame.time.get_ticks()
@@ -98,13 +98,12 @@ def run_transition(game):
 
     game.state.score = 0
 
-    game.spawnpoint(game.ship, game.screen_size,
-        game.selected_sheet, game.ship_frames)
+    game.ship.spawnpoint(game.screen_size, game.sprites.framew)
 
-    game.last_reinforcement_spawn = pygame.time.get_ticks()
+    game.spawns.last_reinforcement_spawn = pygame.time.get_ticks()
     game.state.phase_start_time = pygame.time.get_ticks()
     game.state.phase_state = PHASE_ACTIVE
-    game.state.boss_spawned = False
+    game.spawns.boss_spawned = False
 
 def spawn_asteroids(game):
     if game.state.phase_state != PHASE_ACTIVE:
@@ -121,51 +120,51 @@ def spawn_asteroids(game):
         asteroid = Asteroid(game.screen_size[0], min_y=y, max_y=y)
 
         too_close = any(abs(asteroid.rect.y - a.rect.y) < ASTEROID_MIN_DISTANCE
-                        for a in game.asteroids)
+                        for a in game.sprites.asteroids)
         if too_close:
             asteroid.rect.y -= ASTEROID_OFFSET
 
-        game.asteroids.add(asteroid)
-        game.entities.add(asteroid)
+        game.sprites.asteroids.add(asteroid)
+        game.sprites.entities.add(asteroid)
 
 def spawn_boss(game):
     if not game.state.phase_spawned and not game.state.pause:
         x, y = get_boss_pos()
         color = ['red', 'green', 'yellow']
-        boss = Boss(game, game.ship, game.enemy_projectiles, x, y,
+        boss = Boss(game, game.ship, game.sprites.enemy_projectiles, x, y,
                     random.choice(color))
         game.play_music('flight')
-        game.bosses.add(boss)
-        game.state.phase_spawned = True
-        game.boss_alive = True
+        game.sprites.bosses.add(boss)
+        game.spawns.phase_spawned = True
+        game.spawns.boss_alive = True
 
 def update_shockwaves(game):
-    for wave in list(game.shockwaves):
+    for wave in list(game.sprites.shockwaves):
         wave.update()
 
-        for asteroid in list(game.asteroids):
+        for asteroid in list(game.sprites.asteroids):
             if wave.affects(asteroid.rect.center):
-                game.explosions.add(Explosion(asteroid.rect.centerx,
+                game.sprites.explosions.add(Explosion(asteroid.rect.centerx,
                               asteroid.rect.centery,
-                              game.frame_big_explode))
+                              game.sprites.frame_big_explode))
                 game.state.score += game.ship.level * SCORE_SCALING * game.state.score_multiplier
                 game.ship.gain_xp(formulize(game, game.ship.level), game.mixer.sounds)
                 asteroid.kill()
 
-        for alien in list(game.aliens):
+        for alien in list(game.sprites.aliens):
             if wave.affects(alien.rect.center):
-                game.explosions.add(Explosion(alien.rect.centerx,
+                game.sprites.explosions.add(Explosion(alien.rect.centerx,
                               alien.rect.centery,
-                              game.frame_big_explode))
+                              game.sprites.frame_big_explode))
                 game.state.score += (game.ship.level * SCORE_SCALING * game.state.score_multiplier)
                 game.ship.gain_xp(formulize(game, game.ship.level), game.mixer.sounds)
                 alien.kill()
 
-        game.aliens = pygame.sprite.Group([a for a in game.aliens if a.alive()])
-        game.asteroids = pygame.sprite.Group([a for a in game.asteroids if a.alive()])
+        game.sprites.aliens = pygame.sprite.Group([a for a in game.sprites.aliens if a.alive()])
+        game.sprites.asteroids = pygame.sprite.Group([a for a in game.sprites.asteroids if a.alive()])
 
         if not wave.alive:
-            game.shockwaves.remove(wave)
+            game.sprites.shockwaves.remove(wave)
 
 def update_game(game, delta, screen_size, hud_padding):
     game.ship.hit = False
@@ -173,7 +172,7 @@ def update_game(game, delta, screen_size, hud_padding):
     if game.ship.hit:
         game.ship.combo_multiplier = 1.0
 
-    for i in game.stars:
+    for i in game.sprites.stars:
         if not game.state.pause:
             i[1] += game.state.stars_speed
         if i[1] > screen_size[1]:
@@ -181,72 +180,72 @@ def update_game(game, delta, screen_size, hud_padding):
             i[0] = random.randint(0, screen_size[0])
 
     current_time = pygame.time.get_ticks()
-    if current_time - game.last_celestial_spawn > game.celestial_spawn_interval:
-        game.last_celestial_spawn = current_time
+    if current_time - game.spawns.last_celestial_spawn > game.spawns.celestial_spawn_interval:
+        game.spawns.last_celestial_spawn = current_time
         for _ in range(random.randint(1, 4)):
             for _ in range(10):
                 new_celestial = random_celestial()
-                if new_celestial and is_valid_spawn(new_celestial, game.celestials,
+                if new_celestial and is_valid_spawn(new_celestial, game.sprites.celestials,
                                                     CELESTIAL_MIN_DISTANCE):
-                    game.celestials.add(new_celestial)
+                    game.sprites.celestials.add(new_celestial)
                     break
 
-    if current_time - game.last_upgrade_spawn > game.upgrade_spawn_interval:
-        game.last_upgrade_spawn = current_time
+    if current_time - game.spawns.last_upgrade_spawn > game.spawns.upgrade_spawn_interval:
+        game.spawns.last_upgrade_spawn = current_time
 
         for _ in range(random.randint(1, 2)):
             x, y = get_upgrade_position()
-            game.last_upgrade = upgd.get_upgrade()
-            upgrade_type = game.last_upgrade
+            game.spawns.last_upgrade = upgd.get_upgrade()
+            upgrade_type = game.spawns.last_upgrade
             upgrade_path = resource_path(f"assets/{upgrade_type}.png")
             new_upgrade = Upgrade(upgrade_path, x, y, upgrade_type=upgrade_type)
-            game.upgrades.add(new_upgrade)  # type: ignore
+            game.sprites.upgrades.add(new_upgrade)  # type: ignore
 
     now = pygame.time.get_ticks()
-    if now - game.last_update_base > game.cooldown_base:
-        game.anim_frame_base += 1
-        game.last_update_base = now
+    if now - game.sprites.last_update_base > game.sprites.cooldown_base:
+        game.sprites.anim_frame_base += 1
+        game.sprites.last_update_base = now
 
-    if now - game.last_update_overlay > game.cooldown_overlay:
-        game.anim_frame_overlay += 1
-        game.last_update_overlay = now
+    if now - game.sprites.last_update_overlay > game.sprites.cooldown_overlay:
+        game.sprites.anim_frame_overlay += 1
+        game.sprites.last_update_overlay = now
 
     if game.ship.direction in ["left", "right"]:
         if game.ship.direction == "left":
-            frames = game.left_frames_movement
-            if game.last_direction != "left":
-                game.anim_index_left = len(frames) - 1
-                game.last_update_left = now
-                game.last_direction = "left"
+            frames = game.sprites.left_frames_movement
+            if game.sprites.last_direction != "left":
+                game.sprites.anim_index_left = len(frames) - 1
+                game.sprites.last_update_left = now
+                game.sprites.last_direction = "left"
 
-            if now - game.last_update_left > game.cooldown_base:
-                game.anim_index_left -= 1
-                if game.anim_index_left < 0:
-                    game.anim_index_left = 0
-                game.last_update_left = now
-            game.base = frames[game.anim_index_left]
+            if now - game.sprites.last_update_left > game.sprites.cooldown_base:
+                game.sprites.anim_index_left -= 1
+                if game.sprites.anim_index_left < 0:
+                    game.sprites.anim_index_left = 0
+                game.sprites.last_update_left = now
+            game.sprites.base = frames[game.sprites.anim_index_left]
 
         else:
-            frames = game.right_frames_movement
-            if game.last_direction != "right":
-                game.anim_index_right = 0
-                game.last_update_right = now
-                game.last_direction = "right"
+            frames = game.sprites.right_frames_movement
+            if game.sprites.last_direction != "right":
+                game.sprites.anim_index_right = 0
+                game.sprites.last_update_right = now
+                game.sprites.last_direction = "right"
 
-            if now - game.last_update_right > game.cooldown_base:
-                game.anim_index_right += 1
-                if game.anim_index_right >= len(frames):
-                    game.anim_index_right = len(frames) - 1
-                game.last_update_right = now
-            game.base = frames[game.anim_index_right]
+            if now - game.sprites.last_update_right > game.sprites.cooldown_base:
+                game.sprites.anim_index_right += 1
+                if game.sprites.anim_index_right >= len(frames):
+                    game.sprites.anim_index_right = len(frames) - 1
+                game.sprites.last_update_right = now
+            game.sprites.base = frames[game.sprites.anim_index_right]
     else:
-        game.base = game.frame_idle
-        game.last_direction = None
+        game.sprites.base = game.sprites.frame_idle
+        game.sprites.last_direction = None
 
-    game.celestials.update()
-    game.asteroids.update()
+    game.sprites.celestials.update()
+    game.sprites.asteroids.update()
 
-    if game.ship_alive:
+    if game.sprites.ship_alive:
         game.ship.update_upgrades()
         if game.ship.hitpoints < (game.ship.max_hitpoints * 0.25):
             game.ship.critical = True
@@ -270,26 +269,26 @@ def update_game(game, delta, screen_size, hud_padding):
                                       random.uniform(2, 4))
             particle = Particle(trail_pos, velocity, timer=80,
                                 color=color, radius=4)
-            game.particles.append(particle)
+            game.sprites.particles.append(particle)
 
-    game.fleets = [f for f in game.fleets if f.alive()]
-    for fleet in game.fleets:
+    game.sprites.fleets = [f for f in game.sprites.fleets if f.alive()]
+    for fleet in game.sprites.fleets:
         fleet.update()
 
-    game.bosses.update()
-    game.projectiles.update()
-    game.enemy_projectiles.update()
+    game.sprites.bosses.update()
+    game.sprites.projectiles.update()
+    game.sprites.enemy_projectiles.update()
 
-    game.floating_numbers.update(delta)
-    game.explosions.update()
-    game.upgrades.update()
+    game.sprites.floating_numbers.update(delta)
+    game.sprites.explosions.update()
+    game.sprites.upgrades.update()
 
-    for particle in game.particles[:]:
+    for particle in game.sprites.particles[:]:
         particle.update()
         if particle.timer <= 0:
-            game.particles.remove(particle)
+            game.sprites.particles.remove(particle)
 
-    if not game.direction_set:
+    if not game.sprites.direction_set:
         game.ship.direction = "idle"
 
     check_collision(game)
@@ -301,8 +300,8 @@ def update_game(game, delta, screen_size, hud_padding):
         game.state.score += 1 * game.state.score_multiplier
 
     now = pygame.time.get_ticks()
-    if now - game.state.last_hole_spawn >= game.state.black_hole_spawn_delay:
-        game.state.last_hole_spawn = now
+    if now - game.spawns.last_hole_spawn >= game.spawns.black_hole_spawn_delay:
+        game.spawns.last_hole_spawn = now
         if random.random() < 0.1:
             game.events.black_hole_event(game)
 

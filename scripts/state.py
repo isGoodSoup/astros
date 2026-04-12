@@ -1,8 +1,9 @@
 import pygame
 
 from scripts.settings import (PHASES_TOTAL, PHASE_START, PHASE_COLORS, \
-                              PHASE_LENGTH, BLACK_HOLE_SPAWN, STAR_SPEED,
+                              PHASE_LENGTH, STAR_SPEED,
                               PHASES, SCORE_SCALING, PHASE_ACTIVE)
+
 
 class GameState:
     def __init__(self):
@@ -29,12 +30,6 @@ class GameState:
         self.phase_length = PHASE_LENGTH
         self.phase_spawned = False
         self.transition_started = False
-
-        self.boss_spawned = False
-        self.boss_alive = False
-
-        self.last_hole_spawn = 0
-        self.black_hole_spawn_delay = BLACK_HOLE_SPAWN
 
         self.game_over_fx = True
         self.skills_generated = False
