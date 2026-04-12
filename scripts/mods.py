@@ -76,7 +76,7 @@ class Mods:
             alpha = render_fade(screen, screen_size)
             crt.render(screen)
 
-            if self.ship_flying and self.fade_started and alpha > 0:
+            if self.ship_flying and self.fade_started and alpha >= 255:
                 traits = TraitChoiceScreen(screen, screen_size, hud_ratio,
                     TraitPool()).run(clock, screen, screen_size,hud_ratio, crt)
                 selected_traits = traits.get_traits() if traits else []
