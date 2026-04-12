@@ -9,11 +9,13 @@ from scripts.utils import resource_path
 sounds = []
 
 def load_sounds():
+    sounds.clear()
     sounds.append(pygame.mixer.Sound(resource_path("assets/fx/beam.ogg")))
     sounds.append(pygame.mixer.Sound(resource_path("assets/fx/explosion.ogg")))
     sounds.append(pygame.mixer.Sound(resource_path("assets/fx/power_up.ogg")))
     sounds.append(pygame.mixer.Sound(resource_path("assets/fx/level_up.ogg")))
     sounds.append(pygame.mixer.Sound(resource_path("assets/fx/menu.ogg")))
+    sounds.append(pygame.mixer.Sound(resource_path("assets/fx/select.ogg")))
     sounds.append(pygame.mixer.Sound(resource_path("assets/fx/critical.ogg")))
     sounds.append(pygame.mixer.Sound(resource_path("assets/fx/game_over.ogg")))
     return sounds
