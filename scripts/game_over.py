@@ -42,7 +42,6 @@ def reboot(game, screen_size):
 
     game.sprites.projectiles.empty()
     game.sprites.enemy_projectiles.empty()
-    game.sprites.entities.empty()
     game.sprites.aliens.empty()
     game.sprites.asteroids.empty()
     game.sprites.bosses.empty()
