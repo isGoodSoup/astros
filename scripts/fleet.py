@@ -3,14 +3,15 @@ import random
 import pygame
 
 from scripts.alien import Alien
-from scripts.settings import ASTEROID_PHASES, ALIEN_PHASES, SCALE, FORMATION
+from scripts.settings import (ASTEROID_PHASES, ALIEN_PHASES, SCALE,
+                              ALIEN_FORMATION)
 
 
 class AlienFleet:
     def __init__(self, game, rows=2, cols=4, start_y=200,
                  spacing_x=15, spacing_y=15, scale=SCALE):
         self.game = game
-        self.formation = random.choice(FORMATION)
+        self.formation = random.choice(ALIEN_FORMATION)
         self.rows = rows
         self.cols = cols
         self.aliens = pygame.sprite.Group()

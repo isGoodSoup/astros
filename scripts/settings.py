@@ -138,7 +138,8 @@ ALIEN_WIDTH = 44
 ALIEN_HEIGHT = 32
 ALIEN_ADVANTAGE = 10
 
-FORMATION = ['block', 'line', 'clutch']
+ALIEN_FORMATION = ['block', 'line', 'clutch']
+ALIEN_MOVES = ['sideways', 'zig-zag', 'random']
 
 ELITE_HP_MULT = 2.0
 ELITE_DAMAGE_MULT = 1.5

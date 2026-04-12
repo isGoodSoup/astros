@@ -167,7 +167,7 @@ class TraitChoiceScreen:
 
         self.pool = pool
 
-        self.node = ChoiceNode(pool.roll(count=pool.length()), pick_count=2)
+        self.node = ChoiceNode(pool.roll(count=pool.length()), pick_count=1)
         self.font = FontManager(None, FONT_DEFAULT_SIZE).get_font()
 
         self.cards = [
