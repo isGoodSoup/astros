@@ -133,7 +133,7 @@ def spawn_boss(game):
     if not game.state.phase_spawned and not game.state.pause:
         x, y = get_boss_pos()
         color = ['red', 'green', 'yellow']
-        for i in range(game.sprites.boss_count):
+        for i in range(game.spawns.boss_count):
             game.sprites.bosses.add(Boss(game, game.ship, game.sprites.enemy_projectiles, x, y,
                         random.choice(color)))
 
