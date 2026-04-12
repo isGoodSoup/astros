@@ -12,7 +12,6 @@ class SpriteManager:
         self.celestials = pygame.sprite.Group()
         self.projectiles = pygame.sprite.Group()
         self.enemy_projectiles = pygame.sprite.Group()
-        self.entities = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
         self.bosses = pygame.sprite.Group()
         self.asteroids = pygame.sprite.Group()
