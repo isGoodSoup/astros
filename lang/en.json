@@ -1,6 +1,13 @@
 {
   "menu.start": "Press any key to start",
   "mods.header": "CHOOSE YOUR STYLE",
+  "traits.header": "CHOOSE YOUR TRAIT",
+  "game.trait.name.boss": "Double Trouble",
+  "game.trait.desc.boss": "Maybe one wasn't enough. You'll need a second boss to make it through the entire game.",
+  "game.trait.name.glass": "Glass Reactor",
+  "game.trait.desc.glass": "Your ship does not have enough shields to defend against the incoming asteroids. You'll need to upgrade your shields to defend against the incoming asteroids.",
+  "game.trait.name.panonium": "Panonium",
+  "game.trait.desc.panonium": "Fear the incoming threats",
   "game.pause": "PAUSED",
   "game.victory": "VICTORY",
   "game.defeat": "GAME OVER",

@@ -1,6 +1,13 @@
 {
   "menu.start": "Presiona cualquier tecla para comenzar",
   "mods.header": "Elige tu estilo",
+  "traits.header": "Elige tu modificación",
+  "game.trait.name.boss": "Doble Jefe",
+  "game.trait.desc.boss": "Uno ya no fue suficiente. Es necesario un segundo jefe para lograr la victoria completa.",
+  "game.trait.name.glass": "Reactor Frágil",
+  "game.trait.desc.glass": "Tu nave no tiene suficiente escudo para defenderse contra los asteroides entrantes. Es necesario actualizar tus escudos para defenderse contra los asteroides",
+  "game.trait.name.panonium": "Panonium",
+  "game.trait.desc.panonium": "Las amenazas que llegan te impiden sobrevivir.",
   "game.pause": "PAUSA",
   "game.victory": "VICTORIA",
   "game.defeat": "DERROTA",
