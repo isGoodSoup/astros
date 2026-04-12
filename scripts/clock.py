@@ -13,10 +13,8 @@ class Clock:
 
     def update_time(self, game):
         current_time = pygame.time.get_ticks()
-        elapsed = current_time - getattr(game, 'last_time', 0)
-        if not hasattr(game, 'last_time'):
-            game.sprites.last_time = current_time
-            return
+        elapsed = current_time - game.sprites.last_time
+        game.sprites.last_time = current_time
 
         self.milliseconds += elapsed
         game.sprites.last_time = current_time
