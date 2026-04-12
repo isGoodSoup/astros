@@ -167,7 +167,7 @@ class TraitChoiceScreen:
 
         self.pool = pool
 
-        self.node = ChoiceNode(pool.roll(count=3), pick_count=1)
+        self.node = ChoiceNode(pool.roll(count=pool.length()), pick_count=2)
         self.font = FontManager(None, FONT_DEFAULT_SIZE).get_font()
 
         self.cards = [
@@ -215,7 +215,7 @@ class TraitChoiceScreen:
 
         spacing = TRAIT_CARD_SIZE + 50
         for i, card in enumerate(self.cards):
-            x = cx + (i - 1) * spacing
+            x = cx + (i - (len(self.cards) - 1) / 2) * spacing
             card.draw(self.screen, (x, cy))
 
         header_float = 4 * math.sin(time * 0.002)

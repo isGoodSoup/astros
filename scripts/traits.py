@@ -1,6 +1,6 @@
 import pygame
 
-from scripts.all_traits import DoubleTrouble, GlassReactor, Panonium
+from scripts.all_traits import DoubleTrouble, GlassReactor, Panonium, Classic
 from scripts.lang import local
 from scripts.settings import (COLOR_WHITE, COLOR_LIGHT_ORANGE,
                               TRAIT_CARD_SIZE, SCALE)
@@ -78,9 +78,12 @@ class TraitPool:
                   local.t('game.trait.desc.glass'), "glass_reactor", GlassReactor()),
             Trait(local.t('game.trait.name.panonium'),
                   local.t('game.trait.desc.panonium'), "pandemonium", Panonium()),
-            Trait(local.t('game.trait.name.none'), local.t('game.trait.desc.none'),
-                  "none", None)
+            Trait(local.t('game.trait.name.none'),
+                  local.t('game.trait.desc.none'),"none", Classic())
         ]
 
     def roll(self, count=3):
         return self.traits[:count]
+
+    def length(self):
+        return len(self.traits)

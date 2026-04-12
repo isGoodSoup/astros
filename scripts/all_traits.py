@@ -2,6 +2,9 @@ from typing import override
 
 from scripts.ability import Ability
 
+class Classic(Ability):
+    def apply_on(self, game, ship):
+        pass
 
 class DoubleTrouble(Ability):
     @override
