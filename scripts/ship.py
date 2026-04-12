@@ -64,7 +64,7 @@ class Ship(pygame.sprite.Sprite):
         self.skills = []
 
         self.level = 1
-        self.level_cap = False
+        self.level_cap = TOGGLE_LEVEL_CAP
         self.xp = 0
         self.xp_to_next_level = SHIP_XP_PER_LEVEL
         self.perk_points = 0
@@ -156,8 +156,8 @@ class Ship(pygame.sprite.Sprite):
         elif gun_type == "shotgun":
             if self.guns_ammo['shotgun'] <= 0:
                 return projectiles
-            num_pellets = 6
-            spread_angle = 30
+            num_pellets = SHIP_SHOTGUN_PELLETS
+            spread_angle = SHIP_SHOTGUN_SPREAD
 
             for i in range(num_pellets):
                 angle_offset = (-spread_angle / 2) + i * (
@@ -182,8 +182,8 @@ class Ship(pygame.sprite.Sprite):
             if self.guns_ammo['auto'] <= 0:
                 return projectiles
 
-            num_bullets = 3
-            spread_angle = 5
+            num_bullets = SHIP_AUTO_BULLETS
+            spread_angle = SHIP_AUTO_SPREAD
             for i in range(num_bullets):
                 angle_offset = (-spread_angle / 2) + i * (
                         spread_angle / (num_bullets - 1))
@@ -224,7 +224,7 @@ class Ship(pygame.sprite.Sprite):
         return [random.randint(0,10) - 4, random.randint(0,10) - 4]
 
     def gain_xp(self, amount, sound):
-        if self.level_cap and self.level == 10:
+        if self.level_cap and self.level == LEVEL_CAP:
             return
 
         self.xp += amount
@@ -233,7 +233,7 @@ class Ship(pygame.sprite.Sprite):
             self.level_up(sound)
 
     def level_up(self, sound):
-        if self.level_cap and self.level == 10:
+        if self.level_cap and self.level == LEVEL_CAP:
             return
 
         self.level += 1
