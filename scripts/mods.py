@@ -211,12 +211,20 @@ class TraitChoiceScreen:
     def draw(self):
         cx = self.screen_size[0] // 2
         cy = self.screen_size[1] // 2
+        time = pygame.time.get_ticks()
 
         spacing = TRAIT_CARD_SIZE + 50
-
         for i, card in enumerate(self.cards):
             x = cx + (i - 1) * spacing
             card.draw(self.screen, (x, cy))
+
+        header_float = 4 * math.sin(time * 0.002)
+
+        header = local.t('traits.header')
+        header_surf = self.font.render(header, True, COLOR_LIGHT_ORANGE)
+        header_rect = header_surf.get_rect(
+            center=(cx, 100 + int(header_float)))
+        self.screen.blit(header_surf, header_rect)
 
     def input(self, event):
         if self.exiting:

@@ -98,4 +98,4 @@ def reboot(game, screen_size):
     game.screen_shake = 0
 
     if game.state.play_sound:
-        game.mixer.queue(['odyssey', 'starfield'], loop=True)
+        game.mixer.play_music('starfield')
