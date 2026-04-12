@@ -92,7 +92,7 @@ SHIP_GUNS_RATES = {
 
 SHIP_AMMO = {
     "beam": -1,
-    "shotgun": 20,
+    "shotgun": 100,
     "auto": 400,
     "nuke": 2
 }
