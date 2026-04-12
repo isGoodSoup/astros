@@ -86,6 +86,7 @@ class SpriteManager:
 
         self.boss_invisible_start = pygame.time.get_ticks()
         self.boss_invisible_duration = BOSS_INVISIBLE_DURATION
+        self.alien_delay = pygame.time.get_ticks() + ALIEN_INITIAL_DELAY
 
     def create_ship(self):
         return Ship(self.selected_sheet, 0, 0, self.frame, self.framew, self.frameh,

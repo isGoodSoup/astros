@@ -63,8 +63,6 @@ class Game:
         self.skills = SkillManager()
         self.traits = TraitManager()
 
-        self.delay = pygame.time.get_ticks() + ALIEN_INITIAL_DELAY
-
         self.screen_shake = 0
         self.last_blink = 0
 
@@ -90,7 +88,7 @@ class Game:
 
                 if (event.type == self.events.ALIENLASER and not
                 self.state.pause and not self.state.game_over):
-                    if pygame.time.get_ticks() < self.delay:
+                    if pygame.time.get_ticks() < self.sprites.alien_delay:
                         continue
                     shots_this_frame = 0
                     if random.random() > 0.5:
