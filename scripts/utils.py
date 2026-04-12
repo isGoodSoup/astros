@@ -6,6 +6,7 @@ import sys
 import pygame
 
 from scripts.floaty import FloatingNumber
+from scripts.shared import fade
 
 
 def legacy(func):
@@ -76,3 +77,12 @@ def wrap_text(text, font, max_width):
         lines.append(line)
 
     return lines
+
+def render_fade(screen, screen_size):
+    alpha = fade.update()
+    if alpha > 0:
+        fade_surface = pygame.Surface(screen_size)
+        fade_surface.fill((0, 0, 0))
+        fade_surface.set_alpha(alpha)
+        screen.blit(fade_surface, (0, 0))
+    return alpha

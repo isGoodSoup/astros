@@ -11,6 +11,7 @@ from scripts.settings import *
 from scripts.shared import fade
 from scripts.soundlib import load_sounds
 from scripts.update import set_hud
+from scripts.utils import render_fade
 
 
 class Menu:
@@ -60,7 +61,7 @@ class Menu:
             if not self.running:
                 break
 
-            alpha = fade.update()
+            alpha = render_fade(self.screen, self.screen_size)
             self.screen.fill(COLOR_BLACK)
 
             now = pygame.time.get_ticks()
@@ -78,6 +79,7 @@ class Menu:
             if (now // ONE_SECOND//2) % 2 == 0:
                 self.render_surface.blit(start, (start_x, title_y + TITLE_OFFSET))
             self.screen.blit(pygame.transform.scale(self.render_surface, self.screen_size),(0, 0))
+
             if alpha > 0:
                 fade_surface = pygame.Surface(HD_RESOLUTION)
                 fade_surface.fill(COLOR_BLACK)

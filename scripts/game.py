@@ -24,6 +24,7 @@ from scripts.sprites import SpriteManager
 from scripts.state import GameState
 from scripts.tutorial import Tutorial
 from scripts.update import update_game
+from scripts.utils import render_fade
 
 
 # Copyright (c) 2026 Diego
@@ -152,13 +153,7 @@ class Game:
                 screen.blit(pygame.transform.scale(screen, screen_size),
                             render_offset)
 
-            alpha = fade.update()
-            if alpha > 0:
-                fade_surface = pygame.Surface(screen_size)
-                fade_surface.fill((0, 0, 0))
-                fade_surface.set_alpha(alpha)
-                screen.blit(fade_surface, (0, 0))
-
+            alpha = render_fade(screen, screen_size)
             crt.render(screen)
         pygame.quit()
 
