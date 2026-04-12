@@ -3,13 +3,14 @@ import random
 import pygame
 
 from scripts.alien import Alien
-from scripts.settings import ASTEROID_PHASES, ALIEN_PHASES, SCALE
+from scripts.settings import ASTEROID_PHASES, ALIEN_PHASES, SCALE, FORMATION
 
 
 class AlienFleet:
     def __init__(self, game, rows=2, cols=4, start_y=200,
                  spacing_x=15, spacing_y=15, scale=SCALE):
         self.game = game
+        self.formation = random.choice(FORMATION)
         self.rows = rows
         self.cols = cols
         self.aliens = pygame.sprite.Group()
@@ -26,20 +27,12 @@ class AlienFleet:
         self.start_x = (game.screen_size[0] - cluster_width) // 2
         self.start_y = start_y
 
-        positions = self.grid(
-            self.rows,
-            self.cols,
-            self.alien_width,
-            self.alien_height,
-            self.spacing_x,
-            self.spacing_y,
-            self.start_x,
-            self.start_y
-        )
+        positions = self.grid(self.rows, self.cols, self.alien_width,
+            self.alien_height, self.spacing_x, self.spacing_y, self.start_x,
+                              self.start_y)
 
         if game.spawns.shuffle_enemies:
             random.shuffle(positions)
-            self.rows += 2
 
         for x, y in positions:
             color = game.state.phase_colors[game.state.phase_index %
@@ -51,11 +44,28 @@ class AlienFleet:
     def grid(self, rows, cols, cell_w, cell_h, spacing_x,
                                 spacing_y, origin_x, origin_y):
         positions = []
-        for row in range(rows):
-            for col in range(cols):
-                x = origin_x + col * (cell_w + spacing_x)
-                y = origin_y + row * (cell_h + spacing_y)
+        if self.formation == "block":
+            for row in range(rows):
+                for col in range(cols):
+                    x = origin_x + col * (cell_w + spacing_x)
+                    y = origin_y + row * (cell_h + spacing_y)
+                    positions.append((x, y))
+
+        elif self.formation == "line":
+            count = rows * cols
+            for i in range(count):
+                x = origin_x + i * (cell_w + spacing_x)
+                y = origin_y
                 positions.append((x, y))
+
+        elif self.formation == "clutch":
+            for row in range(rows):
+                for col in range(cols):
+                    x = origin_x + col * (cell_w + spacing_x)
+                    if row % 2 == 1:
+                        x += cell_w // 2
+                    y = origin_y + row * (cell_h + spacing_y)
+                    positions.append((x, y))
         return positions
 
     def update(self):
@@ -78,28 +88,30 @@ class AlienFleet:
             alien.rect.x += self.direction * self.step
             alien.update()
 
-        alive = len(self.aliens)
-        total = self.rows * self.cols
-
     def alive(self):
         return any(a.alive() for a in self.aliens)
 
+def new_fleet_block():
+    return [random.randint(1, 9), random.randint(1, 6)]
+
 def spawn_fleet(game, phase):
-    fleet_sprites = pygame.sprite.Group()
-    for alien in fleet_sprites.sprites():
-        if not alien.alive():
-            fleet_sprites.remove(alien)
-            game.sprites.entities.remove(alien)
+    for fleet in list(game.sprites.fleets):
+        for alien in fleet.aliens:
+            if alien in game.sprites.entities:
+                game.sprites.entities.remove(alien)
+            if alien in game.sprites.aliens:
+                game.sprites.aliens.remove(alien)
+        game.sprites.fleets.remove(fleet)
 
     if phase in ASTEROID_PHASES:
         clusters = 1
-        rows, cols = 3, 8
+        rows, cols = new_fleet_block()
     elif phase in ALIEN_PHASES:
         clusters = 1
-        rows, cols = 5, 8
+        rows, cols = new_fleet_block()
     elif phase == game.state.phases[-1]:
-        clusters = 0
-        rows, cols = 1, 4
+        clusters = 1
+        rows, cols = new_fleet_block()
     else:
         return
 
