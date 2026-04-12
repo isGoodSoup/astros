@@ -21,7 +21,7 @@ class GlassReactor(Ability):
         ship.shield = ship.max_shield
         return [ship.hitpoints, ship.base_damage,ship.shield]
 
-class Panomium(Ability):
+class Panonium(Ability):
     def apply_on(self, game, ship):
         sp = game.spawns
         sp.boss_count += 1
