@@ -2,17 +2,17 @@ import random
 
 import pygame
 
+from scripts.alien import Alien
 from scripts.settings import (ASTEROID_PHASES, ALIEN_PHASES, SCALE,
-                              ALIEN_FORMATION, ONE_SECOND, ALIEN_MOVES)
+                              ALIEN_FORMATION, ALIEN_MOVES, ONE_SECOND)
 
 
 class AlienFleet:
-    def __init__(self, game, rows=2, cols=4, start_y=200,
-                 spacing_x=15, spacing_y=15, scale=SCALE,
-                 movement_type="sideways"):
+    def __init__(self, game, movement, rows=2, cols=4, start_y=200,
+                 spacing_x=15, spacing_y=15, scale=SCALE):
         self.game = game
         self.formation = random.choice(ALIEN_FORMATION)
-        self.movement_type = movement_type
+        self.movement = movement
         self.rows = rows
         self.cols = cols
         self.aliens = pygame.sprite.Group()
@@ -20,18 +20,37 @@ class AlienFleet:
         self.spacing_y = spacing_y
         self.alien_width = 16 * scale
         self.alien_height = 11 * scale
-
         self.direction = 1
+
         self.step = 10
+        self.move_timer = pygame.time.get_ticks()
+
+        cluster_width = cols * self.alien_width + (cols - 1) * spacing_x
+        self.start_x = (game.screen_size[0] - cluster_width) // 2
+        self.start_y = start_y
 
         self.velocity = pygame.math.Vector2(random.uniform(-2, 2),
-            random.uniform(-2, 2))
-        self.max_speed = 2.5
-        self.phase2_change_interval = ONE_SECOND
-        self.phase2_change_time = pygame.time.get_ticks()
+                                            random.uniform(-2, 2))
+        self.max_speed = 5
+        self.chaotic_change_interval = ONE_SECOND
+        self.chaotic_change_time = pygame.time.get_ticks()
+
+        positions = self.grid(self.rows, self.cols, self.alien_width,
+                              self.alien_height, self.spacing_x, self.spacing_y,
+                              self.start_x, self.start_y)
+
+        if game.spawns.shuffle_enemies:
+            random.shuffle(positions)
+
+        for x, y in positions:
+            color = game.state.phase_colors[game.state.phase_index %
+                                            len(game.state.phase_colors)]
+            alien = Alien(game, game.ship, x, y, color, 0, game.screen)
+            self.aliens.add(alien)  # type: ignore
+            game.sprites.aliens.add(alien)
 
     def grid(self, rows, cols, cell_w, cell_h, spacing_x,
-                                spacing_y, origin_x, origin_y):
+             spacing_y, origin_x, origin_y):
         positions = []
         if self.formation == "block":
             for row in range(rows):
@@ -66,9 +85,9 @@ class AlienFleet:
         if len(self.aliens) == 0:
             return
 
-        if self.movement_type == "sideways":
+        if self.movement == "sideways":
             self._update_classic()
-        elif self.movement_type == "chaotic":
+        elif self.movement == "chaotic":
             self._update_chaos()
 
         for alien in self.aliens:
@@ -93,14 +112,14 @@ class AlienFleet:
         now = pygame.time.get_ticks()
         screen_width, screen_height = self.game.screen_size
 
-        if now - self.phase2_change_time > self.phase2_change_interval:
+        if now - self.chaotic_change_time > self.chaotic_change_interval:
             self.velocity.x += random.uniform(-2, 2)
             self.velocity.y += random.uniform(-2, 2)
 
             if self.velocity.length() > self.max_speed:
                 self.velocity.scale_to_length(self.max_speed)
 
-            self.phase2_change_time = now
+            self.chaotic_change_time = now
 
         dx = int(self.velocity.x)
         dy = int(self.velocity.y)
@@ -127,7 +146,7 @@ class AlienFleet:
                 alien.rect.y += correction
 
 def new_fleet_block(game):
-    max_cols = max(1,(game.screen_size[0] + 15) // (16 * SCALE + 15))
+    max_cols = max(1, (game.screen_size[0] + 15) // (16 * SCALE + 15))
     rows = random.randint(4, 9)
     cols = random.randint(4, min(12, max_cols))
     return rows, cols
@@ -139,18 +158,18 @@ def spawn_fleet(game, phase_index):
         game.sprites.fleets.remove(fleet)
 
     if phase_index in ASTEROID_PHASES:
-        movement_type = "sideways"
+        movement = "sideways"
     elif phase_index in ALIEN_PHASES:
-        movement_type = random.choice(ALIEN_MOVES)
+        movement = random.choice(ALIEN_MOVES)
     elif phase_index == len(game.state.phases) - 1:
-        movement_type = "chaotic"
+        movement = "chaotic"
     else:
         return
 
     rows, cols = new_fleet_block(game)
 
-    fleet = AlienFleet(game, rows=rows, cols=cols,
-        start_y=120, movement_type=movement_type)
+    fleet = AlienFleet(game, movement=movement, rows=rows, cols=cols,
+                       start_y=120)
     game.sprites.fleets.append(fleet)
 
     for alien in fleet.aliens:
