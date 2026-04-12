@@ -25,6 +25,10 @@ class SpawnManager:
         self.boss_alive = False
         self.boss_count = 1
         self.can_spawn_asteroids = True
+        self.can_spawn_elites = False
+        self.elite_mutation_chance = 0.01
 
         self.last_hole_spawn = 0
         self.black_hole_spawn_delay = BLACK_HOLE_SPAWN
+
+        self.shuffle_enemies = False
