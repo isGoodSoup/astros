@@ -43,7 +43,7 @@ def spawner(game):
         return
 
     if not game.spawns.boss_spawned and not is_boss_phase:
-        spawn_fleet(game, game.state.current_phase)
+        spawn_fleet(game, game.state.phase_index)
         game.spawns.last_reinforcement_spawn = now
 
         if game.state.phase_index in ASTEROID_PHASES:
@@ -128,7 +128,6 @@ def spawn_asteroids(game):
             asteroid.rect.y -= ASTEROID_OFFSET
 
         game.sprites.asteroids.add(asteroid)
-        game.sprites.entities.add(asteroid)
 
 def spawn_boss(game):
     if not game.state.phase_spawned and not game.state.pause:
