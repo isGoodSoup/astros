@@ -76,6 +76,7 @@ class Game:
         self.floating_numbers = pygame.sprite.Group()
         self.fleets = []
         self.particles = []
+        self.shockwaves = []
 
         self.ship_frames = SHIP_FRAMES
         self.explosion_frames = 7
@@ -154,9 +155,6 @@ class Game:
         self.upgrade_start_time = 0
 
         self.skills = SkillManager()
-
-        self.shockwaves = []
-        self.nuke_flash = 0
 
         self.screen_shake = 0
         self.last_blink = 0

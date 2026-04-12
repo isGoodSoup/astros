@@ -14,7 +14,6 @@ class Events:
         game.explosions.add(Explosion(center[0], center[1],
                                       game.frame_big_explode))
 
-        game.nuke_flash = 255
         game.screen_shake = SCREEN_SHAKE + 30
         if joysticks:
             controller.rumble(0.5, 1, HIGH_RUMBLE_MS)
