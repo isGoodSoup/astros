@@ -98,4 +98,5 @@ def reboot(game, screen_size):
     game.screen_shake = 0
 
     if game.state.play_sound:
+        pygame.mixer.music.set_volume(game.volume)
         game.mixer.play_music('starfield')
