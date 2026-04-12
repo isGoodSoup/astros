@@ -22,7 +22,6 @@ from scripts.soundlib import apply_volume
 from scripts.spawns import SpawnManager
 from scripts.sprites import SpriteManager
 from scripts.state import GameState
-from scripts.traits import TraitManager
 from scripts.tutorial import Tutorial
 from scripts.update import update_game
 
@@ -32,7 +31,7 @@ from scripts.update import update_game
 # All assets in this game are © 2026 Diego. See ASSETS_LICENSE.txt.
 
 class Game:
-    def __init__(self, screen, screen_size, crt, hud_ratio, ships,
+    def __init__(self, screen, screen_size, crt, hud_ratio, traits, ships,
                  ship_index=0):
         home_dir = os.path.expanduser("~")
         save_dir = os.path.join(home_dir, SAVE_DIR_NAME)
@@ -61,7 +60,8 @@ class Game:
         self.events = Events()
         self.spawns = SpawnManager()
         self.skills = SkillManager()
-        self.traits = TraitManager()
+        self.traits = traits
+        self.apply_traits()
 
         self.screen_shake = 0
         self.last_blink = 0
@@ -161,6 +161,10 @@ class Game:
 
             crt.render(screen)
         pygame.quit()
+
+    def apply_traits(self):
+        for trait in self.traits:
+            trait.ability.apply_on(self, self.ship)
 
     def save_config(self):
         config_data = {
