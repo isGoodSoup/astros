@@ -278,15 +278,15 @@ SETTINGS_DEFINITION = [
         "target": "mixer",
     },
     {
-        "key": "screen_shake",
+        "key": "can_screen_shake",
         "label": "game.settings.screen_shake",
         "type": "toggle",
         "target": "state",
     },
     {
-        "key": "show_tutorial",
-        "label": "game.settings.tutorial",
+        "key": "can_rumble",
+        "label": "game.settings.rumble",
         "type": "toggle",
         "target": "state",
-    },
+    }
 ]

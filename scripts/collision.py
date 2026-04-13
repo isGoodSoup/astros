@@ -103,8 +103,9 @@ def check_collision(game):
                     if hasattr(game.ship, "fortified_cap"):
                         shield_gain = min(shield_gain, game.ship.fortified_cap)
                     game.ship.shield += shield_gain
-
-            game.screen_shake = SCREEN_SHAKE // 2
+            
+            if game.state.can_screen_shake:
+                game.screen_shake = SCREEN_SHAKE // 2
 
             if game.ship.hitpoints <= 0:
                 game.state.game_over = True

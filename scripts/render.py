@@ -213,15 +213,9 @@ def render_settings_tab(game, screen, rect, game_font):
                            SETTINGS_Y_OFFSET)
     screen.blit(header_surface, header_rect)
 
-    label_x = header_rect.left - header_rect.width // 2
-    slider_x = label_x + SETTINGS_COL_OFFSET
+    label_x = header_rect.left - header_rect.width // 2 - SETTINGS_COL_OFFSET
+    slider_x = label_x + SETTINGS_COL_OFFSET * 2
     y = header_rect.bottom + SETTINGS_LINESPACE
-
-    settings = [
-        (local.t('game.settings.music'), game.mixer.music_volume),
-        (local.t('game.settings.sfx'), game.mixer.sfx_volume),
-        (local.t('game.settings.fullscreen'), game.can_fullscreen),
-    ]
 
     bar_width = SETTINGS_VOLUME_WIDTH
     bar_height = SETTINGS_VOLUME_HEIGHT
@@ -231,12 +225,15 @@ def render_settings_tab(game, screen, rect, game_font):
         color = COLOR_GREEN if i == game.input.selected_setting_index else COLOR_WHITE
 
         label_surface = game_font.render(label, True, color)
-        screen.blit(label_surface, (label_x, y))
+        label_rect = label_surface.get_rect()
+        label_rect.topleft = (label_x, y)
+
+        screen.blit(label_surface, label_rect)
 
         if setting["type"] == "slider":
             value = getattr(getattr(game, setting["target"]), setting["key"])
             fill_width = int(bar_width * value)
-            bar_y = label_surface.centery - bar_height // 2
+            bar_y = label_rect.centery - bar_height // 2
             pygame.draw.rect(screen, COLOR_BLACK,
                              (slider_x, bar_y, bar_width, bar_height))
             pygame.draw.rect(screen, COLOR_WHITE,

@@ -89,7 +89,7 @@ class Input:
                     if enemies else None
             else:
                 target = None
-            if joysticks:
+            if joysticks and game.state.can_rumble:
                 controller.rumble(1, 2, BASE_RUMBLE_MS + 30)
             new_projectiles = game.ship.shoot(gun_type=game.ship.gun,
                                               target=target)
@@ -103,7 +103,8 @@ class Input:
                 game.mixer.play(0)
 
             if game.ship.gun == "shotgun" and game.ship.guns_ammo['shotgun'] > 0:
-                game.screen_shake = SCREEN_SHAKE // 2
+                if game.state.can_screen_shake:
+                    game.screen_shake = SCREEN_SHAKE // 2
 
         for event in events:
             if event.type == pygame.KEYDOWN:

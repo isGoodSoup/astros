@@ -142,15 +142,17 @@ class Game:
             if self.state.game_over:
                 game_lost(self, self.font, screen, screen_size)
 
-            if self.screen_shake > 0:
-                self.screen_shake -= 1
-            render_offset = self.ship.taken_damage() if self.screen_shake else [0, 0]
-            if joysticks and self.screen_shake:
-                controller.rumble(1, 2, BASE_RUMBLE_MS + 20)
+            if self.state.can_screen_shake:
+                if self.screen_shake > 0:
+                    self.screen_shake -= 1
 
-            if not self.state.game_over:
-                screen.blit(pygame.transform.scale(screen, screen_size),
-                            render_offset)
+                render_offset = self.ship.taken_damage() if self.screen_shake else [0, 0]
+                if joysticks and self.screen_shake and self.state.can_rumble:
+                    controller.rumble(1, 2, BASE_RUMBLE_MS + 20)
+
+                if not self.state.game_over:
+                    screen.blit(pygame.transform.scale(screen, screen_size),
+                                render_offset)
 
             alpha = render_fade(screen, screen_size)
             crt.render(screen)

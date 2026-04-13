@@ -265,12 +265,12 @@ def update_game(game, delta, screen_size, hud_padding):
         if game.ship.hitpoints < (game.ship.max_hitpoints * 0.25):
             game.ship.critical = True
             frequency = 0
-            if game.ship.critical:
-                game.screen_shake = SCREEN_SHAKE * 2
-                if joysticks:
-                    controller.rumble(frequency, 3, BASE_RUMBLE_MS * 2)
-                game.mixer.play(6)
-                frequency += 0.1
+            if game.ship.critical and game.state.can_screen_shake:
+                    game.screen_shake = SCREEN_SHAKE * 2
+                    if joysticks and game.state.can_rumble:
+                        controller.rumble(frequency, 3, BASE_RUMBLE_MS * 2)
+                    game.mixer.play(6)
+                    frequency += 0.1
 
         game.ship.update_position(game.ship.rect.x, game.ship.rect.y)
         trail_pos = game.ship.hitbox.midbottom

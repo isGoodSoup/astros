@@ -23,9 +23,10 @@ class Events:
         game.sprites.explosions.add(Explosion(center[0], center[1],
                                       game.sprites.frame_big_explode))
 
-        game.screen_shake = SCREEN_SHAKE + 30
-        if joysticks:
-            controller.rumble(1, 1, HIGH_RUMBLE_MS)
+        if game.state.can_screen_shake:
+            game.screen_shake = SCREEN_SHAKE + 30
+            if joysticks and game.state.can_rumble:
+                controller.rumble(1, 1, HIGH_RUMBLE_MS)
 
     def black_hole_event(self, game):
         x, y = (random.randint(0, game.screen_size[0]),
