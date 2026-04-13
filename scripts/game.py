@@ -39,6 +39,7 @@ class Game:
         os.makedirs(save_dir, exist_ok=True)
         self.config_path = os.path.join(save_dir, CONFIG_FILE)
 
+        self.delta = 0
         self.screen = screen
         self.screen_size = screen_size
         self.crt = crt
@@ -111,24 +112,24 @@ class Game:
                         self.mixer.sounds[0].play()
 
             screen.fill(BACKGROUND)
-            delta = clock.tick(self.fps) / ONE_SECOND
+            self.delta = clock.tick(self.fps) / ONE_SECOND
 
             self.input.update(self, events)
             self.input.act(self, events)
 
             if not self.state.pause or self.hud.skill_tab.active:
-                update_controller(self, screen_size, delta)
+                update_controller(self, screen_size, self.delta)
                 if not self.hud.skill_tab.active:
-                    update_movement(self, delta, screen_size)
-                    update_cursor(self, delta, screen_size)
+                    update_movement(self, self.delta, screen_size)
+                    update_cursor(self, self.delta, screen_size)
                     update_ship_angle(self)
 
             if not self.state.pause and not self.state.game_over:
-                update_game(self, delta, screen_size, self.hud_padding)
+                update_game(self, self.delta, screen_size, self.hud_padding)
                 self.clock.update_time(self)
 
             if TOGGLE_TUTORIAL:
-                self.tutorial.update(self, delta)
+                self.tutorial.update(self, self.delta)
 
             render_frame(self, screen, self.font, self.hud_padding)
 

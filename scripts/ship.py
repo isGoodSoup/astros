@@ -51,6 +51,7 @@ class Ship(pygame.sprite.Sprite):
         self.heat_per_shot = 100
         self.overheat_limit = SHIP_OVERHEAT_CAP
         self.overheated = False
+        self.previous_overheat = False
         self.overheat_cooldown = SHIP_OVERHEAT_COOLDOWN
         self.overheat_end_time = 0
 
@@ -144,13 +145,15 @@ class Ship(pygame.sprite.Sprite):
         self.heat += self.heat_per_shot
         if self.heat >= self.overheat_limit:
             self.overheated = True
+            self.previous_overheat = self.overheated
             self.overheat_end_time = pygame.time.get_ticks() + self.overheat_cooldown
 
     def _overheat_cooldown(self, game, delta):
         if not self.overheated:
-            self.heat = max(0, self.heat - 1 * delta)
-            if self.heat == 0:
+            self.heat = max(0, self.heat - SHIP_OVERHEAT_RATE * delta)
+            if self.heat == 0 and self.previous_overheat:
                 game.mixer.sounds[4].play()
+                self.previous_overheat = False
 
     def can_shoot(self):
         now = pygame.time.get_ticks()

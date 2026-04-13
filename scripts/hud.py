@@ -69,6 +69,56 @@ class Interface(pygame.sprite.Sprite):
 
         screen.blit(self.image, (self.hud_x, self.hud_y))
 
+class OverheatBar:
+    def __init__(self, x, y, width, height, max_value):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.max_value = max_value
+        self.display_ratio = 0.0
+
+        self.cool_color = pygame.Color(0, 150, 255)
+        self.mid_color = pygame.Color(255, 200, 0)
+        self.hot_color = pygame.Color(255, 60, 0)
+
+        self.border_color = pygame.Color(255, 255, 255)
+        self.background_color = pygame.Color(30, 30, 30)
+
+    def _lerp_color(self, c1, c2, t):
+        return pygame.Color(
+            int(c1.r + (c2.r - c1.r) * t),
+            int(c1.g + (c2.g - c1.g) * t),
+            int(c1.b + (c2.b - c1.b) * t)
+        )
+
+    def _get_color(self, ratio):
+        if ratio < 0.5:
+            return self._lerp_color(self.cool_color, self.mid_color, ratio * 2)
+        else:
+            return self._lerp_color(self.mid_color, self.hot_color, (ratio - 0.5) * 2)
+
+    def update(self, current_value, dt):
+        target_ratio = max(0.0, min(current_value / self.max_value, 1.0))
+        smoothing_speed = 6.0
+        self.display_ratio += (target_ratio - self.display_ratio) * smoothing_speed * dt
+
+    def draw(self, screen, overheated=False):
+        pygame.draw.rect(screen, self.background_color, self.rect)
+
+        fill_height = int(self.rect.height * self.display_ratio)
+        fill_rect = pygame.Rect(
+            self.rect.x,
+            self.rect.bottom - fill_height,
+            self.rect.width,
+            fill_height
+        )
+
+        color = self._get_color(self.display_ratio)
+
+        if overheated and pygame.time.get_ticks() % 400 < 200:
+            color = pygame.Color(255, 255, 255)
+
+        pygame.draw.rect(screen, color, fill_rect)
+        pygame.draw.rect(screen, self.border_color, self.rect, 4)
+
 class HUD:
     def __init__(self, game, screen_size, hud_ratio, game_font):
         self.hitpoints = Interface(resource_path("assets/ui/status.png"), 0,
@@ -82,10 +132,6 @@ class HUD:
                             INTERFACE_XP[0], INTERFACE_XP[1],
                             hud_ratio, ['right', 'bottom'],
                             INTERFACE_XP_COLS, INTERFACE_XP_OFFSET)
-        self.ammo = Interface(resource_path("assets/ui/ammo.png"), 0,
-                              INTERFACE_AMMO[0], INTERFACE_AMMO[1],
-                              hud_ratio, ['right', 'bottom'],
-                              INTERFACE_AMMO_COLS, INTERFACE_AMMO_OFFSET)
         self.guns = Interface(resource_path("assets/ui/guns.png"), 0,
                               INTERFACE_GUNS[0], INTERFACE_GUNS[1],
                               hud_ratio,['right', 'bottom'],
@@ -98,6 +144,12 @@ class HUD:
             "auto": game.ship.guns_ammo["auto"],
             "nuke": game.ship.guns_ammo["nuke"],
         }
+
+        bar_x = hud_ratio['right'] - INTERFACE_OVERHEAT[0]
+        bar_y = hud_ratio['bottom'] - INTERFACE_OVERHEAT[1]
+        self.overheat_bar = OverheatBar(bar_x, bar_y,
+            width=INTERFACE_OVERHEAT_WIDTH, height=INTERFACE_OVERHEAT_HEIGHT,
+            max_value=game.ship.overheat_limit)
 
         self.credits = 0
 
@@ -150,7 +202,6 @@ class HUD:
             (self.hitpoints, game.ship.hitpoints, game.ship.max_hitpoints, True),
             (self.shield, game.ship.shield, game.ship.max_shield, True),
             (self.xp, game.ship.xp, game.ship.xp_to_next_level, True),
-            (self.ammo, available_ammo, game.ship.arsenal, True),
         ]
 
         for interface, value, max_value, reverse in interfaces:
@@ -161,6 +212,9 @@ class HUD:
         current_gun_frame = game.ship.gun_order.index(game.ship.gun)
         self.guns.update(game.ship, hud_ratio, ['right', 'bottom'],
                          current_gun_frame, screen, hud_padding)
+
+        self.overheat_bar.update(game.ship.heat, game.delta)
+        self.overheat_bar.draw(screen, game.ship.overheated)
 
         current_ammo = game.ship.guns_ammo[game.ship.gun]
         total_ammo = "inf" if game.ship.gun == "beam" else (
