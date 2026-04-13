@@ -9,11 +9,14 @@ LOGO = None
 ICON = None
 EXPLOSION_SHEET = None
 MEGAEXPLOSION_SHEET = None
+OVERLAY_CONTROLLER = None
+OVERLAY_KEYBOARD = None
 
 def load_assets():
     global ASTEROID_SPRITES, SHIPS
     global CURSOR, LOGO, ICON
     global EXPLOSION_SHEET, MEGAEXPLOSION_SHEET
+    global OVERLAY_CONTROLLER, OVERLAY_KEYBOARD
 
     ASTEROID_SPRITES = [
         pygame.image.load(
@@ -36,3 +39,9 @@ def load_assets():
 
     EXPLOSION_SHEET = SpriteSheet(resource_path("assets/explosion.png"))
     MEGAEXPLOSION_SHEET = SpriteSheet(resource_path("assets/explosion_charge.png"))
+
+    OVERLAY_CONTROLLER = pygame.image.load(resource_path(
+        "assets/ui/overlay_controller.png")).convert_alpha()
+
+    OVERLAY_KEYBOARD = pygame.image.load(resource_path(
+        "assets/ui/overlay_keyboard.png")).convert_alpha()

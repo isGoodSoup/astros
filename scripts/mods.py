@@ -8,7 +8,8 @@ from scripts.game import Game
 from scripts.lang import local
 from scripts.settings import SCALE, SHIP_FRAMES, COLOR_BLACK, \
     COLOR_LIGHT_ORANGE, FONT_DEFAULT_SIZE, TRAIT_CARD_SIZE, HEADER_FLOAT, \
-    SPRITE_FLOAT, FPS, SHIP_SELECTION_OFFSET, FLIGHT_SPEED, FONT_MEDIUM_SIZE
+    SPRITE_FLOAT, FPS, SHIP_SELECTION_OFFSET, FLIGHT_SPEED, FONT_MEDIUM_SIZE, \
+    ALPHA
 from scripts.shared import fade, joysticks
 from scripts.soundlib import load_sounds
 from scripts.traits import TraitOption, TraitGridSquare, TraitPool
@@ -54,7 +55,7 @@ class Mods:
 
         w, h = self.ship_previews[0].get_size()
         self.dim_surface = pygame.Surface((w, h), pygame.SRCALPHA)
-        self.dim_surface.fill((0, 0, 0, 120))
+        self.dim_surface.fill((0, 0, 0, ALPHA))
 
     def run(self, clock, screen, screen_size, hud_ratio, crt):
         while self.running:

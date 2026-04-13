@@ -14,3 +14,6 @@ def get_boss_pos():
 
 def get_ship_ember():
     return [255, random.randint(50, 150), 0]
+
+def get_desc(rect):
+    return pygame.Rect(rect.x + 50, rect.y + 300, rect.width - 100, 180)
