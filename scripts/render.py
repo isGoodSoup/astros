@@ -10,8 +10,9 @@ from scripts.settings import (TOGGLE_TUTORIAL, COLOR_BLUE, COLOR_RED, \
                               SKILL_TAB_PADDING, SKTAB_HEADER_OFFSET,
                               SKILL_TAB_GRID, ALPHA, COLOR_BLACK,
                               SETTINGS_LINESPACE, SETTINGS_X_OFFSET,
-                              SETTINGS_Y_OFFSET, SETTINGS_VOLUME_WIDTH,
-                              SETTINGS_VOLUME_HEIGHT, SETTINGS_SETTING_GAP)
+                              SETTINGS_VOLUME_WIDTH,
+                              SETTINGS_VOLUME_HEIGHT, SETTINGS_SETTING_GAP,
+                              SETTINGS_Y_OFFSET, SETTINGS_COL_OFFSET)
 from scripts.shared import joysticks
 from scripts.utils import wrap_text
 
@@ -115,11 +116,12 @@ def render_frame(game, screen, font, hud_padding):
         dim_surface.fill((0, 0, 0))
         dim_surface.set_alpha(ALPHA)
 
-        if not game.hud.skill_tab.active and not game.hud.settings_tab.active:
+        if not game.hud.skill_tab.active:
             screen.blit(dim_surface, (0, 0))
-            screen.blit(surf, [game.screen_size[0]//2 - surf.get_width()//2,
-                               game.screen_size[1]//2 - surf.get_height()//2])
-            screen.blit(pause, [game.screen_size[0]//2 - pause.get_width()//2, PAUSED_TEXT_Y])
+            if not game.hud.settings_tab.active:
+                screen.blit(surf, [game.screen_size[0]//2 - surf.get_width()//2,
+                                   game.screen_size[1]//2 - surf.get_height()//2])
+                screen.blit(pause, [game.screen_size[0]//2 - pause.get_width()//2, PAUSED_TEXT_Y])
 
         game.hud.settings_tab.render(game, screen, font, hud_padding)
 
@@ -201,34 +203,41 @@ def render_stats_tab(game, screen, rect, game_font):
     for stat in stats:
         text_surface = game_font.render(stat, True, COLOR_WHITE)
         screen.blit(text_surface, (rect.x + 40, rect.y + y_offset))
-        y_offset += SETTINGS_LINESPACE
+        y_offset = next_row(y_offset)
 
 def render_settings_tab(game, screen, rect, game_font):
-    header_settings = local.t('game.settings.header')
-    header_surface = game_font.render(header_settings, True, COLOR_WHITE)
+    header_surface = game_font.render(local.t('game.settings.header'), True,
+        COLOR_WHITE)
 
     header_rect = header_surface.get_rect()
-    header_rect.topleft = (rect.x + SETTINGS_X_OFFSET,
-        rect.y + SETTINGS_Y_OFFSET)
-
+    header_rect.topleft = (rect.x + SETTINGS_X_OFFSET, rect.y +
+                           SETTINGS_Y_OFFSET)
     screen.blit(header_surface, header_rect)
 
-    x = header_rect.left
+    x = header_rect.left - SETTINGS_COL_OFFSET
     y = header_rect.bottom + SETTINGS_LINESPACE
 
-    y = next_row(y)
+    settings = [
+        local.t('game.settings.volume'),
+        local.t('game.settings.music'),
+        local.t('game.settings.sfx'),
+    ]
 
-    volume_text = local.t('game.settings.volume')
-    volume_surface = game_font.render(volume_text, True, COLOR_WHITE)
-    screen.blit(volume_surface, [x, y])
+    for setting in settings:
+        text_surface = game_font.render(setting, True, COLOR_WHITE)
+        screen.blit(text_surface, (x, y))
+        y = next_row(y)
 
-    bar_x = x + volume_surface.get_width() + SETTINGS_SETTING_GAP
-    bar_y = y
+    volume_label = game_font.render(settings[0], True, COLOR_WHITE)
+    bar_x = x + volume_label.get_width() + SETTINGS_SETTING_GAP
+    bar_y = header_rect.bottom + SETTINGS_LINESPACE
+
     bar_width = SETTINGS_VOLUME_WIDTH
     bar_height = SETTINGS_VOLUME_HEIGHT
 
     volume = game.volume
     fill_width = int(bar_width * volume)
+
     pygame.draw.rect(screen, COLOR_BLACK, (bar_x, bar_y, bar_width, bar_height))
     pygame.draw.rect(screen, COLOR_WHITE, (bar_x, bar_y, fill_width,
                                            bar_height))
