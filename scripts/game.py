@@ -29,7 +29,6 @@ from scripts.utils import render_fade
 
 # Copyright (c) 2026 Diego
 # Licensed under the MIT License. See LICENSE file for details.
-# All assets in this game are © 2026 Diego. See ASSETS_LICENSE.txt.
 
 class Game:
     def __init__(self, screen, screen_size, crt, hud_ratio, traits, ships,
