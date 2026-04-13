@@ -6,6 +6,7 @@ import pygame
 from scripts.proj import Projectile
 from scripts.settings import *
 
+
 class Ship(pygame.sprite.Sprite):
     def __init__(self, sprite_sheet, x, y, frame, width, height, scale=SCALE,
                  columns=1):
@@ -97,7 +98,7 @@ class Ship(pygame.sprite.Sprite):
 
         if getattr(self, "shield_regen", False):
             if now < self.shield_regen_end:
-                self.shield += self.shield_regen_rate / 60
+                self.shield += self.shield_regen_rate / FPS
                 self.shield = min(self.shield, self.max_shield)
             else:
                 self.shield_regen = False

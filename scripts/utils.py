@@ -21,6 +21,10 @@ def formulize(game, level, base_xp=5):
     score_factor = game.state.score ** 0.5
     return int(base_xp * (level ** 1.2) + score_factor)
 
+def activate_shield_regen(ship, duration_ms: int):
+    ship.shield_regen = True
+    ship.shield_regen_end = pygame.time.get_ticks() + duration_ms
+
 def add_multiplier(game, x, y, text, color=(255, 255, 0), font_size=24):
     offset = 0
     for fn in game.sprites.floating_numbers:
