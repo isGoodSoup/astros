@@ -77,7 +77,6 @@ class AlienFleet:
         return positions
 
     def update(self):
-        # Remove dead aliens
         for a in list(self.aliens):
             if not a.alive():
                 self.aliens.remove(a)

@@ -27,8 +27,8 @@ def add_multiplier(game, x, y, text, color=(255, 255, 0), font_size=24):
         if abs(fn.rect.centerx - x) < 50 and abs(
                 fn.rect.centery - y - offset) < 5:
             offset -= 30
-    game.sprites.floating_numbers.add(FloatingNumber(x, y + offset, text, game.font, color=color, # type: ignore
-                       font_size=font_size))
+    game.sprites.floating_numbers.add(FloatingNumber(x, y + offset, text, game.font,
+            color=color, font_size=font_size))
 
 def debug(game):
     game.state.debugging = not game.debugging

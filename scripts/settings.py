@@ -218,6 +218,8 @@ PHASES_TOTAL = 6
 PHASES = [f"wave_{i+1}" for i in range(PHASES_TOTAL)]
 PHASE_COLORS = ['red', 'green', 'yellow', 'purple', 'pink', 'orange']
 
+PHASE_FADE = 5000
+
 STAR_COUNT = 100
 STAR_SPEED = 2
 

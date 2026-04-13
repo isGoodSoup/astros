@@ -109,7 +109,7 @@ class HUD:
                        screen_size[1]), content_renderer=render_stats_tab)
 
     def update(self, game, font, screen, hud_ratio, hud_padding):
-        line_spacing = font.get_linesize()  # fixed per-font value from FontManager
+        line_spacing = font.get_linesize()
         score_x, y = padded_pos(hud_ratio['left'], hud_ratio['top'], 'left',
                                 'top', hud_padding)
 
