@@ -18,7 +18,7 @@ class Input:
         self.deadzone = 0.2
 
         self.cursor_pos = [screen_size[0] // 2, screen_size[1] // 2]
-        self.cursor_speed = ONE_SECOND
+        self.cursor_speed = ONE_SECOND * 1.5
         self.selected_skill_index = 0
         self.selected_skill = None
         self.nav_cooldown = INPUT_NAV_COOLDOWN
