@@ -4,6 +4,8 @@ ONE_SECOND = 1000
 FADE_MS = 1000
 HD_RESOLUTION = (1920, 1080)
 DEFAULT_VOLUME = 0.5
+MUSIC_VOLUME = 0.6
+SFX_VOLUME = 0.8
 
 SCORE_SCALING = 1.0
 SCORE_SCALING_INCREASE = 1.25
@@ -255,3 +257,20 @@ TOGGLE_GOD_MODE = False
 TOGGLE_INVINCIBLE = TOGGLE_GOD_MODE
 TOGGLE_UNLIMITED_AMMO = TOGGLE_GOD_MODE
 TOGGLE_LEVEL_CAP = False
+
+SETTINGS_DEFINITION = [
+    {
+        "key": "music_volume",
+        "label": "game.settings.music",
+        "min": 0.0,
+        "max": 1.0,
+        "step": 0.1,
+    },
+    {
+        "key": "sfx_volume",
+        "label": "game.settings.sfx",
+        "min": 0.0,
+        "max": 1.0,
+        "step": 0.1,
+    },
+]

@@ -27,17 +27,27 @@ def load_ost():
         "starfield": resource_path("assets/fx/starfield.ogg"),
     }
 
-def increase_volume(game):
-    game.volume = min(game.volume + 0.1, 1.0)
+def _music_volume_up(game, step=0.1):
+    game.mixer.music_volume = min(game.mixer.music_volume + step, 1.0)
     apply_volume(game)
     game.save_config()
 
-def decrease_volume(game):
-    game.volume = max(game.volume - 0.1, 0.0)
+def _music_volume_down(game, step=0.1):
+    game.mixer.music_volume = max(game.mixer.music_volume - step, 0.0)
+    apply_volume(game)
+    game.save_config()
+
+def _sfx_volume_up(game, step=0.1):
+    game.mixer.sfx_volume = min(game.mixer.sfx_volume + step, 1.0)
+    apply_volume(game)
+    game.save_config()
+
+def _sfx_volume_down(game, step=0.1):
+    game.mixer.sfx_volume = max(game.mixer.sfx_volume - step, 0.0)
     apply_volume(game)
     game.save_config()
 
 def apply_volume(game):
     for sound in game.mixer.sounds:
-        sound.set_volume(game.volume)
-    pygame.mixer.music.set_volume(game.volume)
+        sound.set_volume(game.mixer.sfx_volume)
+    pygame.mixer.music.set_volume(game.mixer.music_volume)

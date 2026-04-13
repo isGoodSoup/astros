@@ -2,12 +2,12 @@ import pygame
 
 from scripts.game_over import reboot
 from scripts.lang import rotate_language
+from scripts.mixer import adjust_volume
 from scripts.settings import (ONE_SECOND, SCREEN_SHAKE, INPUT_NAV_COOLDOWN,
                               PHASE_TRANSITION, INPUT_MOUSE, INPUT_CONTROLLER,
-                              BASE_RUMBLE_MS)
+                              BASE_RUMBLE_MS, SETTINGS_DEFINITION)
 from scripts.shared import joysticks, controller
 from scripts.ship import get_nearest_enemy
-from scripts.soundlib import decrease_volume, increase_volume
 from scripts.utils import take_screenshot
 
 
@@ -21,6 +21,7 @@ class Input:
         self.cursor_speed = ONE_SECOND * 1.5
         self.selected_skill_index = 0
         self.selected_skill = None
+        self.selected_setting_index = 0
         self.nav_cooldown = INPUT_NAV_COOLDOWN
         self.last_nav_time = 0
         self.mode = INPUT_MOUSE
@@ -95,10 +96,10 @@ class Input:
             game.spawns.last_shot_time = now
 
             if game.ship.guns_ammo[game.ship.gun] <= 0 and game.ship.gun != "beam":
-                game.mixer.sounds[4].play()
+                game.mixer.play(4)
 
             if game.state.play_sound:
-                game.mixer.sounds[0].play()
+                game.mixer.play(0)
 
             if game.ship.gun == "shotgun" and game.ship.guns_ammo['shotgun'] > 0:
                 game.screen_shake = SCREEN_SHAKE // 2
@@ -107,7 +108,7 @@ class Input:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_1:
                     rotate_language()
-                    game.mixer.sounds[4].play()
+                    game.mixer.play(4)
 
                 if event.key == pygame.K_TAB:
                     if game.hud.settings_tab.active:
@@ -132,6 +133,26 @@ class Input:
                             game.screen_size[0] // 2 - game.hud.stats_tab.rect.width // 2,
                             game.screen_size[1] // 2 - game.hud.stats_tab.rect.height // 2
                         ))
+
+                if game.hud.settings_tab.active:
+                    num_settings = len(SETTINGS_DEFINITION)
+
+                    if event.key == pygame.K_UP:
+                        self.selected_setting_index = (self.selected_setting_index - 1) % num_settings
+
+                    elif event.key == pygame.K_DOWN:
+                        self.selected_setting_index = (self.selected_setting_index + 1) % num_settings
+
+                    elif event.key == pygame.K_LEFT:
+                        value = game.mixer.music_volume if (self.selected_setting_index == 0) else (
+                            game.mixer.sfx_volume)
+                        adjust_volume(game, self.selected_setting_index, decrease=True)
+
+                    elif event.key == pygame.K_RIGHT:
+                        adjust_volume(game, self.selected_setting_index, decrease=False)
+
+                    elif event.key in (pygame.K_BACKSPACE, pygame.K_ESCAPE):
+                        game.hud.settings_tab.close()
 
                 if game.hud.skill_tab.active:
                     num_skills = len(game.state.current_phase_options)
@@ -165,12 +186,6 @@ class Input:
                 if event.key == pygame.K_l:
                     from scripts.movement import lock_y
                     lock_y = not lock_y
-
-                if event.key == pygame.K_PLUS or event.key == pygame.K_KP_PLUS:
-                    increase_volume(game)
-
-                elif event.key == pygame.K_MINUS or event.key == pygame.K_KP_MINUS:
-                    decrease_volume(game)
 
                 if event.key == pygame.K_F2:
                     game.state.debugging = not game.state.debugging
@@ -249,8 +264,27 @@ class Input:
                     if not game.hud.skill_tab.active:
                         game.state.pause = not game.state.pause
 
-
             elif event.type == pygame.JOYHATMOTION:
+                if game.hud.settings_tab.active:
+                    now = pygame.time.get_ticks()
+
+                    if now - self.last_nav_time > self.nav_cooldown:
+                        dx, dy = event.value
+                        num_settings = len(SETTINGS_DEFINITION)
+
+                        if dy == 1:
+                            self.selected_setting_index = (self.selected_setting_index - 1) % num_settings
+
+                        elif dy == -1:
+                            self.selected_setting_index = (self.selected_setting_index + 1) % num_settings
+
+                        if dx == -1:
+                            adjust_volume(game, self.selected_setting_index, decrease=True)
+
+                        elif dx == 1:
+                            adjust_volume(game, self.selected_setting_index, decrease=False)
+                        self.last_nav_time = now
+
                 if game.hud.skill_tab.active and game.state.current_phase_options:
                     now = pygame.time.get_ticks()
 
@@ -274,11 +308,6 @@ class Input:
 
                     if event.hat == 0 and event.value == (1, 0):
                         take_screenshot(game)
-
-                if event.hat == 0 and event.value == (0, 1):
-                    increase_volume(game)
-                elif event.hat == 0 and event.value == (0, -1):
-                    decrease_volume(game)
 
         axis_y = 0.0
         if joysticks and controller.get_button(9):

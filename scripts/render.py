@@ -11,8 +11,8 @@ from scripts.settings import (TOGGLE_TUTORIAL, COLOR_BLUE, COLOR_RED, \
                               SKILL_TAB_GRID, ALPHA, COLOR_BLACK,
                               SETTINGS_LINESPACE, SETTINGS_X_OFFSET,
                               SETTINGS_VOLUME_WIDTH,
-                              SETTINGS_VOLUME_HEIGHT, SETTINGS_SETTING_GAP,
-                              SETTINGS_Y_OFFSET, SETTINGS_COL_OFFSET)
+                              SETTINGS_VOLUME_HEIGHT, SETTINGS_Y_OFFSET,
+                              SETTINGS_COL_OFFSET)
 from scripts.shared import joysticks
 from scripts.utils import wrap_text
 
@@ -207,40 +207,40 @@ def render_stats_tab(game, screen, rect, game_font):
 
 def render_settings_tab(game, screen, rect, game_font):
     header_surface = game_font.render(local.t('game.settings.header'), True,
-        COLOR_WHITE)
-
+                                      COLOR_WHITE)
     header_rect = header_surface.get_rect()
     header_rect.topleft = (rect.x + SETTINGS_X_OFFSET, rect.y +
                            SETTINGS_Y_OFFSET)
     screen.blit(header_surface, header_rect)
 
-    x = header_rect.left - SETTINGS_COL_OFFSET
+    label_x = header_rect.left - header_rect.width // 2
+    slider_x = label_x + SETTINGS_COL_OFFSET
     y = header_rect.bottom + SETTINGS_LINESPACE
 
     settings = [
-        local.t('game.settings.volume'),
-        local.t('game.settings.music'),
-        local.t('game.settings.sfx'),
+        (local.t('game.settings.music'), game.mixer.music_volume),
+        (local.t('game.settings.sfx'), game.mixer.sfx_volume),
     ]
-
-    for setting in settings:
-        text_surface = game_font.render(setting, True, COLOR_WHITE)
-        screen.blit(text_surface, (x, y))
-        y = next_row(y)
-
-    volume_label = game_font.render(settings[0], True, COLOR_WHITE)
-    bar_x = x + volume_label.get_width() + SETTINGS_SETTING_GAP
-    bar_y = header_rect.bottom + SETTINGS_LINESPACE
 
     bar_width = SETTINGS_VOLUME_WIDTH
     bar_height = SETTINGS_VOLUME_HEIGHT
 
-    volume = game.volume
-    fill_width = int(bar_width * volume)
+    for i, (label, value) in enumerate(settings):
+        color = COLOR_GREEN if i == game.input.selected_setting_index else COLOR_WHITE
+        label_surface = game_font.render(label, True, color)
+        label_rect = label_surface.get_rect()
+        label_rect.topleft = (label_x, y)
+        screen.blit(label_surface, label_rect)
 
-    pygame.draw.rect(screen, COLOR_BLACK, (bar_x, bar_y, bar_width, bar_height))
-    pygame.draw.rect(screen, COLOR_WHITE, (bar_x, bar_y, fill_width,
-                                           bar_height))
+        bar_y = label_rect.centery - bar_height // 2
+        pygame.draw.rect(screen, COLOR_BLACK,
+            (slider_x, bar_y, bar_width, bar_height))
+
+        fill_width = int(bar_width * max(0, min(1, value)))
+        pygame.draw.rect(screen, COLOR_WHITE,
+            (slider_x, bar_y, fill_width, bar_height))
+
+        y = next_row(y)
 
 def next_row(y, spacing=SETTINGS_LINESPACE):
     return y + spacing
