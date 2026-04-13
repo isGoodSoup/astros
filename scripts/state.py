@@ -7,6 +7,8 @@ from scripts.settings import (PHASES_TOTAL, PHASE_START, PHASE_COLORS, \
 
 class GameState:
     def __init__(self):
+        self.can_fullscreen = False
+
         self.score = 0
         self.score_scaling = SCORE_SCALING
         self.score_multiplier = 1.0

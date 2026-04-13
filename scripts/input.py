@@ -2,13 +2,13 @@ import pygame
 
 from scripts.game_over import reboot
 from scripts.lang import rotate_language
-from scripts.mixer import adjust_volume
+from scripts.mixer import adjust_setting
 from scripts.settings import (ONE_SECOND, SCREEN_SHAKE, INPUT_NAV_COOLDOWN,
                               PHASE_TRANSITION, INPUT_MOUSE, INPUT_CONTROLLER,
                               BASE_RUMBLE_MS, SETTINGS_DEFINITION)
 from scripts.shared import joysticks, controller
 from scripts.ship import get_nearest_enemy
-from scripts.utils import take_screenshot
+from scripts.utils import take_screenshot, toggle_setting
 
 
 class Input:
@@ -22,6 +22,7 @@ class Input:
         self.selected_skill_index = 0
         self.selected_skill = None
         self.selected_setting_index = 0
+        self.selected_setting = None
         self.nav_cooldown = INPUT_NAV_COOLDOWN
         self.last_nav_time = 0
         self.mode = INPUT_MOUSE
@@ -136,6 +137,7 @@ class Input:
 
                 if game.hud.settings_tab.active:
                     num_settings = len(SETTINGS_DEFINITION)
+                    setting = SETTINGS_DEFINITION[self.selected_setting_index]
 
                     if event.key == pygame.K_UP:
                         self.selected_setting_index = (self.selected_setting_index - 1) % num_settings
@@ -143,13 +145,19 @@ class Input:
                     elif event.key == pygame.K_DOWN:
                         self.selected_setting_index = (self.selected_setting_index + 1) % num_settings
 
-                    elif event.key == pygame.K_LEFT:
-                        value = game.mixer.music_volume if (self.selected_setting_index == 0) else (
-                            game.mixer.sfx_volume)
-                        adjust_volume(game, self.selected_setting_index, decrease=True)
+                    elif event.key == pygame.K_LEFT and setting[
+                        "type"] == "slider":
+                        adjust_setting(game, self.selected_setting_index,
+                                       decrease=True)
 
-                    elif event.key == pygame.K_RIGHT:
-                        adjust_volume(game, self.selected_setting_index, decrease=False)
+                    elif event.key == pygame.K_RIGHT and setting[
+                        "type"] == "slider":
+                        adjust_setting(game, self.selected_setting_index,
+                                       decrease=False)
+
+                    elif event.key == pygame.K_RETURN and setting[
+                        "type"] == "toggle":
+                        toggle_setting(game, self.selected_setting_index)
 
                     elif event.key in (pygame.K_BACKSPACE, pygame.K_ESCAPE):
                         game.hud.settings_tab.close()
@@ -206,21 +214,25 @@ class Input:
                             game.running = False
 
             elif event.type == pygame.JOYBUTTONDOWN:
-                if (event.button == 0 and
-                        game.hud.skill_tab.active and
-                        game.state.current_phase_options):
+                if event.button == 0:
+                    setting = SETTINGS_DEFINITION[self.selected_setting_index]
 
-                    selected = (game.state.current_phase_options
-                    [self.selected_skill_index])
+                    if (game.hud.skill_tab.active and
+                            game.state.current_phase_options):
+                        selected = (game.state.current_phase_options
+                        [self.selected_skill_index])
 
-                    game.skills.unlock_or_upgrade(selected, game.ship)
+                        game.skills.unlock_or_upgrade(selected, game.ship)
 
-                    if selected.unlocked and selected not in game.ship.skills:
-                        game.ship.add_skill(selected)
+                        if selected.unlocked and selected not in game.ship.skills:
+                            game.ship.add_skill(selected)
 
-                    game.hud.skill_tab.close()
-                    game.state.current_phase_options = []
-                    game.state.pause = False
+                        game.hud.skill_tab.close()
+                        game.state.current_phase_options = []
+                        game.state.pause = False
+
+                    elif game.hud.settings_tab.active and setting["type"] == "toggle":
+                        toggle_setting(game, self.selected_setting_index)
 
                 if event.button == 1:
                     if game.hud.settings_tab.active:
@@ -264,25 +276,30 @@ class Input:
                     if not game.hud.skill_tab.active:
                         game.state.pause = not game.state.pause
 
+
             elif event.type == pygame.JOYHATMOTION:
                 if game.hud.settings_tab.active:
                     now = pygame.time.get_ticks()
 
                     if now - self.last_nav_time > self.nav_cooldown:
                         dx, dy = event.value
-                        num_settings = len(SETTINGS_DEFINITION)
+                        setting = SETTINGS_DEFINITION[self.selected_setting_index]
 
                         if dy == 1:
-                            self.selected_setting_index = (self.selected_setting_index - 1) % num_settings
+                            self.selected_setting_index = (self.selected_setting_index - 1) % len(
+                                SETTINGS_DEFINITION)
 
                         elif dy == -1:
-                            self.selected_setting_index = (self.selected_setting_index + 1) % num_settings
+                            self.selected_setting_index = (self.selected_setting_index + 1) % len(
+                                SETTINGS_DEFINITION)
 
-                        if dx == -1:
-                            adjust_volume(game, self.selected_setting_index, decrease=True)
+                        if dx == -1 and setting["type"] == "slider":
+                            adjust_setting(game, self.selected_setting_index,
+                                           decrease=True)
 
-                        elif dx == 1:
-                            adjust_volume(game, self.selected_setting_index, decrease=False)
+                        elif dx == 1 and setting["type"] == "slider":
+                            adjust_setting(game, self.selected_setting_index,
+                                           decrease=False)
                         self.last_nav_time = now
 
                 if game.hud.skill_tab.active and game.state.current_phase_options:

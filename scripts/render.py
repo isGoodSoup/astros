@@ -12,7 +12,7 @@ from scripts.settings import (TOGGLE_TUTORIAL, COLOR_BLUE, COLOR_RED, \
                               SETTINGS_LINESPACE, SETTINGS_X_OFFSET,
                               SETTINGS_VOLUME_WIDTH,
                               SETTINGS_VOLUME_HEIGHT, SETTINGS_Y_OFFSET,
-                              SETTINGS_COL_OFFSET)
+                              SETTINGS_COL_OFFSET, SETTINGS_DEFINITION)
 from scripts.shared import joysticks
 from scripts.utils import wrap_text
 
@@ -220,25 +220,33 @@ def render_settings_tab(game, screen, rect, game_font):
     settings = [
         (local.t('game.settings.music'), game.mixer.music_volume),
         (local.t('game.settings.sfx'), game.mixer.sfx_volume),
+        (local.t('game.settings.fullscreen'), game.can_fullscreen),
     ]
 
     bar_width = SETTINGS_VOLUME_WIDTH
     bar_height = SETTINGS_VOLUME_HEIGHT
 
-    for i, (label, value) in enumerate(settings):
+    for i, setting in enumerate(SETTINGS_DEFINITION):
+        label = local.t(setting["label"])
         color = COLOR_GREEN if i == game.input.selected_setting_index else COLOR_WHITE
+
         label_surface = game_font.render(label, True, color)
-        label_rect = label_surface.get_rect()
-        label_rect.topleft = (label_x, y)
-        screen.blit(label_surface, label_rect)
+        screen.blit(label_surface, (label_x, y))
 
-        bar_y = label_rect.centery - bar_height // 2
-        pygame.draw.rect(screen, COLOR_BLACK,
-            (slider_x, bar_y, bar_width, bar_height))
+        if setting["type"] == "slider":
+            value = getattr(getattr(game, setting["target"]), setting["key"])
+            fill_width = int(bar_width * value)
+            bar_y = label_surface.centery - bar_height // 2
+            pygame.draw.rect(screen, COLOR_BLACK,
+                             (slider_x, bar_y, bar_width, bar_height))
+            pygame.draw.rect(screen, COLOR_WHITE,
+                             (slider_x, bar_y, fill_width, bar_height))
 
-        fill_width = int(bar_width * max(0, min(1, value)))
-        pygame.draw.rect(screen, COLOR_WHITE,
-            (slider_x, bar_y, fill_width, bar_height))
+        elif setting["type"] == "toggle":
+            state = getattr(getattr(game, setting["target"]), setting["key"])
+            toggle_text = "ON" if state else "OFF"
+            toggle_surface = game_font.render(toggle_text, True, color)
+            screen.blit(toggle_surface, (slider_x, y))
 
         y = next_row(y)
 

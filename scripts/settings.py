@@ -262,15 +262,31 @@ SETTINGS_DEFINITION = [
     {
         "key": "music_volume",
         "label": "game.settings.music",
+        "type": "slider",
         "min": 0.0,
         "max": 1.0,
         "step": 0.1,
+        "target": "mixer",
     },
     {
         "key": "sfx_volume",
         "label": "game.settings.sfx",
+        "type": "slider",
         "min": 0.0,
         "max": 1.0,
         "step": 0.1,
+        "target": "mixer",
+    },
+    {
+        "key": "screen_shake",
+        "label": "game.settings.screen_shake",
+        "type": "toggle",
+        "target": "state",
+    },
+    {
+        "key": "show_tutorial",
+        "label": "game.settings.tutorial",
+        "type": "toggle",
+        "target": "state",
     },
 ]

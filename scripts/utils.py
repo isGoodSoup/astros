@@ -6,6 +6,7 @@ import sys
 import pygame
 
 from scripts.floaty import FloatingNumber
+from scripts.settings import SETTINGS_DEFINITION
 from scripts.shared import fade
 
 
@@ -55,6 +56,25 @@ def take_screenshot(game):
         "RGBA",
         True)
     pygame.image.save(surface, save_path)
+
+def toggle_setting(game, index):
+    setting = SETTINGS_DEFINITION[index]
+
+    if setting.get("type") != "toggle":
+        return
+
+    target = _get_setting_target(game, setting)
+    key = setting["key"]
+
+    new_value = not getattr(target, key)
+    setattr(target, key, new_value)
+
+    if hasattr(game, "save_config"):
+        game.save_config()
+
+def _get_setting_target(game, setting):
+    target_name = setting.get("target", "state")
+    return getattr(game, target_name)
 
 def resource_path(relative_path):
     if hasattr(sys, "_MEIPASS"):

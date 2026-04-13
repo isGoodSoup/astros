@@ -2,7 +2,8 @@ import pygame
 
 from scripts.settings import FADE_MS, SFX_VOLUME, MUSIC_VOLUME, \
     SETTINGS_DEFINITION
-from scripts.soundlib import load_sounds, load_ost, apply_volume
+from scripts.soundlib import load_sounds, load_ost
+from scripts.utils import _get_setting_target
 
 
 class Mixer:
@@ -78,21 +79,31 @@ class Mixer:
 
         self._play_current(fade_ms)
 
-def adjust_volume(game, index, decrease=False):
+def adjust_setting(game, index, decrease=False):
     setting = SETTINGS_DEFINITION[index]
+
+    if setting.get("type") != "slider":
+        return
+
+    target = _get_setting_target(game, setting)
     key = setting["key"]
+
     step = setting.get("step", 0.1)
     min_val = setting.get("min", 0.0)
     max_val = setting.get("max", 1.0)
 
-    current_value = getattr(game.mixer, key)
+    current_value = getattr(target, key)
 
     if decrease:
         new_value = max(min_val, current_value - step)
     else:
         new_value = min(max_val, current_value + step)
 
-    setattr(game.mixer, key, new_value)
-    apply_volume(game)
+    setattr(target, key, new_value)
+
+    if setting["target"] == "mixer":
+        from scripts.soundlib import apply_volume
+        apply_volume(game)
+
     if hasattr(game, "save_config"):
         game.save_config()
