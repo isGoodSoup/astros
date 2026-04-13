@@ -325,7 +325,8 @@ class Input:
                         self.last_nav_time = now
                 else:
                     if event.hat == 0 and event.value == (-1, 0):
-                        game.font.update()
+                        if not game.hud.settings_tab.active:
+                            game.font.update()
 
                     if event.hat == 0 and event.value == (1, 0):
                         take_screenshot(game)
