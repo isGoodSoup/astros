@@ -47,6 +47,13 @@ class Ship(pygame.sprite.Sprite):
         self.crit_chance = self.base_crit_chance
         self.crit_multiplier = 3
 
+        self.heat = 0
+        self.heat_per_shot = 100
+        self.overheat_limit = SHIP_OVERHEAT_CAP
+        self.overheated = False
+        self.overheat_cooldown = SHIP_OVERHEAT_COOLDOWN
+        self.overheat_end_time = 0
+
         self.evasion = 0.02
         self.shot_cooldown = SHIP_FIRE_RATE
         self.power_ups = []
@@ -133,8 +140,35 @@ class Ship(pygame.sprite.Sprite):
         self.image = pygame.transform.rotate(self.original_image,
                                              -self.current_angle)
 
+    def apply_heat(self):
+        self.heat += self.heat_per_shot
+        if self.heat >= self.overheat_limit:
+            self.overheated = True
+            self.overheat_end_time = pygame.time.get_ticks() + self.overheat_cooldown
+
+    def _overheat_cooldown(self, game, delta):
+        if not self.overheated:
+            self.heat = max(0, self.heat - 1 * delta)
+            if self.heat == 0:
+                game.mixer.sounds[4].play()
+
+    def can_shoot(self):
+        now = pygame.time.get_ticks()
+
+        if self.overheated:
+            if now >= self.overheat_end_time:
+                self.overheated = False
+                self.heat = 0
+            else:
+                return False
+        return True
+
     def shoot(self, gun_type=None, target=None):
+        if not self.can_shoot():
+            return []
+
         self.update_damage()
+
         if gun_type is None:
             gun_type = self.gun
 
@@ -219,6 +253,7 @@ class Ship(pygame.sprite.Sprite):
                 else:
                     self.guns_ammo['nuke'] -= 1
 
+        self.apply_heat()
         return projectiles
 
     def taken_damage(self):
