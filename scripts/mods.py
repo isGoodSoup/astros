@@ -257,11 +257,11 @@ class TraitChoiceScreen:
         if event.type == pygame.JOYHATMOTION:
             if event.hat == 0 and event.value == (-1, 0):
                 self.index = (self.index - 1) % len(self.cards)
+                load_sounds()[5].play()
 
             if event.hat == 0 and event.value == (1, 0):
                 self.index = (self.index + 1) % len(self.cards)
-
-            load_sounds()[5].play()
+                load_sounds()[5].play()
 
         if event.type == pygame.JOYBUTTONDOWN and event.button == 0:
             self.node.select(self.index)
