@@ -42,13 +42,12 @@ def spawner(game):
             game.spawns.boss_spawned = True
         return
 
-    if not game.spawns.boss_spawned and not is_boss_phase:
-        if game.state.phase_fade <= 0:
-            spawn_fleet(game, game.state.phase_index)
-            game.spawns.last_reinforcement_spawn = now
+    if game.state.phase_fade <= 0:
+        spawn_fleet(game, game.state.phase_index)
+        game.spawns.last_reinforcement_spawn = now
 
-        if game.state.phase_index in ASTEROID_PHASES:
-            spawn_asteroids(game)
+    if game.state.phase_index in ASTEROID_PHASES:
+        spawn_asteroids(game)
 
 def enemies_alive(game):
     return (any(a.alive() for a in game.sprites.aliens) or
@@ -61,8 +60,11 @@ def update_phase(game):
 
     if game.state.phase_state == PHASE_ACTIVE:
         spawner(game)
-        if (game.state.score >= score_goal or
-                now - game.state.phase_start_time >= game.state.phase_length):
+
+        score_goal = game.state.score >= score_goal
+        time = now - game.state.phase_start_time >= game.state.phase_length
+
+        if (score_goal or time) and not enemies_alive(game):
             game.state.phase_state = PHASE_CLEANUP
 
     elif game.state.phase_state == PHASE_CLEANUP:
