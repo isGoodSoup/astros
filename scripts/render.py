@@ -1,7 +1,7 @@
 import pygame
 
 import scripts.assets as assets
-from scripts.lang import local
+from scripts.lang import local, LANGS
 from scripts.runtime import get_desc
 from scripts.settings import (TOGGLE_TUTORIAL, COLOR_BLUE, COLOR_RED, \
                               COLOR_GREEN, COLOR_WHITE, STAT_Y_OFFSET,
@@ -247,6 +247,13 @@ def render_settings_tab(game, screen, rect, game_font):
             toggle_text = "ON" if state else "OFF"
             toggle_surface = game_font.render(toggle_text, True, color)
             screen.blit(toggle_surface, (slider_x, y))
+
+
+        elif setting["type"] == "lang":
+            state = getattr(getattr(game, setting["target"]), setting["key"])
+            option_text = LANGS.get(state, state)
+            option_surface = game_font.render(option_text, True, color)
+            screen.blit(option_surface, (slider_x, y))
 
         y = next_row(y, 40)
 

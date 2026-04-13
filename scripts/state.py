@@ -11,7 +11,8 @@ class GameState:
         self.can_rumble = True
         self.can_show_controls = True
         self.can_show_hud = True
-        
+        self.current_lang = 'en'
+
         self.score = 0
         self.score_scaling = SCORE_SCALING
         self.score_multiplier = 1.0

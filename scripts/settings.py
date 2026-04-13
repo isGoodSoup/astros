@@ -300,5 +300,11 @@ SETTINGS_DEFINITION = [
         "label": "game.settings.hud",
         "type": "toggle",
         "target": "state"
+    },
+    {
+        "key": "current_lang",
+        "label": "game.settings.lang",
+        "type": "lang",
+        "target": "state"
     }
 ]

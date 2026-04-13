@@ -27,11 +27,21 @@ class Localization:
         else:
             return text
 
-current_lang = 0
-langs = ['en', 'es']
-local = Localization(langs[current_lang])
+LANGS = {
+    "en": "English",
+    "es": "Español"
+}
 
-def rotate_language():
-    global current_lang, local
-    current_lang = (current_lang + 1) % len(langs)
-    local.set_language(langs[current_lang])
+LANG_ORDER = ["en", "es"]
+local = Localization('en')
+
+def set_language(game, lang):
+    game.state.current_lang = lang
+    local.set_language(lang)
+
+def rotate_language(game):
+    idx = LANG_ORDER.index(game.state.current_lang)
+    idx = (idx + 1) % len(LANG_ORDER)
+
+    new_lang = LANG_ORDER[idx]
+    set_language(game, new_lang)

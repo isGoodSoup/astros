@@ -108,10 +108,6 @@ class Input:
 
         for event in events:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_1:
-                    rotate_language()
-                    game.mixer.play(4)
-
                 if event.key == pygame.K_TAB:
                     if game.hud.settings_tab.active:
                         game.hud.settings_tab.close()
@@ -156,6 +152,10 @@ class Input:
 
                     elif event.key == pygame.K_RETURN and setting["type"] == "toggle":
                         toggle_setting(game, self.selected_setting_index)
+                        game.mixer.play(4)
+
+                    elif event.key == pygame.K_RETURN and setting["type"] == "lang":
+                        rotate_language(game)
                         game.mixer.play(4)
 
                     elif event.key in (pygame.K_BACKSPACE, pygame.K_ESCAPE):
@@ -232,6 +232,10 @@ class Input:
 
                     elif game.hud.settings_tab.active and setting["type"] == "toggle":
                         toggle_setting(game, self.selected_setting_index)
+                        game.mixer.play(4)
+
+                    elif game.hud.settings_tab.active and setting["type"] == "lang":
+                        rotate_language(game)
                         game.mixer.play(4)
 
                 if event.button == 1:
