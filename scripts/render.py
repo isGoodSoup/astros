@@ -8,7 +8,10 @@ from scripts.settings import (TOGGLE_TUTORIAL, COLOR_BLUE, COLOR_RED, \
                               SKILL_TAB_OFFSETS, ASTEROID_PHASES,
                               INPUT_CONTROLLER, SCALE, PAUSED_TEXT_Y,
                               SKILL_TAB_PADDING, SKTAB_HEADER_OFFSET,
-                              SKILL_TAB_GRID, ALPHA)
+                              SKILL_TAB_GRID, ALPHA, COLOR_BLACK,
+                              SETTINGS_LINESPACE, SETTINGS_X_OFFSET,
+                              SETTINGS_Y_OFFSET, SETTINGS_VOLUME_WIDTH,
+                              SETTINGS_VOLUME_HEIGHT, SETTINGS_SETTING_GAP)
 from scripts.shared import joysticks
 from scripts.utils import wrap_text
 
@@ -198,24 +201,40 @@ def render_stats_tab(game, screen, rect, game_font):
     for stat in stats:
         text_surface = game_font.render(stat, True, COLOR_WHITE)
         screen.blit(text_surface, (rect.x + 40, rect.y + y_offset))
-        y_offset += 50
+        y_offset += SETTINGS_LINESPACE
 
 def render_settings_tab(game, screen, rect, game_font):
     header_settings = local.t('game.settings.header')
-    surf = game_font.render(header_settings, True, COLOR_WHITE)
-    screen.blit(surf, [rect.x + SKTAB_HEADER_OFFSET + 50, rect.y + 100])
+    header_surface = game_font.render(header_settings, True, COLOR_WHITE)
 
-    bar_x = rect.x + 100
-    bar_y = rect.y + 140
-    bar_width = 200
-    bar_height = 20
+    header_rect = header_surface.get_rect()
+    header_rect.topleft = (rect.x + SETTINGS_X_OFFSET,
+        rect.y + SETTINGS_Y_OFFSET)
+
+    screen.blit(header_surface, header_rect)
+
+    x = header_rect.left
+    y = header_rect.bottom + SETTINGS_LINESPACE
+
+    y = next_row(y)
+
+    volume_text = local.t('game.settings.volume')
+    volume_surface = game_font.render(volume_text, True, COLOR_WHITE)
+    screen.blit(volume_surface, [x, y])
+
+    bar_x = x + volume_surface.get_width() + SETTINGS_SETTING_GAP
+    bar_y = y
+    bar_width = SETTINGS_VOLUME_WIDTH
+    bar_height = SETTINGS_VOLUME_HEIGHT
 
     volume = game.volume
     fill_width = int(bar_width * volume)
-    pygame.draw.rect(screen, (60, 60, 60),
-                     (bar_x, bar_y, bar_width, bar_height))
-    pygame.draw.rect(screen, COLOR_WHITE,
-                     (bar_x, bar_y, fill_width, bar_height))
+    pygame.draw.rect(screen, COLOR_BLACK, (bar_x, bar_y, bar_width, bar_height))
+    pygame.draw.rect(screen, COLOR_WHITE, (bar_x, bar_y, fill_width,
+                                           bar_height))
+
+def next_row(y, spacing=SETTINGS_LINESPACE):
+    return y + spacing
 
 def render_waves(game, screen):
     for wave in game.sprites.shockwaves:
