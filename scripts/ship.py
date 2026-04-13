@@ -47,6 +47,7 @@ class Ship(pygame.sprite.Sprite):
         self.crit_chance = self.base_crit_chance
         self.crit_multiplier = 3
 
+        self.can_overheat = True
         self.heat = 0
         self.heat_per_shot = 100
         self.overheat_limit = SHIP_OVERHEAT_CAP
@@ -88,6 +89,8 @@ class Ship(pygame.sprite.Sprite):
         self.shield_regen_multiplier = 0.05
         self.shield_regen_rate = int(self.max_shield * self.shield_regen_multiplier)
 
+        self.is_commando_active = False
+
         self.last_hit_time = 0
         self.hit_cooldown = SHIP_IFRAMES
 
@@ -112,12 +115,15 @@ class Ship(pygame.sprite.Sprite):
                 self.shield_regen = False
 
     def update_damage(self):
-        self.damage = self.base_damage
+        self.damage = self.base_damage // 2 if self.is_commando_active else (
+            self.base_damage)
 
         if self.gun == "shotgun":
-            self.damage *= SHIP_SHOTGUN_DAMAGE
+            self.damage *= SHIP_SHOTGUN_DAMAGE // 2 if (
+                self.is_commando_active) else SHIP_SHOTGUN_DAMAGE
         elif self.gun == "nuke":
-            self.damage *= SHIP_NUKE_DAMAGE
+            self.damage *= SHIP_NUKE_DAMAGE // 2 if self.is_commando_active \
+                else SHIP_NUKE_DAMAGE
 
     def update_fire_rate(self):
         self.shot_cooldown = self.guns[self.gun]
@@ -142,6 +148,9 @@ class Ship(pygame.sprite.Sprite):
                                              -self.current_angle)
 
     def apply_heat(self):
+        if not self.can_overheat:
+            return
+
         self.heat += self.heat_per_shot
         if self.heat >= self.overheat_limit:
             self.overheated = True

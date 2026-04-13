@@ -1,6 +1,7 @@
 import pygame
 
-from scripts.all_traits import DoubleTrouble, GlassReactor, Panonium, Classic
+from scripts.all_traits import DoubleTrouble, GlassReactor, Panonium, Classic, \
+    Commando
 from scripts.lang import local
 from scripts.settings import (COLOR_WHITE, COLOR_LIGHT_ORANGE,
                               TRAIT_CARD_SIZE, SCALE)
@@ -76,6 +77,8 @@ class TraitPool:
                   local.t('game.trait.desc.boss'), "double_trouble",DoubleTrouble()),
             Trait(local.t('game.trait.name.glass'),
                   local.t('game.trait.desc.glass'), "glass_reactor", GlassReactor()),
+            Trait(local.t('game.trait.name.commando'),
+                  local.t('game.trait.desc.commando'), "commando", Commando()),
             Trait(local.t('game.trait.name.panonium'),
                   local.t('game.trait.desc.panonium'), "pandemonium", Panonium()),
             Trait(local.t('game.trait.name.none'),

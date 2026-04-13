@@ -24,6 +24,12 @@ class GlassReactor(Ability):
         ship.shield = ship.max_shield
         return [ship.hitpoints, ship.base_damage,ship.shield]
 
+class Commando(Ability):
+    def apply_on(self, game, ship):
+        ship.is_commando_active = True
+        ship.can_overheat = False
+        return [ship.is_commando_active, ship.can_overheat]
+
 class Panonium(Ability):
     def apply_on(self, game, ship):
         sp = game.spawns

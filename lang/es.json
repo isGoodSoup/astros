@@ -6,6 +6,8 @@
   "game.trait.desc.boss": "Uno ya no fue suficiente. Es necesario un segundo jefe para lograr la victoria completa.",
   "game.trait.name.glass": "Reactor Frágil",
   "game.trait.desc.glass": "Tu nave no tiene suficiente escudo para defenderse contra los asteroides entrantes. Es necesario actualizar tus escudos para defenderse contra los asteroides",
+  "game.trait.name.commando": "Comando",
+  "game.trait.desc.commando": "La sobrecarga ya no es un problema, pero tu daño y combos hacen la mitad",
   "game.trait.name.panonium": "Panonium",
   "game.trait.desc.panonium": "Las amenazas que llegan te impiden sobrevivir.",
   "game.trait.name.none": "Ninguno",
