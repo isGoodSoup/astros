@@ -13,60 +13,29 @@ featuring dynamic combat, procedural encounters, skill progression, and hybrid i
 (keyboard, mouse, and controller).
 
 ## Overview
-- Real-time twin-stick style controls
-- Phase-based enemy waves and boss encounters
-- RPG-like skill progression
-- Procedural spawning systems
-- Multi-weapon combat system
-- Controller + keyboard/mouse hybrid input support
-**Your goal**: survive increasingly complex phases, upgrade your ship, and 
-  defeat bosses.
+### Ships, ships, and more... ships?
+![img.png](assets/imgs/img.png)
 
-## Controls (Keyboard)
-| Key                 | Action                                         |
-| ------------------- | ---------------------------------------------- |
-| `WASD / Arrow Keys` | Move ship                                      |
-| `SPACE`             | Shoot                                          |
-| `1`                 | Rotate language                                |
-| `TAB`               | Toggle stats panel                             |
-| `G`                 | Switch gun                                     |
-| `R`                 | Restart (game over only)                       |
-| `L`                 | Toggle vertical lock (debug movement behavior) |
-| `+ / KP +`          | Increase volume                                |
-| `- / KP -`          | Decrease volume                                |
-| `F2`                | Toggle debug mode                              |
-| `F3`                | Decrease HUD padding                           |
-| `F4`                | Increase HUD padding                           |
-| `F5`                | Reload font                                    |
-| `F12`               | Take screenshot                                |
-| `ESC`               | Pause / unpause game                           |
-| `CTRL + Q`          | Quit game (when paused)                        |
+### Choose your gameplay!
+![img_1.png](assets/imgs/img_1.png)
 
-| Input                       | Action                |
-| --------------------------- | --------------------- |
-| `LEFT / RIGHT`              | Cycle skills          |
-| `ENTER`                     | Confirm skill         |
-| Mouse Click                 | Select skill directly |
-| Controller D-Pad Left/Right | Cycle skills          |
-| Button 0                    | Confirm skill         |
+### Engage in scaling rng'd combat!
+![img_2.png](assets/imgs/img_2.png)
 
-| Action                  | Behavior                                 |
-| ----------------------- | ---------------------------------------- |
-| Mouse Move              | Switch to mouse input mode + move cursor |
-| Left Click              | Shoot                                    |
-| Click Skill (Skill Tab) | Select / unlock skill                    |
+### Reach the top, become a hero
+![img_3.png](assets/imgs/img_3.png)
 
-## Controls (Controller)
-| Button / Input          | Action                         |
-| ----------------------- | ------------------------------ |
-| Left Stick              | Move ship                      |
-| Right Stick             | Move cursor                    |
-| Button 0 (A / Cross)    | Confirm / select skill         |
-| Button 1 (B / Circle)   | Toggle stats panel             |
-| Button 2 (X / Square)   | Switch gun                     |
-| Button 3 (Y / Triangle) | Restart (game over only)       |
-| Button 4                | Toggle vertical lock           |
-| Button 5                | Shoot                          |
-| Button 6                | Quit game (when paused)        |
-| Button 7                | Pause / unpause                |
-| Button 9                | Enable right-stick aiming mode |
+#### 🔁 Repeat
+
+## Controls
+- WASD, Arrow Keys, or Controller
+- Mouse/right joystick to move crosshair
+- Mouse-Left/Spacebar/A/RB to shoot
+- G/X to switch weapons
+- Esc to pause
+- R to restart when game over
+- F2 to toggle debug mode
+- F3/F4/right joystick to adjust HUD
+- F5 to switch font
+- Keypads' +/- and PLUS and MINUS/D-pad up and down to adjust volume
+- F12/D-pad right to take screenshot
