@@ -30,4 +30,4 @@ class Events:
     def black_hole_event(self, game):
         x, y = (random.randint(0, game.screen_size[0]),
                random.randint(0, game.screen_size[1]))
-        game.sprites.celestials.add(BlackHole(x, y))
+        game.sprites.celestials.add(BlackHole(game, x, y))
