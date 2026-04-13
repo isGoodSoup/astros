@@ -39,3 +39,4 @@ featuring dynamic combat, procedural encounters, skill progression, and hybrid i
 - F5 to switch font
 - Keypads' +/- and PLUS and MINUS/D-pad up and down to adjust volume
 - F12/D-pad right to take screenshot
+- Switch languages with 1
