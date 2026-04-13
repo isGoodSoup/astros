@@ -1,3 +1,5 @@
+import os
+
 FPS = 60
 SCALE = 4
 ONE_SECOND = 1000
@@ -18,8 +20,9 @@ SPRITE_FLOAT = 0.0025
 SHIP_SELECTION_OFFSET = 200
 FLIGHT_SPEED = 16
 
-SAVE_DIR_NAME = ".saves"
+SAVE_DIR_NAME = ".astros"
 CONFIG_FILE = "config.json"
+SCREENSHOTS_DIR = os.path.join(SAVE_DIR_NAME, "imgs")
 INDENTS = 4
 
 INPUT_CONTROLLER = "controller"

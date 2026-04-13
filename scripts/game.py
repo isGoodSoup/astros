@@ -171,8 +171,8 @@ class Game:
             "rumble": self.state.can_rumble,
             "show_controls": self.state.can_show_controls,
             "show_hud": self.state.can_show_hud,
-            "credits": self.ship.credits,
-            "high_score": self.state.high_score
+            "high_score": self.state.high_score,
+            "language": self.state.current_lang,
         }
         with open(self.config_path, "w") as f:
             json.dump(config_data, f, indent=INDENTS)
@@ -192,5 +192,5 @@ class Game:
             self.state.can_rumble = config_data.get("rumble", True)
             self.state.can_show_controls = config_data.get("show_controls", True)
             self.state.can_show_hud = config_data.get("show_hud", True)
-            self.ship.credits = config_data.get("credits", 0)
             self.state.high_score = config_data.get("high_score", 0)
+            self.state.current_lang = config_data.get("language", "en")

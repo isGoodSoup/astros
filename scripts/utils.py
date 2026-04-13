@@ -6,7 +6,7 @@ import sys
 import pygame
 
 from scripts.floaty import FloatingNumber
-from scripts.settings import SETTINGS_DEFINITION
+from scripts.settings import SETTINGS_DEFINITION, SCREENSHOTS_DIR
 from scripts.shared import fade
 
 
@@ -47,14 +47,12 @@ def center(game, text, screen_size):
 def take_screenshot(game):
     timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     home_dir = os.path.expanduser("~")
-    save_dir = os.path.join(home_dir, ".imgs")
+    save_dir = os.path.join(home_dir, SCREENSHOTS_DIR)
     os.makedirs(save_dir, exist_ok=True)
     save_path = os.path.join(save_dir, f"{timestamp}.png")
     game.crt.ctx.finish()
     data = game.crt.ctx.screen.read(components=4)
-    surface = pygame.image.fromstring(data,game.screen_size,
-        "RGBA",
-        True)
+    surface = pygame.image.fromstring(data,game.screen_size,"RGBA", True)
     pygame.image.save(surface, save_path)
 
 def toggle_setting(game, index):

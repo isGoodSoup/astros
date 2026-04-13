@@ -45,3 +45,4 @@ def rotate_language(game):
 
     new_lang = LANG_ORDER[idx]
     set_language(game, new_lang)
+    game.save_config()
