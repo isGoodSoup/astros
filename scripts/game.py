@@ -45,7 +45,6 @@ class Game:
         self.running = True
         self.fps = FPS
         self.scale = SCALE
-        self.volume = DEFAULT_VOLUME
         self.hud_padding = HUD_PADDING
 
         self.state = GameState()
@@ -108,7 +107,7 @@ class Game:
                             self.sprites.enemy_projectiles.add(*new_projectiles)
 
                     if shots_this_frame > 0 and self.state.play_sound:
-                        self.mixer.sounds[0].play()
+                        self.mixer.play(0)
 
             screen.fill(BACKGROUND)
             self.delta = clock.tick(self.fps) / ONE_SECOND
@@ -163,7 +162,8 @@ class Game:
 
     def save_config(self):
         config_data = {
-            "volume": self.volume,
+            "music_volume": self.mixer.music_volume,
+            "sfx_volume": self.mixer.sfx_volume,
             "play_sound": self.state.play_sound,
             "credits": self.ship.credits,
             "high_score": self.state.high_score
@@ -179,7 +179,8 @@ class Game:
             except (json.JSONDecodeError, ValueError):
                 config_data = {}
 
-            self.volume = config_data.get("volume", 1)
+            self.mixer.music_volume = config_data.get("music_volume", config_data.get("volume", MUSIC_VOLUME))
+            self.mixer.sfx_volume = config_data.get("sfx_volume", config_data.get("volume", SFX_VOLUME))
             self.state.play_sound = config_data.get("play_sound", True)
             self.ship.credits = config_data.get("credits", 0)
             self.state.high_score = config_data.get("high_score", 0)
