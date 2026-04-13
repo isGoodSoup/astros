@@ -7,7 +7,8 @@ from scripts.fonts import FontManager
 from scripts.game import Game
 from scripts.lang import local
 from scripts.settings import SCALE, SHIP_FRAMES, COLOR_BLACK, \
-    COLOR_LIGHT_ORANGE, FONT_DEFAULT_SIZE, TRAIT_CARD_SIZE
+    COLOR_LIGHT_ORANGE, FONT_DEFAULT_SIZE, TRAIT_CARD_SIZE, HEADER_FLOAT, \
+    SPRITE_FLOAT, FPS, SHIP_SELECTION_OFFSET, FLIGHT_SPEED, FONT_MEDIUM_SIZE
 from scripts.shared import fade, joysticks
 from scripts.soundlib import load_sounds
 from scripts.traits import TraitOption, TraitGridSquare, TraitPool
@@ -19,11 +20,11 @@ class Mods:
         fade.start("in")
         self.running = True
         self.screen_size = screen_size
-        self.font = FontManager(None, 36)
+        self.font = FontManager(None, FONT_MEDIUM_SIZE)
         self.preview_scale = SCALE//2
         self.ship_frames = SHIP_FRAMES
         self.ship_flying = False
-        self.flight_speed = 16
+        self.flight_speed = FLIGHT_SPEED
         self.flight_offset = 0
         self.fade_started = False
 
@@ -64,7 +65,7 @@ class Mods:
                            hud_ratio, crt)
 
             screen.fill(COLOR_BLACK)
-            clock.tick(60)
+            clock.tick(FPS)
 
             if self.ship_flying:
                 self.flight_offset -= self.flight_speed
@@ -129,7 +130,7 @@ class Mods:
         center_y = self.screen_size[1] // 2
         time = pygame.time.get_ticks()
 
-        ship_float = 4 * math.sin(time * 0.0025)
+        ship_float = 4 * math.sin(time * SPRITE_FLOAT)
         if self.ship_flying:
             ship_float += self.flight_offset
 
@@ -138,14 +139,14 @@ class Mods:
             center=(center_x, center_y + int(ship_float)))
         screen.blit(current_preview, rect)
 
-        offset = 200
+        offset = SHIP_SELECTION_OFFSET
         phase = math.pi / 2
 
         left_index = (self.current_ship_index - 1) % len(self.ship_previews)
         right_index = (self.current_ship_index + 1) % len(self.ship_previews)
 
-        left_float = 2 * math.sin(time * 0.0025 + phase)
-        right_float = 2 * math.sin(time * 0.0025 - phase)
+        left_float = 2 * math.sin(time * SPRITE_FLOAT + phase)
+        right_float = 2 * math.sin(time * SPRITE_FLOAT - phase)
 
         left_preview = self.ship_previews[left_index]
         right_preview = self.ship_previews[right_index]
@@ -159,7 +160,7 @@ class Mods:
         screen.blit(right_preview, right_rect)
         screen.blit(self.dim_surface, right_rect)
 
-        header_float = 4 * math.sin(time * 0.002)
+        header_float = 4 * math.sin(time * HEADER_FLOAT)
 
         header = local.t('mods.header')
         header_surf = self.font.render(header, True, COLOR_LIGHT_ORANGE)
@@ -195,8 +196,8 @@ class TraitChoiceScreen:
                     return None
                 self.input(event)
 
-            screen.fill((0, 0, 0))
-            clock.tick(60)
+            screen.fill(COLOR_BLACK)
+            clock.tick(FPS)
 
             self.update()
             self.draw()
@@ -225,7 +226,7 @@ class TraitChoiceScreen:
             x = cx + (i - (len(self.cards) - 1) / 2) * spacing
             card.draw(self.screen, (x, cy))
 
-        header_float = 4 * math.sin(time * 0.002)
+        header_float = 4 * math.sin(time * HEADER_FLOAT)
 
         header = local.t('traits.header')
         header_surf = self.font.render(header, True, COLOR_LIGHT_ORANGE)

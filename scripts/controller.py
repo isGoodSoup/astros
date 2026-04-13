@@ -1,4 +1,6 @@
 import pygame
+
+from scripts.settings import INPUT_CONTROLLER
 from scripts.shared import joysticks, controller
 from scripts.utils import apply_curve
 
@@ -27,10 +29,10 @@ def update_controller(game, screen_size, delta):
     ry = apply_curve(game, ry)
 
     if lx != 0 or ly != 0:
-        game.input.mode = "controller"
+        game.input.mode = INPUT_CONTROLLER
 
     if rx != 0 or ry != 0:
-        game.input.mode = "controller"
+        game.input.mode = INPUT_CONTROLLER
         if game.input.moving_hud:
             return
 

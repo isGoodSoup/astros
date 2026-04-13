@@ -3,7 +3,8 @@ import pygame
 from scripts.lang import local
 from scripts.settings import (TOGGLE_TUTORIAL, COLOR_BLUE, COLOR_RED, \
                               COLOR_GREEN, COLOR_WHITE, STAT_Y_OFFSET,
-                              SKILL_TAB_OFFSETS, ASTEROID_PHASES)
+                              SKILL_TAB_OFFSETS, ASTEROID_PHASES,
+                              INPUT_CONTROLLER)
 from scripts.shared import joysticks
 from scripts.utils import wrap_text
 
@@ -110,7 +111,7 @@ def render_skills_tab(game, screen, rect, game_font):
     screen.blit(title, (rect.x + 300 + offset, rect.y + padding))
     screen.blit(perk_points, (rect.x + 300 + offset, rect.y + padding + 40))
 
-    cursor_pos = game.input.cursor_pos if game.input.mode == "controller" \
+    cursor_pos = game.input.cursor_pos if game.input.mode == INPUT_CONTROLLER \
         else pygame.mouse.get_pos()
     grid = [(250, 200), (350, 200), (450, 200)]
     for i, (skill, pos) in enumerate(zip(game.state.current_phase_options, grid)):

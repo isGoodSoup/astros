@@ -52,7 +52,7 @@ class Menu:
                         self.sounds[4].play()
                         fade.start('out')
                         self.transitioning = True
-                elif event.type == JOYBUTTONDOWN:
+                elif event.type == pygame.JOYBUTTONDOWN:
                     if event.button in range(0, 9):
                         self.sounds[4].play()
                         fade.start('out')

@@ -3,7 +3,7 @@ import math
 import pygame
 from pygame.constants import *
 
-from scripts.settings import FPS
+from scripts.settings import FPS, INPUT_MOUSE, INPUT_CONTROLLER
 
 lock_y = False
 
@@ -91,17 +91,17 @@ def update_movement(game, delta, screen_size):
 
         mouse_pos = pygame.mouse.get_pos()
         if mouse_pos != getattr(game, "last_cursor_pos", (0, 0)):
-            game.mode = "mouse"
+            game.mode = INPUT_MOUSE
             game.input.last_input_time = pygame.time.get_ticks()
         game.last_cursor_pos = mouse_pos
 
         if abs(game.input.right_joystick[0]) > 0.05 or abs(game.input.right_joystick[1]) > 0.05:
-            game.input.mode = "controller"
+            game.input.mode = INPUT_CONTROLLER
             game.input.last_input_time = pygame.time.get_ticks()
 
-        if game.input.mode == "mouse":
+        if game.input.mode == INPUT_MOUSE:
             game.input.cursor_pos = list(mouse_pos)
-        elif game.input.mode == "controller":
+        elif game.input.mode == INPUT_CONTROLLER:
             game.input.cursor_pos[0] += game.input.right_joystick[0] * cursor_speed
             game.input.cursor_pos[1] += game.input.right_joystick[1] * cursor_speed
             game.input.cursor_pos[0] = max(0, min(game.screen_size[0],

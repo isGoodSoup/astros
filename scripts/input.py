@@ -3,7 +3,7 @@ import pygame
 from scripts.game_over import reboot
 from scripts.lang import rotate_language
 from scripts.settings import (ONE_SECOND, SCREEN_SHAKE, INPUT_NAV_COOLDOWN,
-                              PHASE_TRANSITION)
+                              PHASE_TRANSITION, INPUT_MOUSE, INPUT_CONTROLLER)
 from scripts.shared import joysticks, controller
 from scripts.ship import get_nearest_enemy
 from scripts.soundlib import decrease_volume, increase_volume
@@ -22,7 +22,7 @@ class Input:
         self.selected_skill = None
         self.nav_cooldown = INPUT_NAV_COOLDOWN
         self.last_nav_time = 0
-        self.mode = "mouse"
+        self.mode = INPUT_MOUSE
         self.last_input_time = pygame.time.get_ticks()
 
         self.cursor_visible = False
@@ -39,14 +39,14 @@ class Input:
         for event in events:
             if event.type in (pygame.MOUSEMOTION, pygame.MOUSEBUTTONDOWN,
                               pygame.MOUSEBUTTONUP):
-                self.mode = "mouse"
+                self.mode = INPUT_MOUSE
                 self.cursor_pos = list(pygame.mouse.get_pos())
                 self.last_move_time = pygame.time.get_ticks()
                 moved = True
 
             elif event.type in (pygame.JOYAXISMOTION, pygame.JOYBUTTONDOWN,
                                 pygame.JOYBUTTONUP, pygame.JOYHATMOTION):
-                self.mode = "controller"
+                self.mode = INPUT_CONTROLLER
                 self.last_move_time = pygame.time.get_ticks()
 
         if moved:
@@ -263,7 +263,7 @@ class Input:
         finally:
             self.moving_hud = True
 
-        if game.hud.skill_tab.active and game.state.current_phase_options and self.mode == "mouse":
+        if game.hud.skill_tab.active and game.state.current_phase_options and self.mode == INPUT_MOUSE:
             mouse_rect = pygame.Rect(self.cursor_pos[0], self.cursor_pos[1], 1, 1)
             clicked_skill = None
 
@@ -315,5 +315,5 @@ def update_cursor(game, delta, screen_size):
         game.input.cursor_pos[1] = max(0, min(screen_size[1],
                                               game.input.cursor_pos[1]))
 
-        game.input.mode = "controller"
+        game.input.mode = INPUT_CONTROLLER
         game.input.last_move_time = pygame.time.get_ticks()

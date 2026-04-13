@@ -111,7 +111,7 @@ class Game:
                         self.mixer.sounds[0].play()
 
             screen.fill(BACKGROUND)
-            delta = clock.tick(self.fps) / 1000
+            delta = clock.tick(self.fps) / ONE_SECOND
 
             self.input.update(self, events)
             self.input.act(self, events)
@@ -137,7 +137,7 @@ class Game:
                                 self.hud_padding)
 
             if self.input.cursor_visible:
-                pos = self.input.cursor_pos if self.input.mode == "controller" else pygame.mouse.get_pos()
+                pos = self.input.cursor_pos if self.input.mode == INPUT_CONTROLLER else pygame.mouse.get_pos()
                 screen.blit(self.cursor_sprite, (int(pos[0]), int(pos[1])))
 
             if self.state.game_over:
@@ -169,7 +169,7 @@ class Game:
             "high_score": self.state.high_score
         }
         with open(self.config_path, "w") as f:
-            json.dump(config_data, f, indent=4)
+            json.dump(config_data, f, indent=INDENTS)
 
     def load_config(self):
         if os.path.exists(self.config_path):
