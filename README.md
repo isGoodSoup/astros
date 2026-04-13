@@ -37,6 +37,6 @@ featuring dynamic combat, procedural encounters, skill progression, and hybrid i
 - F2 to toggle debug mode
 - F3/F4/right joystick to adjust HUD
 - F5 to switch font
-- Keypads' +/- and PLUS and MINUS/D-pad up and down to adjust volume
 - F12/D-pad right to take screenshot
 - Switch languages with 1
+- NEW: TAB while Paused to open a settings menu
