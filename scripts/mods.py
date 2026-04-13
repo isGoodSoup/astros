@@ -3,6 +3,7 @@ import math
 import pygame
 
 import scripts.assets as assets
+from scripts.intro import Intro
 from scripts.fonts import FontManager
 from scripts.game import Game
 from scripts.mixer import Mixer
@@ -86,6 +87,7 @@ class Mods:
                     TraitPool(self.context)).run(clock, screen, screen_size,
                                            hud_ratio, crt)
                 selected_traits = traits.get_traits() if traits else []
+                intro = Intro(self.context, screen, clock, crt).run()
                 game = Game(self.context, screen, screen_size, crt, hud_ratio,
                             selected_traits, self.ships,
                             self.selected_ship_index)
