@@ -83,7 +83,7 @@ INTERFACE_XP = (40, 17)
 INTERFACE_XP_COLS = 33
 INTERFACE_XP_OFFSET = (0, -175)
 
-SETTINGS_X_OFFSET, SETTINGS_Y_OFFSET = SKTAB_HEADER_OFFSET + 50, 100
+SETTINGS_X_OFFSET, SETTINGS_Y_OFFSET = SKTAB_HEADER_OFFSET + 50, 50
 SETTINGS_COL_OFFSET = 200
 SETTINGS_LINESPACE = 50
 SETTINGS_SETTING_GAP = 50
@@ -266,7 +266,7 @@ SETTINGS_DEFINITION = [
         "min": 0.0,
         "max": 1.0,
         "step": 0.1,
-        "target": "mixer",
+        "target": "mixer"
     },
     {
         "key": "sfx_volume",
@@ -275,18 +275,30 @@ SETTINGS_DEFINITION = [
         "min": 0.0,
         "max": 1.0,
         "step": 0.1,
-        "target": "mixer",
+        "target": "mixer"
     },
     {
         "key": "can_screen_shake",
         "label": "game.settings.screen_shake",
         "type": "toggle",
-        "target": "state",
+        "target": "state"
     },
     {
         "key": "can_rumble",
         "label": "game.settings.rumble",
         "type": "toggle",
-        "target": "state",
+        "target": "state"
+    },
+    {
+        "key": "can_show_controls",
+        "label": "game.settings.controls",
+        "type": "toggle",
+        "target": "state"
+    },
+    {
+        "key": "can_show_hud",
+        "label": "game.settings.hud",
+        "type": "toggle",
+        "target": "state"
     }
 ]

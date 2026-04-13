@@ -18,6 +18,8 @@
   "game.settings.sfx": "SFX",
   "game.settings.screen_shake": "Screen-shake",
   "game.settings.rumble": "Vibration",
+  "game.settings.controls": "Show Controls",
+  "game.settings.hud": "Toggle HUD",
   "game.victory": "VICTORY",
   "game.defeat": "GAME OVER",
   "game.score": "SCORE",

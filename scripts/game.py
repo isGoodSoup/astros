@@ -131,7 +131,7 @@ class Game:
 
             render_frame(self, screen, self.font, self.hud_padding)
 
-            if not self.state.game_over:
+            if not self.state.game_over and self.state.can_show_hud:
                 self.hud.update(self, self.font, screen, hud_ratio,
                                 self.hud_padding)
 
@@ -169,6 +169,8 @@ class Game:
             "play_sound": self.state.play_sound,
             "screen_shake": self.state.can_screen_shake,
             "rumble": self.state.can_rumble,
+            "show_controls": self.state.can_show_controls,
+            "show_hud": self.state.can_show_hud,
             "credits": self.ship.credits,
             "high_score": self.state.high_score
         }
@@ -188,5 +190,7 @@ class Game:
             self.state.play_sound = config_data.get("play_sound", True)
             self.state.can_screen_shake = config_data.get("screen_shake", True)
             self.state.can_rumble = config_data.get("rumble", True)
+            self.state.can_show_controls = config_data.get("show_controls", True)
+            self.state.can_show_hud = config_data.get("show_hud", True)
             self.ship.credits = config_data.get("credits", 0)
             self.state.high_score = config_data.get("high_score", 0)

@@ -106,11 +106,13 @@ def render_frame(game, screen, font, hud_padding):
             game.hud.stats_tab.active):
         pause_text = local.t('game.pause')
         pause = game.font.render(pause_text, True, COLOR_WHITE)
-        surf = assets.OVERLAY_CONTROLLER if (game.input.mode ==
-            INPUT_CONTROLLER) else assets.OVERLAY_KEYBOARD
+        surf = None
+        if game.state.can_show_controls:
+            surf = assets.OVERLAY_CONTROLLER if (game.input.mode ==
+                INPUT_CONTROLLER) else assets.OVERLAY_KEYBOARD
 
-        surf = pygame.transform.scale(surf, (surf.get_width() * SCALE,
-                                             surf.get_height() * SCALE))
+            surf = pygame.transform.scale(surf, (surf.get_width() * SCALE,
+                                                 surf.get_height() * SCALE))
 
         dim_surface = pygame.Surface(game.screen_size)
         dim_surface.fill((0, 0, 0))
@@ -119,8 +121,9 @@ def render_frame(game, screen, font, hud_padding):
         if not game.hud.skill_tab.active:
             screen.blit(dim_surface, (0, 0))
             if not game.hud.settings_tab.active:
-                screen.blit(surf, [game.screen_size[0]//2 - surf.get_width()//2,
-                                   game.screen_size[1]//2 - surf.get_height()//2])
+                if game.state.can_show_controls:
+                    screen.blit(surf, [game.screen_size[0]//2 - surf.get_width()//2,
+                                       game.screen_size[1]//2 - surf.get_height()//2])
                 screen.blit(pause, [game.screen_size[0]//2 - pause.get_width()//2, PAUSED_TEXT_Y])
 
         game.hud.settings_tab.render(game, screen, font, hud_padding)
@@ -245,7 +248,7 @@ def render_settings_tab(game, screen, rect, game_font):
             toggle_surface = game_font.render(toggle_text, True, color)
             screen.blit(toggle_surface, (slider_x, y))
 
-        y = next_row(y)
+        y = next_row(y, 40)
 
 def next_row(y, spacing=SETTINGS_LINESPACE):
     return y + spacing

@@ -11,7 +11,7 @@ class FontManager:
         self.fonts = [
             pygame.font.Font(resource_path("assets/fonts/Monocraft.ttf"), size),
             pygame.font.Font(resource_path("assets/fonts/PressStart2P.ttf"), size),
-            pygame.font.Font(resource_path("assets/fonts/BoldPixels.ttf"), size * 2),
+            pygame.font.Font(resource_path("assets/fonts/BoldPixels.ttf"), size),
         ]
 
         if name is not None:
