@@ -181,8 +181,8 @@ class Game:
             except (json.JSONDecodeError, ValueError):
                 config_data = {}
 
-            self.mixer.music_volume = config_data.get("music_volume", config_data.get("volume", MUSIC_VOLUME))
-            self.mixer.sfx_volume = config_data.get("sfx_volume", config_data.get("volume", SFX_VOLUME))
+            self.mixer.music_volume = config_data.get("music_volume", MUSIC_VOLUME)
+            self.mixer.sfx_volume = config_data.get("sfx_volume", SFX_VOLUME)
             self.state.play_sound = config_data.get("play_sound", True)
             self.ship.credits = config_data.get("credits", 0)
             self.state.high_score = config_data.get("high_score", 0)
