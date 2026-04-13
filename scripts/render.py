@@ -1,10 +1,14 @@
 import pygame
+import scripts.assets as assets
 
 from scripts.lang import local
+from scripts.runtime import get_desc
 from scripts.settings import (TOGGLE_TUTORIAL, COLOR_BLUE, COLOR_RED, \
                               COLOR_GREEN, COLOR_WHITE, STAT_Y_OFFSET,
                               SKILL_TAB_OFFSETS, ASTEROID_PHASES,
-                              INPUT_CONTROLLER)
+                              INPUT_CONTROLLER, SCALE, PAUSED_TEXT_Y,
+                              SKILL_TAB_PADDING, SKTAB_HEADER_OFFSET,
+                              SKILL_TAB_GRID, ALPHA)
 from scripts.shared import joysticks
 from scripts.utils import wrap_text
 
@@ -97,9 +101,21 @@ def render_frame(game, screen, font, hud_padding):
             game.hud.stats_tab.active):
         pause_text = local.t('game.pause')
         pause = game.font.render(pause_text, True, COLOR_WHITE)
+        surf = assets.OVERLAY_CONTROLLER if (game.input.mode ==
+            INPUT_CONTROLLER) else assets.OVERLAY_KEYBOARD
+
+        surf = pygame.transform.scale(surf, (surf.get_width() * SCALE,
+                                             surf.get_height() * SCALE))
+
+        dim_surface = pygame.Surface(game.screen_size)
+        dim_surface.fill((0, 0, 0))
+        dim_surface.set_alpha(ALPHA)
+
         if not game.hud.skill_tab.active:
-            screen.blit(pause, [game.screen_size[0]//2 - pause.get_width()//2,
-                        game.screen_size[1]//2 - pause.get_height()//2])
+            screen.blit(dim_surface, (0, 0))
+            screen.blit(surf, [game.screen_size[0]//2 - surf.get_width()//2,
+                               game.screen_size[1]//2 - surf.get_height()//2])
+            screen.blit(pause, [game.screen_size[0]//2 - pause.get_width()//2, PAUSED_TEXT_Y])
 
 def render_skills_tab(game, screen, rect, game_font):
     title_text, perks = local.t('game.victory'), local.t("game.hud.perks",
@@ -108,13 +124,14 @@ def render_skills_tab(game, screen, rect, game_font):
     perk_points = game_font.render(perks, True, COLOR_WHITE)
     padding, offset = SKILL_TAB_OFFSETS
 
-    screen.blit(title, (rect.x + 300 + offset, rect.y + padding))
-    screen.blit(perk_points, (rect.x + 300 + offset, rect.y + padding + 40))
+    screen.blit(title, (rect.x + SKTAB_HEADER_OFFSET + offset, rect.y + padding))
+    screen.blit(perk_points, (rect.x + SKTAB_HEADER_OFFSET + offset, rect.y + padding + SKILL_TAB_PADDING))
 
     cursor_pos = game.input.cursor_pos if game.input.mode == INPUT_CONTROLLER \
         else pygame.mouse.get_pos()
-    grid = [(250, 200), (350, 200), (450, 200)]
-    for i, (skill, pos) in enumerate(zip(game.state.current_phase_options, grid)):
+
+    for i, (skill, pos) in enumerate(zip(game.state.current_phase_options,
+                                         SKILL_TAB_GRID)):
         skill.pos = (rect.x + pos[0] + offset, rect.y + pos[1])
         skill.rect.topleft = skill.pos
 
@@ -131,9 +148,8 @@ def render_skills_tab(game, screen, rect, game_font):
         frame = pygame.transform.scale(skill.current_frame(), (64, 64))
 
         if skill.hovered and skill.description:
-            desc_rect = pygame.Rect(rect.x + 50, rect.y + 300, rect.width - 100, 180)
-            description_surface = game_font.render(skill.description, True,
-                                                   COLOR_WHITE)
+            desc_rect = get_desc(rect)
+            description_surface = game_font.render(skill.description, True,COLOR_WHITE)
             description_rect = description_surface.get_rect(center=desc_rect.center)
 
             text = local.t(skill.description_key)
