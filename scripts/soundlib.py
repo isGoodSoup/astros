@@ -23,6 +23,7 @@ def load_ost():
     return {
         "odyssey": resource_path("assets/fx/odyssey.ogg"),
         "flight": resource_path("assets/fx/flight.ogg"),
+        "unknown": resource_path("assets/fx/unknown.ogg"),
         "starfield": resource_path("assets/fx/starfield.ogg"),
     }
 
