@@ -13,15 +13,15 @@ class FontManager:
         self.size = size
 
         self.fonts = [
+            pygame.font.Font(resource_path("assets/fonts/Monocraft.ttf"), size),
             pygame.font.Font(resource_path("assets/fonts/PressStart2P.ttf"), size),
             pygame.font.Font(resource_path("assets/fonts/BoldPixels.ttf"), size * 2),
-            pygame.font.Font(resource_path("assets/fonts/Bytesized.ttf"), size * 2),
         ]
 
         if name is not None:
             self.fonts.insert(0, pygame.font.Font(name, size))
 
-        self.linesizes = [32, 32, 32]
+        self.linesizes = [32, 32]
         self.font_index = 0
         self.linesize = self.linesizes[self.font_index]
         self.current_font = self.fonts[self.font_index]
