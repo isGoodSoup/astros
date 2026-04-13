@@ -202,9 +202,12 @@ class Ship(pygame.sprite.Sprite):
                            speed=24, damage=1))
 
         elif gun_type == "shotgun":
-            if self.guns_ammo['shotgun'] <= 0:
-                return projectiles
             num_pellets = SHIP_SHOTGUN_PELLETS
+            cost = num_pellets
+
+            if self.guns_ammo['shotgun'] < cost:
+                return projectiles
+
             spread_angle = SHIP_SHOTGUN_SPREAD
 
             for i in range(num_pellets):
@@ -221,16 +224,16 @@ class Ship(pygame.sprite.Sprite):
                     Projectile(pos, COLOR_BLUE, direction=direction,
                                speed=24, damage=self.damage))
             if not TOGGLE_UNLIMITED_AMMO:
-                if self.guns_ammo['shotgun'] < 0:
-                    self.guns_ammo['shotgun'] = 0
-                else:
-                    self.guns_ammo['shotgun'] -= num_pellets
+                self.guns_ammo['shotgun'] -= cost
+                self.clamp_ammo(gun_type)
 
         if gun_type == "auto":
-            if self.guns_ammo['auto'] <= 0:
+            num_bullets = SHIP_AUTO_BULLETS
+            cost = num_bullets
+
+            if self.guns_ammo['auto'] < cost:
                 return projectiles
 
-            num_bullets = SHIP_AUTO_BULLETS
             spread_angle = SHIP_AUTO_SPREAD
             for i in range(num_bullets):
                 angle_offset = (-spread_angle / 2) + i * (
@@ -247,13 +250,12 @@ class Ship(pygame.sprite.Sprite):
                                speed=24, damage=self.damage))
 
             if not TOGGLE_UNLIMITED_AMMO:
-                if self.guns_ammo['auto'] < 0:
-                    self.guns_ammo['auto'] = 0
-                else:
-                    self.guns_ammo['auto'] -= num_bullets
+                self.guns_ammo['auto'] -= cost
+                self.clamp_ammo(gun_type)
 
         if gun_type == "nuke":
-            if self.guns_ammo['nuke'] <= 0:
+            cost = 1
+            if self.guns_ammo['nuke'] <= cost:
                 return projectiles
 
             projectiles.append(Projectile(pos,COLOR_RED,
@@ -261,13 +263,15 @@ class Ship(pygame.sprite.Sprite):
             projectiles[-1].nuke = True
 
             if not TOGGLE_UNLIMITED_AMMO:
-                if self.guns_ammo['nuke'] < 0:
-                    self.guns_ammo['nuke'] = 0
-                else:
-                    self.guns_ammo['nuke'] -= 1
+                self.guns_ammo['nuke'] -= cost
+                self.clamp_ammo(gun_type)
 
         self.apply_heat()
         return projectiles
+
+    def clamp_ammo(self, gun):
+        self.guns_ammo[gun] = max(0, min(self.guns_ammo[gun],
+                                         self.base_guns_ammo[gun]))
 
     def taken_damage(self):
         return [random.randint(0,10) - 4, random.randint(0,10) - 4]
