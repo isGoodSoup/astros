@@ -2,7 +2,7 @@ import pygame
 
 from scripts.settings import (PHASES_TOTAL, PHASE_START, PHASE_COLORS, \
                               PHASE_LENGTH, STAR_SPEED,
-                              PHASES, SCORE_SCALING, PHASE_ACTIVE)
+                              PHASES, SCORE_SCALING, PHASE_ACTIVE, PHASE_FADE)
 
 
 class GameState:
@@ -26,8 +26,10 @@ class GameState:
         self.current_phase = self.phases[self.phase_index]
         self.current_phase_options = []
         self.phase_start_time = pygame.time.get_ticks()
+        self.phase_fade = PHASE_FADE
         self.phase_colors = PHASE_COLORS
         self.phase_length = PHASE_LENGTH
+        self.phase_start = True
         self.phase_spawned = False
         self.transition_started = False
 

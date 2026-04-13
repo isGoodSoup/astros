@@ -43,8 +43,9 @@ def spawner(game):
         return
 
     if not game.spawns.boss_spawned and not is_boss_phase:
-        spawn_fleet(game, game.state.phase_index)
-        game.spawns.last_reinforcement_spawn = now
+        if game.state.phase_fade <= 0:
+            spawn_fleet(game, game.state.phase_index)
+            game.spawns.last_reinforcement_spawn = now
 
         if game.state.phase_index in ASTEROID_PHASES:
             spawn_asteroids(game)
@@ -97,13 +98,14 @@ def run_transition(game):
     game.state.real_phase_index += 1
 
     game.state.score = 0
-
-    game.ship.spawnpoint(game.screen_size, game.sprites.framew)
+    game.state.phase_fade = PHASE_FADE
+    game.state.phase_start = True
 
     game.spawns.last_reinforcement_spawn = pygame.time.get_ticks()
     game.state.phase_start_time = pygame.time.get_ticks()
     game.state.phase_state = PHASE_ACTIVE
     game.spawns.boss_spawned = False
+    game.ship.spawnpoint(game.screen_size, game.sprites.framew)
 
 def spawn_asteroids(game):
     if not game.spawns.can_spawn_asteroids:
@@ -177,7 +179,14 @@ def update_game(game, delta, screen_size, hud_padding):
 
     for i in game.sprites.stars:
         if not game.state.pause:
-            i[1] += game.state.stars_speed
+            if game.state.phase_start and game.state.phase_fade > 0:
+                i[1] += 50
+                game.state.phase_fade -= 1
+                if game.state.phase_fade <= 0:
+                    game.state.phase_start = False
+            else:
+                i[1] += game.state.stars_speed
+
         if i[1] > screen_size[1]:
             i[1] = 0
             i[0] = random.randint(0, screen_size[0])
