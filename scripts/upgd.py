@@ -2,7 +2,6 @@ import random
 
 import pygame
 
-from scripts.soundlib import sounds
 from scripts.utils import activate_shield_regen
 
 upgrades = ['power_up', 'shield', 'ammo']
@@ -28,7 +27,7 @@ class Upgrade(pygame.sprite.Sprite):
         if self.rect.top > pygame.display.get_surface().get_height():
             self.kill()
 
-    def apply(self, ship):
+    def apply(self, ship, game):
         now = pygame.time.get_ticks()
 
         if self.type == "power_up":
@@ -50,4 +49,4 @@ class Upgrade(pygame.sprite.Sprite):
                     ship.guns_ammo[ammo] += 100
                 if ammo == "nuke":
                     ship.guns_ammo[ammo] += 1
-        sounds[2].play()
+        game.mixer.play(2)

@@ -8,8 +8,8 @@ from scripts.settings import *
 
 
 class Ship(pygame.sprite.Sprite):
-    def __init__(self, sprite_sheet, x, y, frame, width, height, scale=SCALE,
-                 columns=1):
+    def __init__(self, game, sprite_sheet, x, y, frame, width, height,
+                 scale=SCALE, columns=1):
         super().__init__()
         self.original_image = sprite_sheet.get_image(frame, width, height,
                                                      scale, columns)
@@ -17,6 +17,7 @@ class Ship(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=(x, y))
         self.hitbox = self.rect.inflate(self.rect.width * SHIP_HITBOX,
                                         self.rect.height * SHIP_HITBOX)
+        self.game = game
         self.current_angle = SHIP_BASE_ANGLE
         self.velocity = SHIP_VELOCITY
         self.direction = "idle"
@@ -161,7 +162,7 @@ class Ship(pygame.sprite.Sprite):
         if not self.overheated:
             self.heat = max(0, self.heat - SHIP_OVERHEAT_RATE * delta)
             if self.heat == 0 and self.previous_overheat:
-                game.mixer.sounds[4].play()
+                game.mixer.play(4)
                 self.previous_overheat = False
 
     def can_shoot(self):
@@ -291,7 +292,7 @@ class Ship(pygame.sprite.Sprite):
         self.max_shield += SHIP_LEVEL_ADDITION
         self.shield = self.max_shield
         self.xp_to_next_level = int(self.xp_to_next_level * self.xp_growth)
-        sound[3].play()
+        self.game.mixer.play(3)
 
     def get_stats(self):
         return {

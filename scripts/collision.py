@@ -85,7 +85,7 @@ def check_collision(game):
                 game.sprites.particles.append(Particle(game.ship.rect.center, vel))
 
             if game.state.play_sound:
-                game.mixer.sounds[1].play()
+                game.mixer.play(1)
 
             damage_per_frame = 0
             boss_damage = BOSS_DAMAGE if boss_hit else 0
@@ -170,7 +170,7 @@ def check_collision(game):
                                       asteroid.rect.centery, game.sprites.frame_explode)
                 game.sprites.explosions.add(explosion)
                 if game.state.play_sound:
-                    game.mixer.sounds[1].play()
+                    game.mixer.play(1)
                 game.state.score_multiplier = game.ship.combo_multiplier
                 game.state.score += (game.ship.level * SCORE_SCALING *
                                 game.state.score_multiplier)
@@ -231,7 +231,7 @@ def check_collision(game):
                                       game.sprites.frame_explode)
                 game.sprites.explosions.add(explosion)
                 if game.state.play_sound:
-                    game.mixer.sounds[1].play()
+                    game.mixer.play(1)
                 game.state.score_multiplier = game.ship.combo_multiplier
                 game.state.score += (game.ship.level * SCORE_SCALING * game.state.score_multiplier)
                 game.ship.gain_xp(formulize(game, game.ship.level), game.mixer.sounds)
@@ -292,7 +292,7 @@ def check_collision(game):
                                       game.sprites.frame_explode)
                 game.sprites.explosions.add(explosion)
                 if game.state.play_sound:
-                    game.mixer.sounds[1].play()
+                    game.mixer.play(1)
                 game.state.score_multiplier = game.ship.combo_multiplier
                 game.state.score += game.ship.level * SCORE_SCALING * game.state.score_multiplier
                 game.ship.gain_xp(formulize(game, game.ship.level), game.mixer.sounds)
@@ -308,5 +308,5 @@ def check_collision(game):
         for upgrade in upgrade_hit:
             upgrade.kill()
             if game.state.play_sound:
-                game.mixer.sounds[2].play()
-                upgrade.apply(game.ship)
+                game.mixer.play(2)
+                upgrade.apply(game.ship, game)

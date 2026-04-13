@@ -9,6 +9,7 @@ from scripts.ship import Ship
 
 class SpriteManager:
     def __init__(self, game):
+        self.game = game
         self.celestials = pygame.sprite.Group()
         self.projectiles = pygame.sprite.Group()
         self.enemy_projectiles = pygame.sprite.Group()
@@ -88,5 +89,5 @@ class SpriteManager:
         self.alien_delay = pygame.time.get_ticks() + ALIEN_INITIAL_DELAY
 
     def create_ship(self):
-        return Ship(self.selected_sheet, 0, 0, self.frame, self.framew, self.frameh,
-             columns=self.ship_frames)
+        return Ship(self.game, self.selected_sheet, 0, 0, self.frame,
+                    self.framew, self.frameh, columns=self.ship_frames)

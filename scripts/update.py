@@ -269,7 +269,7 @@ def update_game(game, delta, screen_size, hud_padding):
                 game.screen_shake = SCREEN_SHAKE * 2
                 if joysticks:
                     controller.rumble(frequency, 3, BASE_RUMBLE_MS * 2)
-                game.mixer.sounds[6].play()
+                game.mixer.play(6)
                 frequency += 0.1
 
         game.ship.update_position(game.ship.rect.x, game.ship.rect.y)

@@ -6,15 +6,16 @@ import scripts.assets as assets
 from scripts.fonts import FontManager
 from scripts.game import Game
 from scripts.lang import local
+from scripts.mixer import Mixer
 from scripts.settings import SCALE, SHIP_FRAMES, COLOR_BLACK, \
     COLOR_LIGHT_ORANGE, FONT_DEFAULT_SIZE, TRAIT_CARD_SIZE, HEADER_FLOAT, \
     SPRITE_FLOAT, FPS, SHIP_SELECTION_OFFSET, FLIGHT_SPEED, FONT_MEDIUM_SIZE, \
     ALPHA
 from scripts.shared import fade, joysticks
-from scripts.soundlib import load_sounds
 from scripts.traits import TraitOption, TraitGridSquare, TraitPool
 from scripts.utils import render_fade
 
+mixer = Mixer()
 
 class Mods:
     def __init__(self, screen, screen_size, hud_ratio):
@@ -97,34 +98,34 @@ class Mods:
             if event.key in (pygame.K_LEFT, pygame.K_a):
                 self.current_ship_index = ((self.current_ship_index - 1)
                                            % len(self.ship_previews))
-                load_sounds()[5].play()
+                mixer.play(5)
 
             elif event.key in (pygame.K_RIGHT, pygame.K_d):
                 self.current_ship_index = ((self.current_ship_index + 1)
                                            % len(self.ship_previews))
-                load_sounds()[5].play()
+                mixer.play(5)
 
             elif event.key in (pygame.K_SPACE, pygame.K_RETURN):
                 self.ship_flying = True
                 self.selected_ship_index = self.current_ship_index
-                load_sounds()[4].play()
+                mixer.play(4)
 
         if joysticks:
             if event.type == pygame.JOYBUTTONDOWN:
                 if event.button == 0:
                     self.ship_flying = True
                     self.selected_ship_index = self.current_ship_index
-                    load_sounds()[4].play()
+                    mixer.play(4)
 
                 if event.button == 5:
                     self.current_ship_index = ((self.current_ship_index + 1)
                                                % len(self.ship_previews))
-                    load_sounds()[5].play()
+                    mixer.play(5)
 
                 if event.button == 4:
                     self.current_ship_index = ((self.current_ship_index - 1)
                                                % len(self.ship_previews))
-                    load_sounds()[5].play()
+                    mixer.play(5)
 
     def draw(self, screen):
         center_x = self.screen_size[0] // 2
@@ -242,32 +243,32 @@ class TraitChoiceScreen:
         if event.type == pygame.KEYDOWN:
             if event.key in (pygame.K_LEFT, pygame.K_a):
                 self.index = (self.index - 1) % len(self.cards)
-                load_sounds()[5].play()
+                mixer.play(5)
 
             elif event.key in (pygame.K_RIGHT, pygame.K_d):
                 self.index = (self.index + 1) % len(self.cards)
-                load_sounds()[5].play()
+                mixer.play(5)
 
             elif event.key in (pygame.K_RETURN, pygame.K_SPACE):
                 self.node.select(self.index)
                 self.result = self.node.confirm()
                 self.exiting = True
-                load_sounds()[4].play()
+                mixer.play(4)
 
         if event.type == pygame.JOYHATMOTION:
             if event.hat == 0 and event.value == (-1, 0):
                 self.index = (self.index - 1) % len(self.cards)
-                load_sounds()[5].play()
+                mixer.play(5)
 
             if event.hat == 0 and event.value == (1, 0):
                 self.index = (self.index + 1) % len(self.cards)
-                load_sounds()[5].play()
+                mixer.play(5)
 
         if event.type == pygame.JOYBUTTONDOWN and event.button == 0:
             self.node.select(self.index)
             self.result = self.node.confirm()
             self.exiting = True
-            load_sounds()[4].play()
+            mixer.play(4)
 
 class ChoiceNode:
     def __init__(self, options, pick_count=1):

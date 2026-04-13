@@ -13,7 +13,7 @@ def game_lost(game, font, screen, screen_size):
     game_over = font.render(local.t('game.defeat'), True, COLOR_RED)
 
     if game.state.play_sound and getattr(game, "game_over_fx", True):
-        game.mixer.sounds[-1].play()
+        game.mixer.play(-1)
         game.state.game_over_fx = False
 
     if game.state.score > game.state.high_score:
@@ -97,5 +97,4 @@ def reboot(game, screen_size):
     game.screen_shake = 0
 
     if game.state.play_sound:
-        pygame.mixer.music.set_volume(game.volume)
         game.mixer.play_music('starfield')

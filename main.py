@@ -6,6 +6,7 @@ from scripts.celestial import *
 from scripts.crt import CRT
 from scripts.fonts import FontManager
 from scripts.lang import local
+from scripts.mixer import Mixer
 from scripts.mods import Mods
 from scripts.settings import *
 from scripts.shared import fade
@@ -34,7 +35,7 @@ class Menu:
         pygame.display.set_caption("Astros")
         pygame.display.set_icon(assets.ICON)
         self.clock = pygame.time.Clock()
-        self.sounds = load_sounds()
+        self.mixer = Mixer()
         self.running = True
         self.transitioning = False
         self.last_blink = 0
@@ -49,12 +50,12 @@ class Menu:
                     self.running = False
                 elif event.type == pygame.KEYDOWN:
                     if any(pygame.key.get_pressed()) and not self.transitioning:
-                        self.sounds[4].play()
+                        self.mixer.play(4)
                         fade.start('out')
                         self.transitioning = True
                 elif event.type == pygame.JOYBUTTONDOWN:
                     if event.button in range(0, 9):
-                        self.sounds[4].play()
+                        self.mixer.play(4)
                         fade.start('out')
                         self.transitioning = True
 
