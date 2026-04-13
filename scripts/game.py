@@ -75,7 +75,7 @@ class Game:
         self.load_config()
         apply_volume(self)
         fade.start('in')
-        self.mixer.queue(['odyssey', 'starfield'], loop=True)
+        self.mixer.queue(['odyssey', 'unknown', 'starfield'], loop=True)
 
     def run(self, clock, screen, screen_size, hud_ratio, crt):
         while self.running:
@@ -147,7 +147,7 @@ class Game:
                 self.screen_shake -= 1
             render_offset = self.ship.taken_damage() if self.screen_shake else [0, 0]
             if joysticks and self.screen_shake:
-                controller.rumble(0.5, 1, BASE_RUMBLE_MS)
+                controller.rumble(1, 2, BASE_RUMBLE_MS + 20)
 
             if not self.state.game_over:
                 screen.blit(pygame.transform.scale(screen, screen_size),

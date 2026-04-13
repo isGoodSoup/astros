@@ -3,7 +3,8 @@ import pygame
 from scripts.game_over import reboot
 from scripts.lang import rotate_language
 from scripts.settings import (ONE_SECOND, SCREEN_SHAKE, INPUT_NAV_COOLDOWN,
-                              PHASE_TRANSITION, INPUT_MOUSE, INPUT_CONTROLLER)
+                              PHASE_TRANSITION, INPUT_MOUSE, INPUT_CONTROLLER,
+                              BASE_RUMBLE_MS)
 from scripts.shared import joysticks, controller
 from scripts.ship import get_nearest_enemy
 from scripts.soundlib import decrease_volume, increase_volume
@@ -86,6 +87,8 @@ class Input:
                     if enemies else None
             else:
                 target = None
+            if joysticks:
+                controller.rumble(1, 2, BASE_RUMBLE_MS + 30)
             new_projectiles = game.ship.shoot(gun_type=game.ship.gun,
                                               target=target)
             game.sprites.projectiles.add(*new_projectiles)

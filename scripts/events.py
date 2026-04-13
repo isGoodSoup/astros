@@ -25,7 +25,7 @@ class Events:
 
         game.screen_shake = SCREEN_SHAKE + 30
         if joysticks:
-            controller.rumble(0.5, 1, HIGH_RUMBLE_MS)
+            controller.rumble(1, 1, HIGH_RUMBLE_MS)
 
     def black_hole_event(self, game):
         x, y = (random.randint(0, game.screen_size[0]),
