@@ -182,7 +182,7 @@ def update_game(game, delta, screen_size, hud_padding):
     for i in game.sprites.stars:
         if not game.state.pause:
             if game.state.phase_start and game.state.phase_fade > 0:
-                i[1] += 50
+                i[1] += LIGHT_SPEED
                 game.state.phase_fade -= 1
                 if game.state.phase_fade <= 0:
                     game.state.phase_start = False
@@ -198,7 +198,7 @@ def update_game(game, delta, screen_size, hud_padding):
         game.spawns.last_celestial_spawn = current_time
         for _ in range(random.randint(1, 4)):
             for _ in range(10):
-                new_celestial = random_celestial()
+                new_celestial = random_celestial(game)
                 if new_celestial and is_valid_spawn(new_celestial, game.sprites.celestials,
                                                     CELESTIAL_MIN_DISTANCE):
                     game.sprites.celestials.add(new_celestial)

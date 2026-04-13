@@ -1,11 +1,12 @@
 import random
 import pygame
 
+from scripts.settings import LIGHT_SPEED, STAR_SPEED
 from scripts.utils import resource_path
 
 
 class Celestial(pygame.sprite.Sprite):
-    def __init__(self, path, x, y, speed=1):
+    def __init__(self, game, path, x, y):
         super().__init__()
         self.image = pygame.image.load(path).convert_alpha()
         self.scale = random.uniform(2, 4)
@@ -15,7 +16,7 @@ class Celestial(pygame.sprite.Sprite):
              int(self.image.get_height() * self.scale))
         )
         self.rect = self.image.get_rect(center=(x, y))
-        self.speed = speed
+        self.speed = LIGHT_SPEED if game.state.phase_start else STAR_SPEED
 
     def update(self):
         self.rect = self.image.get_rect(center=self.rect.center)
@@ -24,21 +25,21 @@ class Celestial(pygame.sprite.Sprite):
             self.kill()
 
 class Planet(Celestial):
-    def __init__(self, x, y):
+    def __init__(self, game, x, y):
         super().__init__(resource_path(f"assets/galaxies/planet_"
-                                       f"{random.randint(1, 10)}.png"), x, y)
+                                       f"{random.randint(1, 10)}.png"), game, x, y)
 
 class Galaxy(Celestial):
-    def __init__(self, x, y):
+    def __init__(self, game, x, y):
         super().__init__(resource_path(f"assets/galaxies/galaxy_"
-                                       f"{random.randint(1, 2)}.png"), x, y)
+                                       f"{random.randint(1, 2)}.png"), game, x, y)
 
 class BlackHole(Celestial):
-    def __init__(self, x, y):
+    def __init__(self, game, x, y):
         super().__init__(resource_path(f"assets/galaxies/black_hole_"
-                         f"{random.randint(1, 2)}.png"), x, y)
+                         f"{random.randint(1, 2)}.png"), game, x, y)
 
-def random_celestial():
+def random_celestial(game):
     screen_w = pygame.display.Info().current_w
     x = random.randint(0, screen_w)
     y = random.randint(-200, -50)
@@ -46,9 +47,9 @@ def random_celestial():
     r = random.random()
 
     if r > 0.8:
-        return Planet(x, y)
+        return Planet(game, x, y)
     elif r > 0.90:
-        return Galaxy(x, y)
+        return Galaxy(game, x, y)
     return None
 
 def is_valid_spawn(new, group, min_dist):
