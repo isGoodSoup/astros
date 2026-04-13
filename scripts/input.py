@@ -146,19 +146,17 @@ class Input:
                     elif event.key == pygame.K_DOWN:
                         self.selected_setting_index = (self.selected_setting_index + 1) % num_settings
 
-                    elif event.key == pygame.K_LEFT and setting[
-                        "type"] == "slider":
+                    elif event.key == pygame.K_LEFT and setting["type"] == "slider":
                         adjust_setting(game, self.selected_setting_index,
                                        decrease=True)
 
-                    elif event.key == pygame.K_RIGHT and setting[
-                        "type"] == "slider":
+                    elif event.key == pygame.K_RIGHT and setting["type"] == "slider":
                         adjust_setting(game, self.selected_setting_index,
                                        decrease=False)
 
-                    elif event.key == pygame.K_RETURN and setting[
-                        "type"] == "toggle":
+                    elif event.key == pygame.K_RETURN and setting["type"] == "toggle":
                         toggle_setting(game, self.selected_setting_index)
+                        game.mixer.play(4)
 
                     elif event.key in (pygame.K_BACKSPACE, pygame.K_ESCAPE):
                         game.hud.settings_tab.close()
@@ -234,6 +232,7 @@ class Input:
 
                     elif game.hud.settings_tab.active and setting["type"] == "toggle":
                         toggle_setting(game, self.selected_setting_index)
+                        game.mixer.play(4)
 
                 if event.button == 1:
                     if game.hud.settings_tab.active:

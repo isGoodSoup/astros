@@ -167,6 +167,8 @@ class Game:
             "music_volume": self.mixer.music_volume,
             "sfx_volume": self.mixer.sfx_volume,
             "play_sound": self.state.play_sound,
+            "screen_shake": self.state.can_screen_shake,
+            "rumble": self.state.can_rumble,
             "credits": self.ship.credits,
             "high_score": self.state.high_score
         }
@@ -184,5 +186,7 @@ class Game:
             self.mixer.music_volume = config_data.get("music_volume", MUSIC_VOLUME)
             self.mixer.sfx_volume = config_data.get("sfx_volume", SFX_VOLUME)
             self.state.play_sound = config_data.get("play_sound", True)
+            self.state.can_screen_shake = config_data.get("screen_shake", True)
+            self.state.can_rumble = config_data.get("rumble", True)
             self.ship.credits = config_data.get("credits", 0)
             self.state.high_score = config_data.get("high_score", 0)
