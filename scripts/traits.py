@@ -1,8 +1,7 @@
 import pygame
 
-from scripts.all_traits import DoubleTrouble, GlassReactor, Panonium, Classic, \
-    Commando
-from scripts.lang import local
+from scripts.all_traits import (DoubleTrouble, GlassReactor, Panonium, Classic, \
+                                Commando)
 from scripts.settings import (COLOR_WHITE, COLOR_LIGHT_ORANGE,
                               TRAIT_CARD_SIZE, SCALE)
 from scripts.utils import resource_path, wrap_text
@@ -71,18 +70,20 @@ class TraitOption:
         self.trait.apply(ship, level)
 
 class TraitPool:
-    def __init__(self):
+    def __init__(self, context):
+        self.context = context
+        self.local = context.local
         self.traits = [
-            Trait(local.t('game.trait.name.boss'),
-                  local.t('game.trait.desc.boss'), "double_trouble",DoubleTrouble()),
-            Trait(local.t('game.trait.name.glass'),
-                  local.t('game.trait.desc.glass'), "glass_reactor", GlassReactor()),
-            Trait(local.t('game.trait.name.commando'),
-                  local.t('game.trait.desc.commando'), "commando", Commando()),
-            Trait(local.t('game.trait.name.panonium'),
-                  local.t('game.trait.desc.panonium'), "pandemonium", Panonium()),
-            Trait(local.t('game.trait.name.none'),
-                  local.t('game.trait.desc.none'),"none", Classic())
+            Trait(self.local.t('game.trait.name.boss'),
+                  self.local.t('game.trait.desc.boss'), "double_trouble",DoubleTrouble()),
+            Trait(self.local.t('game.trait.name.glass'),
+                  self.local.t('game.trait.desc.glass'), "glass_reactor", GlassReactor()),
+            Trait(self.local.t('game.trait.name.commando'),
+                  self.local.t('game.trait.desc.commando'), "commando", Commando()),
+            Trait(self.local.t('game.trait.name.panonium'),
+                  self.local.t('game.trait.desc.panonium'), "pandemonium", Panonium()),
+            Trait(self.local.t('game.trait.name.none'),
+                  self.local.t('game.trait.desc.none'),"none", Classic())
         ]
 
     def roll(self, count=3):

@@ -5,7 +5,6 @@ import pygame
 import scripts.assets as assets
 from scripts.fonts import FontManager
 from scripts.game import Game
-from scripts.lang import local
 from scripts.mixer import Mixer
 from scripts.settings import SCALE, SHIP_FRAMES, COLOR_BLACK, \
     COLOR_LIGHT_ORANGE, FONT_DEFAULT_SIZE, TRAIT_CARD_SIZE, HEADER_FLOAT, \
@@ -18,8 +17,10 @@ from scripts.utils import render_fade
 mixer = Mixer()
 
 class Mods:
-    def __init__(self, screen, screen_size, hud_ratio):
+    def __init__(self, context, screen, screen_size, hud_ratio):
         fade.start("in")
+        self.context = context
+        self.local = context.local
         self.running = True
         self.screen_size = screen_size
         self.font = FontManager(None, FONT_MEDIUM_SIZE)
@@ -81,10 +82,11 @@ class Mods:
             crt.render(screen)
 
             if self.ship_flying and self.fade_started and alpha >= 255:
-                traits = TraitChoiceScreen(screen, screen_size, hud_ratio,
-                    TraitPool()).run(clock, screen, screen_size,hud_ratio, crt)
+                traits = TraitChoiceScreen(self.context, screen, screen_size, hud_ratio,
+                    TraitPool(self.context)).run(clock, screen, screen_size,
+                                           hud_ratio, crt)
                 selected_traits = traits.get_traits() if traits else []
-                game = Game(screen, screen_size, crt, hud_ratio,
+                game = Game(self.context, screen, screen_size, crt, hud_ratio,
                             selected_traits, self.ships,
                             self.selected_ship_index)
                 self.running = False
@@ -164,14 +166,17 @@ class Mods:
 
         header_float = 4 * math.sin(time * HEADER_FLOAT)
 
-        header = local.t('mods.header')
+        header = self.local.t('mods.header')
         header_surf = self.font.render(header, True, COLOR_LIGHT_ORANGE)
         header_rect = header_surf.get_rect(
             center=(center_x, 100 + int(header_float)))
         screen.blit(header_surf, header_rect)
 
 class TraitChoiceScreen:
-    def __init__(self, screen, screen_size, hud_ratio, pool: TraitPool):
+    def __init__(self, context, screen, screen_size, hud_ratio,
+                 pool: TraitPool):
+        self.context = context
+        self.local = context.local
         self.screen = screen
         self.screen_size = screen_size
 
@@ -230,7 +235,7 @@ class TraitChoiceScreen:
 
         header_float = 4 * math.sin(time * HEADER_FLOAT)
 
-        header = local.t('traits.header')
+        header = self.local.t('traits.header')
         header_surf = self.font.render(header, True, COLOR_LIGHT_ORANGE)
         header_rect = header_surf.get_rect(
             center=(cx, 100 + int(header_float)))

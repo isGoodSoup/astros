@@ -1,8 +1,9 @@
 import pygame
 
+import scripts.game as g
+
 from scripts.all_skills import Explorer, DamageBoost, Maniac, Madness, Survival, \
     Adventurer, Pilot, Tank, Tower, Fortified
-from scripts.lang import local
 from scripts.sheet import SpriteSheet
 from scripts.utils import resource_path, legacy
 
@@ -44,7 +45,7 @@ class Skill:
     @property
     def description(self):
         if self.description_key:
-            return local.t(self.description_key)
+            return g.local.t(self.description_key)
         return None
 
     @legacy

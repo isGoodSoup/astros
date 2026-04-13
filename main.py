@@ -1,22 +1,24 @@
+import json
+
 from pygame.constants import *
 from pygame.display import toggle_fullscreen
 
 import scripts.assets as assets
+from scripts.context import AppContext
 from scripts.celestial import *
 from scripts.crt import CRT
 from scripts.fonts import FontManager
-from scripts.lang import local
 from scripts.mixer import Mixer
 from scripts.mods import Mods
 from scripts.settings import *
 from scripts.shared import fade
-from scripts.soundlib import load_sounds
 from scripts.update import set_hud
 from scripts.utils import render_fade
 
 
 class Menu:
-    def __init__(self):
+    def __init__(self, context):
+        self.context = context
         pygame.init()
         pygame.font.init()
         self.width = int(pygame.display.Info().current_w)
@@ -69,8 +71,9 @@ class Menu:
             if now - self.last_blink > ONE_SECOND//2:
                 self.last_blink = now
 
-            start = self.font.render(local.t('menu.start'), True,
-                                     COLOR_WHITE)
+            start_text = self.context.local.t('menu.start')
+            start = self.font.render(start_text, True, COLOR_WHITE)
+
             title_y = TITLE_Y
             self.render_surface.fill(COLOR_BLACK)
             surface_width, surface_height = self.render_surface.get_size()
@@ -95,11 +98,26 @@ class Menu:
                 return
 
     def init_game(self):
-        mods = Mods(self.screen, self.screen_size, self.hud_ratio)
+        mods = Mods(self.context, self.screen, self.screen_size, self.hud_ratio)
         mods.run(self.clock, self.screen, self.screen_size, self.hud_ratio,
-              self.crt)
+                 self.crt)
         self.running = False
 
-if __name__ == '__main__':
-    menu = Menu()
+def load_language():
+    home_dir = os.path.expanduser("~")
+    config_path = os.path.join(home_dir, SAVE_DIR_NAME, CONFIG_FILE)
+
+    if os.path.exists(config_path):
+        try:
+            with open(config_path, "r") as f:
+                config = json.load(f)
+            return config.get("language", "en")
+        except (json.JSONDecodeError, ValueError):
+            pass
+    return "en"
+
+if __name__ == "__main__":
+    lang = load_language()
+    context = AppContext(lang)
+    menu = Menu(context)
     menu.run()

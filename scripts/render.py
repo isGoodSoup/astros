@@ -1,7 +1,8 @@
 import pygame
 
 import scripts.assets as assets
-from scripts.lang import local, LANGS
+import scripts.game as g
+from scripts.lang import LANGS
 from scripts.runtime import get_desc
 from scripts.settings import (TOGGLE_TUTORIAL, COLOR_BLUE, COLOR_RED, \
                               COLOR_GREEN, COLOR_WHITE, STAT_Y_OFFSET,
@@ -104,7 +105,7 @@ def render_frame(game, screen, font, hud_padding):
 
     if game.state.pause and (not game.hud.skill_tab.active or not
             game.hud.stats_tab.active):
-        pause_text = local.t('game.pause')
+        pause_text = g.local.t('game.pause')
         pause = game.font.render(pause_text, True, COLOR_WHITE)
         surf = None
         if game.state.can_show_controls:
@@ -129,7 +130,7 @@ def render_frame(game, screen, font, hud_padding):
         game.hud.settings_tab.render(game, screen, font, hud_padding)
 
 def render_skills_tab(game, screen, rect, game_font):
-    title_text, perks = local.t('game.victory'), local.t("game.hud.perks",
+    title_text, perks = g.local.t('game.victory'), g.local.t("game.hud.perks",
                                                          perks=game.ship.perk_points)
     title = game_font.render(title_text, True, COLOR_WHITE)
     perk_points = game_font.render(perks, True, COLOR_WHITE)
@@ -163,7 +164,7 @@ def render_skills_tab(game, screen, rect, game_font):
             description_surface = game_font.render(skill.description, True,COLOR_WHITE)
             description_rect = description_surface.get_rect(center=desc_rect.center)
 
-            text = local.t(skill.description_key)
+            text = g.local.t(skill.description_key)
             lines = wrap_text(text, game_font.get_font(), desc_rect.width)
 
             screen.set_clip(desc_rect)
@@ -187,18 +188,18 @@ def render_stats_tab(game, screen, rect, game_font):
         available_ammo += game.ship.guns_ammo[ammo]
 
     stats = [
-        local.t("game.hud.hitpoints", hp=int(game.ship.hitpoints),
+        g.local.t("game.hud.hitpoints", hp=int(game.ship.hitpoints),
                 max_hp=int(game.ship.max_hitpoints)),
-        local.t("game.hud.shield", shield=int(game.ship.shield),
+        g.local.t("game.hud.shield", shield=int(game.ship.shield),
                 max_shield=int(game.ship.max_shield)),
-        local.t("game.hud.ammo", ammo=int(available_ammo),
+        g.local.t("game.hud.ammo", ammo=int(available_ammo),
                 max_ammo=int(game.ship.arsenal)),
-        local.t("game.hud.level", level=int(game.ship.level)),
-        local.t("game.hud.xp", xp=int(game.ship.xp),
+        g.local.t("game.hud.level", level=int(game.ship.level)),
+        g.local.t("game.hud.xp", xp=int(game.ship.xp),
                 xp_to_next_level=int(game.ship.xp_to_next_level)),
-        local.t("game.hud.crit_chance",
+        g.local.t("game.hud.crit_chance",
                 crit_chance=int(game.ship.crit_chance * 100)),
-        local.t("game.hud.crit_multiplier",
+        g.local.t("game.hud.crit_multiplier",
                 crit_multiplier=int(game.ship.crit_multiplier)),
     ]
 
@@ -209,7 +210,7 @@ def render_stats_tab(game, screen, rect, game_font):
         y_offset = next_row(y_offset)
 
 def render_settings_tab(game, screen, rect, game_font):
-    header_surface = game_font.render(local.t('game.settings.header'), True,
+    header_surface = game_font.render(g.local.t('game.settings.header'), True,
                                       COLOR_WHITE)
     header_rect = header_surface.get_rect()
     header_rect.topleft = (rect.x + SETTINGS_X_OFFSET, rect.y +
@@ -224,7 +225,7 @@ def render_settings_tab(game, screen, rect, game_font):
     bar_height = SETTINGS_VOLUME_HEIGHT
 
     for i, setting in enumerate(SETTINGS_DEFINITION):
-        label = local.t(setting["label"])
+        label = g.local.t(setting["label"])
         color = COLOR_GREEN if i == game.input.selected_setting_index else COLOR_WHITE
 
         label_surface = game_font.render(label, True, color)
