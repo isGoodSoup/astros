@@ -249,6 +249,11 @@ class Input:
                     if event.hat == 0 and event.value == (1, 0):
                         take_screenshot(game)
 
+                if event.hat == 0 and event.value == (0, 1):
+                    increase_volume(game)
+                elif event.hat == 0 and event.value == (0, -1):
+                    decrease_volume(game)
+
         axis_y = 0.0
         if joysticks and controller.get_button(9):
             axis_y = controller.get_axis(3)
