@@ -84,6 +84,7 @@ class OverheatBar:
         self.background_color = pygame.Color(30, 30, 30)
 
     def _lerp_color(self, c1, c2, t):
+        t = max(0.0, min(t, 1.0))
         return pygame.Color(
             int(c1.r + (c2.r - c1.r) * t),
             int(c1.g + (c2.g - c1.g) * t),
@@ -91,6 +92,7 @@ class OverheatBar:
         )
 
     def _get_color(self, ratio):
+        ratio = max(0.0, min(ratio, 1.0))
         if ratio < 0.5:
             return self._lerp_color(self.cool_color, self.mid_color, ratio * 2)
         else:
@@ -100,6 +102,7 @@ class OverheatBar:
         target_ratio = max(0.0, min(current_value / self.max_value, 1.0))
         smoothing_speed = 6.0
         self.display_ratio += (target_ratio - self.display_ratio) * smoothing_speed * dt
+        self.display_ratio = max(0.0, min(self.display_ratio, 1.0))
 
     def draw(self, screen, overheated=False):
         pygame.draw.rect(screen, self.background_color, self.rect)
@@ -138,13 +141,6 @@ class HUD:
                               hud_ratio,['right', 'bottom'],
                               INTERFACE_GUNS_COLS, INTERFACE_GUNS_OFFSET)
         self.xp.image = self.xp.frames[len(self.xp.frames) - 1]
-
-        self.guns_ammo = {
-            "beam": game.ship.guns_ammo["beam"],
-            "shotgun": game.ship.guns_ammo["shotgun"],
-            "auto": game.ship.guns_ammo["auto"],
-            "nuke": game.ship.guns_ammo["nuke"],
-        }
 
         bar_x = hud_ratio['right'] - INTERFACE_OVERHEAT[0]
         bar_y = hud_ratio['bottom'] - INTERFACE_OVERHEAT[1]
