@@ -2,7 +2,6 @@ import json
 
 from scripts.utils import resource_path
 
-
 class Localization:
     def __init__(self, lang="en"):
         self.lang = lang
@@ -33,11 +32,10 @@ LANGS = {
 }
 
 LANG_ORDER = ["en", "es"]
-local = Localization('en')
 
 def set_language(game, lang):
     game.state.current_lang = lang
-    local.set_language(lang)
+    game.local.set_language(lang)
 
 def rotate_language(game):
     idx = LANG_ORDER.index(game.state.current_lang)

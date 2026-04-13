@@ -4,6 +4,7 @@ import random
 import pygame
 
 import scripts.assets as assets
+from scripts import runtime
 from scripts.clock import Clock
 from scripts.controller import update_controller
 from scripts.events import Events
@@ -25,18 +26,21 @@ from scripts.tutorial import Tutorial
 from scripts.update import update_game
 from scripts.utils import render_fade
 
-
 # Copyright (c) 2026 Diego
 # Licensed under the MIT License. See LICENSE file for details.
 
+local = None
+
 class Game:
-    def __init__(self, screen, screen_size, crt, hud_ratio, traits, ships,
-                 ship_index=0):
+    def __init__(self, context, screen, screen_size, crt, hud_ratio, traits,
+                 ships, ship_index=0):
+        global local
         home_dir = os.path.expanduser("~")
         save_dir = os.path.join(home_dir, SAVE_DIR_NAME)
         os.makedirs(save_dir, exist_ok=True)
         self.config_path = os.path.join(save_dir, CONFIG_FILE)
 
+        self.local = context.local
         self.delta = 0
         self.screen = screen
         self.screen_size = screen_size
@@ -71,6 +75,9 @@ class Game:
             self.tutorial = Tutorial()
 
         self.load_config()
+        runtime.current_game = self
+        self.local.set_language(self.state.current_lang)
+        local = self.local
         apply_volume(self)
         fade.start('in')
         self.mixer.queue(['odyssey', 'unknown', 'starfield'], loop=True)
