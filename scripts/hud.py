@@ -1,7 +1,8 @@
 import pygame
 
 from scripts.lang import local
-from scripts.render import render_skills_tab, render_stats_tab
+from scripts.render import render_skills_tab, render_stats_tab, \
+    render_settings_tab
 from scripts.settings import *
 from scripts.sheet import SpriteSheet
 from scripts.skill_tab import Tab
@@ -160,6 +161,10 @@ class HUD:
             start_pos=(screen_size[0] // 2 - self.skill_tab.rect.width // 2,
                        screen_size[1]), content_renderer=render_stats_tab)
 
+        self.settings_tab = Tab(resource_path("assets/ui/skill_tab.png"),
+            start_pos=(screen_size[0] // 2 - self.skill_tab.rect.width // 2, screen_size[1]),
+                                content_renderer=render_settings_tab)
+
     def update(self, game, font, screen, hud_ratio, hud_padding):
         line_spacing = font.get_linesize()
         score_x, y = padded_pos(hud_ratio['left'], hud_ratio['top'], 'left',
@@ -250,3 +255,4 @@ class HUD:
 
         self.skill_tab.update()
         self.stats_tab.update()
+        self.settings_tab.update()

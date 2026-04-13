@@ -110,15 +110,28 @@ class Input:
                     game.mixer.sounds[4].play()
 
                 if event.key == pygame.K_TAB:
-                    if not game.hud.skill_tab.active:
-                        if game.hud.stats_tab.active:
-                            game.hud.stats_tab.close()
-                        else:
-                            game.hud.stats_tab.open((game.screen_size[0] // 2 -
-                                                     game.hud.stats_tab.rect.width // 2,
-                                                     game.screen_size[1] // 2))
-                    else:
+                    if game.hud.settings_tab.active:
+                        game.hud.settings_tab.close()
+                        return
+
+                    if game.hud.skill_tab.active:
                         game.hud.skill_tab.close()
+                        return
+
+                    if game.state.pause:
+                        game.hud.settings_tab.open((
+                            game.screen_size[0] // 2 - game.hud.settings_tab.rect.width // 2,
+                            game.screen_size[1] // 2 - game.hud.settings_tab.rect.height // 2
+                        ))
+                        return
+
+                    if game.hud.stats_tab.active:
+                        game.hud.stats_tab.close()
+                    else:
+                        game.hud.stats_tab.open((
+                            game.screen_size[0] // 2 - game.hud.stats_tab.rect.width // 2,
+                            game.screen_size[1] // 2 - game.hud.stats_tab.rect.height // 2
+                        ))
 
                 if game.hud.skill_tab.active:
                     num_skills = len(game.state.current_phase_options)
@@ -195,15 +208,28 @@ class Input:
                     game.state.pause = False
 
                 if event.button == 1:
-                    if not game.hud.skill_tab.active:
-                        if game.hud.stats_tab.active:
-                            game.hud.stats_tab.close()
-                        else:
-                            game.hud.stats_tab.open((game.screen_size[0] // 2 -
-                                                     game.hud.stats_tab.rect.width // 2,
-                                                     game.screen_size[1] // 2))
-                    else:
+                    if game.hud.settings_tab.active:
+                        game.hud.settings_tab.close()
+                        return
+
+                    if game.hud.skill_tab.active:
                         game.hud.skill_tab.close()
+                        return
+
+                    if game.state.pause:
+                        game.hud.settings_tab.open((
+                            game.screen_size[0] // 2 - game.hud.settings_tab.rect.width // 2,
+                            game.screen_size[1] // 2 - game.hud.settings_tab.rect.height // 2
+                        ))
+                        return
+
+                    if game.hud.stats_tab.active:
+                        game.hud.stats_tab.close()
+                    else:
+                        game.hud.stats_tab.open((
+                            game.screen_size[0] // 2 - game.hud.stats_tab.rect.width // 2,
+                            game.screen_size[1] // 2 - game.hud.stats_tab.rect.height // 2
+                        ))
 
                 if event.button == 2:
                     game.ship.switch_gun()

@@ -13,6 +13,7 @@
   "game.trait.name.none": "None",
   "game.trait.desc.none": "No trait",
   "game.pause": "PAUSED",
+  "game.settings.header": "Settings",
   "game.victory": "VICTORY",
   "game.defeat": "GAME OVER",
   "game.score": "SCORE",

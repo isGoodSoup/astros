@@ -1,6 +1,6 @@
 import pygame
-import scripts.assets as assets
 
+import scripts.assets as assets
 from scripts.lang import local
 from scripts.runtime import get_desc
 from scripts.settings import (TOGGLE_TUTORIAL, COLOR_BLUE, COLOR_RED, \
@@ -89,6 +89,7 @@ def render_frame(game, screen, font, hud_padding):
                 game.ship.add_skill(game.input.selected_skill )
             game.hud.skill_tab.close()
 
+
     render_waves(game, screen)
 
     game.hud.stats_tab.render(game, screen, font, hud_padding)
@@ -111,11 +112,13 @@ def render_frame(game, screen, font, hud_padding):
         dim_surface.fill((0, 0, 0))
         dim_surface.set_alpha(ALPHA)
 
-        if not game.hud.skill_tab.active:
+        if not game.hud.skill_tab.active and not game.hud.settings_tab.active:
             screen.blit(dim_surface, (0, 0))
             screen.blit(surf, [game.screen_size[0]//2 - surf.get_width()//2,
                                game.screen_size[1]//2 - surf.get_height()//2])
             screen.blit(pause, [game.screen_size[0]//2 - pause.get_width()//2, PAUSED_TEXT_Y])
+
+        game.hud.settings_tab.render(game, screen, font, hud_padding)
 
 def render_skills_tab(game, screen, rect, game_font):
     title_text, perks = local.t('game.victory'), local.t("game.hud.perks",
@@ -171,7 +174,6 @@ def render_skills_tab(game, screen, rect, game_font):
         screen.blit(skill.icon_image, skill.rect)
 
 def render_stats_tab(game, screen, rect, game_font):
-
     available_ammo = 0
     for ammo in game.ship.guns_ammo:
         available_ammo += game.ship.guns_ammo[ammo]
@@ -197,6 +199,23 @@ def render_stats_tab(game, screen, rect, game_font):
         text_surface = game_font.render(stat, True, COLOR_WHITE)
         screen.blit(text_surface, (rect.x + 40, rect.y + y_offset))
         y_offset += 50
+
+def render_settings_tab(game, screen, rect, game_font):
+    header_settings = local.t('game.settings.header')
+    surf = game_font.render(header_settings, True, COLOR_WHITE)
+    screen.blit(surf, [rect.x + SKTAB_HEADER_OFFSET + 50, rect.y + 100])
+
+    bar_x = rect.x + 100
+    bar_y = rect.y + 140
+    bar_width = 200
+    bar_height = 20
+
+    volume = game.volume
+    fill_width = int(bar_width * volume)
+    pygame.draw.rect(screen, (60, 60, 60),
+                     (bar_x, bar_y, bar_width, bar_height))
+    pygame.draw.rect(screen, COLOR_WHITE,
+                     (bar_x, bar_y, fill_width, bar_height))
 
 def render_waves(game, screen):
     for wave in game.sprites.shockwaves:
