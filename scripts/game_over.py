@@ -78,6 +78,7 @@ def reboot(game, screen_size):
     game.spawns.last_shot_time = 0
 
     game.state.score = 0
+    game.state.real_phase_index = 0
     game.state.phase_index = 0
     game.state.current_phase = game.state.phases[0]
     game.state.phase_start_time = pygame.time.get_ticks()
