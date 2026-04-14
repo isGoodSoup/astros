@@ -43,5 +43,5 @@ class SpriteSheet:
         row = index // cols
 
         rect = pygame.Rect(col * frame_width, row * frame_height,
-            frame_width, frame_height)
+                           frame_width, frame_height)
         return self.sheet.subsurface(rect)

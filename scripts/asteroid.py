@@ -4,7 +4,7 @@ from typing import override
 import pygame
 
 import scripts.assets as assets
-from scripts.settings import *
+from scripts.constants import *
 
 class Asteroid(pygame.sprite.Sprite):
     def __init__(self, screen_width, min_y=-150, max_y=0,

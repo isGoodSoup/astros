@@ -1,7 +1,7 @@
 import pygame
 
 import scripts.game as g
-from scripts.settings import COLOR_WHITE
+from scripts.constants import COLOR_WHITE
 
 
 class Tutorial:

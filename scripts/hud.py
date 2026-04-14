@@ -3,7 +3,7 @@ import pygame
 import scripts.game as g
 from scripts.render import render_skills_tab, render_stats_tab, \
     render_settings_tab
-from scripts.settings import *
+from scripts.constants import *
 from scripts.sheet import SpriteSheet
 from scripts.skill_tab import Tab
 from scripts.utils import resource_path

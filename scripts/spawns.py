@@ -1,6 +1,6 @@
 import random
 
-from scripts.settings import UPGRADE_SPAWN_INTERVAL, CELESTIAL_SPAWN_INTERVAL, \
+from scripts.constants import UPGRADE_SPAWN_INTERVAL, CELESTIAL_SPAWN_INTERVAL, \
     ALIEN_SPAWN_INTERVAL_RANGE, BLACK_HOLE_SPAWN
 
 

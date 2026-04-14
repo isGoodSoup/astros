@@ -1,6 +1,6 @@
 import pygame
 
-from scripts.settings import FPS, ONE_SECOND
+from scripts.constants import FPS, ONE_SECOND
 
 
 class Clock:

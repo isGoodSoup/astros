@@ -8,7 +8,7 @@ from scripts.game import Game
 from scripts.fonts import FontManager
 from scripts.intro import Intro
 from scripts.mixer import Mixer
-from scripts.settings import SCALE, SHIP_FRAMES, COLOR_BLACK, \
+from scripts.constants import SCALE, SHIP_FRAMES, COLOR_BLACK, \
     COLOR_LIGHT_ORANGE, FONT_DEFAULT_SIZE, TRAIT_CARD_SIZE, HEADER_FLOAT, \
     SPRITE_FLOAT, FPS, SHIP_SELECTION_OFFSET, FLIGHT_SPEED, ALPHA, \
     TOGGLE_ENABLE_INTRO
@@ -18,6 +18,7 @@ from scripts.utils import render_fade
 
 mixer = Mixer()
 
+
 class Mods:
     def __init__(self, context, screen, screen_size, hud_ratio):
         fade.start("in")
@@ -26,7 +27,7 @@ class Mods:
         self.running = True
         self.screen_size = screen_size
         self.font = FontManager(None, FONT_DEFAULT_SIZE)
-        self.preview_scale = SCALE//2
+        self.preview_scale = SCALE // 2
         self.ship_frames = SHIP_FRAMES
         self.ship_flying = False
         self.flight_speed = FLIGHT_SPEED
@@ -40,19 +41,24 @@ class Mods:
         self.ship_previews_large = []
 
         for sheet in self.ships:
-            framew = sheet.sheet.get_width() // self.ship_frames
-            frameh = sheet.sheet.get_height()
-            idle_frame_index = 2
+            if isinstance(sheet, str):
+                image = pygame.image.load(sheet).convert_alpha()
+                idle_frame_index = 2
 
-            preview = sheet.get_frame(idle_frame_index,
-                cols=self.ship_frames).convert_alpha()
+            else:
+                image = sheet.sheet if hasattr(sheet, "sheet") else sheet
+                idle_frame_index = getattr(sheet, "idle_frame", 2)
 
-            preview = pygame.transform.scale(preview, (framew * SCALE,
-                                                       frameh * SCALE))
+            framew = image.get_width()
+            frameh = image.get_height()
+
+            preview = pygame.transform.scale(image,
+                (framew * SCALE, frameh * SCALE))
 
             large_preview = pygame.transform.scale(preview,
                 (preview.get_width() * self.preview_scale,
-                 preview.get_height() * self.preview_scale))
+                 preview.get_height() * self.preview_scale)
+            )
 
             self.ship_previews.append(preview)
             self.ship_previews_large.append(large_preview)
@@ -84,12 +90,11 @@ class Mods:
             crt.render(screen)
 
             if self.ship_flying and self.fade_started and alpha >= 255:
-                traits = TraitChoiceScreen(self.context, screen, screen_size, hud_ratio,
-                    TraitPool(self.context)).run(clock, screen, screen_size,
-                                           hud_ratio, crt)
-                difficulties = Difficulties(self.context, screen, screen_size, hud_ratio,
-                    DifficultyPool(self.context)).run(clock, screen, screen_size,
-                                           hud_ratio, crt)
+                traits = TraitChoiceScreen(self.context, screen, screen_size,hud_ratio, TraitPool(
+                        self.context)).run(clock, screen, screen_size,hud_ratio, crt)
+                difficulties = Difficulties(self.context, screen,
+                                            screen_size,hud_ratio, DifficultyPool(
+                        self.context)).run(clock, screen, screen_size,hud_ratio, crt)
                 selected_traits = traits.get_traits() if traits else []
                 if TOGGLE_ENABLE_INTRO:
                     intro = Intro(self.context, screen, clock, crt).run()
@@ -163,8 +168,10 @@ class Mods:
         left_preview = self.ship_previews[left_index]
         right_preview = self.ship_previews[right_index]
 
-        left_rect = left_preview.get_rect(center=(center_x - offset, center_y + int(left_float)))
-        right_rect = right_preview.get_rect(center=(center_x + offset, center_y + int(right_float)))
+        left_rect = left_preview.get_rect(
+            center=(center_x - offset, center_y + int(left_float)))
+        right_rect = right_preview.get_rect(
+            center=(center_x + offset, center_y + int(right_float)))
 
         screen.blit(left_preview, left_rect)
         screen.blit(self.dim_surface, left_rect)
@@ -179,6 +186,17 @@ class Mods:
         header_rect = header_surf.get_rect(
             center=(center_x, 100 + int(header_float)))
         screen.blit(header_surf, header_rect)
+
+    def build_ship_preview(self, sheet, frame_index, scale):
+        frame = sheet.get_frame(frame_index, cols=sheet.cols).convert_alpha()
+        return pygame.transform.smoothscale(
+            frame,
+            (
+                frame.get_width() * scale,
+                frame.get_height() * scale
+            )
+        )
+
 
 class TraitChoiceScreen:
     def __init__(self, context, screen, screen_size, hud_ratio,
@@ -283,6 +301,7 @@ class TraitChoiceScreen:
             self.exiting = True
             mixer.play(4)
 
+
 class ChoiceNode:
     def __init__(self, options, pick_count=1):
         self.options = [TraitOption(t) for t in options]
@@ -308,12 +327,14 @@ class ChoiceNode:
         self.done = True
         return ChoiceResult(self.selected)
 
+
 class ChoiceResult:
     def __init__(self, selected_options):
         self.selected_options = selected_options
 
     def get_traits(self):
         return [opt.trait for opt in self.selected_options]
+
 
 class Difficulties:
     def __init__(self, context, screen, screen_size, hud_ratio,
@@ -330,7 +351,7 @@ class Difficulties:
         self.font = FontManager(None, FONT_DEFAULT_SIZE).get_font()
 
         self.cards = [TraitGridSquare(opt, self.font)
-            for opt in self.options]
+                      for opt in self.options]
 
         self.index = 0
         self.selected = None

@@ -8,7 +8,7 @@ from scripts.explode import Explosion
 from scripts.floaty import FloatingNumber
 from scripts.impact import ImpactFrame
 from scripts.particle import Particle
-from scripts.settings import *
+from scripts.constants import *
 from scripts.utils import add_multiplier, formulize
 
 

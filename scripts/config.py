@@ -1,6 +1,6 @@
 import json
 
-from scripts.settings import *
+from scripts.constants import *
 
 def save_config(game):
     config_data = {

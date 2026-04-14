@@ -2,8 +2,8 @@ import pygame
 
 from scripts.all_traits import (DoubleTrouble, GlassReactor, Panonium, Classic, \
                                 Commando)
-from scripts.settings import (COLOR_WHITE, COLOR_LIGHT_ORANGE,
-                              TRAIT_CARD_SIZE, SCALE)
+from scripts.constants import (COLOR_WHITE, COLOR_LIGHT_ORANGE,
+                               TRAIT_CARD_SIZE, SCALE)
 from scripts.utils import resource_path, wrap_text
 
 
@@ -24,8 +24,9 @@ class TraitGridSquare:
         self.font = font
 
         self.icon = pygame.image.load(option.icon).convert_alpha()
-        self.icon = pygame.transform.scale(self.icon, (self.icon.get_width() * SCALE,
-                                                       self.icon.get_height() * SCALE))
+        self.icon = pygame.transform.scale(self.icon,
+                                           (self.icon.get_width() * SCALE,
+                                            self.icon.get_height() * SCALE))
         self.is_selected = False
 
     def set_selected(self, selected):
@@ -49,6 +50,7 @@ class TraitGridSquare:
             screen.blit(surf, (rect.centerx - surf.get_width() // 2, y_offset))
             y_offset += 40
 
+
 class TraitOption:
     def __init__(self, trait, meta=None):
         self.trait = trait
@@ -69,21 +71,26 @@ class TraitOption:
     def apply(self, ship, level):
         self.trait.apply(ship, level)
 
+
 class TraitPool:
     def __init__(self, context):
         self.context = context
         self.local = context.local
         self.traits = [
             Trait(self.local.t('game.trait.name.boss'),
-                  self.local.t('game.trait.desc.boss'), "double_trouble",DoubleTrouble()),
+                  self.local.t('game.trait.desc.boss'), "double_trouble",
+                  DoubleTrouble()),
             Trait(self.local.t('game.trait.name.glass'),
-                  self.local.t('game.trait.desc.glass'), "glass_reactor", GlassReactor()),
+                  self.local.t('game.trait.desc.glass'), "glass_reactor",
+                  GlassReactor()),
             Trait(self.local.t('game.trait.name.commando'),
-                  self.local.t('game.trait.desc.commando'), "commando", Commando()),
+                  self.local.t('game.trait.desc.commando'), "commando",
+                  Commando()),
             Trait(self.local.t('game.trait.name.panonium'),
-                  self.local.t('game.trait.desc.panonium'), "pandemonium", Panonium()),
+                  self.local.t('game.trait.desc.panonium'), "pandemonium",
+                  Panonium()),
             Trait(self.local.t('game.trait.name.none'),
-                  self.local.t('game.trait.desc.none'),"none", Classic())
+                  self.local.t('game.trait.desc.none'), "none", Classic())
         ]
 
     def roll(self, count=3):

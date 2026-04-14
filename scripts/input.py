@@ -3,7 +3,7 @@ import pygame
 from scripts.game_over import reboot
 from scripts.lang import rotate_language
 from scripts.mixer import adjust_setting
-from scripts.settings import (ONE_SECOND, SCREEN_SHAKE, INPUT_NAV_COOLDOWN,
+from scripts.constants import (ONE_SECOND, SCREEN_SHAKE, INPUT_NAV_COOLDOWN,
                               PHASE_TRANSITION, INPUT_MOUSE, INPUT_CONTROLLER,
                               BASE_RUMBLE_MS, SETTINGS_DEFINITION)
 from scripts.shared import joysticks, controller

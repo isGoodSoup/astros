@@ -3,7 +3,7 @@ from typing import override
 import pygame
 
 from scripts.ability import Ability
-from scripts.settings import SHIP_MANIC_BOOST
+from scripts.constants import SHIP_MANIC_BOOST
 
 
 class Explorer(Ability):

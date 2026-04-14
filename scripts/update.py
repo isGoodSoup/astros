@@ -14,12 +14,10 @@ from scripts.difficulty import Difficulty
 from scripts.movement import update_movement, update_ship_angle
 from scripts.particle import Particle
 from scripts.runtime import get_boss_pos, get_upgrade_position, get_ship_ember
-from scripts.settings import *
+from scripts.constants import *
 from scripts.shared import joysticks, controller
 from scripts.upgd import Upgrade
 from scripts.utils import resource_path, formulize
-from scripts.alien import spawn_fleet
-
 
 class Updater:
     def update(self, game):
@@ -63,7 +61,7 @@ def spawner(game):
         return
 
     if game.state.phase_fade <= 0:
-        spawn_fleet()
+        # spawn_fleet(game) # TODO Spawn fleet
         game.spawns.last_reinforcement_spawn = now
 
     if game.state.phase_index in ASTEROID_PHASES:
@@ -127,7 +125,7 @@ def run_transition(game):
     game.state.phase_start_time = pygame.time.get_ticks()
     game.state.phase_state = PHASE_ACTIVE
     game.spawns.boss_spawned = False
-    game.ship.spawnpoint(game.screen_size, game.sprites.framew)
+    game.ship.spawnpoint(game.screen_size)
 
 def spawn_asteroids(game):
     if (not game.spawns.can_spawn_asteroids and game.state.difficulty ==
@@ -261,47 +259,6 @@ def update_game(game, delta, screen_size, hud_padding):
             new_upgrade = Upgrade(upgrade_path, x, y, upgrade_type=upgrade_type)
             game.sprites.upgrades.add(new_upgrade)  # type: ignore
 
-    now = pygame.time.get_ticks()
-    if now - game.sprites.last_update_base > game.sprites.cooldown_base:
-        game.sprites.anim_frame_base += 1
-        game.sprites.last_update_base = now
-
-    if now - game.sprites.last_update_overlay > game.sprites.cooldown_overlay:
-        game.sprites.anim_frame_overlay += 1
-        game.sprites.last_update_overlay = now
-
-    if game.ship.direction in ["left", "right"]:
-        if game.ship.direction == "left":
-            frames = game.sprites.left_frames_movement
-            if game.sprites.last_direction != "left":
-                game.sprites.anim_index_left = len(frames) - 1
-                game.sprites.last_update_left = now
-                game.sprites.last_direction = "left"
-
-            if now - game.sprites.last_update_left > game.sprites.cooldown_base:
-                game.sprites.anim_index_left -= 1
-                if game.sprites.anim_index_left < 0:
-                    game.sprites.anim_index_left = 0
-                game.sprites.last_update_left = now
-            game.sprites.base = frames[game.sprites.anim_index_left]
-
-        else:
-            frames = game.sprites.right_frames_movement
-            if game.sprites.last_direction != "right":
-                game.sprites.anim_index_right = 0
-                game.sprites.last_update_right = now
-                game.sprites.last_direction = "right"
-
-            if now - game.sprites.last_update_right > game.sprites.cooldown_base:
-                game.sprites.anim_index_right += 1
-                if game.sprites.anim_index_right >= len(frames):
-                    game.sprites.anim_index_right = len(frames) - 1
-                game.sprites.last_update_right = now
-            game.sprites.base = frames[game.sprites.anim_index_right]
-    else:
-        game.sprites.base = game.sprites.frame_idle
-        game.sprites.last_direction = None
-
     game.sprites.celestials.update()
     game.sprites.asteroids.update()
 
@@ -332,6 +289,7 @@ def update_game(game, delta, screen_size, hud_padding):
                                 color=color, radius=4)
             game.sprites.particles.append(particle)
 
+    game.sprites.aliens.update()
     game.sprites.bosses.update()
     game.sprites.projectiles.update()
     game.sprites.enemy_projectiles.update()
@@ -344,9 +302,6 @@ def update_game(game, delta, screen_size, hud_padding):
         particle.update()
         if particle.timer <= 0:
             game.sprites.particles.remove(particle)
-
-    if not game.sprites.direction_set:
-        game.ship.direction = "idle"
 
     check_collision(game)
     update_shockwaves(game)

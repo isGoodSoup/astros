@@ -4,7 +4,7 @@ import pygame
 
 from scripts.celestial import BlackHole
 from scripts.explode import Explosion
-from scripts.settings import (HIGH_RUMBLE_MS, SHOCKWAVE_SPEED, SHOCKWAVE_RADIUS, \
+from scripts.constants import (HIGH_RUMBLE_MS, SHOCKWAVE_SPEED, SHOCKWAVE_RADIUS, \
                               SCREEN_SHAKE, ALIEN_SHOT_TIMER_MS, CROSSHAIRS)
 from scripts.shared import joysticks, controller
 from scripts.shockwave import Shockwave

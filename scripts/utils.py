@@ -6,7 +6,7 @@ import sys
 import pygame
 
 from scripts.floaty import FloatingNumber
-from scripts.settings import SETTINGS_DEFINITION, SCREENSHOTS_DIR
+from scripts.constants import SETTINGS_DEFINITION, SCREENSHOTS_DIR
 from scripts.shared import fade
 from scripts.config import save_config
 

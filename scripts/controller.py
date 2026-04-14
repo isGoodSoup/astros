@@ -1,6 +1,6 @@
 import pygame
 
-from scripts.settings import INPUT_CONTROLLER
+from scripts.constants import INPUT_CONTROLLER
 from scripts.shared import joysticks, controller
 from scripts.utils import apply_curve
 

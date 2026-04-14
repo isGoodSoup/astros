@@ -3,9 +3,10 @@ import math
 import pygame
 from pygame.constants import *
 
-from scripts.settings import FPS, INPUT_MOUSE, INPUT_CONTROLLER
+from scripts.constants import (FPS, INPUT_MOUSE, INPUT_CONTROLLER)
 
 lock_y = False
+
 
 def get_next_skill(current, skills, direction):
     if not skills:
@@ -41,6 +42,7 @@ def get_next_skill(current, skills, direction):
     candidates.sort(key=lambda x: x[0])
     return candidates[0][1]
 
+
 def update_movement(game, delta, screen_size):
     key_pressed = pygame.key.get_pressed()
 
@@ -62,19 +64,15 @@ def update_movement(game, delta, screen_size):
 
     movement_x += game.input.left_joystick[0] * game.ship.velocity * delta * FPS
     if not lock_y:
-        movement_y += game.input.left_joystick[1] * game.ship.velocity * delta * FPS
+        movement_y += game.input.left_joystick[
+                          1] * game.ship.velocity * delta * FPS
 
-    game.ship.rect.x = max(0, min(screen_size[0] - game.sprites.base.get_width(),
-                             game.ship.rect.x + movement_x))
-    game.ship.rect.y = max(0, min(screen_size[1] - game.sprites.base.get_height(),
-                             game.ship.rect.y + movement_y))
+    game.ship.rect.x = max(0, min(screen_size[0] - game.ship.rect.width,
+                                  game.ship.rect.x + movement_x))
 
-    if movement_x < 0:
-        game.ship.direction = "left"
-    elif movement_x > 0:
-        game.ship.direction = "right"
-    else:
-        game.ship.direction = "idle"
+    game.ship.rect.y = max(0, min(screen_size[1] - game.ship.rect.height,
+                                  game.ship.rect.y + movement_y))
+
     game.ship.moving = movement_x != 0 or movement_y != 0
 
     if game.ship.moving:
@@ -95,19 +93,22 @@ def update_movement(game, delta, screen_size):
             game.input.last_input_time = pygame.time.get_ticks()
         game.last_cursor_pos = mouse_pos
 
-        if abs(game.input.right_joystick[0]) > 0.05 or abs(game.input.right_joystick[1]) > 0.05:
+        if abs(game.input.right_joystick[0]) > 0.05 or abs(
+                game.input.right_joystick[1]) > 0.05:
             game.input.mode = INPUT_CONTROLLER
             game.input.last_input_time = pygame.time.get_ticks()
 
         if game.input.mode == INPUT_MOUSE:
             game.input.cursor_pos = list(mouse_pos)
         elif game.input.mode == INPUT_CONTROLLER:
-            game.input.cursor_pos[0] += game.input.right_joystick[0] * cursor_speed
-            game.input.cursor_pos[1] += game.input.right_joystick[1] * cursor_speed
+            game.input.cursor_pos[0] += game.input.right_joystick[
+                                            0] * cursor_speed
+            game.input.cursor_pos[1] += game.input.right_joystick[
+                                            1] * cursor_speed
             game.input.cursor_pos[0] = max(0, min(game.screen_size[0],
-                                            game.input.cursor_pos[0]))
+                                                  game.input.cursor_pos[0]))
             game.input.cursor_pos[1] = max(0, min(game.screen_size[1],
-                                            game.input.cursor_pos[1]))
+                                                  game.input.cursor_pos[1]))
 
         current_time = pygame.time.get_ticks()
 
@@ -149,11 +150,13 @@ def update_movement(game, delta, screen_size):
         for skill in game.state.current_phase_options:
             skill.hovered = (skill == game.input.selected_skill)
 
+
 def update_ship_angle(game):
-    cx, cy = game.ship.rect.center
-    mx, my = game.input.cursor_pos
-    dx = mx - cx
-    dy = my - cy
-    angle_rad = math.atan2(-dy, dx)
-    target_angle = math.degrees(angle_rad)
-    game.ship.rotate_to(target_angle, smooth=False)
+    mouse_pos = pygame.mouse.get_pos()
+    mouse_angle = get_mouse_angle(game.ship.rect.center, mouse_pos)
+    game.ship.rotate_to(mouse_angle, smooth=True)
+
+def get_mouse_angle(ship_pos, mouse_pos):
+    dx = mouse_pos[0] - ship_pos[0]
+    dy = mouse_pos[1] - ship_pos[1]
+    return math.degrees(math.atan2(-dy, dx))

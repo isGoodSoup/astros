@@ -3,7 +3,7 @@ import random
 import pygame
 
 import scripts.assets as assets
-from scripts.settings import *
+from scripts.constants import *
 from scripts.ship import Ship
 
 
@@ -22,46 +22,23 @@ class SpriteManager:
         self.particles = []
         self.shockwaves = []
 
-        self.ship_frames = SHIP_FRAMES
         self.explosion_frames = EXPLOSION_FRAMES
         self.explosion_sheet = assets.EXPLOSION_SHEET
         self.megaexplosion_sheet = assets.MEGAEXPLOSION_SHEET
         self.ship_alive = True
 
         self.ship_sprite = game.ships
-        self.selected_sheet = self.ship_sprite[game.ship_index]
+        self.selected_ship = self.ship_sprite[game.ship_index]
         self.ship_frames = SHIP_FRAMES
         self.frame = 0
-
-        self.anim_frame_base = 0
-        self.anim_frame_overlay = 0
-        self.anim_index_left = 0
-        self.anim_index_right = 0
-        self.cooldown_base = ANIM_COOLDOWN_BASE
-        self.cooldown_overlay = ANIM_COOLDOWN_OVERLAY
 
         self.last_update_base = self.last_update_overlay = (
             self).last_update = self.last_update_left = (
             self).last_update_right = self.last_time = pygame.time.get_ticks()
         self.last_direction = self.direction_set = None
 
-        self.frames = []
-        self.framew = self.selected_sheet.sheet.get_width() // self.ship_frames
-        self.frameh = self.selected_sheet.sheet.get_height()
-
         self.ship = self.create_ship()
-        self.ship.spawnpoint(game.screen_size, self.framew)
-
-        for i in range(self.ship_frames):
-            img = self.selected_sheet.get_image(i, self.framew, self.frameh,scale=SCALE,
-                                                columns=self.ship_frames)
-            self.frames.append(img)
-
-        self.left_frames_movement = self.frames[0:2]
-        self.frame_idle = self.frames[2]
-        self.right_frames_movement = self.frames[3:5]
-        self.frames_flying = self.frames[5:9]
-        self.base = self.frame_idle
+        self.ship.spawnpoint(game.screen_size, 0)
 
         framew = self.explosion_sheet.sheet.get_width() // self.explosion_frames
         frameh = self.explosion_sheet.sheet.get_height()
@@ -88,5 +65,4 @@ class SpriteManager:
         self.alien_delay = pygame.time.get_ticks() + ALIEN_INITIAL_DELAY
 
     def create_ship(self):
-        return Ship(self.game, self.selected_sheet, 0, 0, self.frame,
-                    self.framew, self.frameh, columns=self.ship_frames)
+        return Ship(self.selected_ship, self.game, 0, 0)

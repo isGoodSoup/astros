@@ -5,7 +5,7 @@ import scripts.game as g
 from scripts.game_over import game_lost
 from scripts.lang import LANGS
 from scripts.runtime import get_desc
-from scripts.settings import *
+from scripts.constants import *
 from scripts.shared import joysticks, controller
 from scripts.utils import render_fade
 from scripts.utils import wrap_text
@@ -40,12 +40,6 @@ def render_frame(game, screen, font, hud_padding):
     for particle in game.sprites.particles:
         particle.draw(screen)
 
-    img = game.sprites.base.copy()
-
-    overlay_index = game.sprites.anim_frame_overlay % len(game.sprites.frames_flying)
-    overlay_frame = game.sprites.frames_flying[overlay_index]
-    img.blit(overlay_frame, (0, 0))
-
     if game.state.debugging:
         for i in game.sprites.asteroids:
             pygame.draw.rect(screen, COLOR_RED, i.hitbox, 2)
@@ -63,8 +57,7 @@ def render_frame(game, screen, font, hud_padding):
             pygame.draw.rect(screen, COLOR_RED, b.rect, 2)
 
     if game.sprites.ship_alive:
-        game.ship.rect.topleft = (game.ship.rect.x, game.ship.rect.y)
-        screen.blit(img, game.ship.rect)
+        game.ship.draw(screen)
         if game.state.debugging:
             pygame.draw.rect(screen, COLOR_RED, game.ship.hitbox, 2)
 

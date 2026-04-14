@@ -1,6 +1,6 @@
 import pygame
 
-from scripts.settings import FADE_MS, SFX_VOLUME, MUSIC_VOLUME, \
+from scripts.constants import FADE_MS, SFX_VOLUME, MUSIC_VOLUME, \
     SETTINGS_DEFINITION
 from scripts.soundlib import load_sounds, load_ost
 from scripts.utils import _get_setting_target

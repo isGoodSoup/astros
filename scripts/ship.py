@@ -178,14 +178,14 @@ class Ship(Entity):
             angle_diff = ((target_angle - self.current_angle + 180) % 360 - 180)
             self.current_angle += angle_diff * 0.3
         else:
-            self.current_angle = target_angle
+            self.current_angle = target_angle + SHIP_FORWARD_OFFSET
 
         self._apply_rotation()
 
     def _apply_rotation(self):
         self.image = pygame.transform.rotozoom(
             self.base_image,
-            self.current_angle,
+            self.current_angle + SHIP_FORWARD_OFFSET,
             1
         )
         self.rect = self.image.get_rect(center=self.rect.center)
@@ -236,7 +236,7 @@ class Ship(Entity):
         else:
             rad = math.radians(self.current_angle)
             dir_x = math.cos(rad)
-            dir_y = math.sin(rad)
+            dir_y = -math.sin(rad)
 
         projectiles = []
 

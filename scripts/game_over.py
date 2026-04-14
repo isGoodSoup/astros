@@ -2,7 +2,7 @@ import pygame
 
 from scripts.config import save_config
 import scripts.game as g
-from scripts.settings import ONE_SECOND, COLOR_WHITE, COLOR_RED, PHASE_ACTIVE
+from scripts.constants import ONE_SECOND, COLOR_WHITE, COLOR_RED, PHASE_ACTIVE
 from scripts.utils import center
 
 

@@ -1,7 +1,7 @@
 import random
 import pygame
 
-from scripts.settings import LIGHT_SPEED, STAR_SPEED
+from scripts.constants import LIGHT_SPEED, STAR_SPEED
 from scripts.utils import resource_path
 
 

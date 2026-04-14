@@ -10,7 +10,7 @@ from scripts.fonts import FontManager
 from scripts.game import Game
 from scripts.mixer import Mixer
 from scripts.mods import Mods
-from scripts.settings import *
+from scripts.constants import *
 from scripts.shared import fade
 from scripts.update import set_hud
 from scripts.utils import render_fade

@@ -1,7 +1,7 @@
 import pygame
 import math
 
-from scripts.settings import COLOR_LIGHT_RED
+from scripts.constants import COLOR_LIGHT_RED
 
 
 class Projectile(pygame.sprite.Sprite):

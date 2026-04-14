@@ -4,7 +4,7 @@ import random
 import pygame
 
 from scripts.proj import Projectile
-from scripts.settings import (COLOR_RED, BOSS_BASE_SPEED, \
+from scripts.constants import (COLOR_RED, BOSS_BASE_SPEED, \
                               BOSS_VERTICAL_STEP, ONE_SECOND, BOSS_PHASES,
                               BOSS_ADVANTAGE, SCALE,
                               BOSS_BASE_HITPOINTS, HIGH_FIRE_RATE, BOSS_COLORS,

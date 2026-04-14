@@ -1,6 +1,6 @@
 import pygame
 
-from scripts.settings import (PHASES_TOTAL, PHASE_START, PHASE_COLORS, \
+from scripts.constants import (PHASES_TOTAL, PHASE_START, PHASE_COLORS, \
                               PHASE_LENGTH, STAR_SPEED,
                               PHASES, SCORE_SCALING, PHASE_ACTIVE,
                               PHASE_FADE)

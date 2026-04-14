@@ -2,7 +2,7 @@ import pygame
 
 from scripts.shared import fade
 from scripts.fonts import FontManager
-from scripts.settings import (LINE_TIMER, FONT_DEFAULT_SIZE,
+from scripts.constants import (LINE_TIMER, FONT_DEFAULT_SIZE,
                               COLOR_WHITE, COLOR_BLACK, FPS)
 from scripts.utils import render_fade
 

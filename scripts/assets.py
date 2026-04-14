@@ -26,11 +26,11 @@ def load_assets():
     ]
 
     SHIPS = [
-        SpriteSheet(resource_path("assets/ship.png")),
-        SpriteSheet(resource_path("assets/ship_v2.png")),
-        SpriteSheet(resource_path("assets/ship_v3.png")),
-        SpriteSheet(resource_path("assets/ship_v4.png")),
-        SpriteSheet(resource_path("assets/ship_v5.png")),
+        "assets/ship.png",
+        "assets/ship_v2.png",
+        "assets/ship_v3.png",
+        "assets/ship_v4.png",
+        "assets/ship_v5.png",
     ]
 
     CURSOR = pygame.image.load(resource_path("assets/ui/crosshair.png")).convert_alpha()
