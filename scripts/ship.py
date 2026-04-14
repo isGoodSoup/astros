@@ -1,4 +1,3 @@
-import math
 import random
 
 import pygame
@@ -10,11 +9,16 @@ from scripts.proj import Projectile
 
 
 class Ship(Entity):
-    def __init__(self, image, game, x, y):
+    def __init__(self, image, game, x, y, z):
         super().__init__(image, x, y, scale=True)
         self.base_image = self.image
         self.game = game
-        self.wx, self.wy = x, y
+        self.wx, self.wy, self.wz = x, y, z
+        self.angle = 0
+        self.angle_yaw = 0
+        self.angle_pitch = 0
+
+        self.direction = 1
         self.velocity = SHIP_VELOCITY
         self.shooting = False
         self.moving = False
@@ -95,24 +99,6 @@ class Ship(Entity):
 
         self.apply_difficulty()
 
-    def draw(self, screen):
-        sx, sy, scale = self.game.camera.project(self.wx, self.wy,
-                                                 getattr(self, "z", 1))
-
-        if scale <= 0:
-            return
-
-        img = pygame.transform.scale(
-            self.base_image,
-            (
-                max(1, int(self.base_image.get_width() * scale)),
-                max(1, int(self.base_image.get_height() * scale))
-            )
-        )
-
-        rect = img.get_rect(center=(sx, sy))
-        screen.blit(img, rect)
-
     def apply_difficulty(self):
         settings = DIFFICULTY_SHIP_SETTINGS[self.game.state.difficulty]
 
@@ -179,9 +165,10 @@ class Ship(Entity):
     def update_fire_rate(self):
         self.shot_cooldown = self.guns[self.gun]
 
-    def update_position(self, x, y):
+    def update_position(self, x, y, z=0):
         self.wx = x
         self.wy = y
+        self.wz = z
         self.sync_hitbox()
 
     def switch_gun(self):
@@ -228,11 +215,9 @@ class Ship(Entity):
 
         pos = self.hitbox.center
 
-        if target:
-            direction_vec = aim_at_target(pos, target)
-            dir_x, dir_y = direction_vec.x, direction_vec.y
-        else:
-            dir_x, dir_y = 0, -1
+        dir_x = math.cos(self.angle_yaw) * math.cos(self.angle_pitch)
+        dir_y = math.sin(self.angle_yaw) * math.cos(self.angle_pitch)
+        dir_z = math.sin(self.angle_pitch)
 
         projectiles = []
 
@@ -257,9 +242,10 @@ class Ship(Entity):
                     direction = aim_at_target(pos, target)
                 else:
                     direction = self.direction
-                projectiles.append(
-                    Projectile(pos, COLOR_BLUE, direction=direction,
+
+                projectiles.append(Projectile(pos, COLOR_BLUE, direction=direction,
                                speed=24, damage=self.damage))
+
             if not TOGGLE_UNLIMITED_AMMO:
                 self.guns_ammo['shotgun'] -= cost
                 self.clamp_ammo(gun_type)
@@ -355,6 +341,7 @@ class Ship(Entity):
     def sync_hitbox(self):
         self.hitbox.center = (self.wx, self.wy)
 
+
 def get_nearest_enemy(ship_pos, enemies):
     closest = None
     min_dist = float('inf')
@@ -379,3 +366,17 @@ def aim_at_target(ship_pos, target):
     if direction.length() != 0:
         direction = direction.normalize()
     return direction
+
+
+def get_forward(ship):
+    cy = math.cos(ship.angle_yaw)
+    sy = math.sin(ship.angle_yaw)
+
+    cp = math.cos(ship.angle_pitch)
+    sp = math.sin(ship.angle_pitch)
+
+    return pygame.Vector3(
+        cy * cp,
+        sy * cp,
+        sp
+    )

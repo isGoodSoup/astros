@@ -27,6 +27,10 @@ class Updater:
             if not game.hud.skill_tab.active:
                 update_movement(game, game.delta, game.screen_size)
                 update_cursor(game, game.delta, game.screen_size)
+                game.camera.x = game.ship.wx
+                game.camera.y = game.ship.wy
+                game.camera.yaw = game.ship.angle_yaw
+                game.camera.pitch = game.ship.angle_pitch
 
         if not game.state.pause and not game.state.game_over:
             update_game(game, game.delta, game.screen_size, game.hud_padding)

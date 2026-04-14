@@ -16,9 +16,17 @@ def update_controller(game, screen_size, delta):
     game.input.left_joystick[0] = lx
     game.input.left_joystick[1] = ly
 
-    game.ship.rect.x += int(lx * game.ship.velocity * delta)
-    game.ship.rect.y += int(ly * game.ship.velocity * delta)
-    game.ship.hitbox.center = game.ship.rect.center
+    ship = game.ship
+    speed = ship.velocity * delta
+
+    forward_x = math.cos(ship.angle)
+    forward_y = math.sin(ship.angle)
+
+    right_x = -forward_y
+    right_y = forward_x
+
+    ship.wx += (right_x * lx + forward_x * -ly) * speed
+    ship.wy += (right_y * lx + forward_y * -ly) * speed
 
     rx = controller.get_axis(2)
     ry = controller.get_axis(3)

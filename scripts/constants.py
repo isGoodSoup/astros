@@ -1,4 +1,5 @@
 import os
+import math
 
 FPS = 60
 SCALE = 4
@@ -8,6 +9,7 @@ HD_RESOLUTION = (1920, 1080)
 DEFAULT_VOLUME = 0.5
 MUSIC_VOLUME = 0.6
 SFX_VOLUME = 0.8
+MAX_PITCH = math.radians(89)
 
 LINE_TIMER = 2500
 

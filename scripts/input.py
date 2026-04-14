@@ -190,10 +190,6 @@ class Input:
                 if event.key == pygame.K_r and game.state.game_over:
                     reboot(game, game.screen_size)
 
-                if event.key == pygame.K_l:
-                    from scripts.movement import lock_y
-                    lock_y = not lock_y
-
                 if event.key == pygame.K_F2:
                     game.state.debugging = not game.state.debugging
 
@@ -267,10 +263,6 @@ class Input:
 
                 if event.button == 3 and game.state.game_over:
                     reboot(game, game.screen_size)
-
-                if event.button == 4:
-                    from scripts.movement import lock_y
-                    lock_y = not lock_y
 
                 if event.button == 6:
                     if game.state.pause and not game.hud.skill_tab.active:

@@ -80,4 +80,4 @@ class SpriteManager:
                 s.z = self.default_z
 
     def create_ship(self):
-        return Ship(self.selected_ship, self.game, 0, 0)
+        return Ship(self.selected_ship, self.game, 0, 0, 0)

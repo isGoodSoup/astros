@@ -76,7 +76,6 @@ def render_frame(game, screen, font, hud_padding):
             pygame.draw.rect(screen, COLOR_RED, b.rect, 2)
 
     if game.sprites.ship_alive:
-        game.ship.draw(screen)
         if game.state.debugging:
             pygame.draw.rect(screen, COLOR_RED, game.ship.hitbox, 2)
 
