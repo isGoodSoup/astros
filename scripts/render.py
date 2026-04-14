@@ -268,6 +268,10 @@ class RenderScreen:
     def draw(self, game):
         render_frame(game, game.screen, game.font, game.hud_padding)
 
+        if not game.state.game_over and game.state.can_show_hud:
+            game.hud.update(game, game.font, game.screen, game.hud_ratio,
+                            game.hud_padding)
+
         if game.input.cursor_visible:
             pos = game.input.cursor_pos if game.input.mode == INPUT_CONTROLLER else pygame.mouse.get_pos()
             game.screen.blit(game.cursor_sprite, (int(pos[0]), int(pos[1])))

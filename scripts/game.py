@@ -100,11 +100,6 @@ class Game:
             self.input.update(self, events)
             self.input.act(self, events)
             self.updater.update(self)
-
-            if not self.state.game_over and self.state.can_show_hud:
-                self.hud.update(self, self.font, self.screen, self.hud_ratio,
-                                self.hud_padding)
-
             self.render.draw(self)
 
         pygame.quit()
