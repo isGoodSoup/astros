@@ -3,13 +3,10 @@ import random
 
 import pygame
 
-from scripts.proj import Projectile
 from scripts.constants import *
-from scripts.levels import DIFFICULTY_SHIP_SETTINGS
 from scripts.entity import Entity
-from scripts.particle import Particle
-from scripts.runtime import get_ship_ember
-from scripts.utils import legacy
+from scripts.levels import DIFFICULTY_SHIP_SETTINGS
+from scripts.proj import Projectile
 
 
 class Ship(Entity):
@@ -18,7 +15,6 @@ class Ship(Entity):
         self.base_image = self.image
         self.game = game
         self.wx, self.wy = x, y
-        self.current_angle = SHIP_BASE_ANGLE
         self.velocity = SHIP_VELOCITY
         self.shooting = False
         self.moving = False
@@ -100,36 +96,22 @@ class Ship(Entity):
         self.apply_difficulty()
 
     def draw(self, screen):
-        screen.blit(self.image, self.rect)
+        sx, sy, scale = self.game.camera.project(self.wx, self.wy,
+                                                 getattr(self, "z", 1))
 
-    def emit_thruster(self, sprite_manager):
-        if not self.moving:
+        if scale <= 0:
             return
 
-        local_offset = pygame.Vector2(0, self.rect.height // 2 - 32)
-
-        rad = math.radians(self.current_angle + SHIP_FORWARD_OFFSET)
-        rotated_offset = local_offset.rotate(-math.degrees(rad))
-        spawn_pos = pygame.Vector2(self.rect.center) + rotated_offset
-
-        backward = pygame.Vector2(-math.cos(rad), math.sin(rad))
-
-        for _ in range(random.randint(2, 8)):
-            vel = backward * random.uniform(2.0, 4.5)
-            vel.x += random.uniform(-0.6, 0.6)
-            vel.y += random.uniform(-0.6, 0.6)
-
-            sprite_manager.particles.append(
-                Particle(
-                    location=spawn_pos,
-                    velocity=vel,
-                    timer=random.randint(8, 16),
-                    color=get_ship_ember(),
-                    size=random.randint(8, 16),
-                    shrink=True,
-                    fade=True
-                )
+        img = pygame.transform.scale(
+            self.base_image,
+            (
+                max(1, int(self.base_image.get_width() * scale)),
+                max(1, int(self.base_image.get_height() * scale))
             )
+        )
+
+        rect = img.get_rect(center=(sx, sy))
+        screen.blit(img, rect)
 
     def apply_difficulty(self):
         settings = DIFFICULTY_SHIP_SETTINGS[self.game.state.difficulty]
@@ -198,34 +180,14 @@ class Ship(Entity):
         self.shot_cooldown = self.guns[self.gun]
 
     def update_position(self, x, y):
-        self.rect.topleft = (x, y)
-        self.hitbox.center = self.rect.center
+        self.wx = x
+        self.wy = y
+        self.sync_hitbox()
 
     def switch_gun(self):
         idx = self.gun_order.index(self.gun)
         self.gun = self.gun_order[(idx + 1) % len(self.gun_order)]
         self.update_fire_rate()
-
-    @legacy
-    def rotate_to(self, target_angle, smooth=True):
-        if smooth:
-            angle_diff = ((
-                                      target_angle - self.current_angle + 180) % FULL_360 - 180)
-            self.current_angle += angle_diff * 0.3
-        else:
-            self.current_angle = target_angle + SHIP_FORWARD_OFFSET
-
-        self._apply_rotation()
-
-    @legacy
-    def _apply_rotation(self):
-        self.image = pygame.transform.rotozoom(
-            self.base_image,
-            self.current_angle + SHIP_FORWARD_OFFSET,
-            1
-        )
-        self.rect = self.image.get_rect(center=self.rect.center)
-        self.update_hitbox()
 
     def apply_heat(self, game):
         if not self.can_overheat:
@@ -270,9 +232,7 @@ class Ship(Entity):
             direction_vec = aim_at_target(pos, target)
             dir_x, dir_y = direction_vec.x, direction_vec.y
         else:
-            rad = math.radians(self.current_angle)
-            dir_x = math.cos(rad)
-            dir_y = -math.sin(rad)
+            dir_x, dir_y = 0, -1
 
         projectiles = []
 
@@ -294,12 +254,9 @@ class Ship(Entity):
                 angle_offset = (-spread_angle / 2) + i * (
                         spread_angle / (num_pellets - 1))
                 if target:
-                    angle_rad = math.atan2(-dir_y, dir_x) + math.radians(
-                        angle_offset)
-                    direction = (math.cos(angle_rad), -math.sin(angle_rad))
+                    direction = aim_at_target(pos, target)
                 else:
-                    rad = math.radians(self.current_angle + angle_offset)
-                    direction = (math.cos(rad), -math.sin(rad))
+                    direction = self.direction
                 projectiles.append(
                     Projectile(pos, COLOR_BLUE, direction=direction,
                                speed=24, damage=self.damage))
@@ -392,9 +349,11 @@ class Ship(Entity):
     def spawnpoint(self, screen_size, frame_width=26):
         x = screen_size[0] // 2 - frame_width // 2
         y = screen_size[1] // 2 + SHIP_OFFSETS[1]
-        self.rect.topleft = (x, y)
-        self.hitbox.center = self.rect.center
+        self.wx, self.wy = x, y
+        self.sync_hitbox()
 
+    def sync_hitbox(self):
+        self.hitbox.center = (self.wx, self.wy)
 
 def get_nearest_enemy(ship_pos, enemies):
     closest = None

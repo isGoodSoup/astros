@@ -12,7 +12,7 @@ from scripts.controller import update_controller
 from scripts.difficulty import Difficulty
 from scripts.explode import Explosion
 from scripts.input import update_cursor
-from scripts.movement import update_movement, update_ship_angle
+from scripts.movement import update_movement
 from scripts.particle import Particle
 from scripts.runtime import get_boss_pos, get_upgrade_position, get_ship_ember
 from scripts.shared import joysticks, controller
@@ -27,10 +27,6 @@ class Updater:
             if not game.hud.skill_tab.active:
                 update_movement(game, game.delta, game.screen_size)
                 update_cursor(game, game.delta, game.screen_size)
-                if TOGGLE_ROTATION:
-                    update_ship_angle(game)
-
-                game.ship.emit_thruster(game.sprites)
 
         if not game.state.pause and not game.state.game_over:
             update_game(game, game.delta, game.screen_size, game.hud_padding)

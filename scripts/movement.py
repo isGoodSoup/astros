@@ -149,14 +149,3 @@ def update_movement(game, delta, screen_size):
         game.input.selected_skill = closest_skill
         for skill in game.state.current_phase_options:
             skill.hovered = (skill == game.input.selected_skill)
-
-
-def update_ship_angle(game):
-    mouse_pos = pygame.mouse.get_pos()
-    mouse_angle = get_mouse_angle(game.ship.rect.center, mouse_pos)
-    game.ship.rotate_to(mouse_angle, smooth=True)
-
-def get_mouse_angle(ship_pos, mouse_pos):
-    dx = mouse_pos[0] - ship_pos[0]
-    dy = mouse_pos[1] - ship_pos[1]
-    return math.degrees(math.atan2(-dy, dx))
