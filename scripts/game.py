@@ -71,7 +71,7 @@ class Game:
         if TOGGLE_TUTORIAL:
             self.tutorial = Tutorial()
 
-        load_config(game)
+        load_config(self)
         runtime.current_game = self
         self.local.set_language(self.state.current_lang)
         local = self.local

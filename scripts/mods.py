@@ -378,11 +378,12 @@ class Difficulties:
             if event.hat == 0 and event.value == (1, 0):
                 self.index = (self.index + 1) % len(self.options)
 
-        if event.button == 0:
-            self.selected = self.options[self.index]
-            mixer.play(4)
-            self.exiting = True
-            fade.start('out')
+        if event.type == pygame.JOYBUTTONDOWN:
+            if event.button == 0:
+                self.selected = self.options[self.index]
+                mixer.play(4)
+                self.exiting = True
+                fade.start('out')
 
     def render(self):
         cx = self.screen_size[0] // 2

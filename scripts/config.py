@@ -1,3 +1,6 @@
+import json
+import os
+
 def save_config(game):
     config_data = {
         "music_volume": game.mixer.music_volume,
