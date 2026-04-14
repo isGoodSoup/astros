@@ -4,24 +4,18 @@ import random
 import pygame
 
 from scripts.proj import Projectile
-from scripts.settings import *
+from scripts.constants import *
 from scripts.levels import DIFFICULTY_SHIP_SETTINGS
+from scripts.entity import Entity
 
 
-class Ship(pygame.sprite.Sprite):
-    def __init__(self, game, sprite_sheet, x, y, frame, width, height,
-                 scale=SCALE, columns=1):
-        super().__init__()
-        self.original_image = sprite_sheet.get_image(frame, width, height,
-                                                     scale, columns)
-        self.image = self.original_image
-        self.rect = self.image.get_rect(topleft=(x, y))
-        self.hitbox = self.rect.inflate(self.rect.width * SHIP_HITBOX,
-                                        self.rect.height * SHIP_HITBOX)
+class Ship(Entity):
+    def __init__(self, image, game, x, y):
+        super().__init__(image, x, y)
+        self.base_image = self.image
         self.game = game
         self.current_angle = SHIP_BASE_ANGLE
         self.velocity = SHIP_VELOCITY
-        self.direction = "idle"
         self.shooting = False
         self.moving = False
         self.max_hitpoints = SHIP_MAX_HITPOINTS
@@ -91,7 +85,8 @@ class Ship(pygame.sprite.Sprite):
         self.shield_regen = False
         self.shield_regen_end = 0
         self.shield_regen_multiplier = 0.05
-        self.shield_regen_rate = int(self.max_shield * self.shield_regen_multiplier)
+        self.shield_regen_rate = int(
+            self.max_shield * self.shield_regen_multiplier)
 
         self.is_commando_active = False
 
@@ -99,6 +94,9 @@ class Ship(pygame.sprite.Sprite):
         self.hit_cooldown = SHIP_IFRAMES
 
         self.apply_difficulty()
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
 
     def apply_difficulty(self):
         settings = DIFFICULTY_SHIP_SETTINGS[self.game.state.difficulty]
@@ -177,13 +175,21 @@ class Ship(pygame.sprite.Sprite):
 
     def rotate_to(self, target_angle, smooth=True):
         if smooth:
-            angle_diff = ((target_angle - self.current_angle + FULL_360//2) %
-                          FULL_360 - FULL_360//2)
+            angle_diff = ((target_angle - self.current_angle + 180) % 360 - 180)
             self.current_angle += angle_diff * 0.3
         else:
             self.current_angle = target_angle
-        self.image = pygame.transform.rotate(self.original_image,
-                                             -self.current_angle)
+
+        self._apply_rotation()
+
+    def _apply_rotation(self):
+        self.image = pygame.transform.rotozoom(
+            self.base_image,
+            self.current_angle,
+            1
+        )
+        self.rect = self.image.get_rect(center=self.rect.center)
+        self.update_hitbox()
 
     def apply_heat(self, game):
         if not self.can_overheat:
@@ -230,12 +236,13 @@ class Ship(pygame.sprite.Sprite):
         else:
             rad = math.radians(self.current_angle)
             dir_x = math.cos(rad)
-            dir_y = -math.sin(rad)
+            dir_y = math.sin(rad)
 
         projectiles = []
 
         if gun_type == "beam":
-            projectiles.append(Projectile(pos, COLOR_BLUE, direction=(dir_x, dir_y),
+            projectiles.append(
+                Projectile(pos, COLOR_BLUE, direction=(dir_x, dir_y),
                            speed=24, damage=1))
 
         elif gun_type == "shotgun":
@@ -295,8 +302,9 @@ class Ship(pygame.sprite.Sprite):
             if self.guns_ammo['nuke'] <= cost:
                 return projectiles
 
-            projectiles.append(Projectile(pos,COLOR_RED,
-                    direction=(dir_x, dir_y), speed=4, damage=0))
+            projectiles.append(Projectile(pos, COLOR_RED,
+                                          direction=(dir_x, dir_y), speed=4,
+                                          damage=0))
             projectiles[-1].nuke = True
 
             if not TOGGLE_UNLIMITED_AMMO:
@@ -311,7 +319,7 @@ class Ship(pygame.sprite.Sprite):
                                          self.base_guns_ammo[gun]))
 
     def taken_damage(self):
-        return [random.randint(0,10) - 4, random.randint(0,10) - 4]
+        return [random.randint(0, 10) - 4, random.randint(0, 10) - 4]
 
     def gain_xp(self, amount, sound):
         if self.level_cap and self.level == LEVEL_CAP:
@@ -345,11 +353,12 @@ class Ship(pygame.sprite.Sprite):
             "velocity": self.velocity,
         }
 
-    def spawnpoint(self, screen_size, frame_width):
+    def spawnpoint(self, screen_size, frame_width=26):
         x = screen_size[0] // 2 - frame_width // 2
         y = screen_size[1] // 2 + SHIP_OFFSETS[1]
         self.rect.topleft = (x, y)
         self.hitbox.center = self.rect.center
+
 
 def get_nearest_enemy(ship_pos, enemies):
     closest = None
@@ -358,11 +367,12 @@ def get_nearest_enemy(ship_pos, enemies):
         ex, ey = enemy.rect.center
         dx = ex - ship_pos[0]
         dy = ey - ship_pos[1]
-        dist_sq = dx*dx + dy*dy
+        dist_sq = dx * dx + dy * dy
         if dist_sq < min_dist:
             min_dist = dist_sq
             closest = enemy
     return closest
+
 
 def aim_at_target(ship_pos, target):
     if not target:
