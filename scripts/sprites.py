@@ -10,6 +10,7 @@ from scripts.ship import Ship
 class SpriteManager:
     def __init__(self, game):
         self.game = game
+        self.default_z = 1000
         self.celestials = pygame.sprite.Group()
         self.projectiles = pygame.sprite.Group()
         self.enemy_projectiles = pygame.sprite.Group()
@@ -39,6 +40,7 @@ class SpriteManager:
 
         self.ship = self.create_ship()
         self.ship.spawnpoint(game.screen_size, 0)
+        self.ship.z = 0
 
         framew = self.explosion_sheet.sheet.get_width() // self.explosion_frames
         frameh = self.explosion_sheet.sheet.get_height()
@@ -58,11 +60,24 @@ class SpriteManager:
 
         self.stars = [[random.randint(0, game.screen_size[0]),
                        random.randint(0, game.screen_size[1]),
+                       random.randint(200, 1200),
                        random.randint(1, 3)] for _ in range(STAR_COUNT)]
 
         self.boss_invisible_start = pygame.time.get_ticks()
         self.boss_invisible_duration = BOSS_INVISIBLE_DURATION
         self.alien_delay = pygame.time.get_ticks() + ALIEN_INITIAL_DELAY
+
+        for group in [
+            self.celestials,
+            self.aliens,
+            self.asteroids,
+            self.bosses,
+            self.projectiles,
+            self.enemy_projectiles,
+            self.upgrades
+        ]:
+            for s in group:
+                s.z = self.default_z
 
     def create_ship(self):
         return Ship(self.selected_ship, self.game, 0, 0)

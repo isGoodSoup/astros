@@ -2,6 +2,7 @@ import pygame
 
 import scripts.assets as assets
 from scripts import runtime
+from scripts.camera import Camera
 from scripts.clock import Clock
 from scripts.config import load_config
 from scripts.constants import *
@@ -35,6 +36,7 @@ class Game:
         os.makedirs(save_dir, exist_ok=True)
         self.config_path = os.path.join(save_dir, CONFIG_FILE)
 
+        self.camera = Camera(screen_size[0], screen_size[1])
         self.local = context.local
         self.delta = 0
         self.screen = screen

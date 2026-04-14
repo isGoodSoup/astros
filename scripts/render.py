@@ -19,12 +19,31 @@ def render_frame(game, screen, font, hud_padding):
             game.sprites.boss_invisible_duration
     )
 
-    for i in game.sprites.stars:
-        pygame.draw.circle(screen, COLOR_WHITE, (int(i[0]), int(i[1])), i[2])
+    for x, y, z, size in game.sprites.stars:
+        sx, sy, scale = game.camera.project(x, y, z)
+
+        radius = max(1, int(size * scale))
+        pygame.draw.circle(screen, COLOR_WHITE, (int(sx), int(sy)), radius)
 
     game.sprites.celestials.draw(screen)
     if game.state.phase_index in ASTEROID_PHASES:
-        game.sprites.asteroids.draw(screen)
+        for asteroid in game.sprites.asteroids:
+            sx, sy, scale = game.camera.project(
+                asteroid.x,
+                asteroid.y,
+                asteroid.z
+            )
+
+            img = pygame.transform.smoothscale(
+                asteroid.base_image,
+                (
+                    max(1, int(asteroid.base_image.get_width() * scale)),
+                    max(1, int(asteroid.base_image.get_height() * scale))
+                )
+            )
+
+            rect = img.get_rect(center=(sx, sy))
+            screen.blit(img, rect)
 
     if len(game.sprites.aliens) > 0:
         game.sprites.aliens.draw(screen)

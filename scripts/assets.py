@@ -19,9 +19,7 @@ def load_assets():
     global OVERLAY_CONTROLLER, OVERLAY_KEYBOARD
 
     ASTEROID_SPRITES = [
-        pygame.image.load(
-            resource_path(f"assets/asteroids/asteroid_{i}.png")
-        ).convert_alpha()
+        f"assets/asteroids/asteroid_{i}.png"
         for i in range(1, 8)
     ]
 

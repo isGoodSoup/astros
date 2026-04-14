@@ -17,6 +17,7 @@ class Ship(Entity):
         super().__init__(image, x, y, scale=True)
         self.base_image = self.image
         self.game = game
+        self.wx, self.wy = x, y
         self.current_angle = SHIP_BASE_ANGLE
         self.velocity = SHIP_VELOCITY
         self.shooting = False

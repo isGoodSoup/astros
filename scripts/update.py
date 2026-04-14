@@ -2,23 +2,23 @@ import random
 
 import pygame
 
-from scripts.enemies import Alien
 from scripts import upgd
 from scripts.asteroid import Asteroid
 from scripts.boss import Boss
 from scripts.celestial import random_celestial, is_valid_spawn
 from scripts.collision import check_collision
+from scripts.constants import *
 from scripts.controller import update_controller
+from scripts.difficulty import Difficulty
 from scripts.explode import Explosion
 from scripts.input import update_cursor
-from scripts.difficulty import Difficulty
 from scripts.movement import update_movement, update_ship_angle
 from scripts.particle import Particle
 from scripts.runtime import get_boss_pos, get_upgrade_position, get_ship_ember
-from scripts.constants import *
 from scripts.shared import joysticks, controller
 from scripts.upgd import Upgrade
 from scripts.utils import resource_path, formulize
+
 
 class Updater:
     def update(self, game):
@@ -65,8 +65,8 @@ def spawner(game):
         return
 
     if game.state.phase_fade <= 0:
-        alien = Alien('red', 400, 200)
-        game.sprites.aliens.add(alien)
+        # alien = Alien('red', 400, 200) # TODO
+        # game.sprites.aliens.add(alien)
         game.spawns.last_reinforcement_spawn = now
 
     if game.state.phase_index in ASTEROID_PHASES:
@@ -143,17 +143,14 @@ def spawn_asteroids(game):
     if game.state.phase_index not in ASTEROID_PHASES:
         return
 
-    spawns = random.randint(5, 10)
+    spawns = random.randint(2, 4)
+
     for _ in range(spawns):
-        x = random.randint(0, game.screen_size[0] - 50)
-        y = random.randint(*ASTEROID_POS)
+        x = random.randint(-1200, 1200)
+        y = random.randint(-800, 800)
+        z = random.randint(600, 1600)
 
-        asteroid = Asteroid(game.screen_size[0], min_y=y, max_y=y)
-
-        too_close = any(abs(asteroid.rect.y - a.rect.y) < ASTEROID_MIN_DISTANCE
-                        for a in game.sprites.asteroids)
-        if too_close:
-            asteroid.rect.y -= ASTEROID_OFFSET
+        asteroid = Asteroid(x, y, z)
 
         game.sprites.asteroids.add(asteroid)
 
@@ -221,8 +218,16 @@ def cleanup_groups(game):
             if not sprite.alive():
                 group.remove(sprite)
 
+def update_camera(game):
+    lerp = 0.08
+    target_x = game.ship.wx
+    target_y = game.ship.wy
+    game.camera.x += (target_x - game.camera.x) * lerp
+    game.camera.y += (target_y - game.camera.y) * lerp
+
 def update_game(game, delta, screen_size, hud_padding):
     game.ship.hit = False
+    update_camera(game)
 
     if game.ship.hit:
         game.ship.combo_multiplier = 1.0
@@ -231,16 +236,18 @@ def update_game(game, delta, screen_size, hud_padding):
     for i in game.sprites.stars:
         if not game.state.pause:
             if game.state.phase_start and game.state.phase_fade > 0:
-                i[1] += LIGHT_SPEED
+                i[2] -= LIGHT_SPEED * 3
                 game.state.phase_fade -= 1
+
                 if game.state.phase_fade <= 0:
                     game.state.phase_start = False
             else:
-                i[1] += game.state.stars_speed
+                i[2] -= game.state.stars_speed
 
-        if i[1] > screen_size[1]:
-            i[1] = 0
-            i[0] = random.randint(0, screen_size[0])
+        if i[2] <= 1:
+            i[0] = random.randint(-300, 300)
+            i[1] = random.randint(-200, 200)
+            i[2] = random.randint(200, 1200)
 
     current_time = pygame.time.get_ticks()
     if current_time - game.spawns.last_celestial_spawn > game.spawns.celestial_spawn_interval:
@@ -265,7 +272,13 @@ def update_game(game, delta, screen_size, hud_padding):
             game.sprites.upgrades.add(new_upgrade)  # type: ignore
 
     game.sprites.celestials.update()
-    game.sprites.asteroids.update()
+
+    for asteroid in game.sprites.asteroids:
+        asteroid.update()
+        if asteroid.z < 400:
+            asteroid.scale = 0.3
+        else:
+            asteroid.scale = 1.0
 
     if game.sprites.ship_alive:
         game.ship.update_upgrades()
@@ -291,7 +304,7 @@ def update_game(game, delta, screen_size, hud_padding):
             velocity = pygame.Vector2(random.uniform(-1, 1),
                                       random.uniform(2, 4))
             particle = Particle(trail_pos, velocity, timer=80,
-                                color=color, radius=4)
+                                color=color)
             game.sprites.particles.append(particle)
 
     game.sprites.aliens.update()
