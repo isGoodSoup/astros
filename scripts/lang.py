@@ -1,6 +1,7 @@
 import json
 
 from scripts.utils import resource_path
+from scripts.config import save_config
 
 class Localization:
     def __init__(self, lang="en"):
@@ -43,4 +44,4 @@ def rotate_language(game):
 
     new_lang = LANG_ORDER[idx]
     set_language(game, new_lang)
-    game.save_config()
+    save_config(game)

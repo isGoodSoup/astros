@@ -1,6 +1,7 @@
 import pygame
 
 from scripts.utils import resource_path
+from scripts.config import save_config
 
 # Copyright (c) 2026 Diego
 # Licensed under the MIT License. See LICENSE file for details.
@@ -30,22 +31,22 @@ def load_ost():
 def _music_volume_up(game, step=0.1):
     game.mixer.music_volume = min(game.mixer.music_volume + step, 1.0)
     apply_volume(game)
-    game.save_config()
+    save_config(game)
 
 def _music_volume_down(game, step=0.1):
     game.mixer.music_volume = max(game.mixer.music_volume - step, 0.0)
     apply_volume(game)
-    game.save_config()
+    save_config(game)
 
 def _sfx_volume_up(game, step=0.1):
     game.mixer.sfx_volume = min(game.mixer.sfx_volume + step, 1.0)
     apply_volume(game)
-    game.save_config()
+    save_config(game)
 
 def _sfx_volume_down(game, step=0.1):
     game.mixer.sfx_volume = max(game.mixer.sfx_volume - step, 0.0)
     apply_volume(game)
-    game.save_config()
+    save_config(game)
 
 def apply_volume(game):
     for sound in game.mixer.sounds:

@@ -1,5 +1,6 @@
 import pygame
 
+from scripts.config import save_config
 import scripts.game as g
 from scripts.settings import ONE_SECOND, COLOR_WHITE, COLOR_RED, PHASE_ACTIVE
 from scripts.utils import center
@@ -18,7 +19,7 @@ def game_lost(game, font, screen, screen_size):
 
     if game.state.score > game.state.high_score:
         game.state.high_score = game.state.score
-        game.save_config()
+        save_config(game)
 
     game.clock.milliseconds = 0
     game.clock.seconds = 0

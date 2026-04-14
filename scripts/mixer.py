@@ -4,7 +4,7 @@ from scripts.settings import FADE_MS, SFX_VOLUME, MUSIC_VOLUME, \
     SETTINGS_DEFINITION
 from scripts.soundlib import load_sounds, load_ost
 from scripts.utils import _get_setting_target
-
+from scripts.config import save_config
 
 class Mixer:
     def __init__(self):
@@ -105,5 +105,4 @@ def adjust_setting(game, index, decrease=False):
         from scripts.soundlib import apply_volume
         apply_volume(game)
 
-    if hasattr(game, "save_config"):
-        game.save_config()
+    save_config(game)

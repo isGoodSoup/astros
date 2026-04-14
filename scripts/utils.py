@@ -8,7 +8,7 @@ import pygame
 from scripts.floaty import FloatingNumber
 from scripts.settings import SETTINGS_DEFINITION, SCREENSHOTS_DIR
 from scripts.shared import fade
-
+from scripts.config import save_config
 
 def legacy(func):
     @functools.wraps(func)
@@ -66,9 +66,7 @@ def toggle_setting(game, index):
 
     new_value = not getattr(target, key)
     setattr(target, key, new_value)
-
-    if hasattr(game, "save_config"):
-        game.save_config()
+    save_config(game)
 
 def _get_setting_target(game, setting):
     target_name = setting.get("target", "state")
