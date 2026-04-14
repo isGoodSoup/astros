@@ -4,6 +4,7 @@ import pygame
 
 import scripts.assets as assets
 from scripts.difficulty import DifficultyPool
+from scripts.game import Game
 from scripts.fonts import FontManager
 from scripts.intro import Intro
 from scripts.mixer import Mixer
@@ -368,6 +369,20 @@ class Difficulties:
                 mixer.play(4)
                 self.exiting = True
                 fade.start('out')
+
+        if event.type == pygame.JOYHATMOTION:
+            if event.hat == 0 and event.value == (-1, 0):
+                self.index = (self.index - 1) % len(self.options)
+                mixer.play(5)
+
+            if event.hat == 0 and event.value == (1, 0):
+                self.index = (self.index + 1) % len(self.options)
+
+        if event.button == 0:
+            self.selected = self.options[self.index]
+            mixer.play(4)
+            self.exiting = True
+            fade.start('out')
 
     def render(self):
         cx = self.screen_size[0] // 2

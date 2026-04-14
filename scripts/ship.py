@@ -5,6 +5,7 @@ import pygame
 
 from scripts.proj import Projectile
 from scripts.settings import *
+from scripts.levels import DIFFICULTY_SHIP_SETTINGS
 
 
 class Ship(pygame.sprite.Sprite):
