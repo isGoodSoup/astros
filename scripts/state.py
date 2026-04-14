@@ -2,7 +2,8 @@ import pygame
 
 from scripts.settings import (PHASES_TOTAL, PHASE_START, PHASE_COLORS, \
                               PHASE_LENGTH, STAR_SPEED,
-                              PHASES, SCORE_SCALING, PHASE_ACTIVE, PHASE_FADE)
+                              PHASES, SCORE_SCALING, PHASE_ACTIVE,
+                              PHASE_FADE)
 
 
 class GameState:
@@ -12,6 +13,7 @@ class GameState:
         self.can_show_controls = True
         self.can_show_hud = True
         self.current_lang = 'en'
+        self.difficulty = Difficulty.EXPLORER
 
         self.score = 0
         self.score_scaling = SCORE_SCALING

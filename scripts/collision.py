@@ -90,12 +90,13 @@ def check_collision(game):
 
             damage_per_frame = 0
             boss_damage = BOSS_DAMAGE if boss_hit else 0
+            damage_taken = game.ship.damage_taken_multiplier
             if not TOGGLE_INVINCIBLE:
                 if game.ship.shield > 0:
-                    damage_per_frame = (max(1,game.ship.max_shield // SHIP_SHIELD_FRAMES) * game.ship.level)
+                    damage_per_frame = max(1,game.ship.max_shield // SHIP_SHIELD_FRAMES) * game.ship.level * damage_taken
                     game.ship.shield -= damage_per_frame + boss_damage
                 else:
-                    damage_per_frame = max(1,game.ship.max_hitpoints // SHIP_HITPOINTS_FRAMES) * game.ship.level
+                    damage_per_frame = max(1,game.ship.max_hitpoints // SHIP_HITPOINTS_FRAMES) * game.ship.level * damage_taken
                     game.ship.hitpoints -= damage_per_frame + boss_damage
 
             if hasattr(game.ship, "fortified_percent"):
@@ -163,7 +164,8 @@ def check_collision(game):
 
             if asteroid.hitpoints <= 0:
                 asteroid.kill()
-                game.ship.credits += random.randint(1, SHIP_CREDITS_CAP)
+                game.ship.credits += (random.randint(1, SHIP_CREDITS_CAP) *
+                                      game.ship.credits_multiplier)
                 if maniac_skill := next(
                         (s for s in game.skills.get_unlocked() if
                          s.name == "Maniac"), None):
@@ -224,7 +226,7 @@ def check_collision(game):
 
             if alien.hitpoints <= 0:
                 alien.kill()
-                game.ship.credits += random.randint(1, SHIP_CREDITS_CAP)
+                game.ship.credits += random.randint(1, SHIP_CREDITS_CAP) * game.ship.credits_multiplier
                 if maniac_skill := next(
                         (s for s in game.skills.get_unlocked() if
                          s.name == "Maniac"), None):
@@ -285,7 +287,7 @@ def check_collision(game):
 
             if boss.hitpoints <= 0:
                 boss.kill()
-                game.ship.credits += random.randint(1, SHIP_CREDITS_CAP)
+                game.ship.credits += random.randint(1, SHIP_CREDITS_CAP) * game.ship.credits_multiplier
                 if maniac_skill := next(
                         (s for s in game.skills.get_unlocked() if
                          s.name == "Maniac"), None):

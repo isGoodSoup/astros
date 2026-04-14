@@ -91,7 +91,7 @@ class Input:
                 target = None
             if joysticks and game.state.can_rumble:
                 controller.rumble(1, 2, BASE_RUMBLE_MS + 30)
-            new_projectiles = game.ship.shoot(gun_type=game.ship.gun,
+            new_projectiles = game.ship.shoot(game, gun_type=game.ship.gun,
                                               target=target)
             game.sprites.projectiles.add(*new_projectiles)
             game.spawns.last_shot_time = now

@@ -11,6 +11,7 @@ from scripts.controller import update_controller
 from scripts.explode import Explosion
 from scripts.fleet import spawn_fleet
 from scripts.input import update_cursor
+from scripts.levels import Difficulty
 from scripts.movement import update_movement, update_ship_angle
 from scripts.particle import Particle
 from scripts.runtime import get_boss_pos, get_upgrade_position, get_ship_ember
@@ -129,7 +130,8 @@ def run_transition(game):
     game.ship.spawnpoint(game.screen_size, game.sprites.framew)
 
 def spawn_asteroids(game):
-    if not game.spawns.can_spawn_asteroids:
+    if (not game.spawns.can_spawn_asteroids and game.state.difficulty ==
+            Difficulty.TOURIST):
         return
 
     if game.state.phase_state != PHASE_ACTIVE:
@@ -156,6 +158,17 @@ def spawn_boss(game):
     if not game.state.phase_spawned and not game.state.pause:
         x, y = get_boss_pos()
         color = ['red', 'green', 'yellow']
+
+        match game.state.difficulty:
+            case Difficulty.TOURIST:
+                game.spawns.boss_count = 0
+            case Difficulty.EXPLORER:
+                game.spawns.boss_count = 1
+            case Difficulty.PILOT:
+                game.spawns.boss_count = 2
+            case Difficulty.NIGHTMARE:
+                game.spawns.boss_count = 3
+
         for i in range(game.spawns.boss_count):
             game.sprites.bosses.add(Boss(game, game.ship, game.sprites.enemy_projectiles, x, y,
                         random.choice(color)))
