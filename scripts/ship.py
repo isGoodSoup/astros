@@ -104,12 +104,14 @@ class Ship(Entity):
         if not self.moving:
             return
 
+        local_offset = pygame.Vector2(0, self.rect.height // 2 - 6)
+
         rad = math.radians(self.current_angle + SHIP_FORWARD_OFFSET)
+        rotated_offset = local_offset.rotate(-math.degrees(rad))
+
+        spawn_pos = pygame.Vector2(self.rect.center) + rotated_offset
         backward = pygame.Vector2(-math.cos(rad), math.sin(rad))
-        spawn_pos = pygame.Vector2(self.rect.center) + backward * 18
-
         vel = backward * random.uniform(1.5, 3.5)
-
         vel.x += random.uniform(-0.4, 0.4)
         vel.y += random.uniform(-0.4, 0.4)
 
@@ -118,7 +120,7 @@ class Ship(Entity):
                 location=spawn_pos,
                 velocity=vel,
                 timer=random.randint(20, 40),
-                color=(get_ship_ember()),
+                color=get_ship_ember(),
                 radius=random.randint(2, 4)
             )
         )
