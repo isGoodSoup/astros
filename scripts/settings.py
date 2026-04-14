@@ -314,10 +314,4 @@ SETTINGS_DEFINITION = [
         "type": "lang",
         "target": "state"
     },
-    {
-        "key": "difficulty",
-        "label": "game.settings.difficulty",
-        "type": "lang",
-        "target": "state"
-    }
 ]
