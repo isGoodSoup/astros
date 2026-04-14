@@ -102,25 +102,29 @@ class Ship(Entity):
         screen.blit(self.image, self.rect)
 
     def emit_thruster(self, sprite_manager):
-        spawn_pos = pygame.Vector2(
-            self.rect.centerx,
-            self.rect.bottom - 4
-        )
+        if not self.moving:
+            return
 
-        for _ in range(random.randint(1, 8)):
+        local_offset = pygame.Vector2(0, self.rect.height // 2 - 32)
+
+        rad = math.radians(self.current_angle + SHIP_FORWARD_OFFSET)
+        rotated_offset = local_offset.rotate(-math.degrees(rad))
+        spawn_pos = pygame.Vector2(self.rect.center) + rotated_offset
+
+        backward = pygame.Vector2(-math.cos(rad), math.sin(rad))
+
+        for _ in range(random.randint(2, 8)):
+            vel = backward * random.uniform(2.0, 4.5)
+            vel.x += random.uniform(-0.6, 0.6)
+            vel.y += random.uniform(-0.6, 0.6)
+
             sprite_manager.particles.append(
                 Particle(
-                    location=(
-                        spawn_pos.x + random.uniform(-1.5, 1.5),
-                        spawn_pos.y + random.uniform(-1.0, 1.0)
-                    ),
-                    velocity=(
-                        random.uniform(-0.05, 0.05),
-                        random.uniform(0.05, 0.15)
-                    ),
-                    timer=random.randint(10, 18),
+                    location=spawn_pos,
+                    velocity=vel,
+                    timer=random.randint(8, 16),
                     color=get_ship_ember(),
-                    size=random.randint(10, 20),
+                    size=random.randint(8, 16),
                     shrink=True,
                     fade=True
                 )
@@ -205,7 +209,7 @@ class Ship(Entity):
     def rotate_to(self, target_angle, smooth=True):
         if smooth:
             angle_diff = ((
-                                  target_angle - self.current_angle + 180) % FULL_360 - 180)
+                                      target_angle - self.current_angle + 180) % FULL_360 - 180)
             self.current_angle += angle_diff * 0.3
         else:
             self.current_angle = target_angle + SHIP_FORWARD_OFFSET

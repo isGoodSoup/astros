@@ -306,7 +306,8 @@ class Input:
                                            decrease=False)
                         self.last_nav_time = now
 
-                if game.hud.skill_tab.active and game.state.current_phase_options:
+                elif (game.hud.skill_tab.active and
+                     game.state.current_phase_options):
                     now = pygame.time.get_ticks()
 
                     if now - self.last_nav_time > self.nav_cooldown:
@@ -329,7 +330,8 @@ class Input:
                             game.font.update()
 
                     if event.hat == 0 and event.value == (1, 0):
-                        take_screenshot(game)
+                        if not game.hud.settings_tab.active:
+                            game.font.update()
 
         axis_y = 0.0
         if joysticks and controller.get_button(9):
