@@ -167,11 +167,24 @@ def update_shockwaves(game):
                 game.ship.gain_xp(formulize(game, game.ship.level), game.mixer.sounds)
                 alien.kill()
 
-        game.sprites.aliens = pygame.sprite.Group([a for a in game.sprites.aliens if a.alive()])
-        game.sprites.asteroids = pygame.sprite.Group([a for a in game.sprites.asteroids if a.alive()])
+        for a in list(game.sprites.asteroids):
+            if not a.alive():
+                a.kill()
+
+        for a in list(game.sprites.aliens):
+            if not a.alive():
+                a.kill()
 
         if not wave.alive:
             game.sprites.shockwaves.remove(wave)
+
+def cleanup_groups(game):
+    for group in [game.sprites.aliens,
+                  game.sprites.asteroids,
+                  game.sprites.projectiles]:
+        for sprite in list(group):
+            if not sprite.alive():
+                group.remove(sprite)
 
 def update_game(game, delta, screen_size, hud_padding):
     game.ship.hit = False
@@ -179,6 +192,7 @@ def update_game(game, delta, screen_size, hud_padding):
     if game.ship.hit:
         game.ship.combo_multiplier = 1.0
 
+    cleanup_groups(game)
     for i in game.sprites.stars:
         if not game.state.pause:
             if game.state.phase_start and game.state.phase_fade > 0:
