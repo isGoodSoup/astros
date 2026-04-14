@@ -25,7 +25,8 @@ class Boss(pygame.sprite.Sprite):
         self.pos = pygame.Vector2(x, y)
         self.game = game
         self.ship = ship
-        self.step = max(1, ship.velocity + 1)
+        settings = DIFFICULTY_ENEMY_SETTINGS[self.game.state.difficulty]
+        self.step = max(1,int((ship.velocity + 1) * settings["speed_multiplier"]))
         self.offset_x = offset_x
         self.offset_y = offset_y
         self.direction = 1
@@ -34,11 +35,12 @@ class Boss(pygame.sprite.Sprite):
 
         self.colors = BOSS_COLORS
         self.level = ship.level + BOSS_ADVANTAGE
-        self.max_hitpoints = BOSS_BASE_HITPOINTS * self.level + self.colors.get(color)
+        self.max_hitpoints = int((BOSS_BASE_HITPOINTS * self.level + self.colors.get(color))
+            * settings["hp_multiplier"])
         self.hitpoints = self.max_hitpoints
-        self.base_damage = ship.damage * self.level
+        self.base_damage = int((ship.damage * self.level) * settings["damage_multiplier"])
         self.last_shot_time = 0
-        self.shot_cooldown = HIGH_FIRE_RATE
+        self.shot_cooldown = int(HIGH_FIRE_RATE / settings["fire_rate_multiplier"])
         self.last_move = pygame.time.get_ticks()
         self.move_timer = pygame.time.get_ticks()
         self.hit = False
@@ -88,7 +90,7 @@ class Boss(pygame.sprite.Sprite):
                 self.velocity.x += random.uniform(-2, 2)
                 self.velocity.y += random.uniform(-2, 2)
 
-                max_speed = BOSS_BASE_SPEED
+                max_speed = BOSS_BASE_SPEED * settings["speed_multiplier"]
                 if self.velocity.length() > max_speed:
                     self.velocity.scale_to_length(max_speed)
 
@@ -123,7 +125,7 @@ class Boss(pygame.sprite.Sprite):
                 self.velocity.x += random.uniform(-4, 4)
                 self.velocity.y += random.uniform(-4, 4)
 
-                max_speed = BOSS_BASE_SPEED * 2
+                max_speed = BOSS_BASE_SPEED * 2 * settings["speed_multiplier"]
                 if self.velocity.length() > max_speed:
                     self.velocity.scale_to_length(max_speed)
 
@@ -169,5 +171,5 @@ class Boss(pygame.sprite.Sprite):
         direction.rotate_ip(math.degrees(angle_offset))
         self.projectiles.add(Projectile(self.rect.center, COLOR_RED,
                           direction=(direction.x, direction.y),
-                          speed=16, damage=BOSS_BASE_DAMAGE * self.ship.level,
+                          speed=16, damage=int(BOSS_BASE_DAMAGE * self.ship.level * settings["damage_multiplier"]),
                           range_limit=ONE_SECOND))

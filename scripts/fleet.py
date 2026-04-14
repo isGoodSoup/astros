@@ -3,9 +3,9 @@ import random
 import pygame
 
 from scripts.alien import Alien
+from scripts.levels import Difficulty
 from scripts.settings import (ASTEROID_PHASES, ALIEN_PHASES, SCALE,
                               ALIEN_FORMATION, ALIEN_MOVES, ONE_SECOND)
-
 
 class AlienFleet:
     def __init__(self, game, movement, rows=2, cols=4, start_y=200,
@@ -21,9 +21,21 @@ class AlienFleet:
         self.alien_width = 16 * scale
         self.alien_height = 11 * scale
         self.direction = 1
-
-        self.step = 10
         self.move_timer = pygame.time.get_ticks()
+
+        difficulty = game.state.difficulty
+
+        match difficulty:
+            case Difficulty.TOURIST:
+                self.step = 4
+            case Difficulty.EXPLORER:
+                self.step = 10
+            case Difficulty.PILOT:
+                self.step = 16
+            case Difficulty.NIGHTMARE:
+                self.step = 20
+            case _:
+                self.step = 10
 
         cluster_width = cols * self.alien_width + (cols - 1) * spacing_x
         self.start_x = (game.screen_size[0] - cluster_width) // 2

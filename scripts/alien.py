@@ -20,6 +20,8 @@ class Alien(pygame.sprite.Sprite):
         self.screen = screen
         self.ship = ship
 
+        settings = DIFFICULTY_ENEMY_SETTINGS[self.game.state.difficulty]
+
         self.width = width
         self.height = height
         self.scale = scale
@@ -43,14 +45,14 @@ class Alien(pygame.sprite.Sprite):
         self.shooting = False
         self.moving = False
         self.last_shot_time = 0
-        self.shot_cooldown = ONE_SECOND // 2
+        self.shot_cooldown = int((ONE_SECOND // 2) / settings["fire_rate_multiplier"])
         self.hit = False
 
     def _apply_color_stats(self, color: str):
         color_scale = ALIEN_COLORS[color]
         self.level = self.ship.level + ALIEN_ADVANTAGE * color_scale
-        self.max_hitpoints = int(2 * self.level)
-        self.base_damage = self.ship.damage * self.level
+        self.max_hitpoints = int(2 * self.level * settings["hp_multiplier"])
+        self.base_damage = int(self.ship.damage * self.level * settings["damage_multiplier"])
 
         if self.is_elite:
             self.max_hitpoints = int(self.max_hitpoints * ELITE_HP_MULT)
@@ -97,7 +99,7 @@ class Alien(pygame.sprite.Sprite):
         if (self.game.spawns.can_spawn_elites and not self.elite_applied and
                 self.hitpoints > 0 and
                 self.hitpoints <= self.max_hitpoints * 0.05 and
-                random.random() < self.game.spawns.elite_mutation_chance):
+                random.random() < (self.game.spawns.elite_mutation_chance * settings["elite_chance"])):
             self.promote_to_elite()
 
         if self.rect.top > pygame.display.Info().current_h or self.hitpoints <= 0:
