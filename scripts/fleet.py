@@ -145,9 +145,8 @@ class AlienFleet:
                 alien.rect.y += correction
 
 def new_fleet_block(game):
-    max_cols = max(1, (game.screen_size[0] + 15) // (16 * SCALE + 15))
     rows = random.randint(4, 6)
-    cols = random.randint(2, min(12, max_cols))
+    cols = random.randint(2, 12)
     return rows, cols
 
 def spawn_fleet(game, phase_index):
