@@ -3,7 +3,7 @@ import random
 import pygame
 
 from scripts.alien import Alien
-from scripts.levels import Difficulty
+from scripts.difficulty import Difficulty
 from scripts.settings import (ASTEROID_PHASES, ALIEN_PHASES, SCALE,
                               ALIEN_FORMATION, ALIEN_MOVES, ONE_SECOND)
 

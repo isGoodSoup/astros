@@ -11,7 +11,7 @@ from scripts.controller import update_controller
 from scripts.explode import Explosion
 from scripts.fleet import spawn_fleet
 from scripts.input import update_cursor
-from scripts.levels import Difficulty
+from scripts.difficulty import Difficulty
 from scripts.movement import update_movement, update_ship_angle
 from scripts.particle import Particle
 from scripts.runtime import get_boss_pos, get_upgrade_position, get_ship_ember

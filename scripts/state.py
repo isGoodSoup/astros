@@ -5,6 +5,8 @@ from scripts.settings import (PHASES_TOTAL, PHASE_START, PHASE_COLORS, \
                               PHASES, SCORE_SCALING, PHASE_ACTIVE,
                               PHASE_FADE)
 
+from scripts.difficulty import Difficulty
+
 
 class GameState:
     def __init__(self):
