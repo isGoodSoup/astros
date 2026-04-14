@@ -16,7 +16,6 @@ class DifficultyOption:
         self.modifiers = modifiers
         self.icon = resource_path(f"assets/difficulties/{icon}.png")
 
-
 class DifficultyPool:
     def __init__(self, context):
         self.options = [

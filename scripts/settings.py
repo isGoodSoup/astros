@@ -263,7 +263,7 @@ TOGGLE_INVINCIBLE = TOGGLE_GOD_MODE
 TOGGLE_UNLIMITED_AMMO = TOGGLE_GOD_MODE
 TOGGLE_LEVEL_CAP = False
 TOGGLE_ENABLE_INTRO = True
-TOGGLE_SKIP = False
+TOGGLE_SKIP = True
 
 SETTINGS_DEFINITION = [
     {
@@ -315,7 +315,7 @@ SETTINGS_DEFINITION = [
         "target": "state"
     },
     {
-        "key": "current_difficulty",
+        "key": "difficulty",
         "label": "game.settings.difficulty",
         "type": "lang",
         "target": "state"

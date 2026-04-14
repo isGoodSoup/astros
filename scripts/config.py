@@ -1,5 +1,6 @@
 import json
-import os
+
+from scripts.settings import *
 
 def save_config(game):
     config_data = {
@@ -12,7 +13,7 @@ def save_config(game):
         "show_hud": game.state.can_show_hud,
         "high_score": game.state.high_score,
         "language": game.state.current_lang,
-        "difficulty": game.state.difficulty,
+        "difficulty": game.state.difficulty.name,
     }
     with open(game.config_path, "w") as f:
         json.dump(config_data, f, indent=INDENTS)
@@ -35,4 +36,5 @@ def load_config(game):
         game.state.can_show_hud = config_data.get("show_hud", True)
         game.state.high_score = config_data.get("high_score", 0)
         game.state.current_lang = config_data.get("language", "en")
-        game.state.difficulty = config_data.get(("difficulty", Difficulty.EXPLORER))
+        from scripts.difficulty import Difficulty
+        game.state.difficulty = Difficulty[config_data.get("difficulty", "EXPLORER")]

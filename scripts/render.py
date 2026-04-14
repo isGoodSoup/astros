@@ -241,10 +241,9 @@ def render_settings_tab(game, screen, rect, game_font):
             toggle_surface = game_font.render(toggle_text, True, color)
             screen.blit(toggle_surface, (slider_x, y))
 
-
         elif setting["type"] == "lang":
             state = getattr(getattr(game, setting["target"]), setting["key"])
-            option_text = LANGS.get(state, state)
+            option_text = LANGS.get(state, str(state))
             option_surface = game_font.render(option_text, True, color)
             screen.blit(option_surface, (slider_x, y))
 

@@ -148,7 +148,7 @@ class HUD:
             width=INTERFACE_OVERHEAT_WIDTH, height=INTERFACE_OVERHEAT_HEIGHT,
             max_value=game.ship.overheat_limit)
 
-        self.credits = 0
+        self.credits = game.ship.credits
 
         self.skill_tab = Tab(resource_path("assets/ui/skill_tab.png"),
             start_pos=(screen_size[0], SKILL_TAB_Y), content_renderer=render_skills_tab)
@@ -175,7 +175,7 @@ class HUD:
         screen.blit(score_value_surf, [score_x, y])
         y += line_spacing
 
-        credits_surf = font.render(f"${game.ship.credits:,}", True,
+        credits_surf = font.render(f"${game.ship.credits:,.0f}", True,
                                    COLOR_LIGHT_ORANGE)
         screen.blit(credits_surf, [score_x, y])
         y += line_spacing
