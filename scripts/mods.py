@@ -9,8 +9,8 @@ from scripts.intro import Intro
 from scripts.mixer import Mixer
 from scripts.settings import SCALE, SHIP_FRAMES, COLOR_BLACK, \
     COLOR_LIGHT_ORANGE, FONT_DEFAULT_SIZE, TRAIT_CARD_SIZE, HEADER_FLOAT, \
-    SPRITE_FLOAT, FPS, SHIP_SELECTION_OFFSET, FLIGHT_SPEED, FONT_MEDIUM_SIZE, \
-    ALPHA, TOGGLE_ENABLE_INTRO
+    SPRITE_FLOAT, FPS, SHIP_SELECTION_OFFSET, FLIGHT_SPEED, ALPHA, \
+    TOGGLE_ENABLE_INTRO
 from scripts.shared import fade, joysticks
 from scripts.traits import TraitOption, TraitGridSquare, TraitPool
 from scripts.utils import render_fade
@@ -24,7 +24,7 @@ class Mods:
         self.local = context.local
         self.running = True
         self.screen_size = screen_size
-        self.font = FontManager(None, FONT_MEDIUM_SIZE)
+        self.font = FontManager(None, FONT_DEFAULT_SIZE)
         self.preview_scale = SCALE//2
         self.ship_frames = SHIP_FRAMES
         self.ship_flying = False
@@ -317,6 +317,7 @@ class ChoiceResult:
 class Difficulties:
     def __init__(self, context, screen, screen_size, hud_ratio,
                  pool: DifficultyPool):
+        fade.start('in')
         self.context = context
         self.local = context.local
         self.screen = screen
@@ -333,7 +334,6 @@ class Difficulties:
         self.index = 0
         self.selected = None
         self.exiting = False
-        fade.start('in')
 
     def run(self, clock, screen, screen_size, hud_ratio, crt):
         while not self.exiting:
