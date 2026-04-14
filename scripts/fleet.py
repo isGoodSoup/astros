@@ -2,10 +2,11 @@ import random
 
 import pygame
 
-from scripts.alien import Alien
+from scripts.alien import Alien, KamikazeAlien
 from scripts.difficulty import Difficulty
 from scripts.settings import (ASTEROID_PHASES, ALIEN_PHASES, SCALE,
                               ALIEN_FORMATION, ALIEN_MOVES, ONE_SECOND)
+
 
 class AlienFleet:
     def __init__(self, game, movement, rows=2, cols=4, start_y=200,
@@ -57,7 +58,10 @@ class AlienFleet:
         for x, y in positions:
             color = game.state.phase_colors[game.state.phase_index %
                                             len(game.state.phase_colors)]
-            alien = Alien(game, game.ship, x, y, color, 0, game.screen)
+            if random.random() > 0.5:
+                alien = KamikazeAlien(game, game.ship, x, y, color, 0, game.screen)
+            else:
+                alien = Alien(game, game.ship, x, y, color, 1, game.screen)
             self.aliens.add(alien)  # type: ignore
             game.sprites.aliens.add(alien)
 
@@ -102,7 +106,8 @@ class AlienFleet:
             self._update_chaos()
 
         for alien in self.aliens:
-            alien.update()
+            if not isinstance(alien, KamikazeAlien):
+                alien.update()
 
     def alive(self):
         return any(a.alive() for a in self.aliens)

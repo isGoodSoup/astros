@@ -1,14 +1,15 @@
 import random
+from typing import override
 
 import pygame
 
+from scripts.levels import DIFFICULTY_ENEMY_SETTINGS
 from scripts.proj import Projectile
 from scripts.settings import (
     ONE_SECOND, SHIP_HITBOX, ALIEN_HEIGHT, ALIEN_WIDTH,
     SCALE, ALIEN_ADVANTAGE, COLOR_GREEN, ALIEN_COLORS,
     ELITE_DAMAGE_MULT, ELITE_HP_MULT
 )
-from scripts.levels import DIFFICULTY_ENEMY_SETTINGS
 from scripts.utils import resource_path
 
 
@@ -21,8 +22,7 @@ class Alien(pygame.sprite.Sprite):
         self.screen = screen
         self.ship = ship
 
-        settings = DIFFICULTY_ENEMY_SETTINGS[self.game.state.difficulty]
-
+        self.settings = DIFFICULTY_ENEMY_SETTINGS[self.game.state.difficulty]
         self.width = width
         self.height = height
         self.scale = scale
@@ -46,15 +46,14 @@ class Alien(pygame.sprite.Sprite):
         self.shooting = False
         self.moving = False
         self.last_shot_time = 0
-        self.shot_cooldown = int((ONE_SECOND // 2) / settings["fire_rate_multiplier"])
+        self.shot_cooldown = int((ONE_SECOND // 2) / self.settings["fire_rate_multiplier"])
         self.hit = False
 
     def _apply_color_stats(self, color: str):
-        settings = DIFFICULTY_ENEMY_SETTINGS[self.game.state.difficulty]
         color_scale = ALIEN_COLORS[color]
         self.level = self.ship.level + ALIEN_ADVANTAGE * color_scale
-        self.max_hitpoints = int(2 * self.level * settings["hp_multiplier"])
-        self.base_damage = int(self.ship.damage * self.level * settings["damage_multiplier"])
+        self.max_hitpoints = int(2 * self.level * self.settings["hp_multiplier"])
+        self.base_damage = int(self.ship.damage * self.level * self.settings["damage_multiplier"])
 
         if self.is_elite:
             self.max_hitpoints = int(self.max_hitpoints * ELITE_HP_MULT)
@@ -63,8 +62,7 @@ class Alien(pygame.sprite.Sprite):
         self.hitpoints = self.max_hitpoints
 
     def _load_sprite(self, color: str):
-        image = pygame.image.load(resource_path(f"assets/aliens/{color}.png")
-        ).convert_alpha()
+        image = pygame.image.load(resource_path(f"assets/aliens/{color}.png")).convert_alpha()
 
         self.image = pygame.transform.scale(image,
             (int(self.width * self.scale), int(self.height * self.scale)))
@@ -96,16 +94,20 @@ class Alien(pygame.sprite.Sprite):
             self.rect.height * SHIP_HITBOX)
 
     def update(self):
-        self.hitbox.center = self.rect.center
+        self.sync_hitbox()
 
         if (self.game.spawns.can_spawn_elites and not self.elite_applied and
                 self.hitpoints > 0 and
                 self.hitpoints <= self.max_hitpoints * 0.05 and
-                random.random() < (self.game.spawns.elite_mutation_chance * settings["elite_chance"])):
+                random.random() < (self.game.spawns.elite_mutation_chance *
+                                   self.settings["elite_chance"])):
             self.promote_to_elite()
 
         if self.rect.top > pygame.display.Info().current_h or self.hitpoints <= 0:
             self.kill()
+
+    def sync_hitbox(self):
+        self.hitbox.center = self.rect.center
 
     def shoot(self, target, shot_cooldown):
         current_time = pygame.time.get_ticks()
@@ -136,3 +138,41 @@ class Alien(pygame.sprite.Sprite):
             self.last_shot_time = current_time
 
         return new_projectiles
+
+class KamikazeAlien(Alien):
+    def __init__(self, game, ship, x, y, color, frame, screen):
+        super().__init__(game, ship, x, y, color, frame, screen)
+        self.is_kamikaze = True
+        self.ship = ship
+        self.speed = 4
+        self.locked = False
+        self.velocity = pygame.math.Vector2(0, 0)
+
+    @override
+    def update(self):
+        if not self.locked and random.random() < 0.2:
+            self.locked = True
+
+        if self.locked:
+            self._home_toward_ship()
+        else:
+            self.rect.x += 0
+            self.rect.y += 0
+
+        self.sync_hitbox()
+
+    def _home_toward_ship(self):
+        alien_pos = pygame.math.Vector2(self.rect.center)
+        ship_pos = pygame.math.Vector2(self.ship.rect.center)
+
+        direction = ship_pos - alien_pos
+
+        if direction.length() == 0:
+            return
+
+        direction = direction.normalize()
+
+        self.velocity = self.velocity.lerp(direction * self.speed, 0.15)
+
+        self.rect.centerx += self.velocity.x
+        self.rect.centery += self.velocity.y
