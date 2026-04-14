@@ -9,7 +9,6 @@ from scripts.celestial import random_celestial, is_valid_spawn
 from scripts.collision import check_collision
 from scripts.controller import update_controller
 from scripts.explode import Explosion
-from scripts.fleet import spawn_fleet
 from scripts.input import update_cursor
 from scripts.difficulty import Difficulty
 from scripts.movement import update_movement, update_ship_angle
@@ -19,6 +18,7 @@ from scripts.settings import *
 from scripts.shared import joysticks, controller
 from scripts.upgd import Upgrade
 from scripts.utils import resource_path, formulize
+from scripts.alien import spawn_fleet
 
 
 class Updater:
@@ -63,7 +63,7 @@ def spawner(game):
         return
 
     if game.state.phase_fade <= 0:
-        spawn_fleet(game, game.state.phase_index)
+        spawn_fleet()
         game.spawns.last_reinforcement_spawn = now
 
     if game.state.phase_index in ASTEROID_PHASES:
@@ -331,10 +331,6 @@ def update_game(game, delta, screen_size, hud_padding):
             particle = Particle(trail_pos, velocity, timer=80,
                                 color=color, radius=4)
             game.sprites.particles.append(particle)
-
-    game.sprites.fleets = [f for f in game.sprites.fleets if f.alive()]
-    for fleet in game.sprites.fleets:
-        fleet.update()
 
     game.sprites.bosses.update()
     game.sprites.projectiles.update()

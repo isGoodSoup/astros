@@ -50,7 +50,6 @@ def reboot(game, screen_size):
     game.sprites.upgrades.empty()
     game.sprites.floating_numbers.empty()
     game.sprites.celestials.empty()
-    game.sprites.fleets.clear()
     game.sprites.particles.clear()
 
     game.ship = game.sprites.create_ship()

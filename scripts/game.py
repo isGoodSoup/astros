@@ -91,7 +91,8 @@ class Game:
 
                 if (event.type == self.events.ALIENLASER and not
                     self.state.pause and not self.state.game_over):
-                    self.events.alien_shoot_event(self)
+                    # self.events.alien_shoot_event(self)
+                    pass
 
             screen.fill(BACKGROUND)
             self.delta = clock.tick(self.fps) / ONE_SECOND

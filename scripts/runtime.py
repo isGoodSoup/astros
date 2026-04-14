@@ -8,6 +8,10 @@ def get_upgrade_position():
         random.randint(-200, -50)
     )
 
+def get_alien_pos(x, y):
+    info = pygame.display.Info()
+    return info.current_w // 2 - x // 2, info.current_h // 2 - y // 2
+
 def get_boss_pos():
     info = pygame.display.Info()
     return [info.current_w // 2 + random.randint(-200, 200), 350]

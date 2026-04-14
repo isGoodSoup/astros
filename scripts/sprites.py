@@ -19,7 +19,6 @@ class SpriteManager:
         self.explosions = pygame.sprite.Group()
         self.upgrades = pygame.sprite.Group()
         self.floating_numbers = pygame.sprite.Group()
-        self.fleets = []
         self.particles = []
         self.shockwaves = []
 

@@ -167,6 +167,7 @@ FULL_360 = 360
 
 ALIEN_COLORS = {'red': 5, 'green': 10, 'yellow': 15, 'purple': 15,
                 'pink': 20, 'orange': 20}
+ALIEN_SPACING = [60, 60]
 ALIEN_INITIAL_DELAY = 2500
 ALIEN_WIDTH = 44
 ALIEN_HEIGHT = 32
