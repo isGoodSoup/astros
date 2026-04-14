@@ -10,7 +10,7 @@ from scripts.mixer import Mixer
 from scripts.settings import SCALE, SHIP_FRAMES, COLOR_BLACK, \
     COLOR_LIGHT_ORANGE, FONT_DEFAULT_SIZE, TRAIT_CARD_SIZE, HEADER_FLOAT, \
     SPRITE_FLOAT, FPS, SHIP_SELECTION_OFFSET, FLIGHT_SPEED, FONT_MEDIUM_SIZE, \
-    ALPHA
+    ALPHA, TOGGLE_ENABLE_INTRO
 from scripts.shared import fade, joysticks
 from scripts.traits import TraitOption, TraitGridSquare, TraitPool
 from scripts.utils import render_fade
@@ -87,7 +87,8 @@ class Mods:
                     TraitPool(self.context)).run(clock, screen, screen_size,
                                            hud_ratio, crt)
                 selected_traits = traits.get_traits() if traits else []
-                intro = Intro(self.context, screen, clock, crt).run()
+                if TOGGLE_ENABLE_INTRO:
+                    intro = Intro(self.context, screen, clock, crt).run()
                 game = Game(self.context, screen, screen_size, crt, hud_ratio,
                             selected_traits, self.ships,
                             self.selected_ship_index)

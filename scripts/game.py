@@ -5,25 +5,21 @@ import pygame
 import scripts.assets as assets
 from scripts import runtime
 from scripts.clock import Clock
-from scripts.controller import update_controller
 from scripts.events import Events
 from scripts.fonts import FontManager
-from scripts.game_over import game_lost
 from scripts.hud import HUD
-from scripts.input import Input, update_cursor
+from scripts.input import Input
 from scripts.mixer import Mixer
-from scripts.movement import update_movement, update_ship_angle
-from scripts.render import render_frame
+from scripts.render import RenderScreen
 from scripts.settings import *
-from scripts.shared import joysticks, controller, fade
+from scripts.shared import fade
 from scripts.skill import SkillManager
 from scripts.soundlib import apply_volume
 from scripts.spawns import SpawnManager
 from scripts.sprites import SpriteManager
 from scripts.state import GameState
 from scripts.tutorial import Tutorial
-from scripts.update import update_game
-from scripts.utils import render_fade
+from scripts.update import Updater
 
 # Copyright (c) 2026 Diego
 # Licensed under the MIT License. See LICENSE file for details.
@@ -43,6 +39,7 @@ class Game:
         self.delta = 0
         self.screen = screen
         self.screen_size = screen_size
+        self.hud_ratio = hud_ratio
         self.crt = crt
         self.running = True
         self.fps = FPS
@@ -52,7 +49,9 @@ class Game:
         self.state = GameState()
         self.input = Input(screen_size)
         self.clock = Clock()
+        self.updater = Updater()
         self.font = FontManager(None, FONT_DEFAULT_SIZE)
+        self.render = RenderScreen()
         self.ships = ships
         self.ship_index = ship_index
         self.sprites = SpriteManager(self)
@@ -100,48 +99,14 @@ class Game:
 
             self.input.update(self, events)
             self.input.act(self, events)
-
-            if not self.state.pause or self.hud.skill_tab.active:
-                update_controller(self, screen_size, self.delta)
-                if not self.hud.skill_tab.active:
-                    update_movement(self, self.delta, screen_size)
-                    update_cursor(self, self.delta, screen_size)
-                    update_ship_angle(self)
-
-            if not self.state.pause and not self.state.game_over:
-                update_game(self, self.delta, screen_size, self.hud_padding)
-                self.clock.update_time(self)
-
-            if TOGGLE_TUTORIAL:
-                self.tutorial.update(self, self.delta)
-
-            render_frame(self, screen, self.font, self.hud_padding)
+            self.updater.update(self)
 
             if not self.state.game_over and self.state.can_show_hud:
-                self.hud.update(self, self.font, screen, hud_ratio,
+                self.hud.update(self, self.font, self.screen, self.hud_ratio,
                                 self.hud_padding)
 
-            if self.input.cursor_visible:
-                pos = self.input.cursor_pos if self.input.mode == INPUT_CONTROLLER else pygame.mouse.get_pos()
-                screen.blit(self.cursor_sprite, (int(pos[0]), int(pos[1])))
+            self.render.draw(self)
 
-            if self.state.game_over:
-                game_lost(self, self.font, screen, screen_size)
-
-            if self.state.can_screen_shake:
-                if self.screen_shake > 0:
-                    self.screen_shake -= 1
-
-                render_offset = self.ship.taken_damage() if self.screen_shake else [0, 0]
-                if joysticks and self.screen_shake and self.state.can_rumble:
-                    controller.rumble(1, 2, BASE_RUMBLE_MS + 20)
-
-                if not self.state.game_over:
-                    screen.blit(pygame.transform.scale(screen, screen_size),
-                                render_offset)
-
-            alpha = render_fade(screen, screen_size)
-            crt.render(screen)
         pygame.quit()
 
     def apply_traits(self):

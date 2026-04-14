@@ -2,21 +2,13 @@ import pygame
 
 import scripts.assets as assets
 import scripts.game as g
+from scripts.game_over import game_lost
 from scripts.lang import LANGS
 from scripts.runtime import get_desc
-from scripts.settings import (TOGGLE_TUTORIAL, COLOR_BLUE, COLOR_RED, \
-                              COLOR_GREEN, COLOR_WHITE, STAT_Y_OFFSET,
-                              SKILL_TAB_OFFSETS, ASTEROID_PHASES,
-                              INPUT_CONTROLLER, SCALE, PAUSED_TEXT_Y,
-                              SKILL_TAB_PADDING, SKTAB_HEADER_OFFSET,
-                              SKILL_TAB_GRID, ALPHA, COLOR_BLACK,
-                              SETTINGS_LINESPACE, SETTINGS_X_OFFSET,
-                              SETTINGS_VOLUME_WIDTH,
-                              SETTINGS_VOLUME_HEIGHT, SETTINGS_Y_OFFSET,
-                              SETTINGS_COL_OFFSET, SETTINGS_DEFINITION)
-from scripts.shared import joysticks
+from scripts.settings import *
+from scripts.shared import joysticks, controller
+from scripts.utils import render_fade
 from scripts.utils import wrap_text
-
 
 def render_frame(game, screen, font, hud_padding):
     now = pygame.time.get_ticks()
@@ -271,3 +263,29 @@ def render_waves(game, screen):
 
         screen.blit(surf,
             (wave.x - wave.radius, wave.y - wave.radius))
+
+class RenderScreen:
+    def draw(self, game):
+        render_frame(game, game.screen, game.font, game.hud_padding)
+
+        if game.input.cursor_visible:
+            pos = game.input.cursor_pos if game.input.mode == INPUT_CONTROLLER else pygame.mouse.get_pos()
+            game.screen.blit(game.cursor_sprite, (int(pos[0]), int(pos[1])))
+
+        if game.state.game_over:
+            game_lost(game, game.font, game.screen, game.screen_size)
+
+        if game.state.can_screen_shake:
+            if game.screen_shake > 0:
+                game.screen_shake -= 1
+
+            render_offset = game.ship.taken_damage() if game.screen_shake else [0, 0]
+            if joysticks and game.screen_shake and game.state.can_rumble:
+                controller.rumble(1, 2, BASE_RUMBLE_MS + 20)
+
+            if not game.state.game_over:
+                game.screen.blit(pygame.transform.scale(game.screen, game.screen_size),
+                            render_offset)
+
+        alpha = render_fade(game.screen, game.screen_size)
+        game.crt.render(game.screen)

@@ -5,7 +5,7 @@ import pygame
 from scripts.celestial import BlackHole
 from scripts.explode import Explosion
 from scripts.settings import (HIGH_RUMBLE_MS, SHOCKWAVE_SPEED, SHOCKWAVE_RADIUS, \
-                              SCREEN_SHAKE, ALIEN_SHOT_TIMER_MS)
+                              SCREEN_SHAKE, ALIEN_SHOT_TIMER_MS, CROSSHAIRS)
 from scripts.shared import joysticks, controller
 from scripts.shockwave import Shockwave
 
@@ -24,7 +24,7 @@ class Events:
         shots_this_frame = 0
         if random.random() > 0.5:
             shooters = random.sample(game.sprites.aliens.sprites(),
-                                     k=min(1, len(self.sprites.aliens)))
+                                     k=min(1, len(game.sprites.aliens)))
         else:
             shooters = [alien for alien in game.sprites.aliens.sprites()
                         if abs(alien.rect.centerx -

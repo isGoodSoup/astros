@@ -7,8 +7,11 @@ from scripts.asteroid import Asteroid
 from scripts.boss import Boss
 from scripts.celestial import random_celestial, is_valid_spawn
 from scripts.collision import check_collision
+from scripts.controller import update_controller
 from scripts.explode import Explosion
 from scripts.fleet import spawn_fleet
+from scripts.input import update_cursor
+from scripts.movement import update_movement, update_ship_angle
 from scripts.particle import Particle
 from scripts.runtime import get_boss_pos, get_upgrade_position, get_ship_ember
 from scripts.settings import *
@@ -16,6 +19,22 @@ from scripts.shared import joysticks, controller
 from scripts.upgd import Upgrade
 from scripts.utils import resource_path, formulize
 
+
+class Updater:
+    def update(self, game):
+        if not game.state.pause or game.hud.skill_tab.active:
+            update_controller(game, game.screen_size, game.delta)
+            if not game.hud.skill_tab.active:
+                update_movement(game, game.delta, game.screen_size)
+                update_cursor(game, game.delta, game.screen_size)
+                update_ship_angle(game)
+
+        if not game.state.pause and not game.state.game_over:
+            update_game(game, game.delta, game.screen_size, game.hud_padding)
+            game.clock.update_time(game)
+
+        if TOGGLE_TUTORIAL:
+            game.tutorial.update(game, game.delta)
 
 def set_hud(screen_size):
     width, height = screen_size

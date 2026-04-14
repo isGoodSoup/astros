@@ -146,7 +146,7 @@ class AlienFleet:
 
 def new_fleet_block(game):
     rows = random.randint(4, 6)
-    cols = random.randint(2, 12)
+    cols = random.randint(2, max(12, rows // 2))
     return rows, cols
 
 def spawn_fleet(game, phase_index):
