@@ -17,6 +17,7 @@ class Alien(Entity):
 
     def update(self):
         self.hover_around()
+        self.rect.x += self._hover_speed
         if self.hitpoints <= 0:
             self.kill()
 
