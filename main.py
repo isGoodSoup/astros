@@ -1,13 +1,13 @@
 import json
 
 from pygame.constants import *
-from pygame.display import toggle_fullscreen
 
 import scripts.assets as assets
-from scripts.context import AppContext
 from scripts.celestial import *
+from scripts.context import AppContext
 from scripts.crt import CRT
 from scripts.fonts import FontManager
+from scripts.game import Game
 from scripts.mixer import Mixer
 from scripts.mods import Mods
 from scripts.settings import *
@@ -42,7 +42,6 @@ class Menu:
         self.transitioning = False
         self.last_blink = 0
         pygame.mouse.set_visible(False)
-        toggle_fullscreen()
         fade.start('in')
 
     def run(self):
@@ -98,8 +97,15 @@ class Menu:
                 return
 
     def init_game(self):
-        mods = Mods(self.context, self.screen, self.screen_size, self.hud_ratio)
-        mods.run(self.clock, self.screen, self.screen_size, self.hud_ratio,
+        if TOGGLE_SKIP:
+            game = (Game(self.context, self.screen, self.screen_size, self.crt,
+                        self.hud_ratio, [], assets.SHIPS, 0)
+                    .run(self.clock, self.screen, self.screen_size,
+                         self.hud_ratio, self.crt))
+            self.running = False
+        else:
+            mods = Mods(self.context, self.screen, self.screen_size, self.hud_ratio)
+            mods.run(self.clock, self.screen, self.screen_size, self.hud_ratio,
                  self.crt)
         self.running = False
 
