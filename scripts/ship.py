@@ -13,7 +13,7 @@ from scripts.runtime import get_ship_ember
 
 class Ship(Entity):
     def __init__(self, image, game, x, y):
-        super().__init__(image, x, y)
+        super().__init__(image, x, y, scale=True)
         self.base_image = self.image
         self.game = game
         self.current_angle = SHIP_BASE_ANGLE

@@ -2,6 +2,7 @@ import random
 
 import pygame
 
+from scripts.enemies import Alien
 from scripts import upgd
 from scripts.asteroid import Asteroid
 from scripts.boss import Boss
@@ -62,7 +63,8 @@ def spawner(game):
         return
 
     if game.state.phase_fade <= 0:
-        # spawn_fleet(game) # TODO Spawn fleet
+        alien = Alien('red', 400, 200)
+        game.sprites.aliens.add(alien)
         game.spawns.last_reinforcement_spawn = now
 
     if game.state.phase_index in ASTEROID_PHASES:
