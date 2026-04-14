@@ -8,6 +8,8 @@ from scripts.constants import *
 from scripts.levels import DIFFICULTY_SHIP_SETTINGS
 from scripts.entity import Entity
 from scripts.particle import Particle
+from scripts.runtime import get_ship_ember
+
 
 class Ship(Entity):
     def __init__(self, image, game, x, y):
@@ -116,7 +118,7 @@ class Ship(Entity):
                 location=spawn_pos,
                 velocity=vel,
                 timer=random.randint(20, 40),
-                color=(255, random.randint(120, 180), 50),
+                color=(get_ship_ember()),
                 radius=random.randint(2, 4)
             )
         )
