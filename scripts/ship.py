@@ -42,6 +42,7 @@ class Ship(pygame.sprite.Sprite):
         self.arsenal = total_arsenal
         self.base_damage = SHIP_BASE_DAMAGE
         self.damage = self.base_damage
+        self.damage_taken_multiplier = 1.0
         self.combo_multiplier = 1.0
         self.powerup_multiplier = 1.0
         self.base_crit_chance = SHIP_BASE_CRIT_CHANCE
@@ -81,6 +82,7 @@ class Ship(pygame.sprite.Sprite):
         self.perk_points = 0
         self.xp_growth = SHIP_XP_GROWTH
         self.credits = 0
+        self.credits_multiplier = 1.0
 
         self.hit = False
         self.critical = False
@@ -94,6 +96,40 @@ class Ship(pygame.sprite.Sprite):
 
         self.last_hit_time = 0
         self.hit_cooldown = SHIP_IFRAMES
+
+        self.apply_difficulty()
+
+    def apply_difficulty(self):
+        settings = DIFFICULTY_SHIP_SETTINGS[self.game.state.difficulty]
+
+        self.damage_taken_multiplier = settings["damage_taken_multiplier"]
+        self.max_hitpoints = int(self.max_hitpoints * settings["hp_multiplier"])
+        self.hitpoints = self.max_hitpoints
+
+        self.max_shield = int(self.max_shield * settings["shield_multiplier"])
+        self.base_max_shield = self.max_shield
+        self.shield = self.max_shield
+
+        self.base_damage = int(self.base_damage * settings["damage_multiplier"])
+        self.crit_chance = self.base_crit_chance + settings["crit_bonus"]
+        self.evasion += settings["evasion_bonus"]
+
+        self.shot_cooldown = int(self.shot_cooldown *
+                                 settings["cooldown_multiplier"])
+        self.heat_per_shot = settings["heat_per_shot"]
+
+        self.shield_regen_multiplier = settings["shield_regen_multiplier"]
+        self.shield_regen_rate = int(
+            self.max_shield * self.shield_regen_multiplier)
+
+        for gun, ammo in self.guns_ammo.items():
+            if gun != "beam":
+                scaled_ammo = int(ammo * settings["ammo_multiplier"])
+                self.guns_ammo[gun] = scaled_ammo
+                self.base_guns_ammo[gun] = scaled_ammo
+
+        self.xp_growth = settings["xp_growth"]
+        self.credits_multiplier = settings["credits_multiplier"]
 
     def add_skill(self, skill):
         self.skills.append(skill)
@@ -148,7 +184,7 @@ class Ship(pygame.sprite.Sprite):
         self.image = pygame.transform.rotate(self.original_image,
                                              -self.current_angle)
 
-    def apply_heat(self):
+    def apply_heat(self, game):
         if not self.can_overheat:
             return
 
@@ -176,7 +212,7 @@ class Ship(pygame.sprite.Sprite):
                 return False
         return True
 
-    def shoot(self, gun_type=None, target=None):
+    def shoot(self, game, gun_type=None, target=None):
         if not self.can_shoot():
             return []
 
@@ -266,7 +302,7 @@ class Ship(pygame.sprite.Sprite):
                 self.guns_ammo['nuke'] -= cost
                 self.clamp_ammo(gun_type)
 
-        self.apply_heat()
+        self.apply_heat(game)
         return projectiles
 
     def clamp_ammo(self, gun):
