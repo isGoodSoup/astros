@@ -27,6 +27,7 @@ class Updater:
                 update_movement(game, game.delta, game.screen_size)
                 update_cursor(game, game.delta, game.screen_size)
                 update_ship_angle(game)
+                game.ship.emit_thruster(game.sprites)
 
         if not game.state.pause and not game.state.game_over:
             update_game(game, game.delta, game.screen_size, game.hud_padding)

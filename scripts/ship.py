@@ -7,7 +7,7 @@ from scripts.proj import Projectile
 from scripts.constants import *
 from scripts.levels import DIFFICULTY_SHIP_SETTINGS
 from scripts.entity import Entity
-
+from scripts.particle import Particle
 
 class Ship(Entity):
     def __init__(self, image, game, x, y):
@@ -97,6 +97,29 @@ class Ship(Entity):
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
+
+    def emit_thruster(self, sprite_manager):
+        if not self.moving:
+            return
+
+        rad = math.radians(self.current_angle + SHIP_FORWARD_OFFSET)
+        backward = pygame.Vector2(-math.cos(rad), math.sin(rad))
+        spawn_pos = pygame.Vector2(self.rect.center) + backward * 18
+
+        vel = backward * random.uniform(1.5, 3.5)
+
+        vel.x += random.uniform(-0.4, 0.4)
+        vel.y += random.uniform(-0.4, 0.4)
+
+        sprite_manager.particles.append(
+            Particle(
+                location=spawn_pos,
+                velocity=vel,
+                timer=random.randint(20, 40),
+                color=(255, random.randint(120, 180), 50),
+                radius=random.randint(2, 4)
+            )
+        )
 
     def apply_difficulty(self):
         settings = DIFFICULTY_SHIP_SETTINGS[self.game.state.difficulty]

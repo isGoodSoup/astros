@@ -12,6 +12,7 @@ class Particle:
     def update(self):
         self.location += self.velocity
         self.timer -= 1
+        return self.timer > 0
 
     def draw(self, screen):
         if self.timer > 0:
