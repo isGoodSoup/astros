@@ -9,6 +9,7 @@ from scripts.levels import DIFFICULTY_SHIP_SETTINGS
 from scripts.entity import Entity
 from scripts.particle import Particle
 from scripts.runtime import get_ship_ember
+from scripts.utils import legacy
 
 
 class Ship(Entity):
@@ -101,29 +102,29 @@ class Ship(Entity):
         screen.blit(self.image, self.rect)
 
     def emit_thruster(self, sprite_manager):
-        if not self.moving:
-            return
-
-        local_offset = pygame.Vector2(0, self.rect.height // 2 - 6)
-
-        rad = math.radians(self.current_angle + SHIP_FORWARD_OFFSET)
-        rotated_offset = local_offset.rotate(-math.degrees(rad))
-
-        spawn_pos = pygame.Vector2(self.rect.center) + rotated_offset
-        backward = pygame.Vector2(-math.cos(rad), math.sin(rad))
-        vel = backward * random.uniform(1.5, 3.5)
-        vel.x += random.uniform(-0.4, 0.4)
-        vel.y += random.uniform(-0.4, 0.4)
-
-        sprite_manager.particles.append(
-            Particle(
-                location=spawn_pos,
-                velocity=vel,
-                timer=random.randint(20, 40),
-                color=get_ship_ember(),
-                radius=random.randint(2, 4)
-            )
+        spawn_pos = pygame.Vector2(
+            self.rect.centerx,
+            self.rect.bottom - 4
         )
+
+        for _ in range(random.randint(1, 8)):
+            sprite_manager.particles.append(
+                Particle(
+                    location=(
+                        spawn_pos.x + random.uniform(-1.5, 1.5),
+                        spawn_pos.y + random.uniform(-1.0, 1.0)
+                    ),
+                    velocity=(
+                        random.uniform(-0.05, 0.05),
+                        random.uniform(0.05, 0.15)
+                    ),
+                    timer=random.randint(10, 18),
+                    color=get_ship_ember(),
+                    size=random.randint(10, 20),
+                    shrink=True,
+                    fade=True
+                )
+            )
 
     def apply_difficulty(self):
         settings = DIFFICULTY_SHIP_SETTINGS[self.game.state.difficulty]
@@ -200,15 +201,18 @@ class Ship(Entity):
         self.gun = self.gun_order[(idx + 1) % len(self.gun_order)]
         self.update_fire_rate()
 
+    @legacy
     def rotate_to(self, target_angle, smooth=True):
         if smooth:
-            angle_diff = ((target_angle - self.current_angle + 180) % 360 - 180)
+            angle_diff = ((
+                                  target_angle - self.current_angle + 180) % FULL_360 - 180)
             self.current_angle += angle_diff * 0.3
         else:
             self.current_angle = target_angle + SHIP_FORWARD_OFFSET
 
         self._apply_rotation()
 
+    @legacy
     def _apply_rotation(self):
         self.image = pygame.transform.rotozoom(
             self.base_image,

@@ -27,7 +27,9 @@ class Updater:
             if not game.hud.skill_tab.active:
                 update_movement(game, game.delta, game.screen_size)
                 update_cursor(game, game.delta, game.screen_size)
-                update_ship_angle(game)
+                if TOGGLE_ROTATION:
+                    update_ship_angle(game)
+
                 game.ship.emit_thruster(game.sprites)
 
         if not game.state.pause and not game.state.game_over:
