@@ -1,5 +1,4 @@
 import json
-import random
 
 import pygame
 
@@ -93,27 +92,8 @@ class Game:
                     self.mixer.next_track()
 
                 if (event.type == self.events.ALIENLASER and not
-                self.state.pause and not self.state.game_over):
-                    if pygame.time.get_ticks() < self.sprites.alien_delay:
-                        continue
-                    shots_this_frame = 0
-                    if random.random() > 0.5:
-                        shooters = random.sample(self.sprites.aliens.sprites(),
-                                                 k=min(1, len(self.sprites.aliens)))
-                    else:
-                        shooters = [alien for alien in self.sprites.aliens.sprites()
-                                    if abs(alien.rect.centerx -
-                                           self.ship.rect.centerx) <= CROSSHAIRS]
-
-                    for alien in shooters:
-                        new_projectiles = alien.shoot(self.ship,
-                                                      alien.shot_cooldown)
-                        if new_projectiles:
-                            shots_this_frame += len(new_projectiles)
-                            self.sprites.enemy_projectiles.add(*new_projectiles)
-
-                    if shots_this_frame > 0 and self.state.play_sound:
-                        self.mixer.play(0)
+                    self.state.pause and not self.state.game_over):
+                    self.events.alien_shoot_event(self)
 
             screen.fill(BACKGROUND)
             self.delta = clock.tick(self.fps) / ONE_SECOND

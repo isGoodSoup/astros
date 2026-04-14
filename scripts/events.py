@@ -17,6 +17,29 @@ class Events:
         self.MUSIC_END = pygame.USEREVENT + 2
         pygame.mixer.music.set_endevent(self.MUSIC_END)
 
+    def alien_shoot_event(self, game):
+        if pygame.time.get_ticks() < game.sprites.alien_delay:
+            return
+
+        shots_this_frame = 0
+        if random.random() > 0.5:
+            shooters = random.sample(game.sprites.aliens.sprites(),
+                                     k=min(1, len(self.sprites.aliens)))
+        else:
+            shooters = [alien for alien in game.sprites.aliens.sprites()
+                        if abs(alien.rect.centerx -
+                               game.ship.rect.centerx) <= CROSSHAIRS]
+
+        for alien in shooters:
+            new_projectiles = alien.shoot(game.ship,
+                                          alien.shot_cooldown)
+            if new_projectiles:
+                shots_this_frame += len(new_projectiles)
+                game.sprites.enemy_projectiles.add(*new_projectiles)
+
+        if shots_this_frame > 0 and game.state.play_sound:
+            game.mixer.play(0)
+
     def nuke_event(self, center, game):
         game.sprites.shockwaves.append(Shockwave(center, max_radius=SHOCKWAVE_RADIUS,
                                          speed=SHOCKWAVE_SPEED))
