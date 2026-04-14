@@ -8,6 +8,7 @@ from scripts.settings import (
     SCALE, ALIEN_ADVANTAGE, COLOR_GREEN, ALIEN_COLORS,
     ELITE_DAMAGE_MULT, ELITE_HP_MULT
 )
+from scripts.levels import DIFFICULTY_ENEMY_SETTINGS
 from scripts.utils import resource_path
 
 
@@ -49,6 +50,7 @@ class Alien(pygame.sprite.Sprite):
         self.hit = False
 
     def _apply_color_stats(self, color: str):
+        settings = DIFFICULTY_ENEMY_SETTINGS[self.game.state.difficulty]
         color_scale = ALIEN_COLORS[color]
         self.level = self.ship.level + ALIEN_ADVANTAGE * color_scale
         self.max_hitpoints = int(2 * self.level * settings["hp_multiplier"])

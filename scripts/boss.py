@@ -10,7 +10,7 @@ from scripts.settings import (COLOR_RED, BOSS_BASE_SPEED, \
                               BOSS_BASE_HITPOINTS, HIGH_FIRE_RATE, BOSS_COLORS,
                               BOSS_BASE_DAMAGE, ALIEN_HEIGHT, ALIEN_WIDTH)
 from scripts.utils import resource_path
-
+from scripts.levels import  DIFFICULTY_ENEMY_SETTINGS
 
 class Boss(pygame.sprite.Sprite):
     def __init__(self, game, ship, projectiles, x, y, color, frame=0,
