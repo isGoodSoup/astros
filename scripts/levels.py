@@ -1,11 +1,4 @@
-from enum import Enum, auto
-
-
-class Difficulty(Enum):
-    TOURIST = auto()
-    EXPLORER = auto()
-    PILOT = auto()
-    NIGHTMARE = auto()
+from scripts.difficulty import Difficulty
 
 DIFFICULTY_SHIP_SETTINGS = {
     Difficulty.TOURIST: {

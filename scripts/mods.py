@@ -3,9 +3,9 @@ import math
 import pygame
 
 import scripts.assets as assets
-from scripts.intro import Intro
+from scripts.difficulty import DifficultyPool
 from scripts.fonts import FontManager
-from scripts.game import Game
+from scripts.intro import Intro
 from scripts.mixer import Mixer
 from scripts.settings import SCALE, SHIP_FRAMES, COLOR_BLACK, \
     COLOR_LIGHT_ORANGE, FONT_DEFAULT_SIZE, TRAIT_CARD_SIZE, HEADER_FLOAT, \
@@ -86,9 +86,13 @@ class Mods:
                 traits = TraitChoiceScreen(self.context, screen, screen_size, hud_ratio,
                     TraitPool(self.context)).run(clock, screen, screen_size,
                                            hud_ratio, crt)
+                difficulties = Difficulties(self.context, screen, screen_size, hud_ratio,
+                    DifficultyPool(self.context)).run(clock, screen, screen_size,
+                                           hud_ratio, crt)
                 selected_traits = traits.get_traits() if traits else []
                 if TOGGLE_ENABLE_INTRO:
                     intro = Intro(self.context, screen, clock, crt).run()
+
                 game = Game(self.context, screen, screen_size, crt, hud_ratio,
                             selected_traits, self.ships,
                             self.selected_ship_index)
@@ -309,3 +313,79 @@ class ChoiceResult:
 
     def get_traits(self):
         return [opt.trait for opt in self.selected_options]
+
+class Difficulties:
+    def __init__(self, context, screen, screen_size, hud_ratio,
+                 pool: DifficultyPool):
+        self.context = context
+        self.local = context.local
+        self.screen = screen
+        self.screen_size = screen_size
+
+        self.pool = pool
+        self.options = pool.options
+
+        self.font = FontManager(None, FONT_DEFAULT_SIZE).get_font()
+
+        self.cards = [TraitGridSquare(opt, self.font)
+            for opt in self.options]
+
+        self.index = 0
+        self.selected = None
+        self.exiting = False
+        fade.start('in')
+
+    def run(self, clock, screen, screen_size, hud_ratio, crt):
+        while not self.exiting:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.exiting = True
+
+                self.input(event)
+
+            screen.fill(COLOR_BLACK)
+            clock.tick(FPS)
+
+            self.render()
+
+            alpha = render_fade(screen, screen_size)
+            crt.render(screen)
+
+        return self.selected.trait
+
+    def input(self, event):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                self.index = (self.index - 1) % len(self.options)
+                mixer.play(5)
+
+            elif event.key == pygame.K_RIGHT:
+                self.index = (self.index + 1) % len(self.options)
+                mixer.play(5)
+
+            elif event.key in (pygame.K_RETURN, pygame.K_SPACE):
+                self.selected = self.options[self.index]
+                mixer.play(4)
+                self.exiting = True
+                fade.start('out')
+
+    def render(self):
+        cx = self.screen_size[0] // 2
+        cy = self.screen_size[1] // 2
+        time = pygame.time.get_ticks()
+
+        header_float = 4 * math.sin(time * HEADER_FLOAT)
+        header = self.local.t('game.difficulty.header')
+        header_surf = self.font.render(header, True, COLOR_LIGHT_ORANGE)
+        header_rect = header_surf.get_rect(
+            center=(cx, 100 + int(header_float)))
+        self.screen.blit(header_surf, header_rect)
+
+        spacing = TRAIT_CARD_SIZE + 50
+
+        for i, card in enumerate(self.cards):
+            x = cx + (i - (len(self.cards) - 1) / 2) * spacing
+            card.set_selected(i == self.index)
+            card.draw(self.screen, (x, cy))
+
+        alpha = render_fade(self.screen, self.screen_size)
