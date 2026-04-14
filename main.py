@@ -14,7 +14,7 @@ from scripts.settings import *
 from scripts.shared import fade
 from scripts.update import set_hud
 from scripts.utils import render_fade
-
+from scripts.shared import controller
 
 class Menu:
     def __init__(self, context):
@@ -41,6 +41,7 @@ class Menu:
         self.running = True
         self.transitioning = False
         self.last_blink = 0
+        self.skip = False
         pygame.mouse.set_visible(False)
         fade.start('in')
 
@@ -50,11 +51,17 @@ class Menu:
                 if event.type == pygame.QUIT:
                     self.running = False
                 elif event.type == pygame.KEYDOWN:
+                    if event.mod & KMOD_CTRL and event.key == K_s:
+                        self.skip = True
+
                     if any(pygame.key.get_pressed()) and not self.transitioning:
                         self.mixer.play(4)
                         fade.start('out')
                         self.transitioning = True
                 elif event.type == pygame.JOYBUTTONDOWN:
+                    if controller.get_button(8) and controller.get_button(9):
+                        self.skip = True
+
                     if event.button in range(0, 9):
                         self.mixer.play(4)
                         fade.start('out')
@@ -97,7 +104,7 @@ class Menu:
                 return
 
     def init_game(self):
-        if TOGGLE_SKIP:
+        if TOGGLE_SKIP or self.skip:
             game = (Game(self.context, self.screen, self.screen_size, self.crt,
                         self.hud_ratio, [], assets.SHIPS, 0)
                     .run(self.clock, self.screen, self.screen_size,
