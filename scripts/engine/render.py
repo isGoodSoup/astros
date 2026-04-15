@@ -69,8 +69,8 @@ def render_frame(game, screen, font, hud_padding):
     game.sprites.explosions.draw(screen)
 
     if game.hud.skill_tab.active and game.state.current_phase_options:
-        cursor_pos = game.input.cursor_pos if joysticks else pygame.mouse.get_pos()
-        game.input.selected_skill  = None
+        cursor_pos = game.input.cursor_pos
+        game.input.selected_skill = None
 
         for skill in game.state.current_phase_options:
             if skill.is_hovered(cursor_pos):
@@ -270,7 +270,7 @@ class RenderScreen:
                             game.hud_padding)
 
         if game.input.cursor_visible:
-            pos = game.input.cursor_pos if game.input.mode == INPUT_CONTROLLER else pygame.mouse.get_pos()
+            pos = game.input.cursor_pos
             game.screen.blit(game.cursor_sprite, (int(pos[0]), int(pos[1])))
 
         if game.state.game_over:

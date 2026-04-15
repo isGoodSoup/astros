@@ -80,12 +80,11 @@ def update_movement(game, delta, screen_size):
         game.ship.tower_boost_applied = True
 
     if game.hud.skill_tab.active:
-        cursor_speed = game.input.cursor_speed * delta
-
         mouse_pos = pygame.mouse.get_pos()
         if mouse_pos != getattr(game, "last_cursor_pos", (0, 0)):
             game.input.mode = INPUT_MOUSE
             game.input.last_input_time = pygame.time.get_ticks()
+            game.input.cursor_pos = list(mouse_pos)
         game.last_cursor_pos = mouse_pos
 
         if abs(game.input.right_joystick[0]) > 0.05 or abs(
@@ -93,10 +92,8 @@ def update_movement(game, delta, screen_size):
             game.input.mode = INPUT_CONTROLLER
             game.input.last_input_time = pygame.time.get_ticks()
 
-        if game.input.mode == INPUT_MOUSE:
-            game.input.cursor_pos = list(mouse_pos)
-
-        elif game.input.mode == INPUT_CONTROLLER:
+        if game.input.mode == INPUT_CONTROLLER:
+            cursor_speed = game.input.cursor_speed * delta
             game.input.cursor_pos[0] += game.input.right_joystick[
                                             0] * cursor_speed
             game.input.cursor_pos[1] += game.input.right_joystick[

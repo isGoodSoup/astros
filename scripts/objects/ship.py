@@ -214,7 +214,7 @@ class Ship(AnimatedEntity):
 
         pos = self.hitbox.center
 
-        direction_vec = aim_at_cursor(pos)
+        direction_vec = aim_at_cursor(game, pos)
         dir_x, dir_y = direction_vec.x, direction_vec.y
 
         projectiles = []
@@ -376,10 +376,10 @@ def get_nearest_enemy(ship_pos, enemies):
     return closest
 
 
-def aim_at_cursor(ship_pos):
-    mouse = pygame.mouse.get_pos()
-    dx = mouse[0] - ship_pos[0]
-    dy = mouse[1] - ship_pos[1]
+def aim_at_cursor(game, ship_pos):
+    cursor = game.input.cursor_pos
+    dx = cursor[0] - ship_pos[0]
+    dy = cursor[1] - ship_pos[1]
 
     vec = pygame.Vector2(dx, dy)
     if vec.length_squared() > 0:

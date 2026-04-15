@@ -4,9 +4,8 @@ import pygame
 
 from scripts.engine import upgd
 from scripts.engine.collision import check_collision
-from scripts.engine.controller import update_controller
 from scripts.engine.difficulty import Difficulty
-from scripts.engine.input import update_cursor
+from scripts.engine.input import update_cursor, update_axis
 from scripts.engine.movement import update_movement
 from scripts.engine.runtime import get_boss_pos, get_upgrade_position, \
     get_ship_ember
@@ -26,8 +25,8 @@ __all__ = ['Updater']
 
 class Updater:
     def update(self, game):
+        update_axis(game)
         if not game.state.pause or game.hud.skill_tab.active:
-            update_controller(game, game.screen_size, game.delta)
             if not game.hud.skill_tab.active:
                 update_movement(game, game.delta, game.screen_size)
                 update_cursor(game, game.delta, game.screen_size)
