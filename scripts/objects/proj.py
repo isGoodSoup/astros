@@ -56,3 +56,56 @@ class Projectile(pygame.sprite.Sprite):
 
         if self.distance_traveled >= self.range_limit:
             self.kill()
+
+class StoneProjectile(pygame.sprite.Sprite):
+    def __init__(self, pos, direction, game, speed=10, damage=1, parent=None):
+        super().__init__()
+        self.game = game
+        self.speed = speed
+        self.damage = damage
+        self.direction = pygame.Vector2(direction).normalize()
+        self.parent = parent
+        self.pos = pygame.Vector2(pos)
+        self.start_pos = pygame.Vector2(pos)
+        self.max_dist = 400
+        self.returning = False
+        self.angle = 0
+
+        # Load stone image or create a simple one
+        try:
+            self.image = pygame.image.load("assets/asteroids/asteroid_small.png").convert_alpha()
+            self.image = pygame.transform.scale(self.image, (24, 24))
+        except:
+            self.image = pygame.Surface((20, 20), pygame.SRCALPHA)
+            pygame.draw.circle(self.image, (150, 150, 150), (10, 10), 10)
+
+        self.original_image = self.image
+        self.rect = self.image.get_rect(center=pos)
+
+    def update(self, delta_time=1.0):
+        self.angle += 10
+        self.image = pygame.transform.rotate(self.original_image, self.angle)
+        self.rect = self.image.get_rect(center=self.rect.center)
+
+        if not self.returning:
+            move = self.direction * self.speed * delta_time
+            self.pos += move
+            if self.pos.distance_to(self.start_pos) >= self.max_dist:
+                self.returning = True
+        else:
+            # Return to parent or just move back to start if parent is dead
+            target = self.start_pos
+            if self.parent and self.parent.alive():
+                target = pygame.Vector2(self.parent.rect.center)
+
+            dir_to_target = (target - self.pos)
+            if dir_to_target.length() > 5:
+                self.pos += dir_to_target.normalize() * self.speed * delta_time
+            else:
+                self.kill()
+
+        self.rect.center = self.pos
+
+        if (self.pos.x < -100 or self.pos.x > self.game.screen_size[0] + 100 or
+            self.pos.y < -100 or self.pos.y > self.game.screen_size[1] + 100):
+            self.kill()

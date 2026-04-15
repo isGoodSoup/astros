@@ -5,15 +5,15 @@ import pygame
 from scripts.objects.entity import Entity
 from scripts.system.levels import (DIFFICULTY_ENEMY_SETTINGS)
 from scripts.objects.shockwave import Shockwave
-from scripts.objects.proj import Projectile
+from scripts.objects.proj import Projectile, StoneProjectile
 from scripts.system.constants import *
 
-__all__ = ['Alien', 'HeavyAlien', 'BomberAlien']
+__all__ = ['Alien', 'HeavyAlien', 'BomberAlien', 'EvokerAlien', 'StoneAlien']
 
 
 class Alien(Entity):
     def __init__(self, color, x, y, ship, game,
-                 base_hp=100, base_damage=10, base_speed=2):
+                 base_hp=100, base_damage=10, base_speed=4):
         image_path = f"assets/aliens/{color}.png"
         image = pygame.image.load(image_path).convert_alpha()
         super().__init__(image, x, y)
@@ -224,3 +224,59 @@ class BomberAlien(Alien):
             self.explode()
         else:
             super().kill()
+
+class EvokerAlien(Alien):
+    def __init__(self, x, y, ship, game):
+        super().__init__("purple", x, y, ship, game, base_hp=500,
+                         base_damage=30)
+        self.summon_cooldown = EVOKER_SUMMON_COOLDOWN
+        self.last_summon_time = pygame.time.get_ticks()
+
+    def update(self):
+        super().update()
+        now = pygame.time.get_ticks()
+        if self.aggro and now - self.last_summon_time > self.summon_cooldown:
+            self.summon()
+            self.last_summon_time = now
+
+    def summon(self):
+        from scripts.objects.particle import Particle
+        for _ in range(20):
+            angle = random.uniform(0, 2 * math.pi)
+            speed = random.uniform(2, 5)
+            velocity = (math.cos(angle) * speed, math.sin(angle) * speed)
+            self.game.sprites.particles.append(
+                Particle(self.rect.center, velocity, timer=30, color=COLOR_WHITE)
+            )
+
+        for _ in range(random.randint(2, 3)):
+            off_x = random.randint(-100, 100)
+            off_y = random.randint(-100, 100)
+            new_alien = Alien("red", self.rect.centerx + off_x,
+                              self.rect.centery + off_y, self.ship, self.game)
+            new_alien.aggro = True
+            new_alien.in_formation = False
+            self.game.sprites.aliens.add(new_alien)
+
+class StoneAlien(Alien):
+    def __init__(self, x, y, ship, game):
+        super().__init__("green", x, y, ship, game, base_hp=250,
+                         base_damage=20)
+        self.shot_cooldown = 3000
+
+    def update(self):
+        super().update()
+        now = pygame.time.get_ticks()
+        if self.aggro and now - self.last_shot_time > self.shot_cooldown:
+            self.shoot_boomerang()
+            self.last_shot_time = now
+
+    def shoot_boomerang(self):
+        target = pygame.Vector2(self.ship.rect.center)
+        pos = pygame.Vector2(self.rect.center)
+        direction = (target - pos)
+        if direction.length() > 0:
+            direction = direction.normalize()
+            stone = StoneProjectile(self.rect.center, direction, self.game,
+                                    damage=self.damage, parent=self)
+            self.game.sprites.enemy_projectiles.add(stone)

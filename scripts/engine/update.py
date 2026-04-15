@@ -3,22 +3,23 @@ import random
 import pygame
 
 from scripts.engine import upgd
+from scripts.engine.collision import check_collision
+from scripts.engine.controller import update_controller
+from scripts.engine.difficulty import Difficulty
+from scripts.engine.input import update_cursor
+from scripts.engine.movement import update_movement
+from scripts.engine.runtime import get_boss_pos, get_upgrade_position, \
+    get_ship_ember
+from scripts.engine.shared import joysticks, controller
+from scripts.engine.upgd import Upgrade
+from scripts.engine.utils import resource_path, formulize
 from scripts.objects.asteroid import Asteroid
 from scripts.objects.boss import Boss
 from scripts.objects.celestial import random_celestial, is_valid_spawn
-from scripts.engine.collision import check_collision
-from scripts.system.constants import *
-from scripts.engine.controller import update_controller
-from scripts.engine.difficulty import Difficulty
-from scripts.objects.enemies import Alien, HeavyAlien, BomberAlien
+from scripts.objects.enemies import Alien, HeavyAlien, BomberAlien, EvokerAlien, StoneAlien
 from scripts.objects.explode import Explosion
-from scripts.engine.input import update_cursor
-from scripts.engine.movement import update_movement
 from scripts.objects.particle import Particle
-from scripts.engine.runtime import get_boss_pos, get_upgrade_position, get_ship_ember
-from scripts.engine.shared import joysticks, controller
-from scripts.engine.upgd import Upgrade
-from scripts.engine.utils import resource_path, formulize, random_pos
+from scripts.system.constants import *
 
 __all__ = ['Updater']
 
@@ -182,8 +183,8 @@ def spawn_fleet(game):
                     alien_type = Alien
         else:
             alien_type = random.choices(
-                [Alien, HeavyAlien, BomberAlien],
-                weights=[0.6, 0.25, 0.15],
+                [Alien, HeavyAlien, BomberAlien, EvokerAlien, StoneAlien],
+                weights=[0.5, 0.2, 0.15, 0.08, 0.07],
                 k=1
             )[0]
 
@@ -191,8 +192,7 @@ def spawn_fleet(game):
         spawn_y = center.y + offset[1]
 
         if alien_type == Alien:
-            color = random.choice(PHASE_COLORS)
-            alien = Alien(color, spawn_x, spawn_y, game.ship, game)
+            alien = Alien('red', spawn_x, spawn_y, game.ship, game)
         else:
             alien = alien_type(spawn_x, spawn_y, game.ship, game)
 
