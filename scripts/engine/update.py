@@ -131,7 +131,7 @@ def run_transition(game):
     game.state.phase_fade = PHASE_FADE
     game.state.phase_start = True
 
-    game.spawns.last_reinforcement_spawn = pygame.time.get_ticks()
+    game.spawns.last_reinforcement_spawn = pygame.time.get_ticks() + 1000
     game.state.phase_start_time = pygame.time.get_ticks()
     game.state.phase_state = PHASE_ACTIVE
     game.spawns.boss_spawned = False
@@ -143,7 +143,7 @@ def spawn_fleet(game):
     formation_type = random.choice(formations)
 
     x = random.randint(100, game.screen_size[0] - 100)
-    y = -200
+    y = -300
     center = pygame.Vector2(x, y)
     
     offsets = []

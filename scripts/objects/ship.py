@@ -264,8 +264,10 @@ class Ship(AnimatedEntity):
                         angle_offset)
                     direction = (math.cos(angle_rad), -math.sin(angle_rad))
                 else:
-                    rad = math.radians(self.current_angle + angle_offset)
-                    direction = (math.cos(rad), -math.sin(rad))
+                    base_angle = math.atan2(dir_y, dir_x)
+                    angle_rad = base_angle + math.radians(angle_offset)
+                    direction = (math.cos(angle_rad), math.sin(angle_rad))
+
                 projectiles.append(
                     Projectile(pos, COLOR_BLUE, direction=direction,
                                speed=24, damage=self.damage))
