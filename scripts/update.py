@@ -10,7 +10,7 @@ from scripts.collision import check_collision
 from scripts.constants import *
 from scripts.controller import update_controller
 from scripts.difficulty import Difficulty
-from scripts.enemies import Alien
+from scripts.enemies import Alien, HeavyAlien, BomberAlien
 from scripts.explode import Explosion
 from scripts.input import update_cursor
 from scripts.movement import update_movement
@@ -21,6 +21,7 @@ from scripts.upgd import Upgrade
 from scripts.utils import resource_path, formulize, random_pos
 
 __all__ = ['Updater']
+
 
 class Updater:
     def update(self, game):
@@ -37,10 +38,12 @@ class Updater:
         if TOGGLE_TUTORIAL:
             game.tutorial.update(game, game.delta)
 
+
 def set_hud(screen_size):
     width, height = screen_size
     return {'left': 0, 'top': 0, 'right': width, 'bottom': height,
             'width': width, 'height': height}
+
 
 def spawner(game):
     now = pygame.time.get_ticks()
@@ -69,9 +72,11 @@ def spawner(game):
             spawn_asteroids(game)
         game.spawns.last_reinforcement_spawn = now
 
+
 def enemies_alive(game):
     return (any(a.alive() for a in game.sprites.aliens) or
             any(b.alive() for b in game.sprites.bosses))
+
 
 def update_phase(game):
     now = pygame.time.get_ticks()
@@ -97,6 +102,7 @@ def update_phase(game):
             game.state.transition_started = True
             run_transition(game)
 
+
 def run_transition(game):
     if game.state.phase_state != PHASE_TRANSITION:
         return
@@ -110,13 +116,15 @@ def run_transition(game):
 
     available_skills = game.skills.skills
     game.state.current_phase_options = random.sample(available_skills,
-        k=min(3, len(available_skills)))
+                                                     k=min(3,
+                                                           len(available_skills)))
 
     game.input.selected_skill_index = 0
     game.input.selected_skill = game.state.current_phase_options[0]
     game.state.skills_generated = True
 
-    game.state.phase_index = (game.state.phase_index + 1) % len(game.state.phases)
+    game.state.phase_index = (game.state.phase_index + 1) % len(
+        game.state.phases)
     game.state.real_phase_index += 1
 
     game.state.score = 0
@@ -129,10 +137,57 @@ def run_transition(game):
     game.spawns.boss_spawned = False
     game.ship.spawnpoint(game.screen_size, game.sprites.framew)
 
+
 def spawn_fleet(game):
-    color = random.choice(PHASE_COLORS)
+    formations = ["Block", "Clutch", "Cross", "Line"]
+    formation_type = random.choice(formations)
+
     x, y = random_pos(game)
-    game.sprites.aliens.add(Alien(color, x, y, game.ship, game))
+    center = pygame.Vector2(x, y)
+    
+    offsets = []
+    if formation_type == "Block":
+        for r in range(3):
+            for c in range(3):
+                offsets.append((c * 60 - 60, r * 60 - 60))
+    elif formation_type == "Clutch":
+        for _ in range(8):
+            offsets.append(
+                (random.randint(-100, 100), random.randint(-100, 100)))
+    elif formation_type == "Cross":
+        for i in range(-2, 3):
+            offsets.append((i * 60, 0))
+            if i != 0:
+                offsets.append((0, i * 60))
+    elif formation_type == "Line":
+        length = random.randint(3, 7)
+        horizontal = random.choice([True, False])
+        for i in range(length):
+            if horizontal:
+                offsets.append((i * 60 - (length * 30), 0))
+            else:
+                offsets.append((0, i * 60 - (length * 30)))
+
+    for offset in offsets:
+        alien_type = random.choices(
+            [Alien, HeavyAlien, BomberAlien],
+            weights=[0.6, 0.25, 0.15],
+            k=1
+        )[0]
+
+        spawn_x = center.x + offset[0]
+        spawn_y = center.y + offset[1]
+
+        if alien_type == Alien:
+            color = random.choice(PHASE_COLORS)
+            alien = Alien(color, spawn_x, spawn_y, game.ship, game)
+        else:
+            alien = alien_type(spawn_x, spawn_y, game.ship, game)
+
+        alien.formation_offset = pygame.Vector2(offset)
+        alien.formation_center = center
+        game.sprites.aliens.add(alien)
+
 
 def spawn_asteroids(game):
     if (not game.spawns.can_spawn_asteroids and game.state.difficulty ==
@@ -153,6 +208,7 @@ def spawn_asteroids(game):
 
         game.sprites.asteroids.add(asteroid)
 
+
 def spawn_boss(game):
     if not game.state.phase_spawned and not game.state.pause:
         x, y = get_boss_pos()
@@ -170,12 +226,14 @@ def spawn_boss(game):
 
         if game.spawns.boss_count > 0:
             for i in range(game.spawns.boss_count):
-                game.sprites.bosses.add(Boss(game, game.ship, game.sprites.enemy_projectiles, x, y,
-                            random.choice(color)))
+                game.sprites.bosses.add(
+                    Boss(game, game.ship, game.sprites.enemy_projectiles, x, y,
+                         random.choice(color)))
 
         game.play_music('flight')
         game.spawns.phase_spawned = True
         game.spawns.boss_alive = True
+
 
 def update_shockwaves(game):
     for wave in list(game.sprites.shockwaves):
@@ -184,20 +242,26 @@ def update_shockwaves(game):
         for asteroid in list(game.sprites.asteroids):
             if wave.affects(asteroid.rect.center):
                 game.sprites.explosions.add(Explosion(asteroid.rect.centerx,
-                              asteroid.rect.centery,
-                              game.sprites.frame_big_explode))
+                                                      asteroid.rect.centery,
+                                                      game.sprites.frame_big_explode))
                 game.state.score += game.ship.level * SCORE_SCALING * game.state.score_multiplier
-                game.ship.gain_xp(formulize(game, game.ship.level), game.mixer.sounds)
+                game.ship.gain_xp(formulize(game, game.ship.level),
+                                  game.mixer.sounds)
                 asteroid.kill()
 
         for alien in list(game.sprites.aliens):
             if wave.affects(alien.rect.center):
-                game.sprites.explosions.add(Explosion(alien.rect.centerx,
-                              alien.rect.centery,
-                              game.sprites.frame_big_explode))
-                game.state.score += (game.ship.level * SCORE_SCALING * game.state.score_multiplier)
-                game.ship.gain_xp(formulize(game, game.ship.level), game.mixer.sounds)
-                alien.kill()
+                if hasattr(alien, "explode"):
+                    alien.explode()
+                else:
+                    game.sprites.explosions.add(Explosion(alien.rect.centerx,
+                                                          alien.rect.centery,
+                                                          game.sprites.frame_big_explode))
+                    game.state.score += (
+                                game.ship.level * SCORE_SCALING * game.state.score_multiplier)
+                    game.ship.gain_xp(formulize(game, game.ship.level),
+                                      game.mixer.sounds)
+                    alien.kill()
 
         for a in list(game.sprites.asteroids):
             if not a.alive():
@@ -210,6 +274,7 @@ def update_shockwaves(game):
         if not wave.alive:
             game.sprites.shockwaves.remove(wave)
 
+
 def cleanup_groups(game):
     for group in [game.sprites.aliens,
                   game.sprites.asteroids,
@@ -217,6 +282,7 @@ def cleanup_groups(game):
         for sprite in list(group):
             if not sprite.alive():
                 group.remove(sprite)
+
 
 def update_game(game, delta, screen_size, hud_padding):
     game.ship.hit = False
@@ -245,7 +311,8 @@ def update_game(game, delta, screen_size, hud_padding):
         for _ in range(random.randint(1, 4)):
             for _ in range(10):
                 new_celestial = random_celestial(game)
-                if new_celestial and is_valid_spawn(new_celestial, game.sprites.celestials,
+                if new_celestial and is_valid_spawn(new_celestial,
+                                                    game.sprites.celestials,
                                                     CELESTIAL_MIN_DISTANCE):
                     game.sprites.celestials.add(new_celestial)
                     break
@@ -304,6 +371,7 @@ def update_game(game, delta, screen_size, hud_padding):
 
     game.sprites.celestials.update()
     game.sprites.asteroids.update()
+    game.sprites.aliens.update()
 
     if game.sprites.ship_alive:
         game.ship.update_upgrades()
@@ -312,11 +380,11 @@ def update_game(game, delta, screen_size, hud_padding):
             game.ship.critical = True
             frequency = 0
             if game.ship.critical and game.state.can_screen_shake:
-                    game.screen_shake = SCREEN_SHAKE * 2
-                    if joysticks and game.state.can_rumble:
-                        controller.rumble(frequency, 3, BASE_RUMBLE_MS * 2)
-                    game.mixer.play(6)
-                    frequency += 0.1
+                game.screen_shake = SCREEN_SHAKE * 2
+                if joysticks and game.state.can_rumble:
+                    controller.rumble(frequency, 3, BASE_RUMBLE_MS * 2)
+                game.mixer.play(6)
+                frequency += 0.1
 
         game.ship.update_position(game.ship.rect.x, game.ship.rect.y)
         trail_pos = game.ship.hitbox.midbottom
