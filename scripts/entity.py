@@ -1,7 +1,6 @@
 import pygame
 
 from scripts.constants import ENTITY_HITBOX, SCALE, SHIP_FRAMES
-from scripts.utils import resource_path
 
 
 class Entity(pygame.sprite.Sprite):
@@ -20,8 +19,8 @@ class Entity(pygame.sprite.Sprite):
 
     def _compute_hitbox(self):
         return self.rect.inflate(
-            -self.rect.width * self.hitbox_margin,
-            -self.rect.height * self.hitbox_margin
+            self.rect.width * -self.hitbox_margin,
+            self.rect.height * -self.hitbox_margin
         )
 
     def update_hitbox(self):
