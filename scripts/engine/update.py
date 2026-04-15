@@ -51,6 +51,13 @@ def spawner(game):
     if game.state.phase_state != PHASE_ACTIVE:
         return
 
+    score_goal = SCORE_BASE * game.state.score_scaling
+    reached_score = game.state.score >= score_goal
+    reached_time = now - game.state.phase_start_time >= game.state.phase_length
+
+    if reached_score or reached_time:
+        return
+
     if now - game.spawns.last_reinforcement_spawn < SPAWN_COOLDOWN:
         return
 
@@ -86,10 +93,10 @@ def update_phase(game):
     if game.state.phase_state == PHASE_ACTIVE:
         spawner(game)
 
-        score_goal = game.state.score >= score_goal
-        time = now - game.state.phase_start_time >= game.state.phase_length
+        reached_score = game.state.score >= score_goal
+        reached_time = now - game.state.phase_start_time >= game.state.phase_length
 
-        if (score_goal or time) and not enemies_alive(game):
+        if (reached_score or reached_time) and not enemies_alive(game):
             game.state.phase_state = PHASE_CLEANUP
 
     elif game.state.phase_state == PHASE_CLEANUP:
