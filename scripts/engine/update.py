@@ -15,7 +15,8 @@ from scripts.engine.utils import resource_path, formulize
 from scripts.objects.asteroid import Asteroid
 from scripts.objects.boss import Boss
 from scripts.objects.celestial import random_celestial, is_valid_spawn
-from scripts.objects.enemies import Alien, HeavyAlien, BomberAlien, EvokerAlien, StoneAlien
+from scripts.objects.enemies import Alien, HeavyAlien, BomberAlien, EvokerAlien, \
+    StoneAlien
 from scripts.objects.explode import Explosion
 from scripts.objects.particle import Particle
 from scripts.system.constants import *
@@ -152,7 +153,7 @@ def spawn_fleet(game):
     x = random.randint(100, game.screen_size[0] - 100)
     y = -300
     center = pygame.Vector2(x, y)
-    
+
     offsets = []
     if formation_type == "block":
         for r in range(3):
@@ -276,7 +277,7 @@ def update_shockwaves(game):
                                                           alien.rect.centery,
                                                           game.sprites.frame_big_explode))
                     game.state.score += (
-                                game.ship.level * SCORE_SCALING * game.state.score_multiplier)
+                            game.ship.level * SCORE_SCALING * game.state.score_multiplier)
                     game.ship.gain_xp(formulize(game, game.ship.level),
                                       game.mixer.sounds)
                     alien.kill()
