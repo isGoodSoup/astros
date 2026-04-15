@@ -10,6 +10,7 @@ from scripts.collision import check_collision
 from scripts.constants import *
 from scripts.controller import update_controller
 from scripts.difficulty import Difficulty
+from scripts.enemies import Alien
 from scripts.explode import Explosion
 from scripts.input import update_cursor
 from scripts.movement import update_movement
@@ -17,8 +18,9 @@ from scripts.particle import Particle
 from scripts.runtime import get_boss_pos, get_upgrade_position, get_ship_ember
 from scripts.shared import joysticks, controller
 from scripts.upgd import Upgrade
-from scripts.utils import resource_path, formulize
+from scripts.utils import resource_path, formulize, random_pos
 
+__all__ = ['Updater']
 
 class Updater:
     def update(self, game):
@@ -61,7 +63,7 @@ def spawner(game):
         return
 
     if game.state.phase_fade <= 0:
-        # TODO enemy spawning
+        spawn_fleet(game)
         game.spawns.last_reinforcement_spawn = now
 
     if game.state.phase_index in ASTEROID_PHASES:
@@ -127,15 +129,22 @@ def run_transition(game):
     game.spawns.boss_spawned = False
     game.ship.spawnpoint(game.screen_size, game.sprites.framew)
 
+def spawn_fleet(game):
+    if (game.state.phase_state != PHASE_ACTIVE or game.state.phase_index not
+            in ALIEN_PHASES):
+        return
+
+    color = random.choice(PHASE_COLORS)
+    x, y = random_pos(game)
+    game.sprites.aliens.add(Alien(color, x, y, game.ship, game))
+
 def spawn_asteroids(game):
     if (not game.spawns.can_spawn_asteroids and game.state.difficulty ==
             Difficulty.TOURIST):
         return
 
-    if game.state.phase_state != PHASE_ACTIVE:
-        return
-
-    if game.state.phase_index not in ASTEROID_PHASES:
+    if (game.state.phase_state != PHASE_ACTIVE or
+            game.state.phase_index not in ASTEROID_PHASES):
         return
 
     spawns = random.randint(5, 10)

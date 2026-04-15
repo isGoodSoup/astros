@@ -17,6 +17,8 @@ from scripts.traits import TraitOption, TraitGridSquare, TraitPool
 from scripts.utils import render_fade
 
 mixer = Mixer()
+__all__ = ['Mods', 'TraitChoiceScreen', 'ChoiceNode', 'ChoiceResult',
+           'Difficulties']
 
 class Mods:
     def __init__(self, context, screen, screen_size, hud_ratio):

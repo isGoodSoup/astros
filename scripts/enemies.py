@@ -1,13 +1,19 @@
-from scripts.entity import Entity
-from scripts.difficulty import DIFFICULTY_ENEMY_SETTINGS
 import random
 
+import pygame
+
+from scripts.entity import Entity
+from scripts.levels import (DIFFICULTY_ENEMY_SETTINGS)
+
+__all__ = ['Alien']
 
 class Alien(Entity):
-    def __init__(self, color, x, y, ship,
+    def __init__(self, color, x, y, ship, game,
                  base_hp=100, base_damage=10, base_speed=2):
-        super().__init__(f"assets/aliens/{color}.png", x, y)
+        image = pygame.image.load(f"assets/aliens/{color}.png").convert_alpha()
+        super().__init__(image, x, y)
         self.ship = ship
+        self.game = game
         self.base_hp = base_hp
         self.base_damage = base_damage
         self.base_speed = base_speed
@@ -15,7 +21,7 @@ class Alien(Entity):
         self._apply_difficulty()
 
     def _get_scalers(self):
-        return DIFFICULTY_ENEMY_SETTINGS[self.ship.difficulty]
+        return DIFFICULTY_ENEMY_SETTINGS[self.game.state.difficulty]
 
     def _apply_difficulty(self):
         settings = self._get_scalers()
