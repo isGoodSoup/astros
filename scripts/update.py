@@ -372,6 +372,7 @@ def update_game(game, delta, screen_size, hud_padding):
     game.sprites.celestials.update()
     game.sprites.asteroids.update()
     game.sprites.aliens.update()
+    game.sprites.enemy_projectiles.update()
 
     if game.sprites.ship_alive:
         game.ship.update_upgrades()
