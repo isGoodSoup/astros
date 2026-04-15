@@ -139,27 +139,27 @@ def run_transition(game):
 
 
 def spawn_fleet(game):
-    formations = ["Block", "Clutch", "Cross", "Line"]
+    formations = ['block', 'clutch', 'cross', 'line']
     formation_type = random.choice(formations)
 
     x, y = random_pos(game)
     center = pygame.Vector2(x, y)
     
     offsets = []
-    if formation_type == "Block":
+    if formation_type == "block":
         for r in range(3):
             for c in range(3):
                 offsets.append((c * 60 - 60, r * 60 - 60))
-    elif formation_type == "Clutch":
+    elif formation_type == "clutch":
         for _ in range(8):
             offsets.append(
                 (random.randint(-100, 100), random.randint(-100, 100)))
-    elif formation_type == "Cross":
+    elif formation_type == "cross":
         for i in range(-2, 3):
             offsets.append((i * 60, 0))
             if i != 0:
                 offsets.append((0, i * 60))
-    elif formation_type == "Line":
+    elif formation_type == "line":
         length = random.randint(3, 7)
         horizontal = random.choice([True, False])
         for i in range(length):
