@@ -73,7 +73,7 @@ def check_collision(game, local):
             game.ship.hit = True
             if previous_combo > 1.0:
                 x, y = game.ship.rect.centerx, game.ship.rect.top
-                game.sprites.floating_numbers.add(FloatingNumber(x, y, g.local.t('game.lost_mult'),
+                game.sprites.floating_numbers.add(FloatingNumber(x, y, local.t('game.lost_mult'),
                         game.font, color=COLOR_RED))  # type: ignore
 
             game.sprites.explosions.add(Explosion(*game.ship.rect.center,
