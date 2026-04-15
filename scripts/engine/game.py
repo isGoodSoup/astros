@@ -25,6 +25,7 @@ from scripts.engine.update import Updater
 
 local = None
 
+
 class Game:
     def __init__(self, context, screen, screen_size, crt, hud_ratio, traits,
                  ships, ship_index=0):
@@ -77,7 +78,11 @@ class Game:
         local = self.local
         apply_volume(self)
         fade.start('in')
-        self.mixer.queue(['odyssey', 'unknown', 'starfield'], loop=True)
+        self.mixer.queue([
+            'odyssey',
+            'unknown',
+            'starfield'],
+            loop=True)
 
     def run(self, clock, screen, screen_size, hud_ratio, crt):
         while self.running:
@@ -90,7 +95,7 @@ class Game:
                     self.mixer.next_track()
 
                 if (event.type == self.events.ALIENLASER and not
-                    self.state.pause and not self.state.game_over):
+                self.state.pause and not self.state.game_over):
                     self.events.alien_shoot_event(self)
 
             screen.fill(BACKGROUND)
