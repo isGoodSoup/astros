@@ -63,11 +63,11 @@ def spawner(game):
         return
 
     if game.state.phase_fade <= 0:
-        spawn_fleet(game)
+        if game.state.phase_index in ALIEN_PHASES:
+            spawn_fleet(game)
+        elif game.state.phase_index in ASTEROID_PHASES:
+            spawn_asteroids(game)
         game.spawns.last_reinforcement_spawn = now
-
-    if game.state.phase_index in ASTEROID_PHASES:
-        spawn_asteroids(game)
 
 def enemies_alive(game):
     return (any(a.alive() for a in game.sprites.aliens) or
@@ -130,10 +130,6 @@ def run_transition(game):
     game.ship.spawnpoint(game.screen_size, game.sprites.framew)
 
 def spawn_fleet(game):
-    if (game.state.phase_state != PHASE_ACTIVE or game.state.phase_index not
-            in ALIEN_PHASES):
-        return
-
     color = random.choice(PHASE_COLORS)
     x, y = random_pos(game)
     game.sprites.aliens.add(Alien(color, x, y, game.ship, game))
@@ -141,10 +137,6 @@ def spawn_fleet(game):
 def spawn_asteroids(game):
     if (not game.spawns.can_spawn_asteroids and game.state.difficulty ==
             Difficulty.TOURIST):
-        return
-
-    if (game.state.phase_state != PHASE_ACTIVE or
-            game.state.phase_index not in ASTEROID_PHASES):
         return
 
     spawns = random.randint(5, 10)

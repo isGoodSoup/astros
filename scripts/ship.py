@@ -234,6 +234,8 @@ class Ship(AnimatedEntity):
             spread_angle = SHIP_SHOTGUN_SPREAD
 
             for i in range(num_pellets):
+                offset = (-spread_angle / 2) + i * (
+                        spread_angle / (num_pellets - 1))
                 base_angle = math.atan2(dir_y, dir_x)
                 angle = base_angle + math.radians(offset)
                 direction = (math.cos(angle), math.sin(angle))
