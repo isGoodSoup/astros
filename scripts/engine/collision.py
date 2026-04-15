@@ -109,11 +109,17 @@ def check_collision(game, local):
                 game.screen_shake = SCREEN_SHAKE // 2
 
             if game.ship.hitpoints <= 0:
-                game.state.game_over = True
-                game.ship.kill()
-                game.sprites.ship_alive = False
-                pygame.mixer.music.stop()
-                game.state.game_over = True
+                if game.ship.can_use_bod and not game.ship.bod_used:
+                    game.ship.hitpoints = int(game.ship.max_hitpoints * 0.8)
+                    game.ship.bod_used = True
+                    if game.state.play_sound:
+                        game.mixer.play(2)
+                else:
+                    game.state.game_over = True
+                    game.ship.kill()
+                    game.sprites.ship_alive = False
+                    pygame.mixer.music.stop()
+                    game.state.game_over = True
 
     hits1 = pygame.sprite.groupcollide(game.sprites.projectiles, game.sprites.asteroids, True,
                                    False)

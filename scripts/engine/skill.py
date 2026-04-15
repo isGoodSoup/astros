@@ -2,7 +2,7 @@ import pygame
 
 import scripts.engine.game as g
 from scripts.engine.all_skills import Explorer, DamageBoost, Maniac, Madness, Survival, \
-    Adventurer, Pilot, Tank, Tower, Fortified
+    Adventurer, Pilot, Tank, Tower, Fortified, BrushOfDeath
 from scripts.engine.sheet import SpriteSheet
 from scripts.engine.utils import resource_path, legacy
 
@@ -84,6 +84,8 @@ class SkillManager:
             Skill("Tank", Tank(), "04_tank", "game.skill.tank"),
             Skill("Tower", Tower(), "04a_tower", "game.skill.tower"),
             Skill("Fortified", Fortified(), "04b_fortified", "game.skill.fortified"),
+            Skill("BrushOfDeath", BrushOfDeath(), "05_bod", "game.skill.bod",
+                  max_level=1),
         ]
 
     def can_unlock(self, skill, ship):

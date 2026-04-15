@@ -61,5 +61,6 @@
   "game.skill.pilot": "La pericia de pilotaje mejora la supervivencia y la evasión, aunque el rendimiento ofensivo se reduce ligeramente.",
   "game.skill.tank": "Transforma tu nave en una fortaleza fuertemente blindada. La enorme durabilidad se obtiene a costa de la agilidad y la maniobrabilidad.",
   "game.skill.tower": "Conviértete en un bastión inamovible. Permanecer estático aumenta significativamente la capacidad de escudos, pero los refuerzos estructurales dificultan la movilidad.",
-  "game.skill.fortified": "Refuerza tus defensas para mitigar el daño recibido. Sin embargo, las pesadas fortificaciones ralentizan la recuperación de escudos."
+  "game.skill.fortified": "Refuerza tus defensas para mitigar el daño recibido. Sin embargo, las pesadas fortificaciones ralentizan la recuperación de escudos.",
+  "game.skill.bod": "Engaña a la muerte. Tu casco se convierte en 80% de vida si tu casco se destruye. Este efecto solo puede desencadenarse una vez por partida."
 }

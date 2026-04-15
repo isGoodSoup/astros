@@ -5,6 +5,9 @@ import pygame
 from scripts.engine.ability import Ability
 from scripts.system.constants import SHIP_MANIC_BOOST
 
+__all__ = ['Explorer', 'DamageBoost', 'Maniac', 'Madness','Survival',
+           'Adventurer', 'Pilot', 'Tank', 'Tower', 'Fortified',
+           'BrushOfDeath']
 
 class Explorer(Ability):
     @override
@@ -102,3 +105,9 @@ class Fortified(Ability):
         ship.shield_regen_multiplier = getattr(ship, "shield_regen_multiplier", 1.0)
         ship.shield_regen_multiplier *= (1 - 0.05 * level)
         return [ship.fortified_percent, ship.fortified_cap]
+
+class BrushOfDeath(Ability):
+    @override
+    def apply(self, ship, level):
+        ship.can_use_bod = True
+        return [ship.can_use_bod]

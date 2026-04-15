@@ -96,6 +96,9 @@ class Ship(AnimatedEntity):
         self.last_hit_time = 0
         self.hit_cooldown = SHIP_IFRAMES
 
+        self.bod_used = False
+        self.can_use_bod = False
+
         self.apply_difficulty()
 
     def draw(self, screen):
