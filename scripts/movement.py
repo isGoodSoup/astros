@@ -56,12 +56,10 @@ def update_movement(game, delta, screen_size):
     game.ship.rect.x += game.ship.vel_x * delta * FPS
     game.ship.rect.y += game.ship.vel_y * delta * FPS
 
-    game.ship.rect.x = max(0, min(
-            screen_size[0] - game.sprites.base.get_width(),
-            game.ship.rect.x))
-    game.ship.rect.y = max(0, min(
-            screen_size[1] - game.sprites.base.get_height(),
-            game.ship.rect.y))
+    game.ship.rect.x = max(0, min(screen_size[0] - game.ship.rect.width,
+        game.ship.rect.x))
+    game.ship.rect.y = max(0, min(screen_size[1] - game.ship.rect.height,
+        game.ship.rect.y))
 
     if game.ship.vel_x < -0.1:
         game.ship.direction = "left"
@@ -86,7 +84,7 @@ def update_movement(game, delta, screen_size):
 
         mouse_pos = pygame.mouse.get_pos()
         if mouse_pos != getattr(game, "last_cursor_pos", (0, 0)):
-            game.mode = INPUT_MOUSE
+            game.input.mode = INPUT_MOUSE
             game.input.last_input_time = pygame.time.get_ticks()
         game.last_cursor_pos = mouse_pos
 

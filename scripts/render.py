@@ -50,7 +50,7 @@ def render_frame(game, screen, font, hud_padding):
             pygame.draw.rect(screen, COLOR_RED, i.hitbox, 2)
 
         for a in game.sprites.aliens:
-            pygame.draw.rect(screen, COLOR_RED, a.rect, 2)
+            pygame.draw.rect(screen, COLOR_RED, a.hitbox, 2)
 
         for u in game.sprites.upgrades:
             pygame.draw.rect(screen, COLOR_GREEN, u.rect, 2)
@@ -59,10 +59,9 @@ def render_frame(game, screen, font, hud_padding):
             pygame.draw.rect(screen, COLOR_BLUE, p.rect, 2)
 
         for b in game.sprites.bosses:
-            pygame.draw.rect(screen, COLOR_RED, b.rect, 2)
+            pygame.draw.rect(screen, COLOR_RED, b.hitbox, 2)
 
     if game.sprites.ship_alive:
-        game.ship.rect.topleft = (game.ship.rect.x, game.ship.rect.y)
         screen.blit(img, game.ship.rect)
         if game.state.debugging:
             pygame.draw.rect(screen, COLOR_RED, game.ship.hitbox, 2)
