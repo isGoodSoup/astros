@@ -439,7 +439,6 @@ def update_game(game, delta, screen_size, hud_padding):
     now = pygame.time.get_ticks()
     if now - game.spawns.last_hole_spawn >= game.spawns.black_hole_spawn_delay:
         game.spawns.last_hole_spawn = now
-        if random.random() < 0.1:
-            game.events.black_hole_event(game)
+        game.events.black_hole_event(game)
 
     update_phase(game)

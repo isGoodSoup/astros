@@ -52,6 +52,6 @@ class Events:
                 controller.rumble(1, 1, HIGH_RUMBLE_MS)
 
     def black_hole_event(self, game):
-        x, y = (random.randint(0, game.screen_size[0]),
-               random.randint(0, game.screen_size[1]))
+        x = random.randint(100, game.screen_size[0] - 100)
+        y = -200
         game.sprites.celestials.add(BlackHole(game, x, y))

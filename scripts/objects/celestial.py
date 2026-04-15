@@ -38,6 +38,26 @@ class BlackHole(Celestial):
     def __init__(self, game, x, y):
         super().__init__(game, resource_path(f"assets/galaxies/black_hole_"
                          f"{random.randint(1, 2)}.png"), x, y)
+        self.game = game
+        self.gravity_strength = 200
+        self.event_horizon_radius = 20
+
+    def update(self):
+        super().update()
+        if self.game.sprites.ship_alive:
+            ship = self.game.ship
+            dx = self.rect.centerx - ship.rect.centerx
+            dy = self.rect.centery - ship.rect.centery
+            distance = (dx**2 + dy**2)**0.5
+
+            if distance > 0:
+                if distance < self.event_horizon_radius:
+                    ship.hitpoints = 0
+                elif distance < 500:
+                    force = self.gravity_strength * 100 / distance
+                    ship.rect.x += (dx / distance) * force * self.game.delta
+                    ship.rect.y += (dy / distance) * force * self.game.delta
+                    ship.update_position(ship.rect.x, ship.rect.y)
 
 def random_celestial(game):
     screen_w = pygame.display.Info().current_w
