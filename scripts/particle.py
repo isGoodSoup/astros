@@ -1,8 +1,10 @@
 import pygame
 
+from scripts.constants import COLOR_WHITE
+
 
 class Particle:
-    def __init__(self, location, velocity, timer=50, color=(255, 255, 255), radius=3):
+    def __init__(self, location, velocity, timer=50, color=COLOR_WHITE, radius=3):
         self.location = pygame.Vector2(location)
         self.velocity = pygame.Vector2(velocity)
         self.timer = timer
