@@ -7,7 +7,7 @@ from scripts.system.constants import SHIP_MANIC_BOOST
 
 __all__ = ['Explorer', 'DamageBoost', 'Maniac', 'Madness','Survival',
            'Adventurer', 'Pilot', 'Tank', 'Tower', 'Fortified',
-           'BrushOfDeath']
+           'BrushOfDeath', 'WeaponsExpert']
 
 class Explorer(Ability):
     @override
@@ -111,3 +111,10 @@ class BrushOfDeath(Ability):
     def apply(self, ship, level):
         ship.can_use_bod = True
         return [ship.can_use_bod]
+
+class WeaponsExpert(Ability):
+    @override
+    def apply(self, ship, level):
+        ship.heat_per_shot *= (1 - 0.05 * level)
+        ship.evasion -= 0.015 * level
+        return [ship.heat_per_shot]

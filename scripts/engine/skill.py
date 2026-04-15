@@ -1,15 +1,16 @@
 import pygame
 
 import scripts.engine.game as g
-from scripts.engine.all_skills import Explorer, DamageBoost, Maniac, Madness, Survival, \
-    Adventurer, Pilot, Tank, Tower, Fortified, BrushOfDeath
+from scripts.engine.all_skills import Explorer, DamageBoost, Maniac, Madness, \
+    Survival, \
+    Adventurer, Pilot, Tank, Tower, Fortified, BrushOfDeath, WeaponsExpert
 from scripts.engine.sheet import SpriteSheet
 from scripts.engine.utils import resource_path, legacy
 
 
 class Skill:
     def __init__(self, name, ability, icon, description_key=None, max_level=10,
-            visual_tiers=5):
+                 visual_tiers=5):
         self.name = name
         self.ability = ability
 
@@ -23,7 +24,8 @@ class Skill:
         self.parents = []
         self.children = []
 
-        self.sheet = SpriteSheet(resource_path("assets/ui/skills/skill_frame.png"))
+        self.sheet = SpriteSheet(
+            resource_path("assets/ui/skills/skill_frame.png"))
         self.cols = 7
         self.visual_tiers = visual_tiers
 
@@ -56,7 +58,8 @@ class Skill:
         if self.level <= 0:
             return None
 
-        return min(self.visual_tiers - 1, (self.level - 1) * self.visual_tiers // self.max_level)
+        return min(self.visual_tiers - 1,
+                   (self.level - 1) * self.visual_tiers // self.max_level)
 
     def current_frame(self):
         if self.hovered:
@@ -71,6 +74,7 @@ class Skill:
 
         return self.frames["unlockable"]
 
+
 class SkillManager:
     def __init__(self):
         self.skills = [
@@ -79,13 +83,14 @@ class SkillManager:
             Skill("Maniac", Maniac(), "02a_maniac", "game.skill.maniac"),
             Skill("Madness", Madness(), "02b_madness", "game.skill.madness"),
             Skill("Survivor", Survival(), "03_survivor", "game.skill.survivor"),
-            Skill("Adventurer", Adventurer(), "03a_adventurer", "game.skill.adventurer"),
+            Skill("Adventurer", Adventurer(), "03a_adventurer",
+                  "game.skill.adventurer"),
             Skill("Pilot", Pilot(), "03b_pilot", "game.skill.pilot"),
             Skill("Tank", Tank(), "04_tank", "game.skill.tank"),
             Skill("Tower", Tower(), "04a_tower", "game.skill.tower"),
-            Skill("Fortified", Fortified(), "04b_fortified", "game.skill.fortified"),
-            Skill("BrushOfDeath", BrushOfDeath(), "05_bod", "game.skill.bod",
-                  max_level=1),
+            Skill("Fortified", Fortified(), "04b_fortified","game.skill.fortified"),
+            Skill("BrushOfDeath", BrushOfDeath(), "05_bod", "game.skill.bod",max_level=1),
+            Skill("Savant", WeaponsExpert(), "06_savant", "game.skill.savant"),
         ]
 
     def can_unlock(self, skill, ship):
