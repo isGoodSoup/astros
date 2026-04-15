@@ -90,7 +90,7 @@ class Alien(Entity):
             self.formation_center.y += self.speed
             self.rect.center = self.formation_center + self.formation_offset
 
-            if self.rect.top > self.game.screen_size[1]:
+            if self.rect.top > self.game.screen_size[1] + 100:
                 self.kill()
         else:
             self.orbit_angle += self.orbit_speed * 0.02
@@ -169,7 +169,7 @@ class BomberAlien(Alien):
             self.formation_center.y += self.speed
             self.rect.center = self.formation_center + self.formation_offset
 
-            if self.rect.top > self.game.screen_size[1]:
+            if self.rect.top > self.game.screen_size[1] + 100:
                 self.kill()
         else:
             target = pygame.Vector2(self.ship.rect.center)

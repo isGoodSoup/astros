@@ -142,7 +142,8 @@ def spawn_fleet(game):
     formations = ['block', 'clutch', 'cross', 'line']
     formation_type = random.choice(formations)
 
-    x, y = random_pos(game)
+    x = random.randint(100, game.screen_size[0] - 100)
+    y = -200
     center = pygame.Vector2(x, y)
     
     offsets = []
