@@ -168,9 +168,10 @@ def spawn_boss(game):
             case Difficulty.NIGHTMARE:
                 game.spawns.boss_count = 3
 
-        for i in range(game.spawns.boss_count):
-            game.sprites.bosses.add(Boss(game, game.ship, game.sprites.enemy_projectiles, x, y,
-                        random.choice(color)))
+        if game.spawns.boss_count > 0:
+            for i in range(game.spawns.boss_count):
+                game.sprites.bosses.add(Boss(game, game.ship, game.sprites.enemy_projectiles, x, y,
+                            random.choice(color)))
 
         game.play_music('flight')
         game.spawns.phase_spawned = True
