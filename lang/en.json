@@ -62,5 +62,6 @@
   "game.skill.tank": "Transform your ship into a heavily armored fortress. The immense durability comes at the cost of agility and maneuverability.",
   "game.skill.tower": "Become an immovable bastion. Remaining stationary significantly boosts shield capacity, but structural reinforcements hinder mobility.",
   "game.skill.fortified": "Reinforce your defenses to mitigate incoming damage. However, the heavy fortifications slow shield recovery.",
-  "game.skill.bod": "Cheat death once. If your hull would be destroyed, you are instead restored to 80% health. This effect can only trigger once per game."
+  "game.skill.bod": "Cheat death once. If your hull would be destroyed, you are instead restored to 80% health. This effect can only trigger once per game.",
+  "game.skill.savant": "Know your weapons, know your enemies. The more you use them, the less they overheat"
 }
