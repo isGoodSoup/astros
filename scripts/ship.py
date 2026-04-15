@@ -99,7 +99,7 @@ class Ship(AnimatedEntity):
         self.apply_difficulty()
 
     def draw(self, screen):
-        screen.blit(self.image, self.hitbox)
+        screen.blit(self.image, self.rect)
 
     def apply_difficulty(self):
         settings = DIFFICULTY_SHIP_SETTINGS[self.game.state.difficulty]
@@ -332,6 +332,7 @@ class Ship(AnimatedEntity):
         x = screen_size[0] // 2 - frame_width // 2
         y = screen_size[1] // 2 + SHIP_OFFSETS[1]
         self.rect.topleft = (x, y)
+
 
 def get_nearest_enemy(ship_pos, enemies):
     closest = None

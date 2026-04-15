@@ -11,15 +11,13 @@ class Entity(pygame.sprite.Sprite):
 
     @property
     def hitbox(self):
-        w = int(self.rect.width * ENTITY_HITBOX)
-        h = int(self.rect.height * ENTITY_HITBOX)
+        return self.rect.inflate(int(self.rect.width * ENTITY_HITBOX),
+                                 int(self.rect.height * ENTITY_HITBOX))
 
-        box = pygame.Rect(0, 0, w, h)
-        box.center = self.rect.center
-        return box
 
 class AnimatedEntity(Entity):
     def __init__(self, sheet, frame, frame_w, frame_h, x, y):
-        image = sheet.get_image(frame, frame_w, frame_h, scale=SCALE, columns=SHIP_FRAMES)
+        image = sheet.get_image(frame, frame_w, frame_h, scale=SCALE,
+                                columns=SHIP_FRAMES)
         super().__init__(image, x, y)
         self.sheet = sheet
