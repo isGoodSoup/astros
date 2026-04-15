@@ -3,6 +3,7 @@ import json
 from pygame.constants import *
 
 import scripts.system.assets as assets
+from scripts.engine.difficulty import Difficulty
 from scripts.objects.celestial import *
 from scripts.system.context import AppContext
 from scripts.engine.crt import CRT
@@ -112,9 +113,10 @@ class Menu:
     def init_game(self):
         if TOGGLE_SKIP or self.skip:
             game = (Game(self.context, self.screen, self.screen_size, self.crt,
-                         self.hud_ratio, [], assets.SHIPS, 0)
-                    .run(self.clock, self.screen, self.screen_size,
-                         self.hud_ratio, self.crt))
+                         self.hud_ratio, [], assets.SHIPS, 0))
+            game.state.difficulty = Difficulty.EXPLORER
+            game.run(self.clock, self.screen, self.screen_size,
+                         self.hud_ratio, self.crt)
             self.running = False
         else:
             mods = Mods(self.context, self.screen, self.screen_size,
