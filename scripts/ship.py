@@ -18,6 +18,7 @@ class Ship(AnimatedEntity):
         self.dir = pygame.Vector2(1, 0)
         self.direction = "idle"
         self.velocity = SHIP_VELOCITY
+        self.vel_x, self.vel_y = 0, 0
         self.shooting = False
         self.moving = False
         self.max_hitpoints = SHIP_MAX_HITPOINTS
