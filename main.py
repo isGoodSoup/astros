@@ -15,6 +15,7 @@ from scripts.system.constants import *
 from scripts.engine.fade import fade
 from scripts.engine.update import set_hud
 from scripts.engine.utils import render_fade
+from scripts.engine.shared import controller
 
 class Menu:
     def __init__(self, context):
