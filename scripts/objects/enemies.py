@@ -87,7 +87,12 @@ class Alien(Entity):
                 self.in_formation = False
 
         if self.in_formation:
-            self.formation_center.y += self.speed
+            if (not hasattr(self.game,
+                           "_last_formation_update") or
+                    self.game._last_formation_update != pygame.time.get_ticks()):
+                self.formation_center.y += self.speed
+                self.game._last_formation_update = pygame.time.get_ticks()
+
             self.rect.center = self.formation_center + self.formation_offset
 
             if self.rect.top > self.game.screen_size[1] + 100:
@@ -166,7 +171,12 @@ class BomberAlien(Alien):
                 self.in_formation = False
 
         if self.in_formation:
-            self.formation_center.y += self.speed
+            if (not hasattr(self.game,
+                           "_last_formation_update") or
+                    self.game._last_formation_update != pygame.time.get_ticks()):
+                self.formation_center.y += self.speed
+                self.game._last_formation_update = pygame.time.get_ticks()
+
             self.rect.center = self.formation_center + self.formation_offset
 
             if self.rect.top > self.game.screen_size[1] + 100:
