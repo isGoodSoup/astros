@@ -224,7 +224,7 @@ def spawn_asteroids(game):
 def spawn_boss(game):
     if not game.state.phase_spawned and not game.state.pause:
         x, y = get_boss_pos()
-        color = ['red', 'green', 'yellow']
+        color = list(BOSS_COLORS.keys())
 
         match game.state.difficulty:
             case Difficulty.TOURIST:

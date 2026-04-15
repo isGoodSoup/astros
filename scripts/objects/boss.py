@@ -3,12 +3,16 @@ import random
 
 import pygame
 
-from scripts.objects.proj import Projectile
+from scripts.objects.proj import Projectile, StoneProjectile
+from scripts.objects.shockwave import Shockwave
 from scripts.system.constants import (COLOR_RED, BOSS_BASE_SPEED, \
                               BOSS_VERTICAL_STEP, ONE_SECOND, BOSS_PHASES,
                               BOSS_ADVANTAGE, SCALE,
                               BOSS_BASE_HITPOINTS, HIGH_FIRE_RATE, BOSS_COLORS,
-                              BOSS_BASE_DAMAGE, ALIEN_HEIGHT, ALIEN_WIDTH)
+                              BOSS_BASE_DAMAGE, ALIEN_HEIGHT, ALIEN_WIDTH,
+                              EVOKER_SUMMON_COOLDOWN, SCREEN_SHAKE,
+                              BASE_RUMBLE_MS)
+from scripts.engine.shared import joysticks, controller
 from scripts.engine.utils import resource_path
 from scripts.system.levels import  DIFFICULTY_ENEMY_SETTINGS
 
@@ -17,6 +21,7 @@ class Boss(pygame.sprite.Sprite):
                  width=ALIEN_WIDTH, height=ALIEN_HEIGHT, scale=SCALE*2,
                  columns=1, offset_x=0, offset_y=0):
         super().__init__()
+        self.color = color
         self.image = pygame.image.load(resource_path(f"assets/aliens/{color}.png")).convert_alpha()
         self.image = pygame.transform.scale(self.image, (width * scale, height * scale))
         self.rect = self.image.get_rect(center=(x,y))
@@ -62,6 +67,10 @@ class Boss(pygame.sprite.Sprite):
             self.offset_y
         )
 
+        self.last_summon_time = 0
+        self.summon_cooldown = EVOKER_SUMMON_COOLDOWN * 2
+        self.exploded = False
+
     def update(self):
         self.hitbox.center = self.rect.center
         now = pygame.time.get_ticks()
@@ -82,9 +91,15 @@ class Boss(pygame.sprite.Sprite):
                 self.last_shot_time = now
                 self.shoot()
 
+            if self.color == "purple":
+                if now - self.last_summon_time > self.summon_cooldown:
+                    self.summon()
+                    self.last_summon_time = now
+
         if self.current_phase == 'phase2':
             screen = pygame.display.get_surface()
             screen_width, screen_height = screen.get_size()
+            settings = DIFFICULTY_ENEMY_SETTINGS[self.game.state.difficulty]
 
             if now - self.phase2_change_time > self.phase2_change_interval:
                 self.velocity.x += random.uniform(-2, 2)
@@ -117,9 +132,15 @@ class Boss(pygame.sprite.Sprite):
                 self.last_shot_time = now
                 self.shoot()
 
+            if self.color == "purple":
+                if now - self.last_summon_time > self.summon_cooldown:
+                    self.summon()
+                    self.last_summon_time = now
+
         if self.current_phase == 'phase3':
             screen = pygame.display.get_surface()
             screen_width, screen_height = screen.get_size()
+            settings = DIFFICULTY_ENEMY_SETTINGS[self.game.state.difficulty]
 
             if now - self.phase2_change_time > self.phase2_change_interval:
                 self.velocity.x += random.uniform(-4, 4)
@@ -152,6 +173,11 @@ class Boss(pygame.sprite.Sprite):
                 self.last_shot_time = now
                 self.shoot()
 
+            if self.color == "purple":
+                if now - self.last_summon_time > self.summon_cooldown:
+                    self.summon()
+                    self.last_summon_time = now
+
         health_ratio = self.hitpoints / self.max_hitpoints
         if health_ratio < 0.7 and self.current_phase == 'phase1':
             self.current_phase = 'phase2'
@@ -159,6 +185,11 @@ class Boss(pygame.sprite.Sprite):
             self.current_phase = 'phase3'
 
     def shoot(self):
+        settings = DIFFICULTY_ENEMY_SETTINGS[self.game.state.difficulty]
+        if self.color == "green":
+            self.shoot_boomerang()
+            return
+
         target_vec = pygame.Vector2(self.ship.rect.center) - pygame.Vector2(
             self.rect.center)
         if target_vec.length() != 0:
@@ -173,3 +204,62 @@ class Boss(pygame.sprite.Sprite):
                           direction=(direction.x, direction.y),
                           speed=16, damage=int(BOSS_BASE_DAMAGE * self.ship.level * settings["damage_multiplier"]),
                           range_limit=ONE_SECOND))
+
+    def shoot_boomerang(self):
+        target = pygame.Vector2(self.ship.rect.center)
+        pos = pygame.Vector2(self.rect.center)
+        direction = (target - pos)
+        if direction.length() > 0:
+            direction = direction.normalize()
+            settings = DIFFICULTY_ENEMY_SETTINGS[self.game.state.difficulty]
+            stone = StoneProjectile(self.rect.center, direction, self.game,
+                                    damage=int(BOSS_BASE_DAMAGE * self.ship.level * settings["damage_multiplier"]),
+                                    parent=self)
+            self.game.sprites.enemy_projectiles.add(stone)
+
+    def summon(self):
+        from scripts.objects.particle import Particle
+        from scripts.objects.enemies import Alien
+        for _ in range(20):
+            angle = random.uniform(0, 2 * math.pi)
+            speed = random.uniform(2, 5)
+            velocity = (math.cos(angle) * speed, math.sin(angle) * speed)
+            self.game.sprites.particles.append(
+                Particle(self.rect.center, velocity, timer=30, color=COLOR_RED)
+            )
+
+        for _ in range(random.randint(1, 2)):
+            off_x = random.randint(-100, 100)
+            off_y = random.randint(-100, 100)
+            new_alien = Alien("red", self.rect.centerx + off_x,
+                              self.rect.centery + off_y, self.ship, self.game)
+            new_alien.aggro = True
+            new_alien.in_formation = False
+            self.game.sprites.aliens.add(new_alien)
+
+    def explode(self):
+        if not self.exploded:
+            self.exploded = True
+            self.game.sprites.shockwaves.append(Shockwave(self.rect.center,
+                                                          max_radius=400))
+            if self.game.state.can_screen_shake:
+                self.game.screen_shake = SCREEN_SHAKE * 2
+            if joysticks and self.game.state.can_rumble:
+                controller.rumble(0.5, 0.7, BASE_RUMBLE_MS * 4)
+
+            dist = pygame.Vector2(self.rect.center).distance_to(
+                self.ship.rect.center)
+            if dist < 400:
+                damage_taken = self.ship.damage_taken_multiplier
+                total_damage = self.base_damage * 2 * damage_taken
+                if self.ship.shield > 0:
+                    self.ship.shield -= total_damage
+                else:
+                    self.ship.hitpoints -= total_damage
+                self.ship.hit = True
+                self.ship.last_hit_time = pygame.time.get_ticks()
+
+    def kill(self):
+        if self.color == "orange":
+            self.explode()
+        super().kill()

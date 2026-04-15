@@ -6,6 +6,7 @@ from scripts.objects.entity import Entity
 from scripts.system.levels import (DIFFICULTY_ENEMY_SETTINGS)
 from scripts.objects.shockwave import Shockwave
 from scripts.objects.proj import Projectile, StoneProjectile
+from scripts.engine.shared import joysticks, controller
 from scripts.system.constants import *
 
 __all__ = ['Alien', 'HeavyAlien', 'BomberAlien', 'EvokerAlien', 'StoneAlien']
@@ -204,6 +205,11 @@ class BomberAlien(Alien):
             self.exploded = True
             self.game.sprites.shockwaves.append(Shockwave(self.rect.center,
                                                           max_radius=200))
+
+            if self.game.state.can_screen_shake:
+                self.game.screen_shake = SCREEN_SHAKE
+            if joysticks and self.game.state.can_rumble:
+                controller.rumble(0.2, 0.4, BASE_RUMBLE_MS * 2)
 
             dist = pygame.Vector2(self.rect.center).distance_to(
                 self.ship.rect.center)
