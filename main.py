@@ -16,6 +16,7 @@ from scripts.engine.update import set_hud
 from scripts.engine.utils import render_fade
 from scripts.engine.controller import controller
 
+
 class Menu:
     def __init__(self, context):
         self.context = context
@@ -26,14 +27,16 @@ class Menu:
         self.screen_size = (self.width, self.height)
         self.hud_ratio = set_hud(self.screen_size)
         self.render_surface = pygame.Surface(HD_RESOLUTION)
-        self.screen = pygame.display.set_mode(self.screen_size, DOUBLEBUF|OPENGL, vsync=1)
+        self.screen = pygame.display.set_mode(self.screen_size,
+                                              DOUBLEBUF | OPENGL, vsync=1)
         assets.load_assets()
         self.crt = CRT(self.screen, 1, HD_RESOLUTION, cpu_only=False)
         self.crt.prog['curvature'].value = CRT_CURVATURE
         self.font = FontManager(None, FONT_DEFAULT_SIZE)
         self.logo_img = assets.LOGO
         self.logo_img = pygame.transform.scale(self.logo_img,
-            (self.logo_img.get_width() * SCALE, self.logo_img.get_height() * SCALE))
+                                               (self.logo_img.get_width() * SCALE,
+                                                self.logo_img.get_height() * SCALE))
         pygame.display.set_caption("Astros")
         pygame.display.set_icon(assets.ICON)
         self.clock = pygame.time.Clock()
@@ -74,7 +77,7 @@ class Menu:
             self.screen.fill(COLOR_BLACK)
 
             now = pygame.time.get_ticks()
-            if now - self.last_blink > ONE_SECOND//2:
+            if now - self.last_blink > ONE_SECOND // 2:
                 self.last_blink = now
 
             start_text = self.context.local.t('menu.start')
@@ -86,9 +89,12 @@ class Menu:
             title_x = surface_width // 2 - self.logo_img.get_width() // 2
             start_x = surface_width // 2 - start.get_width() // 2
             self.render_surface.blit(self.logo_img, (title_x, title_y))
-            if (now // ONE_SECOND//2) % 2 == 0:
-                self.render_surface.blit(start, (start_x, title_y + TITLE_OFFSET))
-            self.screen.blit(pygame.transform.scale(self.render_surface, self.screen_size),(0, 0))
+            if (now // ONE_SECOND // 2) % 2 == 0:
+                self.render_surface.blit(start,
+                                         (start_x, title_y + TITLE_OFFSET))
+            self.screen.blit(
+                pygame.transform.scale(self.render_surface, self.screen_size),
+                (0, 0))
 
             if alpha > 0:
                 fade_surface = pygame.Surface(HD_RESOLUTION)
@@ -106,15 +112,17 @@ class Menu:
     def init_game(self):
         if TOGGLE_SKIP or self.skip:
             game = (Game(self.context, self.screen, self.screen_size, self.crt,
-                        self.hud_ratio, [], assets.SHIPS, 0)
+                         self.hud_ratio, [], assets.SHIPS, 0)
                     .run(self.clock, self.screen, self.screen_size,
                          self.hud_ratio, self.crt))
             self.running = False
         else:
-            mods = Mods(self.context, self.screen, self.screen_size, self.hud_ratio)
+            mods = Mods(self.context, self.screen, self.screen_size,
+                        self.hud_ratio)
             mods.run(self.clock, self.screen, self.screen_size, self.hud_ratio,
-                 self.crt)
+                     self.crt)
         self.running = False
+
 
 def load_language():
     home_dir = os.path.expanduser("~")
@@ -128,6 +136,7 @@ def load_language():
         except (json.JSONDecodeError, ValueError):
             pass
     return "en"
+
 
 if __name__ == "__main__":
     lang = load_language()
