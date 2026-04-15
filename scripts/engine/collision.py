@@ -92,10 +92,10 @@ def check_collision(game, local):
             damage_taken = game.ship.damage_taken_multiplier
             if not TOGGLE_INVINCIBLE:
                 if game.ship.shield > 0:
-                    damage_per_frame = max(1,game.ship.max_shield // SHIP_SHIELD_FRAMES) * game.ship.level * damage_taken
+                    damage_per_frame = SHIP_SHIELD_COLLISION_DAMAGE * game.ship.level * damage_taken
                     game.ship.shield -= damage_per_frame + boss_damage
                 else:
-                    damage_per_frame = max(1,game.ship.max_hitpoints // SHIP_HITPOINTS_FRAMES) * game.ship.level * damage_taken
+                    damage_per_frame = SHIP_BASE_COLLISION_DAMAGE * game.ship.level * damage_taken
                     game.ship.hitpoints -= damage_per_frame + boss_damage
 
             if hasattr(game.ship, "fortified_percent"):

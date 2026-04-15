@@ -70,18 +70,41 @@ class Interface(pygame.sprite.Sprite):
 
         screen.blit(self.image, (self.hud_x, self.hud_y))
 
-class OverheatBar:
-    def __init__(self, x, y, width, height, max_value):
+class Bar:
+    def __init__(self, x, y, width, height, max_value, color=None,
+                 background_color=pygame.Color(30, 30, 30),
+                 border_color=pygame.Color(255, 255, 255)):
         self.rect = pygame.Rect(x, y, width, height)
         self.max_value = max_value
         self.display_ratio = 0.0
+        self.color = color if color else pygame.Color(255, 255, 255)
+        self.background_color = background_color
+        self.border_color = border_color
+        self.smoothing_speed = 6.0
 
+    def update(self, current_value, dt):
+        target_ratio = max(0.0, min(current_value / self.max_value, 1.0))
+        self.display_ratio += (target_ratio - self.display_ratio) * self.smoothing_speed * dt
+        self.display_ratio = max(0.0, min(self.display_ratio, 1.0))
+
+    def draw(self, screen):
+        pygame.draw.rect(screen, self.background_color, self.rect)
+        fill_height = int(self.rect.height * self.display_ratio)
+        fill_rect = pygame.Rect(
+            self.rect.x,
+            self.rect.bottom - fill_height,
+            self.rect.width,
+            fill_height
+        )
+        pygame.draw.rect(screen, self.color, fill_rect)
+        pygame.draw.rect(screen, self.border_color, self.rect, 4)
+
+class OverheatBar(Bar):
+    def __init__(self, x, y, width, height, max_value):
+        super().__init__(x, y, width, height, max_value)
         self.cool_color = pygame.Color(0, 150, 255)
         self.mid_color = pygame.Color(255, 200, 0)
         self.hot_color = pygame.Color(255, 60, 0)
-
-        self.border_color = pygame.Color(255, 255, 255)
-        self.background_color = pygame.Color(30, 30, 30)
 
     def _lerp_color(self, c1, c2, t):
         t = max(0.0, min(t, 1.0))
@@ -97,12 +120,6 @@ class OverheatBar:
             return self._lerp_color(self.cool_color, self.mid_color, ratio * 2)
         else:
             return self._lerp_color(self.mid_color, self.hot_color, (ratio - 0.5) * 2)
-
-    def update(self, current_value, dt):
-        target_ratio = max(0.0, min(current_value / self.max_value, 1.0))
-        smoothing_speed = 6.0
-        self.display_ratio += (target_ratio - self.display_ratio) * smoothing_speed * dt
-        self.display_ratio = max(0.0, min(self.display_ratio, 1.0))
 
     def draw(self, screen, overheated=False):
         pygame.draw.rect(screen, self.background_color, self.rect)
@@ -123,30 +140,41 @@ class OverheatBar:
         pygame.draw.rect(screen, color, fill_rect)
         pygame.draw.rect(screen, self.border_color, self.rect, 4)
 
+class ShieldBar(Bar):
+    def __init__(self, x, y, width, height, max_value):
+        color = pygame.Color(0, 150, 255)
+        super().__init__(x, y, width, height, max_value, color)
+
+class XPBar(Bar):
+    def __init__(self, x, y, width, height, max_value):
+        color = pygame.Color(200, 100, 255)
+        super().__init__(x, y, width, height, max_value, color)
+
 class HUD:
     def __init__(self, game, screen_size, hud_ratio, game_font):
         self.hitpoints = Interface(resource_path("assets/ui/status.png"), 0,
                                    *INTERFACE_HITPOINTS,
                                    hud_ratio, ['right', 'bottom'])
-        self.shield = Interface(resource_path("assets/ui/shield_bar.png"), 0,
-                                INTERFACE_SHIELD[0], INTERFACE_SHIELD[1],
-                                hud_ratio, ['right', 'bottom'],
-                                INTERFACE_SHIELD_COLS, INTERFACE_SHIELD_OFFSET)
-        self.xp = Interface(resource_path("assets/ui/xp.png"), 0,
-                            INTERFACE_XP[0], INTERFACE_XP[1],
-                            hud_ratio, ['right', 'bottom'],
-                            INTERFACE_XP_COLS, INTERFACE_XP_OFFSET)
         self.guns = Interface(resource_path("assets/ui/guns.png"), 0,
                               INTERFACE_GUNS[0], INTERFACE_GUNS[1],
                               hud_ratio,['right', 'bottom'],
                               INTERFACE_GUNS_COLS, INTERFACE_GUNS_OFFSET)
-        self.xp.image = self.xp.frames[len(self.xp.frames) - 1]
 
         bar_x = hud_ratio['right'] - INTERFACE_OVERHEAT[0]
         bar_y = hud_ratio['bottom'] - INTERFACE_OVERHEAT[1]
         self.overheat_bar = OverheatBar(bar_x, bar_y,
             width=INTERFACE_OVERHEAT_WIDTH, height=INTERFACE_OVERHEAT_HEIGHT,
             max_value=game.ship.overheat_limit)
+
+        shield_x = hud_ratio['right'] - INTERFACE_OVERHEAT[0] - 30
+        self.shield_bar = ShieldBar(shield_x, bar_y,
+            width=INTERFACE_OVERHEAT_WIDTH, height=INTERFACE_OVERHEAT_HEIGHT,
+            max_value=game.ship.max_shield)
+
+        xp_x = hud_ratio['right'] - INTERFACE_OVERHEAT[0] - 60
+        self.xp_bar = XPBar(xp_x, bar_y,
+            width=INTERFACE_OVERHEAT_WIDTH, height=INTERFACE_OVERHEAT_HEIGHT,
+            max_value=game.ship.xp_to_next_level)
 
         self.credits = game.ship.credits
 
@@ -201,14 +229,20 @@ class HUD:
         current_gun_frame = game.ship.gun_order.index(game.ship.gun)
         interfaces = [
             (self.hitpoints, game.ship.hitpoints, game.ship.max_hitpoints, True),
-            (self.shield, game.ship.shield, game.ship.max_shield, True),
-            (self.xp, game.ship.xp, game.ship.xp_to_next_level, True),
         ]
 
         for interface, value, max_value, reverse in interfaces:
             frame = value_to_frame(value, max_value, len(interface.frames), reverse)
             interface.update(game.ship, hud_ratio, ['right', 'bottom'], frame,
                              screen, hud_padding)
+
+        self.shield_bar.max_value = game.ship.max_shield
+        self.shield_bar.update(game.ship.shield, game.delta)
+        self.shield_bar.draw(screen)
+
+        self.xp_bar.max_value = game.ship.xp_to_next_level
+        self.xp_bar.update(game.ship.xp, game.delta)
+        self.xp_bar.draw(screen)
 
         current_gun_frame = game.ship.gun_order.index(game.ship.gun)
         self.guns.update(game.ship, hud_ratio, ['right', 'bottom'],
