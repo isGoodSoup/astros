@@ -2,19 +2,19 @@ import json
 
 from pygame.constants import *
 
-import scripts.assets as assets
-from scripts.celestial import *
-from scripts.context import AppContext
-from scripts.crt import CRT
-from scripts.fonts import FontManager
-from scripts.game import Game
-from scripts.mixer import Mixer
-from scripts.mods import Mods
-from scripts.constants import *
-from scripts.shared import fade
-from scripts.update import set_hud
-from scripts.utils import render_fade
-from scripts.shared import controller
+import scripts.system.assets as assets
+from scripts.objects.celestial import *
+from scripts.system.context import AppContext
+from scripts.engine.crt import CRT
+from scripts.system.fonts import FontManager
+from scripts.engine.game import Game
+from scripts.system.mixer import Mixer
+from scripts.engine.mods import Mods
+from scripts.system.constants import *
+from scripts.engine.fade import fade
+from scripts.engine.update import set_hud
+from scripts.engine.utils import render_fade
+from scripts.engine.controller import controller
 
 class Menu:
     def __init__(self, context):
