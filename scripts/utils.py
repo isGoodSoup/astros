@@ -1,6 +1,7 @@
 import datetime
 import functools
 import os
+import random
 import sys
 
 import pygame
@@ -40,6 +41,10 @@ def debug(game):
 
 def apply_curve(game, v):
     return v * abs(v)
+
+def random_pos(game):
+    return (random.randint(0, game.screen_size[0]),
+            random.randint(-100, game.screen_size[1]))
 
 def center(game, text, screen_size):
     return screen_size[0] // 2 - text.get_width() // 2
