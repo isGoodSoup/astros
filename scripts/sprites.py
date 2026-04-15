@@ -4,8 +4,9 @@ import pygame
 
 import scripts.assets as assets
 from scripts.constants import *
+from scripts.runtime import get_ship_ember
 from scripts.ship import Ship
-
+from scripts.particle import Particle
 
 class SpriteManager:
     def __init__(self, game):
@@ -89,3 +90,36 @@ class SpriteManager:
 
     def create_ship(self):
         return Ship(self.selected_sheet, self.game, 0, 0)
+
+    def spawn_thruster_particle(self, ship):
+        vel = pygame.Vector2(ship.vel_x, ship.vel_y)
+
+        if vel.length_squared() == 0:
+            return
+
+        direction = -vel.normalize()
+
+        base_pos = pygame.Vector2(ship.rect.center)
+        engine_pos = base_pos + ship.engine_offset
+
+        side = pygame.Vector2(-direction.y, direction.x)
+        engine_pos += side * random.uniform(-3, 3)
+
+        spawn_pos = engine_pos + direction * 6
+
+        spread = pygame.Vector2(
+            random.uniform(-0.6, 0.6),
+            random.uniform(-0.6, 0.6)
+        )
+
+        speed = direction * random.uniform(2.0, 4.5) + spread
+
+        particle = Particle(
+            location=spawn_pos,
+            velocity=speed,
+            timer=random.randint(15, 28),
+            color=get_ship_ember(),
+            radius=random.randint(2, 4)
+        )
+
+        self.particles.append(particle)

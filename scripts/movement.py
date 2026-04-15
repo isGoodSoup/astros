@@ -44,6 +44,14 @@ def update_movement(game, delta, screen_size):
     game.ship.vel_y += iy * ACCEL * delta * FPS
 
     speed = (game.ship.vel_x ** 2 + game.ship.vel_y ** 2) ** 0.5
+    accel_mag = (ix * ix + iy * iy) ** 0.5
+
+    if accel_mag > 0:
+        emit_count = 1 + int(accel_mag * 3)
+
+        for _ in range(emit_count):
+            game.sprites.spawn_thruster_particle(game.ship)
+
     if speed > MAX_SPEED:
         scale = MAX_SPEED / speed
         game.ship.vel_x *= scale
