@@ -298,7 +298,31 @@ class Ship(AnimatedEntity):
                                          self.base_guns_ammo[gun]))
 
     def taken_damage(self):
-        return [random.randint(0, 10) - 4, random.randint(0, 10) - 4]
+        return [0, 0]
+
+    def apply_visual_damage(self):
+        if not hasattr(self.game.sprites, 'frames') or not self.game.sprites.frames:
+            return
+
+        current_surface = self.game.sprites.base
+        width, height = current_surface.get_size()
+
+        pixels = []
+        for x in range(0, width, SCALE):
+            for y in range(0, height, SCALE):
+                if current_surface.get_at((x, y))[3] > 0:
+                    pixels.append((x, y))
+
+        if not pixels:
+            return
+
+        target_x, target_y = random.choice(pixels)
+
+        for frame in self.game.sprites.frames:
+            for dx in range(SCALE):
+                for dy in range(SCALE):
+                    if target_x + dx < width and target_y + dy < height:
+                        frame.set_at((target_x + dx, target_y + dy), (0, 0, 0, 0))
 
     def gain_xp(self, amount, sound):
         if self.level_cap and self.level == LEVEL_CAP:

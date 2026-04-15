@@ -71,6 +71,7 @@ def check_collision(game, local):
                 alien_hit.kill()
 
             game.ship.hit = True
+            game.ship.apply_visual_damage()
             if previous_combo > 1.0:
                 x, y = game.ship.rect.centerx, game.ship.rect.top
                 game.sprites.floating_numbers.add(FloatingNumber(x, y, local.t('game.lost_mult'),
