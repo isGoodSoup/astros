@@ -15,7 +15,7 @@ __all__ = ['Alien', 'HeavyAlien', 'BomberAlien', 'EvokerAlien', 'StoneAlien']
 
 class Alien(Entity):
     def __init__(self, color, x, y, ship, game,
-                 base_hp=100, base_damage=10, base_speed=4):
+                 base_hp=100, base_damage=10, base_speed=4, base_weight=1):
         image_path = resource_path(f"assets/aliens/{color}.png")
         image = pygame.image.load(image_path).convert_alpha()
         super().__init__(image, x, y)
@@ -290,6 +290,47 @@ class StoneAlien(Alien):
 
 class AlienBehemoth(Alien):
     def __init__(self, x, y, ship, game):
-        super().__init__("blue", x, y, ship, game, base_hp=800, base_damage=50)
+        super().__init__("blue", x, y, ship, game, base_hp=2000, base_damage=50)
         self.shot_cooldown = 5000
         self.aggro_distance = 500
+        
+        self.scale_factor = random.uniform(2.0, 3.0)
+        self.image = pygame.transform.scale(
+            self.image, 
+            (int(self.rect.width * self.scale_factor), 
+             int(self.rect.height * self.scale_factor))
+        )
+        self.rect = self.image.get_rect(center=self.rect.center)
+        
+        self.summon_cooldown = EVOKER_SUMMON_COOLDOWN * 1.5
+        self.last_summon_time = pygame.time.get_ticks()
+
+    def update(self):
+        super().update()
+        now = pygame.time.get_ticks()
+        if self.aggro and now - self.last_summon_time > self.summon_cooldown:
+            self.summon()
+            self.last_summon_time = now
+
+    def summon(self):
+        from scripts.objects.particle import Particle
+        for _ in range(25):
+            angle = random.uniform(0, 2 * math.pi)
+            speed = random.uniform(3, 6)
+            velocity = (math.cos(angle) * speed, math.sin(angle) * speed)
+            self.game.sprites.particles.append(
+                Particle(self.rect.center, velocity, timer=40, color=COLOR_BLUE)
+            )
+
+        for _ in range(2):
+            off_x = random.randint(-150, 150)
+            off_y = random.randint(-150, 150)
+            new_alien = AlienMinion(self.rect.centerx + off_x,
+                                    self.rect.centery + off_y, self.ship, self.game)
+            new_alien.aggro = True
+            new_alien.in_formation = False
+            self.game.sprites.aliens.add(new_alien)
+
+class AlienMinion(Alien):
+    def __init__(self, x, y, ship, game):
+        super().__init__("cyan", x, y, ship, game, base_hp=150, base_damage=15)

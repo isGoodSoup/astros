@@ -16,7 +16,7 @@ from scripts.objects.asteroid import Asteroid
 from scripts.objects.boss import Boss
 from scripts.objects.celestial import random_celestial, is_valid_spawn
 from scripts.objects.enemies import Alien, HeavyAlien, BomberAlien, EvokerAlien, \
-    StoneAlien
+    StoneAlien, AlienBehemoth
 from scripts.objects.explode import Explosion
 from scripts.objects.particle import Particle
 from scripts.system.constants import *
@@ -76,6 +76,8 @@ def spawner(game):
     if game.state.phase_fade <= 0:
         if game.state.phase_index in ALIEN_PHASES:
             spawn_fleet(game)
+            if game.state.difficulty == Difficulty.NIGHTMARE:
+                spawn_fleet(game)
         elif game.state.phase_index in ASTEROID_PHASES:
             spawn_asteroids(game)
         game.spawns.last_reinforcement_spawn = now
@@ -147,6 +149,7 @@ def run_transition(game):
 
 
 def spawn_fleet(game):
+    now = pygame.time.get_ticks()
     formations = ['block', 'clutch', 'cross', 'line']
     formation_type = random.choice(formations)
 
@@ -154,31 +157,44 @@ def spawn_fleet(game):
     y = -300
     center = pygame.Vector2(x, y)
 
+    should_spawn_behemoth = (now - game.spawns.last_behemoth_spawn >=
+                             game.spawns.behemoth_cooldown)
+
     offsets = []
+    behemoth_index = -1
+
     if formation_type == "block":
         for r in range(3):
             for c in range(3):
-                offsets.append((c * 60 - 60, r * 60 - 60))
+                offsets.append(pygame.Vector2(c * 60 - 60, r * 60 - 60))
     elif formation_type == "clutch":
         for _ in range(8):
             offsets.append(
-                (random.randint(-100, 100), random.randint(-100, 100)))
+                pygame.Vector2(random.randint(-100, 100),
+                               random.randint(-100, 100)))
     elif formation_type == "cross":
         for i in range(-2, 3):
-            offsets.append((i * 60, 0))
+            offsets.append(pygame.Vector2(i * 60, 0))
             if i != 0:
-                offsets.append((0, i * 60))
+                offsets.append(pygame.Vector2(0, i * 60))
     elif formation_type == "line":
         length = random.randint(3, 7)
         horizontal = random.choice([True, False])
         for i in range(length):
             if horizontal:
-                offsets.append((i * 60 - (length * 30), 0))
+                offsets.append(pygame.Vector2(i * 60 - (length * 30), 0))
             else:
-                offsets.append((0, i * 60 - (length * 30)))
+                offsets.append(pygame.Vector2(0, i * 60 - (length * 30)))
 
-    for offset in offsets:
-        if game.state.sandbox_enabled:
+    if should_spawn_behemoth and len(offsets) > 0:
+        behemoth_index = random.randint(0, len(offsets) - 1)
+        game.spawns.last_behemoth_spawn = now
+
+    for i, offset in enumerate(offsets):
+        final_offset = pygame.Vector2(offset)
+        if i == behemoth_index:
+            alien_type = AlienBehemoth
+        elif game.state.sandbox_enabled:
             match game.state.sandbox_enemy_type:
                 case "Alien":
                     alien_type = Alien
@@ -192,18 +208,27 @@ def spawn_fleet(game):
             alien_type = random.choices(
                 [Alien, HeavyAlien, BomberAlien, EvokerAlien, StoneAlien],
                 weights=[0.5, 0.2, 0.15, 0.08, 0.07],
-                k=1
-            )[0]
+                k=1)[0]
 
-        spawn_x = center.x + offset[0]
-        spawn_y = center.y + offset[1]
+        spawn_x = center.x + offset.x
+        spawn_y = center.y + offset.y
 
         if alien_type == Alien:
             alien = Alien('red', spawn_x, spawn_y, game.ship, game)
         else:
             alien = alien_type(spawn_x, spawn_y, game.ship, game)
 
-        alien.formation_offset = pygame.Vector2(offset)
+        if behemoth_index != -1 and i != behemoth_index:
+            behemoth_offset = offsets[behemoth_index]
+            diff = final_offset - behemoth_offset
+            if diff.length() > 0:
+                if diff.length() < 120:
+                    final_offset = behemoth_offset + diff.normalize() * 120
+                    spawn_x = center.x + final_offset.x
+                    spawn_y = center.y + final_offset.y
+                    alien.rect.center = (spawn_x, spawn_y)
+
+        alien.formation_offset = final_offset
         alien.formation_center = center
         game.sprites.aliens.add(alien)
 

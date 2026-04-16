@@ -32,3 +32,6 @@ class SpawnManager:
         self.black_hole_spawn_delay = BLACK_HOLE_SPAWN
 
         self.shuffle_enemies = False
+        
+        self.last_behemoth_spawn = 0
+        self.behemoth_cooldown = 180_000
