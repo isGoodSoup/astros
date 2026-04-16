@@ -13,7 +13,7 @@ from scripts.system.constants import (COLOR_RED, BOSS_BASE_SPEED, \
                               EVOKER_SUMMON_COOLDOWN, SCREEN_SHAKE,
                               BASE_RUMBLE_MS)
 from scripts.engine.shared import joysticks, controller
-from scripts.engine.utils import resource_path
+from scripts.engine.utils import resource_path, HealthBar
 from scripts.system.levels import  DIFFICULTY_ENEMY_SETTINGS
 
 class Boss(pygame.sprite.Sprite):
@@ -70,8 +70,14 @@ class Boss(pygame.sprite.Sprite):
         self.last_summon_time = 0
         self.summon_cooldown = EVOKER_SUMMON_COOLDOWN * 2
         self.exploded = False
+        
+        # Health bar (reuse HealthBar object)
+        from scripts.system.constants import HEALTHBAR_WIDTH
+        self.health_bar = HealthBar(self, width=HEALTHBAR_WIDTH * 4, offset=20)
+        self.health_bar.visible = True # Always show for bosses
 
     def update(self):
+        self.health_bar.update()
         self.hitbox.center = self.rect.center
         now = pygame.time.get_ticks()
 

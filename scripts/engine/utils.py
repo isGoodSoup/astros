@@ -7,7 +7,9 @@ import sys
 import pygame
 
 from scripts.objects.floaty import FloatingNumber
-from scripts.system.constants import SETTINGS_DEFINITION, SCREENSHOTS_DIR
+from scripts.system.constants import SETTINGS_DEFINITION, SCREENSHOTS_DIR, \
+    HEALTHBAR_WIDTH, HEALTHBAR_HEIGHT, HEALTHBAR_OFFSET, COLOR_HEALTH_RED, \
+    COLOR_HEALTH_DARK_RED
 from scripts.engine.fade import fade
 from scripts.system.config import save_config
 
@@ -111,3 +113,41 @@ def render_fade(screen, screen_size):
         fade_surface.set_alpha(alpha)
         screen.blit(fade_surface, (0, 0))
     return alpha
+
+class HealthBar:
+    def __init__(self, owner, width=HEALTHBAR_WIDTH, height=HEALTHBAR_HEIGHT, offset=HEALTHBAR_OFFSET):
+        self.owner = owner
+        self.width = width
+        self.height = height
+        self.offset = offset
+        self.visible = False
+        self.last_hp = owner.hitpoints if hasattr(owner, 'hitpoints') else 0
+
+    def update(self):
+        current_hp = getattr(self.owner, 'hitpoints', 0)
+        
+        if current_hp < self.last_hp:
+            self.visible = True
+        
+        if getattr(self.owner, 'aggro', False):
+            self.visible = True
+            
+        self.last_hp = current_hp
+
+    def draw(self, screen):
+        if not self.visible or not self.owner.alive():
+            return
+
+        max_hp = getattr(self.owner, 'max_hitpoints', getattr(self.owner, 'base_hp', 1))
+        current_hp = getattr(self.owner, 'hitpoints', 0)
+        
+        if max_hp <= 0:
+            return
+
+        ratio = max(0, min(1, current_hp / max_hp))
+        
+        x = self.owner.rect.centerx - self.width // 2
+        y = self.owner.rect.bottom + self.offset
+        
+        pygame.draw.rect(screen, COLOR_HEALTH_RED, (x, y, self.width, self.height))
+        pygame.draw.rect(screen, COLOR_HEALTH_DARK_RED, (x, y, int(self.width * ratio), self.height))

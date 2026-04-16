@@ -27,9 +27,15 @@ def render_frame(game, screen, font, hud_padding):
 
     if len(game.sprites.aliens) > 0:
         game.sprites.aliens.draw(screen)
+        for alien in game.sprites.aliens:
+            if hasattr(alien, 'health_bar'):
+                alien.health_bar.draw(screen)
 
     if not boss_invisible:
         game.sprites.bosses.draw(screen)
+        for boss in game.sprites.bosses:
+            if hasattr(boss, 'health_bar'):
+                boss.health_bar.draw(screen)
 
     game.sprites.projectiles.draw(screen)
     game.sprites.enemy_projectiles.draw(screen)

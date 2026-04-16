@@ -8,9 +8,10 @@ from scripts.objects.shockwave import Shockwave
 from scripts.objects.proj import Projectile, StoneProjectile
 from scripts.engine.shared import joysticks, controller
 from scripts.system.constants import *
-from scripts.engine.utils import resource_path
+from scripts.engine.utils import resource_path, HealthBar
 
-__all__ = ['Alien', 'HeavyAlien', 'BomberAlien', 'EvokerAlien', 'StoneAlien']
+__all__ = ['Alien', 'HeavyAlien', 'BomberAlien', 'EvokerAlien',
+           'StoneAlien', 'AlienBehemoth', 'AlienMinion']
 
 
 class Alien(Entity):
@@ -38,6 +39,8 @@ class Alien(Entity):
         self.orbit_speed = random.uniform(0.5, 1.5)
 
         self.last_shot_time = 0
+
+        self.health_bar = HealthBar(self)
 
         self._apply_difficulty()
 
@@ -81,6 +84,7 @@ class Alien(Entity):
         self._apply_difficulty()
 
     def update(self):
+        self.health_bar.update()
         if not self.aggro:
             dist_to_ship = pygame.Vector2(self.rect.center).distance_to(
                 self.ship.rect.center)
@@ -165,6 +169,7 @@ class BomberAlien(Alien):
         self.aggro_distance = 500
 
     def update(self):
+        self.health_bar.update()
         if not self.aggro:
             dist_to_ship = pygame.Vector2(self.rect.center).distance_to(
                 self.ship.rect.center)
