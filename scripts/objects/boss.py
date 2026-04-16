@@ -79,6 +79,10 @@ class Boss(pygame.sprite.Sprite):
         self.health_bar = HealthBar(self, width=HEALTHBAR_WIDTH * 4, offset=20)
         self.health_bar.visible = True
 
+        self.original_image = self.image
+        self.hit_flash_timer = 0
+        self.hit_flash_duration = 8
+
         self.iframes_cooldown = BOSS_IFRAMES
         self.iframes_duration = BOSS_IFRAMES_DURATION
         self.is_invincible = False
@@ -90,6 +94,7 @@ class Boss(pygame.sprite.Sprite):
         self.alpha = 255
 
     def update(self):
+        self.update_hit_flash()
         self.health_bar.update()
         self.hitbox.center = self.rect.center
         now = pygame.time.get_ticks()
@@ -169,6 +174,21 @@ class Boss(pygame.sprite.Sprite):
             self.current_phase = 'phase2'
         elif health_ratio < 0.5 and self.current_phase == 'phase2':
             self.current_phase = 'phase3'
+
+    def update_hit_flash(self):
+        if self.hit_flash_timer > 0:
+            self.hit_flash_timer -= 1
+            if self.hit_flash_timer > self.hit_flash_duration - 2:
+                self.image = colour(self.original_image, COLOR_WHITE)
+            elif (self.hit_flash_timer // 2) % 2 == 0:
+                self.image = colour(self.original_image, COLOR_WHITE)
+            else:
+                self.image = self.original_image
+        else:
+            self.image = self.original_image
+
+    def trigger_hit_flash(self):
+        self.hit_flash_timer = self.hit_flash_duration
 
     def shoot(self):
         settings = DIFFICULTY_ENEMY_SETTINGS[self.game.state.difficulty]

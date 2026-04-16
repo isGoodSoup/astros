@@ -8,7 +8,7 @@ from scripts.objects.shockwave import Shockwave
 from scripts.objects.proj import Projectile, StoneProjectile
 from scripts.engine.shared import joysticks, controller
 from scripts.system.constants import *
-from scripts.engine.utils import resource_path, HealthBar
+from scripts.engine.utils import resource_path, HealthBar, colour
 
 __all__ = ['Alien', 'HeavyAlien', 'BomberAlien', 'EvokerAlien',
            'StoneAlien', 'AlienBehemoth', 'AlienMinion']
@@ -84,6 +84,7 @@ class Alien(Entity):
         self._apply_difficulty()
 
     def update(self):
+        self.update_hit_flash()
         self.health_bar.update()
         if not self.aggro:
             dist_to_ship = pygame.Vector2(self.rect.center).distance_to(
@@ -169,6 +170,7 @@ class BomberAlien(Alien):
         self.aggro_distance = 500
 
     def update(self):
+        self.update_hit_flash()
         self.health_bar.update()
         if not self.aggro:
             dist_to_ship = pygame.Vector2(self.rect.center).distance_to(
@@ -306,6 +308,7 @@ class AlienBehemoth(Alien):
              int(self.rect.height * self.scale_factor))
         )
         self.rect = self.image.get_rect(center=self.rect.center)
+        self.original_image = self.image
         
         self.summon_cooldown = EVOKER_SUMMON_COOLDOWN * 1.5
         self.last_summon_time = pygame.time.get_ticks()

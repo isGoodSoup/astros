@@ -115,6 +115,13 @@ def render_fade(screen, screen_size):
         screen.blit(fade_surface, (0, 0))
     return alpha
 
+def colour(img, col):
+    img = img.copy()
+    color_img = pygame.Surface(img.get_size(), pygame.SRCALPHA)
+    color_img.fill((col[0], col[1], col[2], 0))
+    img.blit(color_img, (0, 0), special_flags=pygame.BLEND_RGBA_ADD)
+    return img
+
 class HealthBar:
     def __init__(self, owner, width=HEALTHBAR_WIDTH, height=HEALTHBAR_HEIGHT, offset=HEALTHBAR_OFFSET):
         self.owner = owner

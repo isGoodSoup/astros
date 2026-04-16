@@ -63,6 +63,7 @@ def check_collision(game, local):
                     game.ship.shield -= proj_damage * damage_taken
                 else:
                     game.ship.hitpoints -= proj_damage * damage_taken
+                game.ship.trigger_hit_flash()
             alien_proj.kill()
 
         if can_take_damage:
@@ -73,6 +74,7 @@ def check_collision(game, local):
             game.ship.combo_multiplier = 1.0
 
             if asteroid_hit:
+                game.ship.trigger_hit_flash()
                 asteroid_hit.kill()
 
             if alien_hit:
@@ -84,6 +86,7 @@ def check_collision(game, local):
                         game.ship.shield -= alien_damage * damage_taken
                     else:
                         game.ship.hitpoints -= alien_damage * damage_taken
+                    game.ship.trigger_hit_flash()
                 alien_hit.kill()
 
             game.ship.hit = True
@@ -115,6 +118,7 @@ def check_collision(game, local):
                 else:
                     damage_per_frame = SHIP_BASE_COLLISION_DAMAGE * game.ship.level * damage_taken
                     game.ship.hitpoints -= damage_per_frame + boss_damage
+                game.ship.trigger_hit_flash()
 
             if hasattr(game.ship, "fortified_percent"):
                 if game.ship.fortified_percent > 0:
@@ -167,6 +171,7 @@ def check_collision(game, local):
                 game.ship.combo_multiplier = 1.0
 
             asteroid.hitpoints -= damage_per_frame
+            asteroid.trigger_hit_flash()
             x, y = asteroid.rect.center
 
             if not game.ship.hit:
@@ -230,6 +235,7 @@ def check_collision(game, local):
                 game.ship.combo_multiplier = 1.0
 
             alien.hitpoints -= damage_per_frame
+            alien.trigger_hit_flash()
             x, y = alien.rect.center
 
             if not game.ship.hit:
@@ -293,6 +299,7 @@ def check_collision(game, local):
                 game.ship.combo_multiplier = 1.0
 
             boss.hitpoints -= damage_per_frame
+            boss.trigger_hit_flash()
             x, y = boss.rect.center
 
             if not game.ship.hit:

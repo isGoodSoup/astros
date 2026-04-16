@@ -1,12 +1,12 @@
-import random
 import math
+import random
 
 import pygame
 
-from scripts.system.constants import *
 from scripts.objects.entity import AnimatedEntity
-from scripts.system.levels import DIFFICULTY_SHIP_SETTINGS
 from scripts.objects.proj import Projectile
+from scripts.system.constants import *
+from scripts.system.levels import DIFFICULTY_SHIP_SETTINGS
 
 
 class Ship(AnimatedEntity):
