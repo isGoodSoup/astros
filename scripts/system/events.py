@@ -47,7 +47,7 @@ class Events:
                                       game.sprites.frame_big_explode))
 
         if game.state.can_screen_shake:
-            game.screen_shake = SCREEN_SHAKE + 30
+            game.screen_shake = SCREEN_SHAKE + 5
             if joysticks and game.state.can_rumble:
                 controller.rumble(1, 1, HIGH_RUMBLE_MS)
 

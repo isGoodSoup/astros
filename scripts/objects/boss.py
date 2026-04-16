@@ -243,7 +243,7 @@ class Boss(pygame.sprite.Sprite):
             self.game.sprites.shockwaves.append(Shockwave(self.rect.center,
                                                           max_radius=400))
             if self.game.state.can_screen_shake:
-                self.game.screen_shake = SCREEN_SHAKE * 2
+                self.game.screen_shake = SCREEN_SHAKE
             if joysticks and self.game.state.can_rumble:
                 controller.rumble(0.5, 0.7, BASE_RUMBLE_MS * 4)
 
