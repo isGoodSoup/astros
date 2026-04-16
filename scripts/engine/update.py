@@ -400,7 +400,7 @@ def update_game(game, delta, screen_size, hud_padding):
             game.ship.critical = True
             frequency = 0
             if game.ship.critical and game.state.can_screen_shake:
-                game.screen_shake = SCREEN_SHAKE * 2
+                game.screen_shake = SCREEN_SHAKE
                 if joysticks and game.state.can_rumble:
                     controller.rumble(frequency, 3, BASE_RUMBLE_MS * 2)
                 game.mixer.play(6)

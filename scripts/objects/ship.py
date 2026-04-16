@@ -301,7 +301,8 @@ class Ship(AnimatedEntity):
                                          self.base_guns_ammo[gun]))
 
     def taken_damage(self):
-        return [0, 0]
+        return [random.randint(-SCREEN_SHAKE, SCREEN_SHAKE),
+                random.randint(-SCREEN_SHAKE, SCREEN_SHAKE)]
 
     def apply_visual_damage(self):
         if not hasattr(self.game.sprites, 'frames') or not self.game.sprites.frames:

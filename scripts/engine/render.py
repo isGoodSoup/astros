@@ -285,8 +285,9 @@ class RenderScreen:
                 controller.rumble(1, 2, BASE_RUMBLE_MS + 20)
 
             if not game.state.game_over:
-                game.screen.blit(pygame.transform.scale(game.screen, game.screen_size),
-                            render_offset)
+                temp_surface = pygame.transform.scale(game.screen, game.screen_size)
+                game.screen.fill(COLOR_BLACK)
+                game.screen.blit(temp_surface, render_offset)
 
         alpha = render_fade(game.screen, game.screen_size)
         game.crt.render(game.screen)
