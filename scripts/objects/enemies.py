@@ -8,6 +8,7 @@ from scripts.objects.shockwave import Shockwave
 from scripts.objects.proj import Projectile, StoneProjectile
 from scripts.engine.shared import joysticks, controller
 from scripts.system.constants import *
+from scripts.engine.utils import resource_path
 
 __all__ = ['Alien', 'HeavyAlien', 'BomberAlien', 'EvokerAlien', 'StoneAlien']
 
@@ -15,7 +16,7 @@ __all__ = ['Alien', 'HeavyAlien', 'BomberAlien', 'EvokerAlien', 'StoneAlien']
 class Alien(Entity):
     def __init__(self, color, x, y, ship, game,
                  base_hp=100, base_damage=10, base_speed=4):
-        image_path = f"assets/aliens/{color}.png"
+        image_path = resource_path(f"assets/aliens/{color}.png")
         image = pygame.image.load(image_path).convert_alpha()
         super().__init__(image, x, y)
         self.ship = ship

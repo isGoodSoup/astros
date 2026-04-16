@@ -2,6 +2,7 @@ import pygame
 import math
 
 from scripts.system.constants import COLOR_LIGHT_RED
+from scripts.engine.utils import resource_path
 
 
 class Projectile(pygame.sprite.Sprite):
@@ -73,7 +74,7 @@ class StoneProjectile(pygame.sprite.Sprite):
 
         # Load stone image or create a simple one
         try:
-            self.image = pygame.image.load("assets/asteroids/asteroid_small.png").convert_alpha()
+            self.image = pygame.image.load(resource_path("assets/asteroids/asteroid_small.png")).convert_alpha()
             self.image = pygame.transform.scale(self.image, (24, 24))
         except:
             self.image = pygame.Surface((20, 20), pygame.SRCALPHA)
