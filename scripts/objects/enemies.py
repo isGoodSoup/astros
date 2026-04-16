@@ -1,14 +1,15 @@
-import random
 import math
+import random
+
 import pygame
 
-from scripts.objects.entity import Entity
-from scripts.system.levels import (DIFFICULTY_ENEMY_SETTINGS)
-from scripts.objects.shockwave import Shockwave
-from scripts.objects.proj import Projectile, StoneProjectile
 from scripts.engine.shared import joysticks, controller
+from scripts.engine.utils import resource_path, HealthBar
+from scripts.objects.entity import Entity
+from scripts.objects.proj import Projectile, StoneProjectile
+from scripts.objects.shockwave import Shockwave
 from scripts.system.constants import *
-from scripts.engine.utils import resource_path, HealthBar, colour
+from scripts.system.levels import (DIFFICULTY_ENEMY_SETTINGS)
 
 __all__ = ['Alien', 'HeavyAlien', 'BomberAlien', 'EvokerAlien',
            'StoneAlien', 'AlienBehemoth', 'AlienMinion']
@@ -170,8 +171,7 @@ class BomberAlien(Alien):
         self.aggro_distance = 500
 
     def update(self):
-        self.update_hit_flash()
-        self.health_bar.update()
+        super().update()
         if not self.aggro:
             dist_to_ship = pygame.Vector2(self.rect.center).distance_to(
                 self.ship.rect.center)
@@ -243,6 +243,7 @@ class EvokerAlien(Alien):
     def __init__(self, x, y, ship, game):
         super().__init__("purple", x, y, ship, game, base_hp=500,
                          base_damage=30)
+        self.hit_flash_duration = 10
         self.summon_cooldown = EVOKER_SUMMON_COOLDOWN
         self.last_summon_time = pygame.time.get_ticks()
 
@@ -276,6 +277,7 @@ class StoneAlien(Alien):
     def __init__(self, x, y, ship, game):
         super().__init__("green", x, y, ship, game, base_hp=250,
                          base_damage=20)
+        self.hit_flash_duration = 10
         self.shot_cooldown = 3000
 
     def update(self):
@@ -309,6 +311,7 @@ class AlienBehemoth(Alien):
         )
         self.rect = self.image.get_rect(center=self.rect.center)
         self.original_image = self.image
+        self.hit_flash_duration = 12
         
         self.summon_cooldown = EVOKER_SUMMON_COOLDOWN * 1.5
         self.last_summon_time = pygame.time.get_ticks()

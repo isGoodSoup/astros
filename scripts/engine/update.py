@@ -418,6 +418,7 @@ def update_game(game, delta, screen_size, hud_padding):
     game.sprites.enemy_projectiles.update()
 
     if game.sprites.ship_alive:
+        game.ship.update_hit_flash()
         game.ship.update_upgrades()
         game.ship._overheat_cooldown(game, delta)
         if game.ship.hitpoints < (game.ship.max_hitpoints * 0.25):
