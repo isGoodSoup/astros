@@ -1,5 +1,6 @@
 {
   "menu.start": "Presiona cualquier tecla para comenzar",
+  "menu.game_version": "v0.0.1-estable",
   "mods.header": "Elige tu estilo",
   "traits.header": "Elige tu modificación",
   "game.trait.name.boss": "Doble Jefe",

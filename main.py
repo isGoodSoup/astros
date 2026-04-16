@@ -17,6 +17,7 @@ from scripts.engine.update import set_hud
 from scripts.engine.utils import render_fade
 from scripts.engine.shared import controller
 
+
 class Menu:
     def __init__(self, context):
         self.context = context
@@ -90,10 +91,20 @@ class Menu:
             start_x = surface_width // 2 - start.get_width() // 2
             self.render_surface.blit(self.logo_img, (title_x, title_y))
             if (now // ONE_SECOND // 2) % 2 == 0:
-                self.render_surface.blit(start,
-                                         (start_x, title_y + TITLE_OFFSET))
+                self.render_surface.blit(start, (start_x, title_y +
+                                                 TITLE_OFFSET))
+            version_text = self.context.local.t('menu.game_version')
+            version = self.font.render(version_text, True, COLOR_WHITE)
+            self.render_surface.blit(
+                version,
+                (VERSION_PADDING,
+                surface_height - version.get_height() -
+                VERSION_PADDING))
+
             self.screen.blit(
-                pygame.transform.scale(self.render_surface, self.screen_size),
+                pygame.transform.scale(
+                    self.render_surface,
+                    self.screen_size),
                 (0, 0))
 
             if alpha > 0:
@@ -115,7 +126,7 @@ class Menu:
                          self.hud_ratio, [], assets.SHIPS, 0))
             game.state.difficulty = Difficulty.EXPLORER
             game.run(self.clock, self.screen, self.screen_size,
-                         self.hud_ratio, self.crt)
+                     self.hud_ratio, self.crt)
             self.running = False
         else:
             mods = Mods(self.context, self.screen, self.screen_size,
