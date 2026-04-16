@@ -29,7 +29,7 @@ def check_collision(game, local):
     else:
         alien_proj = None
 
-    if game.state.current_phase == game.state.phases[-1]:
+    if game.state.phase_index in BOSS_PHASES_INDEX:
         boss_hit = pygame.sprite.spritecollideany(game.ship, game.sprites.bosses, # type: ignore
             collided=lambda s,m: s.hitbox.colliderect(m.rect))
     else:
@@ -55,6 +55,14 @@ def check_collision(game, local):
             return
 
         if alien_proj:
+            damage_per_frame = 0
+            proj_damage = getattr(alien_proj, "damage", 0)
+            damage_taken = game.ship.damage_taken_multiplier
+            if not TOGGLE_INVINCIBLE:
+                if game.ship.shield > 0:
+                    game.ship.shield -= proj_damage * damage_taken
+                else:
+                    game.ship.hitpoints -= proj_damage * damage_taken
             alien_proj.kill()
 
         if can_take_damage:
@@ -68,6 +76,14 @@ def check_collision(game, local):
                 asteroid_hit.kill()
 
             if alien_hit:
+                damage_per_frame = 0
+                alien_damage = getattr(alien_hit, "damage", ALIEN_DAMAGE)
+                damage_taken = game.ship.damage_taken_multiplier
+                if not TOGGLE_INVINCIBLE:
+                    if game.ship.shield > 0:
+                        game.ship.shield -= alien_damage * damage_taken
+                    else:
+                        game.ship.hitpoints -= alien_damage * damage_taken
                 alien_hit.kill()
 
             game.ship.hit = True
@@ -88,7 +104,9 @@ def check_collision(game, local):
                 game.mixer.play(1)
 
             damage_per_frame = 0
-            boss_damage = BOSS_DAMAGE if boss_hit else 0
+            boss_damage = 0
+            if boss_hit:
+                boss_damage = getattr(boss_hit, "current_damage", BOSS_DAMAGE)
             damage_taken = game.ship.damage_taken_multiplier
             if not TOGGLE_INVINCIBLE:
                 if game.ship.shield > 0:
@@ -248,6 +266,9 @@ def check_collision(game, local):
     hits3 = pygame.sprite.groupcollide(game.sprites.projectiles, game.sprites.bosses, True, False)
     for projectile, boss_hit in hits3.items():
         for boss in boss_hit:
+            if boss.is_invincible:
+                continue
+
             current_time = pygame.time.get_ticks()
             if current_time > game.ship.maniac_boost_end:
                 game.ship.maniac_boost = 0

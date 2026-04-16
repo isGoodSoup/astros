@@ -1,14 +1,17 @@
 import pygame
 
 from scripts.engine.game_over import reboot
+from scripts.engine.shared import joysticks, controller
+from scripts.engine.utils import take_screenshot, toggle_setting
+from scripts.objects.ship import get_nearest_enemy
+from scripts.system.constants import (BOSS_PHASES_INDEX, ONE_SECOND,
+                                      SCREEN_SHAKE,
+                                      INPUT_NAV_COOLDOWN,
+                                      PHASE_TRANSITION, INPUT_MOUSE,
+                                      INPUT_CONTROLLER,
+                                      BASE_RUMBLE_MS, SETTINGS_DEFINITION)
 from scripts.system.lang import rotate_language
 from scripts.system.mixer import adjust_setting
-from scripts.system.constants import (ONE_SECOND, SCREEN_SHAKE, INPUT_NAV_COOLDOWN,
-                              PHASE_TRANSITION, INPUT_MOUSE, INPUT_CONTROLLER,
-                              BASE_RUMBLE_MS, SETTINGS_DEFINITION)
-from scripts.engine.shared import joysticks, controller
-from scripts.objects.ship import get_nearest_enemy
-from scripts.engine.utils import take_screenshot, toggle_setting
 
 
 class Input:
@@ -64,7 +67,7 @@ class Input:
         keys = pygame.key.get_pressed()
         mouse = pygame.mouse.get_pressed()
 
-        is_boss_phase = game.state.current_phase == game.state.phases[-1]
+        is_boss_phase = game.state.phase_index in BOSS_PHASES_INDEX
 
         controller_shoot = False
         if joysticks:

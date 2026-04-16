@@ -6,12 +6,13 @@ import sys
 
 import pygame
 
+from scripts.engine.fade import fade
 from scripts.objects.floaty import FloatingNumber
+from scripts.system.config import save_config
 from scripts.system.constants import SETTINGS_DEFINITION, SCREENSHOTS_DIR, \
     HEALTHBAR_WIDTH, HEALTHBAR_HEIGHT, HEALTHBAR_OFFSET, COLOR_HEALTH_RED, \
-    COLOR_HEALTH_DARK_RED
-from scripts.engine.fade import fade
-from scripts.system.config import save_config
+    COLOR_BLACK
+
 
 def legacy(func):
     @functools.wraps(func)
@@ -149,5 +150,5 @@ class HealthBar:
         x = self.owner.rect.centerx - self.width // 2
         y = self.owner.rect.bottom + self.offset
         
-        pygame.draw.rect(screen, COLOR_HEALTH_RED, (x, y, self.width, self.height))
-        pygame.draw.rect(screen, COLOR_HEALTH_DARK_RED, (x, y, int(self.width * ratio), self.height))
+        pygame.draw.rect(screen, COLOR_BLACK, (x, y, self.width, self.height))
+        pygame.draw.rect(screen, COLOR_HEALTH_RED, (x, y, int(self.width * ratio), self.height))
