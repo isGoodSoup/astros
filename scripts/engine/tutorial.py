@@ -1,6 +1,5 @@
 import pygame
 
-import scripts.engine.game as g
 from scripts.system.constants import COLOR_WHITE
 
 
@@ -33,23 +32,23 @@ class Tutorial:
             self.active = False
             game.tutorial_active = False
 
-    def render(self, screen, font):
+    def render(self, game, screen, font):
         if self.step == 0:
-            text = font.render(g.local.t('game.tutorial.move'), True, COLOR_WHITE)
+            text = font.render(game.local.t('game.tutorial.move'), True, COLOR_WHITE)
             screen.blit(text, (pygame.display.Info().current_w // 2 - text.get_width() // 2,
                                pygame.display.Info().current_h - 100))
 
         elif self.step == 1:
-            text = font.render(g.local.t('game.tutorial.shoot'), True,COLOR_WHITE)
+            text = font.render(game.local.t('game.tutorial.shoot'), True,COLOR_WHITE)
             screen.blit(text, (pygame.display.Info().current_w // 2 - text.get_width() // 2,
                                pygame.display.Info().current_h - 100))
 
         elif self.step == 2:
-            text = font.render(g.local.t('game.tutorial.switch'), True, COLOR_WHITE)
+            text = font.render(game.local.t('game.tutorial.switch'), True, COLOR_WHITE)
             screen.blit(text, (pygame.display.Info().current_w // 2 - text.get_width() // 2,
                                pygame.display.Info().current_h - 100))
 
         elif self.step == 3:
-            text = font.render(g.local.t('game.tutorial.survive'), True, COLOR_WHITE)
+            text = font.render(game.local.t('game.tutorial.survive'), True, COLOR_WHITE)
             screen.blit(text, (pygame.display.Info().current_w // 2 - text.get_width() // 2,
                                pygame.display.Info().current_h - 100))

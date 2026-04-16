@@ -1,6 +1,5 @@
 import pygame
 
-import scripts.engine.game as g
 from scripts.engine.all_skills import Explorer, DamageBoost, Maniac, Madness, \
     Survival, \
     Adventurer, Pilot, Tank, Tower, Fortified, BrushOfDeath, WeaponsExpert
@@ -9,8 +8,10 @@ from scripts.engine.utils import resource_path, legacy
 
 
 class Skill:
-    def __init__(self, name, ability, icon, description_key=None, max_level=10,
+    def __init__(self, name, game, ability, icon, description_key=None,
+                 max_level=10,
                  visual_tiers=5):
+        self.local = game.local
         self.name = name
         self.ability = ability
 
@@ -46,7 +47,7 @@ class Skill:
     @property
     def description(self):
         if self.description_key:
-            return g.local.t(self.description_key)
+            return self.local.t(self.description_key)
         return None
 
     @legacy
@@ -76,21 +77,43 @@ class Skill:
 
 
 class SkillManager:
-    def __init__(self):
+    def __init__(self, game):
         self.skills = [
-            Skill("Explorer", Explorer(), "01_explorer", "game.skill.explorer"),
-            Skill("Berserk", DamageBoost(), "02_berserk", "game.skill.berserk"),
-            Skill("Maniac", Maniac(), "02a_maniac", "game.skill.maniac"),
-            Skill("Madness", Madness(), "02b_madness", "game.skill.madness"),
-            Skill("Survivor", Survival(), "03_survivor", "game.skill.survivor"),
-            Skill("Adventurer", Adventurer(), "03a_adventurer",
+            Skill("Explorer", game, Explorer(), "01_explorer",
+                  "game.skill.explorer"),
+
+            Skill("Berserk", game, DamageBoost(), "02_berserk",
+                  "game.skill.berserk"),
+
+            Skill("Maniac", game, Maniac(), "02a_maniac",
+                  "game.skill.maniac"),
+
+            Skill("Madness", game, Madness(), "02b_madness",
+                  "game.skill.madness"),
+
+            Skill("Survivor", game, Survival(), "03_survivor",
+                  "game.skill.survivor"),
+
+            Skill("Adventurer", game, Adventurer(), "03a_adventurer",
                   "game.skill.adventurer"),
-            Skill("Pilot", Pilot(), "03b_pilot", "game.skill.pilot"),
-            Skill("Tank", Tank(), "04_tank", "game.skill.tank"),
-            Skill("Tower", Tower(), "04a_tower", "game.skill.tower"),
-            Skill("Fortified", Fortified(), "04b_fortified","game.skill.fortified"),
-            Skill("BrushOfDeath", BrushOfDeath(), "05_bod", "game.skill.bod",max_level=1),
-            Skill("Savant", WeaponsExpert(), "06_savant", "game.skill.savant"),
+
+            Skill("Pilot", game, Pilot(), "03b_pilot",
+                  "game.skill.pilot"),
+
+            Skill("Tank", game, Tank(), "04_tank",
+                  "game.skill.tank"),
+
+            Skill("Tower", game, Tower(), "04a_tower",
+                  "game.skill.tower"),
+
+            Skill("Fortified", game, Fortified(), "04b_fortified",
+                  "game.skill.fortified"),
+
+            Skill("BrushOfDeath", game, BrushOfDeath(), "05_bod",
+                  "game.skill.bod", max_level=1),
+
+            Skill("Savant", game, WeaponsExpert(), "06_savant",
+                  "game.skill.savant"),
         ]
 
     def can_unlock(self, skill, ship):

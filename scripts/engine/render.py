@@ -91,7 +91,7 @@ def render_frame(game, screen, font, hud_padding):
     game.hud.skill_tab.render(game, screen, font, hud_padding)
 
     if TOGGLE_TUTORIAL:
-        game.tutorial.render(screen, font)
+        game.tutorial.render(game, screen, font)
 
     if game.state.pause and (not game.hud.skill_tab.active or not
             game.hud.stats_tab.active):

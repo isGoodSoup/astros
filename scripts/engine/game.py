@@ -60,7 +60,7 @@ class Game:
         self.mixer = Mixer()
         self.events = Events()
         self.spawns = SpawnManager()
-        self.skills = SkillManager()
+        self.skills = SkillManager(self)
         self.traits = traits
         self.apply_traits()
 
