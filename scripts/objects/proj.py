@@ -72,7 +72,6 @@ class StoneProjectile(pygame.sprite.Sprite):
         self.returning = False
         self.angle = 0
 
-        # Load stone image or create a simple one
         try:
             self.image = pygame.image.load(resource_path("assets/asteroids/asteroid_small.png")).convert_alpha()
             self.image = pygame.transform.scale(self.image, (24, 24))
@@ -94,7 +93,6 @@ class StoneProjectile(pygame.sprite.Sprite):
             if self.pos.distance_to(self.start_pos) >= self.max_dist:
                 self.returning = True
         else:
-            # Return to parent or just move back to start if parent is dead
             target = self.start_pos
             if self.parent and self.parent.alive():
                 target = pygame.Vector2(self.parent.rect.center)
@@ -105,7 +103,7 @@ class StoneProjectile(pygame.sprite.Sprite):
             else:
                 self.kill()
 
-        self.rect.center = self.pos
+        self.rect.center = (int(self.pos.x), int(self.pos.y))
 
         if (self.pos.x < -100 or self.pos.x > self.game.screen_size[0] + 100 or
             self.pos.y < -100 or self.pos.y > self.game.screen_size[1] + 100):

@@ -133,7 +133,6 @@ class Boss(pygame.sprite.Sprite):
                 self.image.set_alpha(self.alpha)
 
         if self.current_phase in ['phase1', 'phase2', 'phase3']:
-            # Adjust orbit speed and radius based on phase
             phase_multipliers = {
                 'phase1': (0.02, 1.0, 1.5),
                 'phase2': (0.03, 0.8, 2.0),
@@ -154,8 +153,6 @@ class Boss(pygame.sprite.Sprite):
             direction = (target_pos - pos)
 
             if direction.length() > 2:
-                # Use lerp for smoother movement towards target to avoid jitter
-                # Higher speed_mult makes it catch up faster but still smoothly
                 lerp_factor = min(1.0, (self.step * speed_mult) / direction.length())
                 new_pos = pos.lerp(target_pos, lerp_factor)
                 self.rect.center = (int(new_pos.x), int(new_pos.y))
