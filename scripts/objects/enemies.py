@@ -287,3 +287,9 @@ class StoneAlien(Alien):
             stone = StoneProjectile(self.rect.center, direction, self.game,
                                     damage=self.damage, parent=self)
             self.game.sprites.enemy_projectiles.add(stone)
+
+class AlienBehemoth(Alien):
+    def __init__(self, x, y, ship, game):
+        super().__init__("blue", x, y, ship, game, base_hp=800, base_damage=50)
+        self.shot_cooldown = 5000
+        self.aggro_distance = 500
