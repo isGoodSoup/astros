@@ -24,7 +24,7 @@ class Intro:
             self.lang.t('game.intro.line4')
         ]
 
-        self.timer_per_line = LINE_TIMER  # e.g., 2500 milliseconds
+        self.timer_per_line = LINE_TIMER
         self.font = FontManager(None, FONT_DEFAULT_SIZE).get_font()
         self.running = True
 

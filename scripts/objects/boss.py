@@ -3,35 +3,32 @@ import random
 
 import pygame
 
-from scripts.objects.proj import Projectile, StoneProjectile
-from scripts.objects.shockwave import Shockwave
-from scripts.system.constants import (COLOR_RED, BOSS_BASE_SPEED, \
-                              BOSS_VERTICAL_STEP, ONE_SECOND, BOSS_PHASES,
-                              BOSS_ADVANTAGE, SCALE,
-                              BOSS_BASE_HITPOINTS, HIGH_FIRE_RATE, BOSS_COLORS,
-                              BOSS_BASE_DAMAGE, ALIEN_HEIGHT, ALIEN_WIDTH,
-                              EVOKER_SUMMON_COOLDOWN, SCREEN_SHAKE,
-                              BASE_RUMBLE_MS)
 from scripts.engine.shared import joysticks, controller
 from scripts.engine.utils import resource_path, HealthBar
-from scripts.system.levels import  DIFFICULTY_ENEMY_SETTINGS
+from scripts.objects.proj import Projectile, StoneProjectile
+from scripts.objects.shockwave import Shockwave
+from scripts.system.constants import *
+from scripts.system.levels import DIFFICULTY_ENEMY_SETTINGS
+
 
 class Boss(pygame.sprite.Sprite):
     def __init__(self, game, ship, projectiles, x, y, color, frame=0,
-                 width=ALIEN_WIDTH, height=ALIEN_HEIGHT, scale=SCALE*2,
+                 width=ALIEN_WIDTH, height=ALIEN_HEIGHT, scale=SCALE * 2,
                  columns=1, offset_x=0, offset_y=0):
         super().__init__()
         self.color = color
-        self.image = pygame.image.load(resource_path(f"assets/aliens/{color}.png")).convert_alpha()
-        self.image = pygame.transform.scale(self.image, (width * scale, height * scale))
-        self.rect = self.image.get_rect(center=(x,y))
+        self.image = pygame.image.load(
+            resource_path(f"assets/aliens/{color}.png")).convert_alpha()
+        self.image = pygame.transform.scale(self.image,
+                                            (width * scale, height * scale))
+        self.rect = self.image.get_rect(center=(x, y))
         self.hitbox = self.rect.inflate(self.rect.width * -0.5, self.rect.height * -0.5)
 
         self.pos = pygame.Vector2(x, y)
         self.game = game
         self.ship = ship
         settings = DIFFICULTY_ENEMY_SETTINGS[self.game.state.difficulty]
-        self.step = max(1,int((ship.velocity + 1) * settings["speed_multiplier"]))
+        self.step = max(1, int((ship.velocity + 1) * settings["speed_multiplier"]))
         self.offset_x = offset_x
         self.offset_y = offset_y
         self.direction = 1
@@ -40,12 +37,16 @@ class Boss(pygame.sprite.Sprite):
 
         self.colors = BOSS_COLORS
         self.level = ship.level + BOSS_ADVANTAGE
-        self.max_hitpoints = int((BOSS_BASE_HITPOINTS * self.level + self.colors.get(color))
+        self.max_hitpoints = int(
+            (BOSS_BASE_HITPOINTS * self.level + self.colors.get(color))
             * settings["hp_multiplier"])
         self.hitpoints = self.max_hitpoints
-        self.base_damage = int((ship.damage * self.level) * settings["damage_multiplier"])
+        self.base_damage = int(
+            (ship.damage * self.level) * settings["damage_multiplier"])
+        self.current_damage = self.base_damage
         self.last_shot_time = 0
-        self.shot_cooldown = int(HIGH_FIRE_RATE / settings["fire_rate_multiplier"])
+        self.shot_cooldown = int(
+            HIGH_FIRE_RATE / settings["fire_rate_multiplier"])
         self.last_move = pygame.time.get_ticks()
         self.move_timer = pygame.time.get_ticks()
         self.hit = False
@@ -60,6 +61,10 @@ class Boss(pygame.sprite.Sprite):
         self.phase2_change_time = pygame.time.get_ticks()
         self.phase2_change_interval = ONE_SECOND
 
+        self.orbit_radius = random.randint(300, 500)
+        self.orbit_angle = random.uniform(0, 2 * math.pi)
+        self.orbit_speed = random.uniform(0.1, 0.4)
+
         self.projectiles = projectiles
 
         self.target = pygame.Vector2(
@@ -70,110 +75,85 @@ class Boss(pygame.sprite.Sprite):
         self.last_summon_time = 0
         self.summon_cooldown = EVOKER_SUMMON_COOLDOWN * 2
         self.exploded = False
-        
-        # Health bar (reuse HealthBar object)
-        from scripts.system.constants import HEALTHBAR_WIDTH
+
         self.health_bar = HealthBar(self, width=HEALTHBAR_WIDTH * 4, offset=20)
-        self.health_bar.visible = True # Always show for bosses
+        self.health_bar.visible = True
+
+        self.iframes_cooldown = BOSS_IFRAMES
+        self.iframes_duration = BOSS_IFRAMES_DURATION
+        self.is_invincible = False
+        self.iframes_timer = pygame.time.get_ticks()
+        self.iframes_start_time = 0
+        self.original_step = self.step
+        self.original_velocity = self.velocity.copy()
+        self.alpha_direction = 1
+        self.alpha = 255
 
     def update(self):
         self.health_bar.update()
         self.hitbox.center = self.rect.center
         now = pygame.time.get_ticks()
 
-        if self.current_phase == 'phase1':
-            screen_width = pygame.display.Info().current_w
-            screen_height = pygame.display.Info().current_h
-            if self.rect.right >= screen_width or self.rect.left <= 0:
-                self.direction *= -1
-                self.rect.y += BOSS_VERTICAL_STEP if not (self.rect.y <=
-                    screen_height) else 0
+        if not self.is_invincible:
+            if now - self.iframes_timer >= self.iframes_cooldown:
+                self.is_invincible = True
+                self.iframes_start_time = now
+                self.original_step = self.step
+                self.original_velocity = self.velocity.copy()
+        else:
+            elapsed = now - self.iframes_start_time
+            if elapsed >= self.iframes_duration:
+                self.is_invincible = False
+                self.iframes_timer = now
+                self.step = self.original_step
+                self.velocity = self.original_velocity.copy()
+                self.current_damage = self.base_damage
+                self.alpha = 255
+                self.image.set_alpha(self.alpha)
+            else:
+                seconds_passed = elapsed // 1000
+                multiplier = 1.0 + (0.02 * seconds_passed)
+                self.step = self.original_step * multiplier
+                if self.velocity.length() > 0:
+                    self.velocity = self.original_velocity * multiplier
+                self.current_damage = self.base_damage * multiplier
 
-            self.rect.x += self.direction * self.step
-            self.rect.x = max(0, min(self.rect.x, screen_width - self.rect.width))
-            self.move_timer = now
+                self.alpha += 5 * self.alpha_direction
+                if self.alpha >= 255:
+                    self.alpha = 255
+                    self.alpha_direction = -1
+                elif self.alpha <= 180:
+                    self.alpha = 180
+                    self.alpha_direction = 1
+                self.image.set_alpha(self.alpha)
 
-            if now - self.last_shot_time >= self.shot_cooldown:
-                self.last_shot_time = now
-                self.shoot()
+        if self.current_phase in ['phase1', 'phase2', 'phase3']:
+            # Adjust orbit speed and radius based on phase
+            phase_multipliers = {
+                'phase1': (0.02, 1.0, 1.5),
+                'phase2': (0.03, 0.8, 2.0),
+                'phase3': (0.04, 0.5, 2.5)
+            }
+            angle_inc, radius_mult, speed_mult = phase_multipliers[self.current_phase]
 
-            if self.color == "purple":
-                if now - self.last_summon_time > self.summon_cooldown:
-                    self.summon()
-                    self.last_summon_time = now
+            self.orbit_angle += self.orbit_speed * angle_inc
 
-        if self.current_phase == 'phase2':
-            screen = pygame.display.get_surface()
-            screen_width, screen_height = screen.get_size()
-            settings = DIFFICULTY_ENEMY_SETTINGS[self.game.state.difficulty]
+            target_pos = pygame.Vector2(
+                self.ship.rect.centerx + math.cos(
+                    self.orbit_angle) * (self.orbit_radius * radius_mult),
+                self.ship.rect.centery + math.sin(
+                    self.orbit_angle) * (self.orbit_radius * radius_mult)
+            )
 
-            if now - self.phase2_change_time > self.phase2_change_interval:
-                self.velocity.x += random.uniform(-2, 2)
-                self.velocity.y += random.uniform(-2, 2)
+            pos = pygame.Vector2(self.rect.center)
+            direction = (target_pos - pos)
 
-                max_speed = BOSS_BASE_SPEED * settings["speed_multiplier"]
-                if self.velocity.length() > max_speed:
-                    self.velocity.scale_to_length(max_speed)
-
-                self.phase2_change_time = now
-
-            self.rect.x += int(self.velocity.x)
-            self.rect.y += int(self.velocity.y)
-
-            if self.rect.left <= 0:
-                self.rect.left = 0
-                self.velocity.x *= -1
-            elif self.rect.right >= screen_width:
-                self.rect.right = screen_width
-                self.velocity.x *= -1
-
-            if self.rect.top <= 0:
-                self.rect.top = 0
-                self.velocity.y *= -1
-            elif self.rect.bottom >= screen_height:
-                self.rect.bottom = screen_height
-                self.velocity.y *= -1
-
-            if now - self.last_shot_time >= self.shot_cooldown:
-                self.last_shot_time = now
-                self.shoot()
-
-            if self.color == "purple":
-                if now - self.last_summon_time > self.summon_cooldown:
-                    self.summon()
-                    self.last_summon_time = now
-
-        if self.current_phase == 'phase3':
-            screen = pygame.display.get_surface()
-            screen_width, screen_height = screen.get_size()
-            settings = DIFFICULTY_ENEMY_SETTINGS[self.game.state.difficulty]
-
-            if now - self.phase2_change_time > self.phase2_change_interval:
-                self.velocity.x += random.uniform(-4, 4)
-                self.velocity.y += random.uniform(-4, 4)
-
-                max_speed = BOSS_BASE_SPEED * 2 * settings["speed_multiplier"]
-                if self.velocity.length() > max_speed:
-                    self.velocity.scale_to_length(max_speed)
-
-                self.phase2_change_time = now
-
-            self.rect.x += int(self.velocity.x)
-            self.rect.y += int(self.velocity.y)
-
-            if self.rect.left <= 0:
-                self.rect.left = 0
-                self.velocity.x *= -1
-            elif self.rect.right >= screen_width:
-                self.rect.right = screen_width
-                self.velocity.x *= -1
-
-            if self.rect.top <= 0:
-                self.rect.top = 0
-                self.velocity.y *= -1
-            elif self.rect.bottom >= screen_height:
-                self.rect.bottom = screen_height
-                self.velocity.y *= -1
+            if direction.length() > 2:
+                # Use lerp for smoother movement towards target to avoid jitter
+                # Higher speed_mult makes it catch up faster but still smoothly
+                lerp_factor = min(1.0, (self.step * speed_mult) / direction.length())
+                new_pos = pos.lerp(target_pos, lerp_factor)
+                self.rect.center = (int(new_pos.x), int(new_pos.y))
 
             if now - self.last_shot_time >= self.shot_cooldown:
                 self.last_shot_time = now
@@ -206,10 +186,11 @@ class Boss(pygame.sprite.Sprite):
         angle_offset = random.uniform(-0.2, 0.2)
 
         direction.rotate_ip(math.degrees(angle_offset))
-        self.projectiles.add(Projectile(self.rect.center, COLOR_RED,
-                          direction=(direction.x, direction.y),
-                          speed=16, damage=int(BOSS_BASE_DAMAGE * self.ship.level * settings["damage_multiplier"]),
-                          range_limit=ONE_SECOND))
+        self.projectiles.add(Projectile(
+            self.rect.center, COLOR_RED,
+            direction=(direction.x, direction.y),
+            speed=16, damage=int(self.current_damage),
+            range_limit=ONE_SECOND))
 
     def shoot_boomerang(self):
         target = pygame.Vector2(self.ship.rect.center)
@@ -218,9 +199,10 @@ class Boss(pygame.sprite.Sprite):
         if direction.length() > 0:
             direction = direction.normalize()
             settings = DIFFICULTY_ENEMY_SETTINGS[self.game.state.difficulty]
-            stone = StoneProjectile(self.rect.center, direction, self.game,
-                                    damage=int(BOSS_BASE_DAMAGE * self.ship.level * settings["damage_multiplier"]),
-                                    parent=self)
+            stone = StoneProjectile(
+                self.rect.center, direction, self.game,
+                damage=int(self.current_damage),
+                parent=self)
             self.game.sprites.enemy_projectiles.add(stone)
 
     def summon(self):

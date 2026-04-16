@@ -65,16 +65,15 @@ def spawner(game):
     if enemies_alive(game):
         return
 
-    is_boss_phase = (game.state.phase_index == len(game.state.phases) - 1)
+    is_boss_phase = (game.state.phase_index in BOSS_PHASES_INDEX)
 
-    if is_boss_phase:
-        if not game.spawns.boss_spawned:
-            spawn_boss(game)
-            game.spawns.boss_spawned = True
+    if is_boss_phase and not game.spawns.boss_spawned:
+        spawn_boss(game)
+        game.spawns.boss_spawned = True
         return
 
     if game.state.phase_fade <= 0:
-        if game.state.phase_index in ALIEN_PHASES:
+        if game.state.phase_index in ALIEN_PHASES or is_boss_phase:
             spawn_fleet(game)
             if game.state.difficulty == Difficulty.NIGHTMARE:
                 spawn_fleet(game)
@@ -274,7 +273,7 @@ def spawn_boss(game):
                     Boss(game, game.ship, game.sprites.enemy_projectiles, x, y,
                          random.choice(color)))
 
-        game.play_music('flight')
+        game.mixer.play_music('flight')
         game.spawns.phase_spawned = True
         game.spawns.boss_alive = True
 
