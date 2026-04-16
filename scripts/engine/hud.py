@@ -171,46 +171,57 @@ class XPBar(Bar):
 
 class HUD:
     def __init__(self, game, screen_size, hud_ratio, game_font):
-        self.hitpoints = Interface(resource_path("assets/ui/status.png"), 0,
-                                   *INTERFACE_HITPOINTS,
-                                   hud_ratio, ['right', 'bottom'])
-        self.guns = Interface(resource_path("assets/ui/guns.png"), 0,
-                              INTERFACE_GUNS[0], INTERFACE_GUNS[1],
-                              hud_ratio, ['right', 'bottom'],
-                              INTERFACE_GUNS_COLS, INTERFACE_GUNS_OFFSET)
+        self.hitpoints = Interface(
+            resource_path("assets/ui/status.png"),
+            0,
+            *INTERFACE_HITPOINTS,
+            hud_ratio, ['right', 'bottom'])
 
-        self.overheat_bar = OverheatBar(0, 0,
-                                        width=INTERFACE_OVERHEAT_WIDTH,
-                                        height=INTERFACE_OVERHEAT_HEIGHT,
-                                        max_value=game.ship.overheat_limit)
+        self.guns = Interface(
+            resource_path("assets/ui/guns.png"),
+            0,
+            INTERFACE_GUNS[0],
+            INTERFACE_GUNS[1],
+            hud_ratio, ['right', 'bottom'],
+            INTERFACE_GUNS_COLS,
+            GUNS_HUD_NUDGE)
 
-        self.shield_bar = ShieldBar(0, 0,
-                                    width=INTERFACE_OVERHEAT_WIDTH,
-                                    height=INTERFACE_OVERHEAT_HEIGHT,
-                                    max_value=game.ship.max_shield)
+        self.overheat_bar = OverheatBar(
+            0, 0,
+            width=INTERFACE_OVERHEAT_WIDTH,
+            height=INTERFACE_OVERHEAT_HEIGHT,
+            max_value=game.ship.overheat_limit)
 
-        self.xp_bar = XPBar(0, 0,
-                            width=INTERFACE_OVERHEAT_WIDTH,
-                            height=INTERFACE_OVERHEAT_HEIGHT,
-                            max_value=game.ship.xp_to_next_level)
+        self.shield_bar = ShieldBar(
+            0, 0,
+            width=INTERFACE_OVERHEAT_WIDTH,
+            height=INTERFACE_OVERHEAT_HEIGHT,
+            max_value=game.ship.max_shield)
+
+        self.xp_bar = XPBar(
+            0, 0,
+            width=INTERFACE_OVERHEAT_WIDTH,
+            height=INTERFACE_OVERHEAT_HEIGHT,
+            max_value=game.ship.xp_to_next_level)
 
         self.credits = game.ship.credits
 
-        self.skill_tab = Tab(resource_path("assets/ui/skill_tab.png"),
-                             start_pos=(screen_size[0], SKILL_TAB_Y),
-                             content_renderer=render_skills_tab)
+        self.skill_tab = Tab(
+            resource_path("assets/ui/skill_tab.png"),
+            start_pos=(screen_size[0], SKILL_TAB_Y),
+            content_renderer=render_skills_tab)
 
-        self.stats_tab = Tab(resource_path("assets/ui/skill_tab.png"),
-                             start_pos=(screen_size[
-                                            0] // 2 - self.skill_tab.rect.width // 2,
-                                        screen_size[1]),
-                             content_renderer=render_stats_tab)
+        self.stats_tab = Tab(
+            resource_path("assets/ui/skill_tab.png"),
+            start_pos=(screen_size[0] // 2 - self.skill_tab.rect.width // 2,
+            screen_size[1]),
+            content_renderer=render_stats_tab)
 
-        self.settings_tab = Tab(resource_path("assets/ui/skill_tab.png"),
-                                start_pos=(screen_size[
-                                               0] // 2 - self.skill_tab.rect.width // 2,
-                                           screen_size[1]),
-                                content_renderer=render_settings_tab)
+        self.settings_tab = Tab(
+            resource_path("assets/ui/skill_tab.png"),
+            start_pos=(screen_size[0] // 2 - self.skill_tab.rect.width // 2,
+            screen_size[1]),
+            content_renderer=render_settings_tab)
 
     def update(self, game, font, screen, hud_ratio, hud_padding):
         line_spacing = font.get_linesize()
@@ -240,7 +251,8 @@ class HUD:
 
         stopwatch_text = f"{game.clock.hours:02}:{game.clock.minutes:02}:{game.clock.seconds:02}"
         stopwatch_surface = font.render(stopwatch_text, True, COLOR_WHITE)
-        sw_x = hud_ratio['left'] + hud_ratio['width'] // 2 - stopwatch_surface.get_width() // 2
+        sw_x = hud_ratio['left'] + hud_ratio[
+            'width'] // 2 - stopwatch_surface.get_width() // 2
         sw_y = hud_ratio['top'] + hud_padding
         screen.blit(stopwatch_surface, [sw_x, sw_y])
 
@@ -272,8 +284,7 @@ class HUD:
 
         bar_y = self.guns.hud_y
 
-        overheat_x = (self.guns.hud_x + self.guns.image.get_width() +
-                      BAR_SPACING) + BAR_OFFSET
+        overheat_x = (self.guns.hud_x + self.guns.image.get_width() + BAR_SPACING)
         shield_x = overheat_x + bar_width + BAR_SPACING
         xp_x = shield_x + bar_width + BAR_SPACING
 
@@ -285,7 +296,7 @@ class HUD:
         current_gun_frame = game.ship.gun_order.index(game.ship.gun)
 
         self.guns.update(game.ship, hud_ratio, ['right', 'bottom'],
-            current_gun_frame, screen, hud_padding)
+                         current_gun_frame, screen, hud_padding)
 
         current_ammo = game.ship.guns_ammo[game.ship.gun]
         total_ammo = "inf" if game.ship.gun == "beam" else (

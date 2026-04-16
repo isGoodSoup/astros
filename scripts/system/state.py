@@ -10,7 +10,7 @@ from scripts.engine.difficulty import Difficulty
 
 class GameState:
     def __init__(self):
-        self.can_screen_shake = False
+        self.can_screen_shake = True
         self.can_rumble = True
         self.can_show_controls = True
         self.can_show_hud = True
