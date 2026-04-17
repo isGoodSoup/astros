@@ -3,7 +3,7 @@ import pygame
 from scripts.engine.fade import fade
 from scripts.system.fonts import FontManager
 from scripts.system.constants import (LINE_TIMER, FONT_DEFAULT_SIZE,
-                              COLOR_WHITE, COLOR_BLACK, FPS)
+                              COLOR_WHITE, COLOR_BLACK, FPS, TYPEWRITER_SPEED)
 from scripts.engine.utils import render_fade
 
 
@@ -29,6 +29,7 @@ class Intro:
         self.running = True
 
         self.current_line_index = 0
+        self.char_index = 0
         self.last_switch_time = pygame.time.get_ticks()
 
     def run(self):
@@ -40,6 +41,7 @@ class Intro:
             current_time = pygame.time.get_ticks()
             if current_time - self.last_switch_time >= self.timer_per_line:
                 self.current_line_index += 1
+                self.char_index = 0
                 self.last_switch_time = current_time
 
                 if self.current_line_index >= len(self.lines):
@@ -50,7 +52,8 @@ class Intro:
                 fade.start('in')
 
             self.screen.fill(COLOR_BLACK)
-            self.clock.tick(FPS)
+            dt = self.clock.tick(FPS) / 1000
+            self.char_index += dt * TYPEWRITER_SPEED
             self.display()
             alpha = render_fade(self.screen, self.screen_size)
             self.crt.render(self.screen)
@@ -58,7 +61,8 @@ class Intro:
     def display(self):
         if self.current_line_index < len(self.lines):
             line = self.lines[self.current_line_index]
-            surf = self.font.render(line, True, COLOR_WHITE)
+            visible_text = line[:int(self.char_index)]
+            surf = self.font.render(visible_text, True, COLOR_WHITE)
             alpha = fade.update()
             self.screen.blit(surf,
                 (self.screen_size[0] // 2 - surf.get_width() // 2,
