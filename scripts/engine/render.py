@@ -279,7 +279,7 @@ class RenderScreen:
             render_offset = (int(offset_x), int(offset_y))
 
             if joysticks and game.state.can_rumble:
-                controller.rumble(1, 2, int(BASE_RUMBLE_MS * t))
+                controller.rumble(1, 2, int(BASE_RUMBLE_MS))
 
             temp = pygame.Surface(game.screen_size)
             temp.blit(game.screen, (0, 0))
