@@ -9,7 +9,7 @@ from scripts.system.constants import (PHASES_TOTAL, PHASE_START, PHASE_LENGTH,
 
 class GameState:
     def __init__(self):
-        self.can_screen_shake = True
+        self.screen_shake_amount = 0.4
         self.can_rumble = True
         self.can_show_controls = True
         self.can_show_hud = True

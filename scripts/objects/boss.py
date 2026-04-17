@@ -4,7 +4,7 @@ import random
 import pygame
 
 from scripts.engine.shared import joysticks, controller
-from scripts.engine.utils import resource_path, HealthBar, colour
+from scripts.engine.utils import resource_path, HealthBar, colour, update_screenshake
 from scripts.objects.proj import Projectile, StoneProjectile
 from scripts.objects.shockwave import Shockwave
 from scripts.system.constants import *
@@ -247,8 +247,10 @@ class Boss(pygame.sprite.Sprite):
             self.exploded = True
             self.game.sprites.shockwaves.append(Shockwave(self.rect.center,
                                                           max_radius=400))
-            if self.game.state.can_screen_shake:
-                self.game.screen_shake = SCREEN_SHAKE
+            if self.game.state.screen_shake_amount > 0:
+                update_screenshake(game, time=40,
+                                   strength=game.state.screen_shake_amount * 8)
+
             if joysticks and self.game.state.can_rumble:
                 controller.rumble(0.5, 0.7, BASE_RUMBLE_MS * 4)
 

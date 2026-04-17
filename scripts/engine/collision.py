@@ -7,7 +7,7 @@ from scripts.objects.floaty import FloatingNumber
 from scripts.objects.impact import ImpactFrame
 from scripts.objects.particle import Particle
 from scripts.system.constants import *
-from scripts.engine.utils import add_multiplier, formulize
+from scripts.engine.utils import add_multiplier, formulize, update_screenshake
 
 
 def check_collision(game, local):
@@ -127,8 +127,9 @@ def check_collision(game, local):
                         shield_gain = min(shield_gain, game.ship.fortified_cap)
                     game.ship.shield += shield_gain
             
-            if game.state.can_screen_shake:
-                game.screen_shake = SCREEN_SHAKE // 2
+            if game.state.screen_shake_amount > 0:
+                update_screenshake(game, time=40,
+                                   strength=game.state.screen_shake_amount * 8)
 
             if game.ship.hitpoints <= 0:
                 if game.ship.can_use_bod and not game.ship.bod_used:

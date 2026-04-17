@@ -1,4 +1,5 @@
 import pygame
+import random
 
 import scripts.system.assets as assets
 from scripts.engine.game_over import game_lost
@@ -73,23 +74,6 @@ def render_frame(game, screen, font, hud_padding):
             pygame.draw.rect(screen, COLOR_RED, game.ship.hitbox, 2)
 
     game.sprites.explosions.draw(screen)
-
-    if game.hud.skill_tab.active and game.state.current_phase_options:
-        cursor_pos = game.input.cursor_pos
-        game.input.selected_skill = None
-
-        for skill in game.state.current_phase_options:
-            if skill.is_hovered(cursor_pos):
-                game.input.selected_skill  = skill
-                break
-
-        mouse_pressed = pygame.mouse.get_pressed()[0]
-        if mouse_pressed and game.input.selected_skill:
-            game.skills.unlock_or_upgrade(game.input.selected_skill , game.ship)
-            if game.input.selected_skill .unlocked and game.input.selected_skill  not in game.ship.skills:
-                game.ship.add_skill(game.input.selected_skill )
-            game.hud.skill_tab.close()
-
 
     render_waves(game, screen)
 
@@ -282,18 +266,29 @@ class RenderScreen:
         if game.state.game_over:
             game_lost(game, game.font, game.screen, game.screen_size)
 
-        if game.state.can_screen_shake:
-            if game.screen_shake > 0:
-                game.screen_shake -= 1
+        offset_x = 0
+        offset_y = 0
 
-            render_offset = game.ship.taken_damage() if game.screen_shake else [0, 0]
-            if joysticks and game.screen_shake and game.state.can_rumble:
-                controller.rumble(1, 2, BASE_RUMBLE_MS + 20)
+        if game.screen_shake_time > 0:
+            game.screen_shake_time -= 1
 
-            if not game.state.game_over:
-                temp_surface = pygame.transform.scale(game.screen, game.screen_size)
-                game.screen.fill(COLOR_BLACK)
-                game.screen.blit(temp_surface, render_offset)
+            strength = game.screen_shake_strength
+            offset_x = random.uniform(-strength, strength)
+            offset_y = random.uniform(-strength, strength)
+
+            render_offset = (int(offset_x), int(offset_y))
+
+            if joysticks and game.state.can_rumble:
+                controller.rumble(1, 2, int(BASE_RUMBLE_MS * t))
+
+            temp = pygame.Surface(game.screen_size)
+            temp.blit(game.screen, (0, 0))
+
+            game.screen.fill(COLOR_BLACK)
+            game.screen.blit(temp, (offset_x, offset_y))
+
+        else:
+            render_offset = (0, 0)
 
         alpha = render_fade(game.screen, game.screen_size)
         game.crt.render(game.screen)

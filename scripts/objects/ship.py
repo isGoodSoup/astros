@@ -7,6 +7,7 @@ from scripts.objects.entity import AnimatedEntity
 from scripts.objects.proj import Projectile
 from scripts.system.constants import *
 from scripts.system.levels import DIFFICULTY_SHIP_SETTINGS
+from scripts.engine.utils import update_screenshake
 
 
 class Ship(AnimatedEntity):
@@ -334,8 +335,8 @@ class Ship(AnimatedEntity):
             game.mixer.play(0)
 
         if gun_type == "shotgun" and self.guns_ammo['shotgun'] > 0:
-            if game.state.can_screen_shake:
-                game.screen_shake = SCREEN_SHAKE // 2
+            if game.state.screen_shake_amount > 0:
+                update_screenshake(game, time=40, strength=game.state.screen_shake_amount * 8)
 
         return projectiles
 
@@ -344,14 +345,12 @@ class Ship(AnimatedEntity):
                                          self.base_guns_ammo[gun]))
 
     def clamp_ammo_secondary(self, gun):
-        self.secondary_guns_ammo[gun] = max(0,
-                                            min(self.secondary_guns_ammo[gun],
+        self.secondary_guns_ammo[gun] = max(0, min(self.secondary_guns_ammo[gun],
                                                 self.base_secondary_guns_ammo[
                                                     gun]))
 
     def taken_damage(self):
-        return [random.randint(-SCREEN_SHAKE, SCREEN_SHAKE),
-                random.randint(-SCREEN_SHAKE, SCREEN_SHAKE)]
+        return [random.randint(-2, 2), random.randint(-2, 2)]
 
     def apply_visual_damage(self):
         if not hasattr(self.game.sprites,

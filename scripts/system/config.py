@@ -7,7 +7,7 @@ def save_config(game):
         "music_volume": game.mixer.music_volume,
         "sfx_volume": game.mixer.sfx_volume,
         "play_sound": game.state.play_sound,
-        "screen_shake": game.state.can_screen_shake,
+        "screen_shake": game.state.screen_shake_amount,
         "rumble": game.state.can_rumble,
         "show_controls": game.state.can_show_controls,
         "show_hud": game.state.can_show_hud,
@@ -30,7 +30,7 @@ def load_config(game):
         game.mixer.music_volume = config_data.get("music_volume", MUSIC_VOLUME)
         game.mixer.sfx_volume = config_data.get("sfx_volume", SFX_VOLUME)
         game.state.play_sound = config_data.get("play_sound", True)
-        game.state.can_screen_shake = config_data.get("screen_shake", True)
+        game.state.screen_shake_amount = config_data.get("screen_shake", 0.4)
         game.state.can_rumble = config_data.get("rumble", True)
         game.state.can_show_controls = config_data.get("show_controls", True)
         game.state.can_show_hud = config_data.get("show_hud", True)

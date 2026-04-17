@@ -94,7 +94,8 @@ def reboot(game, screen_size):
     if hasattr(game.hud, "skill_tab"):
         game.hud.skill_tab.active = False
 
-    game.screen_shake = 0
+    game.screen_shake_time = 0
+    game.screen_shake_strength = 0
 
     if game.state.play_sound:
         game.mixer.play_music('starfield')

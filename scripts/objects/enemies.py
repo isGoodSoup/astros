@@ -4,7 +4,7 @@ import random
 import pygame
 
 from scripts.engine.shared import joysticks, controller
-from scripts.engine.utils import resource_path, HealthBar
+from scripts.engine.utils import resource_path, HealthBar, update_screenshake
 from scripts.objects.entity import Entity
 from scripts.objects.proj import Projectile, StoneProjectile
 from scripts.objects.shockwave import Shockwave
@@ -214,8 +214,10 @@ class BomberAlien(Alien):
             self.game.sprites.shockwaves.append(Shockwave(self.rect.center,
                                                           max_radius=200))
 
-            if self.game.state.can_screen_shake:
-                self.game.screen_shake = SCREEN_SHAKE
+            if self.game.state.screen_shake_amount > 0:
+                update_screenshake(self.game, time=40,
+                                   strength=self.game.state.screen_shake_amount * 8)
+
             if joysticks and self.game.state.can_rumble:
                 controller.rumble(0.2, 0.4, BASE_RUMBLE_MS * 2)
 

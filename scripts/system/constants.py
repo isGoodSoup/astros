@@ -46,8 +46,6 @@ COLOR_LIGHT_YELLOW = (255, 255, 100)
 
 INPUT_NAV_COOLDOWN = 150
 
-SCREEN_SHAKE = 30
-
 CRT_CURVATURE = 0.5
 
 BASE_RUMBLE_MS = 50
@@ -298,9 +296,12 @@ SETTINGS_DEFINITION = [
         "target": "mixer"
     },
     {
-        "key": "can_screen_shake",
+        "key": "screen_shake_amount",
         "label": "game.settings.screen_shake",
-        "type": "toggle",
+        "type": "slider",
+        "min": 0.0,
+        "max": 1.0,
+        "step": 0.1,
         "target": "state"
     },
     {

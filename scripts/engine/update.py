@@ -12,7 +12,7 @@ from scripts.engine.runtime import (get_boss_pos, get_upgrade_position, \
                                     get_ship_ember)
 from scripts.engine.shared import joysticks, controller
 from scripts.engine.upgd import Upgrade
-from scripts.engine.utils import resource_path, formulize
+from scripts.engine.utils import resource_path, formulize, update_screenshake
 from scripts.objects.asteroid import Asteroid
 from scripts.objects.boss import Boss
 from scripts.objects.celestial import random_celestial, is_valid_spawn
@@ -450,8 +450,8 @@ def update_game(game, delta, screen_size, hud_padding):
         if game.ship.hitpoints < (game.ship.max_hitpoints * 0.25):
             game.ship.critical = True
             frequency = 0
-            if game.ship.critical and game.state.can_screen_shake:
-                game.screen_shake = SCREEN_SHAKE
+            if game.ship.critical and game.state.screen_shake_amount > 0:
+                update_screenshake(game, time=40, strength=game.state.screen_shake_amount * 8)
                 if joysticks and game.state.can_rumble:
                     controller.rumble(frequency, 3, BASE_RUMBLE_MS * 2)
                 game.mixer.play(6)

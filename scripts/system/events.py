@@ -2,12 +2,15 @@ import random
 
 import pygame
 
+from scripts.engine.shared import joysticks, controller
+from scripts.engine.utils import update_screenshake
 from scripts.objects.celestial import BlackHole
 from scripts.objects.explode import Explosion
-from scripts.system.constants import (HIGH_RUMBLE_MS, SHOCKWAVE_SPEED, SHOCKWAVE_RADIUS, \
-                              SCREEN_SHAKE, ALIEN_SHOT_TIMER_MS, CROSSHAIRS)
-from scripts.engine.shared import joysticks, controller
 from scripts.objects.shockwave import Shockwave
+from scripts.system.constants import (HIGH_RUMBLE_MS, SHOCKWAVE_SPEED,
+                                      SHOCKWAVE_RADIUS, \
+                                      ALIEN_SHOT_TIMER_MS, CROSSHAIRS)
+
 
 class Events:
     def __init__(self):
@@ -46,8 +49,10 @@ class Events:
         game.sprites.explosions.add(Explosion(center[0], center[1],
                                       game.sprites.frame_big_explode))
 
-        if game.state.can_screen_shake:
-            game.screen_shake = SCREEN_SHAKE + 5
+        if game.state.screen_shake_amount > 0:
+            update_screenshake(game, time=40,
+                               strength=game.state.screen_shake_amount * 8)
+
             if joysticks and game.state.can_rumble:
                 controller.rumble(1, 1, HIGH_RUMBLE_MS)
 
@@ -57,8 +62,10 @@ class Events:
         game.sprites.explosions.add(Explosion(center[0], center[1],
                                       game.sprites.frame_explode))
 
-        if game.state.can_screen_shake:
-            game.screen_shake = SCREEN_SHAKE // 2
+        if game.state.screen_shake_amount > 0:
+            update_screenshake(game, time=40,
+                               strength=game.state.screen_shake_amount * 8)
+
             if joysticks and game.state.can_rumble:
                 controller.rumble(0.5, 0.5, HIGH_RUMBLE_MS // 2)
 

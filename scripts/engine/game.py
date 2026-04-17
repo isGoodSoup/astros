@@ -64,7 +64,8 @@ class Game:
         self.traits = traits
         self.apply_traits()
 
-        self.screen_shake = 0
+        self.screen_shake_time = 0
+        self.screen_shake_strength = 0
         self.last_blink = 0
 
         self.cursor_sprite = assets.CURSOR
