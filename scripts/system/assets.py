@@ -40,6 +40,7 @@ def load_assets():
         SpriteSheet(resource_path("assets/ship_v3.png")),
         SpriteSheet(resource_path("assets/ship_v4.png")),
         SpriteSheet(resource_path("assets/ship_v5.png")),
+        SpriteSheet(resource_path("assets/ship_v6.png")),
     ])
 
     CURSOR = pygame.image.load(
