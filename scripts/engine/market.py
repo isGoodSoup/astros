@@ -59,8 +59,7 @@ class Market:
 
         for node in self.nodes:
             name_surf = self.font.render(
-                game.local.t(f"game.buy.{node.item.type}"
-                .upper()),
+                game.local.t(f"game.buy.{node.item.type}"),
                 True,
                 COLOR_WHITE)
 
