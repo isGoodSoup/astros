@@ -8,6 +8,7 @@ CURSOR = None
 LOGO = None
 ICON = None
 STATUS = None
+BARS = None
 GUNS = None
 GUNS_2 = None
 EXPLOSION_SHEET = None
@@ -21,7 +22,7 @@ MARKET_DAMAGE_BOOST = None
 
 def load_assets():
     global ASTEROID_SPRITES, SHIPS
-    global CURSOR, LOGO, ICON, STATUS, GUNS, GUNS_2
+    global CURSOR, LOGO, ICON, STATUS, BARS, GUNS, GUNS_2
     global EXPLOSION_SHEET, MEGAEXPLOSION_SHEET
     global OVERLAY_CONTROLLER, OVERLAY_KEYBOARD
     global MARKET_AMMO, MARKET_REPAIRS, MARKET_DAMAGE_BOOST
@@ -52,6 +53,9 @@ def load_assets():
     ).convert_alpha()
     STATUS = SpriteSheet(
         resource_path("assets/ui/status.png"))
+    BARS = pygame.image.load(
+        resource_path("assets/ui/bars.png")
+    ).convert_alpha()
     GUNS = SpriteSheet(
         resource_path("assets/ui/guns.png"))
     GUNS_2 = SpriteSheet(

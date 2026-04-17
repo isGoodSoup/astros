@@ -223,6 +223,14 @@ class HUD:
             height=INTERFACE_OVERHEAT_HEIGHT,
             max_value=game.ship.xp_to_next_level)
 
+        self.bar_icons = pygame.transform.scale(
+            assets.BARS,
+            (
+                assets.BARS.get_width() * SCALE,
+                assets.BARS.get_height() * SCALE
+            )
+        )
+
         self.credits = game.ship.credits
 
         self.skill_tab = Tab(
@@ -311,9 +319,15 @@ class HUD:
         self.shield_bar.draw(screen, x=shield_x, y=bar_y)
         self.xp_bar.draw(screen, x=xp_x, y=bar_y)
 
+        icon_x = overheat_x - ICONS_OFFSET
+        icon_y = bar_y + self.overheat_bar.rect.height
+        if game.state.pause:
+            screen.blit(self.bar_icons, (icon_x, icon_y))
+
         current_time = pygame.time.get_ticks()
         show_secondary = (game.ship.last_gun_fired == "torpedo" and
-                          current_time - game.ship.last_gun_fired_time < 1500)
+                          current_time - game.ship.last_gun_fired_time <
+                          SHIP_LAST_SHOT_GUN)
 
         if show_secondary:
             secondary_frame = 0
