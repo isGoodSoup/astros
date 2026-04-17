@@ -22,10 +22,9 @@ from scripts.objects.enemies import (Alien, HeavyAlien, BomberAlien,
 from scripts.objects.explode import Explosion
 from scripts.objects.particle import Particle
 from scripts.system.constants import *
+from scripts.system.prices import build_market
 
 __all__ = ['Updater']
-
-from scripts.system.prices import build_market
 
 market = None
 
