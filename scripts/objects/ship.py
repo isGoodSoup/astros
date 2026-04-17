@@ -29,8 +29,16 @@ class Ship(AnimatedEntity):
         self.gun_order = SHIP_GUNS
         self.gun = SHIP_GUNS[0]
         self.guns = SHIP_GUNS_RATES
-        self.guns_ammo = SHIP_AMMO
+        self.guns_ammo = SHIP_AMMO.copy()
         self.base_guns_ammo = self.guns_ammo.copy()
+
+        self.secondary_gun = SHIP_SECONDARY_GUNS[0]
+        self.secondary_guns = SHIP_SECONDARY_RATES
+        self.secondary_guns_ammo = SHIP_SECONDARY_AMMO.copy()
+        self.base_secondary_guns_ammo = self.secondary_guns_ammo.copy()
+        self.last_secondary_shot = 0
+        self.last_gun_fired = self.gun
+        self.last_gun_fired_time = 0
 
         total_arsenal = 0
         for ammo in self.guns_ammo:
@@ -132,6 +140,11 @@ class Ship(AnimatedEntity):
                 scaled_ammo = int(ammo * settings["ammo_multiplier"])
                 self.guns_ammo[gun] = scaled_ammo
                 self.base_guns_ammo[gun] = scaled_ammo
+
+        for gun, ammo in self.secondary_guns_ammo.items():
+            scaled_ammo = int(ammo * settings["ammo_multiplier"])
+            self.secondary_guns_ammo[gun] = scaled_ammo
+            self.base_secondary_guns_ammo[gun] = scaled_ammo
 
         self.xp_growth = settings["xp_growth"]
         self.credits_multiplier = settings["credits_multiplier"]
@@ -293,19 +306,55 @@ class Ship(AnimatedEntity):
                 self.guns_ammo['nuke'] -= cost
                 self.clamp_ammo(gun_type)
 
+        elif gun_type == "torpedo":
+            cost = 1
+            if self.secondary_guns_ammo['torpedo'] < cost:
+                if game.state.play_sound:
+                    game.mixer.play(4)
+                return projectiles
+
+            projectiles.append(Projectile(
+                pos,
+                COLOR_LIGHT_RED,
+                direction=(dir_x, dir_y), speed=12,
+                damage=SHIP_TORPEDO_DAMAGE,
+                explosive=True,
+                explosion_radius=SHIP_TORPEDO_RADIUS))
+
+            if not TOGGLE_UNLIMITED_AMMO:
+                self.secondary_guns_ammo['torpedo'] -= cost
+                self.clamp_ammo_secondary(gun_type)
+
         self.apply_heat(game)
+        self.last_gun_fired = gun_type
+        self.last_gun_fired_time = pygame.time.get_ticks()
+
+        if game.state.play_sound:
+            game.mixer.play(0)
+
+        if gun_type == "shotgun" and self.guns_ammo['shotgun'] > 0:
+            if game.state.can_screen_shake:
+                game.screen_shake = SCREEN_SHAKE // 2
+
         return projectiles
 
     def clamp_ammo(self, gun):
         self.guns_ammo[gun] = max(0, min(self.guns_ammo[gun],
                                          self.base_guns_ammo[gun]))
 
+    def clamp_ammo_secondary(self, gun):
+        self.secondary_guns_ammo[gun] = max(0,
+                                            min(self.secondary_guns_ammo[gun],
+                                                self.base_secondary_guns_ammo[
+                                                    gun]))
+
     def taken_damage(self):
         return [random.randint(-SCREEN_SHAKE, SCREEN_SHAKE),
                 random.randint(-SCREEN_SHAKE, SCREEN_SHAKE)]
 
     def apply_visual_damage(self):
-        if not hasattr(self.game.sprites, 'frames') or not self.game.sprites.frames:
+        if not hasattr(self.game.sprites,
+                       'frames') or not self.game.sprites.frames:
             return
 
         current_surface = self.game.sprites.base
@@ -326,7 +375,8 @@ class Ship(AnimatedEntity):
             for dx in range(SCALE):
                 for dy in range(SCALE):
                     if target_x + dx < width and target_y + dy < height:
-                        frame.set_at((target_x + dx, target_y + dy), (0, 0, 0, 0))
+                        frame.set_at((target_x + dx, target_y + dy),
+                                     (0, 0, 0, 0))
 
     def gain_xp(self, amount, sound):
         if self.level_cap and self.level == LEVEL_CAP:

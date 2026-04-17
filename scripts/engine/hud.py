@@ -52,7 +52,7 @@ class Interface(pygame.sprite.Sprite):
         self.offset_x, self.offset_y = offset
 
     def update(self, ship, hud_ratio, hud_pos, frame, screen, hud_padding=0,
-               scale=False):
+               scale=False, x=None, y=None):
         frame = int(min(frame, len(self.frames) - 1))
         self.image = self.frames[frame]
         if scale:
@@ -60,17 +60,23 @@ class Interface(pygame.sprite.Sprite):
                                                 (self.image.get_width() * 2,
                                                  self.image.get_height() * 2))
 
-        if hud_pos[0] == 'left':
-            self.hud_x = hud_ratio['left'] + hud_padding + self.offset_x
-        elif hud_pos[0] == 'right':
-            self.hud_x = hud_ratio[
-                             'right'] - hud_padding - self.image.get_width() + self.offset_x
+        if x is not None:
+            self.hud_x = x
+        else:
+            if hud_pos[0] == 'left':
+                self.hud_x = hud_ratio['left'] + hud_padding + self.offset_x
+            elif hud_pos[0] == 'right':
+                self.hud_x = hud_ratio[
+                                 'right'] - hud_padding - self.image.get_width() + self.offset_x
 
-        if hud_pos[1] == 'top':
-            self.hud_y = hud_ratio['top'] + hud_padding + self.offset_y
-        elif hud_pos[1] == 'bottom':
-            self.hud_y = hud_ratio[
-                             'bottom'] - hud_padding - self.image.get_height() + self.offset_y
+        if y is not None:
+            self.hud_y = y
+        else:
+            if hud_pos[1] == 'top':
+                self.hud_y = hud_ratio['top'] + hud_padding + self.offset_y
+            elif hud_pos[1] == 'bottom':
+                self.hud_y = hud_ratio[
+                                 'bottom'] - hud_padding - self.image.get_height() + self.offset_y
 
         screen.blit(self.image, (self.hud_x, self.hud_y))
 
@@ -186,6 +192,15 @@ class HUD:
             INTERFACE_GUNS_COLS,
             GUNS_HUD_NUDGE)
 
+        self.secondary_guns = Interface(
+            resource_path("assets/ui/guns_2.png"),
+            0,
+            INTERFACE_GUNS[0],
+            INTERFACE_GUNS[1],
+            hud_ratio, ['right', 'bottom'],
+            1,
+            GUNS_HUD_NUDGE)
+
         self.overheat_bar = OverheatBar(
             0, 0,
             width=INTERFACE_OVERHEAT_WIDTH,
@@ -251,8 +266,7 @@ class HUD:
 
         stopwatch_text = f"{game.clock.hours:02}:{game.clock.minutes:02}:{game.clock.seconds:02}"
         stopwatch_surface = font.render(stopwatch_text, True, COLOR_WHITE)
-        sw_x = hud_ratio['left'] + hud_ratio[
-            'width'] // 2 - stopwatch_surface.get_width() // 2
+        sw_x = hud_ratio['left'] + hud_ratio['width'] // 2 - stopwatch_surface.get_width() // 2
         sw_y = hud_ratio['top'] + hud_padding
         screen.blit(stopwatch_surface, [sw_x, sw_y])
 
@@ -293,22 +307,40 @@ class HUD:
         self.shield_bar.draw(screen, x=shield_x, y=bar_y)
         self.xp_bar.draw(screen, x=xp_x, y=bar_y)
 
-        current_gun_frame = game.ship.gun_order.index(game.ship.gun)
+        current_time = pygame.time.get_ticks()
+        show_secondary = (game.ship.last_gun_fired == "torpedo" and
+                          current_time - game.ship.last_gun_fired_time < 1500)
 
-        self.guns.update(game.ship, hud_ratio, ['right', 'bottom'],
-                         current_gun_frame, screen, hud_padding)
-
-        current_ammo = game.ship.guns_ammo[game.ship.gun]
-        total_ammo = "inf" if game.ship.gun == "beam" else (
-            game.ship.base_guns_ammo)[game.ship.gun]
+        if show_secondary:
+            secondary_frame = 0
+            self.secondary_guns.update(game.ship, hud_ratio, ['right', 'bottom'],
+                                       secondary_frame, screen, hud_padding,
+                                       x=self.guns.hud_x, y=self.guns.hud_y)
+            
+            current_ammo = game.ship.secondary_guns_ammo[game.ship.secondary_gun]
+            total_ammo = game.ship.base_secondary_guns_ammo[game.ship.secondary_gun]
+            
+            tag = SHIP_SECONDARY_TAGS.get(game.ship.secondary_gun,
+                                         f"game.gun.{game.ship.secondary_gun}")
+            gun_name = game.local.t(tag)
+            name_color = COLOR_LIGHT_RED
+        else:
+            current_gun_frame = game.ship.gun_order.index(game.ship.gun)
+            self.guns.update(game.ship, hud_ratio, ['right', 'bottom'],
+                             current_gun_frame, screen, hud_padding)
+            
+            current_ammo = game.ship.guns_ammo[game.ship.gun]
+            total_ammo = "inf" if game.ship.gun == "beam" else (
+                game.ship.base_guns_ammo)[game.ship.gun]
+            
+            tag = SHIP_TAGS.get(game.ship.gun, game.ship.gun)
+            gun_name = game.local.t(tag)
+            name_color = COLOR_LIGHT_ORANGE
 
         icon_left_x = self.guns.hud_x
         x_right_edge = icon_left_x - TEXT_PADDING
 
-        gun_tag = SHIP_TAGS.get(game.ship.gun, game.ship.gun)
-        gun_name = game.local.t(gun_tag)
-        gun_name_surface = font.render(gun_name, True, COLOR_LIGHT_ORANGE)
-
+        gun_name_surface = font.render(gun_name, True, name_color)
         gun_name_x = x_right_edge - gun_name_surface.get_width()
         gun_name_y = self.guns.hud_y + GUN_LABEL_OFFSET
         screen.blit(gun_name_surface, [gun_name_x, gun_name_y])

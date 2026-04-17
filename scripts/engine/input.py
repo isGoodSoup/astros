@@ -5,7 +5,6 @@ from scripts.engine.shared import joysticks, controller
 from scripts.engine.utils import take_screenshot, toggle_setting
 from scripts.objects.ship import get_nearest_enemy
 from scripts.system.constants import (BOSS_PHASES_INDEX, ONE_SECOND,
-                                      SCREEN_SHAKE,
                                       INPUT_NAV_COOLDOWN,
                                       PHASE_TRANSITION, INPUT_MOUSE,
                                       INPUT_CONTROLLER,
@@ -70,9 +69,11 @@ class Input:
         is_boss_phase = game.state.phase_index in BOSS_PHASES_INDEX
 
         controller_shoot = False
+        controller_secondary = False
         if joysticks:
             controller_shoot = (controller.get_button(5)
                                 or controller.get_button(0))
+            controller_secondary = controller.get_button(4)
 
         shooting_input = ((controller_shoot or keys[pygame.K_SPACE] or mouse[0])
                           and not game.state.pause)
@@ -94,12 +95,13 @@ class Input:
             if game.ship.guns_ammo[game.ship.gun] <= 0 and game.ship.gun != "beam":
                 game.mixer.play(4)
 
-            if game.state.play_sound:
-                game.mixer.play(0)
-
-            if game.ship.gun == "shotgun" and game.ship.guns_ammo['shotgun'] > 0:
-                if game.state.can_screen_shake:
-                    game.screen_shake = SCREEN_SHAKE // 2
+        secondary_input = ((controller_secondary or mouse[2])
+                           and not game.state.pause)
+        if (secondary_input and now - game.ship.last_secondary_shot >=
+                game.ship.secondary_guns['torpedo']):
+            new_projectiles = game.ship.shoot(game, gun_type="torpedo")
+            game.sprites.projectiles.add(*new_projectiles)
+            game.ship.last_secondary_shot = now
 
         for event in events:
             if event.type == pygame.KEYDOWN:
@@ -272,10 +274,6 @@ class Input:
 
                 if event.button == 3 and game.state.game_over:
                     reboot(game, game.screen_size)
-
-                if event.button == 4:
-                    from scripts.engine.movement import lock_y
-                    lock_y = not lock_y
 
                 if event.button == 6:
                     if game.state.pause and not game.hud.skill_tab.active:

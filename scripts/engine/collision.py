@@ -338,6 +338,11 @@ def check_collision(game, local):
         if getattr(projectile, "nuke", False):
             game.events.nuke_event(projectile.rect.center, game)
             projectile.kill()
+        elif getattr(projectile, "explosive", False):
+            game.events.torpedo_event(projectile.rect.center, 
+                                    getattr(projectile, "explosion_radius", 100), 
+                                    game)
+            projectile.kill()
 
     upgrade_hit = pygame.sprite.spritecollide(game.ship, game.sprites.upgrades,False, # type: ignore
                                           collided=lambda s,u: s.hitbox.colliderect(u.rect))

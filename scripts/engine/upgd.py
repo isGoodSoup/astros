@@ -50,4 +50,9 @@ class Upgrade(pygame.sprite.Sprite):
                 if ammo == "nuke":
                     ship.guns_ammo[ammo] += 1
             ship.clamp_ammo(ship.gun)
+
+            for ammo in ship.secondary_guns_ammo:
+                if ammo == "torpedo":
+                    ship.secondary_guns_ammo[ammo] += 2
+                ship.clamp_ammo_secondary(ammo)
         game.mixer.play(2)

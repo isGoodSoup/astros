@@ -51,6 +51,17 @@ class Events:
             if joysticks and game.state.can_rumble:
                 controller.rumble(1, 1, HIGH_RUMBLE_MS)
 
+    def torpedo_event(self, center, radius, game):
+        game.sprites.shockwaves.append(Shockwave(center, max_radius=radius,
+                                         speed=SHOCKWAVE_SPEED // 2))
+        game.sprites.explosions.add(Explosion(center[0], center[1],
+                                      game.sprites.frame_explode))
+
+        if game.state.can_screen_shake:
+            game.screen_shake = SCREEN_SHAKE // 2
+            if joysticks and game.state.can_rumble:
+                controller.rumble(0.5, 0.5, HIGH_RUMBLE_MS // 2)
+
     def black_hole_event(self, game):
         x = random.randint(100, game.screen_size[0] - 100)
         y = -200
