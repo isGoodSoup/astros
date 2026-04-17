@@ -19,6 +19,7 @@ class SpriteManager:
         self.explosions = pygame.sprite.Group()
         self.upgrades = pygame.sprite.Group()
         self.floating_numbers = pygame.sprite.Group()
+        self.nodes = pygame.sprite.Group()
         self.particles = []
         self.shockwaves = []
 
@@ -89,3 +90,11 @@ class SpriteManager:
 
     def create_ship(self):
         return Ship(self.selected_sheet, self.game, 0, 0)
+
+    def create_market(self):
+        for item in random.sample(MARKET_ITEMS, k=3):
+            pos = pygame.Vector2(
+                random.randint(200, game.screen_size[0] - 200),
+                random.randint(200, game.screen_size[1] - 200)
+            )
+            self.nodes.add(MarketNode(item, pos))

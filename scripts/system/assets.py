@@ -14,12 +14,15 @@ EXPLOSION_SHEET = None
 MEGAEXPLOSION_SHEET = None
 OVERLAY_CONTROLLER = None
 OVERLAY_KEYBOARD = None
+MARKET_AMMO = None
+MARKET_REPAIRS = None
 
 def load_assets():
     global ASTEROID_SPRITES, SHIPS
     global CURSOR, LOGO, ICON, STATUS, GUNS, GUNS_2
     global EXPLOSION_SHEET, MEGAEXPLOSION_SHEET
     global OVERLAY_CONTROLLER, OVERLAY_KEYBOARD
+    global MARKET_AMMO, MARKET_REPAIRS
 
     ASTEROID_SPRITES = [
         pygame.image.load(
@@ -51,3 +54,6 @@ def load_assets():
 
     OVERLAY_KEYBOARD = pygame.image.load(resource_path(
         "assets/ui/overlay_keyboard.png")).convert_alpha()
+
+    MARKET_AMMO = resource_path("assets/obj/bullet.png")
+    MARKET_REPAIRS = resource_path("assets/obj/repairs.png")

@@ -49,3 +49,5 @@ class GameState:
         self.stars_speed = STAR_SPEED
         self.sandbox_enabled = False
         self.sandbox_enemy_type = "Alien"
+        
+        self.market_active = False

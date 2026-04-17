@@ -6,31 +6,47 @@ from scripts.engine import upgd
 from scripts.engine.collision import check_collision
 from scripts.engine.difficulty import Difficulty
 from scripts.engine.input import update_cursor, update_axis
+from scripts.engine.market import Market
 from scripts.engine.movement import update_movement
-from scripts.engine.runtime import get_boss_pos, get_upgrade_position, \
-    get_ship_ember
+from scripts.engine.runtime import (get_boss_pos, get_upgrade_position, \
+                                    get_ship_ember)
 from scripts.engine.shared import joysticks, controller
 from scripts.engine.upgd import Upgrade
 from scripts.engine.utils import resource_path, formulize
 from scripts.objects.asteroid import Asteroid
 from scripts.objects.boss import Boss
 from scripts.objects.celestial import random_celestial, is_valid_spawn
-from scripts.objects.enemies import Alien, HeavyAlien, BomberAlien, EvokerAlien, \
-    StoneAlien, AlienBehemoth
+from scripts.objects.enemies import (Alien, HeavyAlien, BomberAlien,
+                                     EvokerAlien, \
+                                     StoneAlien, AlienBehemoth)
 from scripts.objects.explode import Explosion
 from scripts.objects.particle import Particle
 from scripts.system.constants import *
 
 __all__ = ['Updater']
 
+market = None
 
 class Updater:
     def update(self, game):
+        global market
         update_axis(game)
         if not game.state.pause or game.hud.skill_tab.active:
             if not game.hud.skill_tab.active:
                 update_movement(game, game.delta, game.screen_size)
                 update_cursor(game, game.delta, game.screen_size)
+
+        if game.state.market_active:
+            if market:
+                market.update(game)
+                purchase = market.check_purchase(game)
+                if purchase:
+                    market.purchase(purchase, game)
+                    market = None
+                    game.state.market_active = False
+            else:
+                market = Market(game)
+            return
 
         if not game.state.pause and not game.state.game_over:
             update_game(game, game.delta, game.screen_size, game.hud_padding)
@@ -145,7 +161,7 @@ def run_transition(game):
     game.state.phase_state = PHASE_ACTIVE
     game.spawns.boss_spawned = False
     game.ship.spawnpoint(game.screen_size, game.sprites.framew)
-
+    game.state.market_active = True
 
 def spawn_fleet(game):
     now = pygame.time.get_ticks()

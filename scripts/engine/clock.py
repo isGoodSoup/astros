@@ -12,19 +12,20 @@ class Clock:
         self.stopwatch = None
 
     def update_time(self, game):
-        current_time = pygame.time.get_ticks()
-        elapsed = current_time - game.sprites.last_time
-        game.sprites.last_time = current_time
+        if not game.state.market_active:
+            current_time = pygame.time.get_ticks()
+            elapsed = current_time - game.sprites.last_time
+            game.sprites.last_time = current_time
 
-        self.milliseconds += elapsed
-        game.sprites.last_time = current_time
+            self.milliseconds += elapsed
+            game.sprites.last_time = current_time
 
-        if self.milliseconds >= ONE_SECOND:
-            self.milliseconds -= ONE_SECOND
-            self.seconds += 1
-            if self.seconds >= FPS:
-                self.seconds = 0
-                self.minutes += 1
-                if self.minutes >= FPS:
-                    self.minutes = 0
-                    self.hours += 1
+            if self.milliseconds >= ONE_SECOND:
+                self.milliseconds -= ONE_SECOND
+                self.seconds += 1
+                if self.seconds >= FPS:
+                    self.seconds = 0
+                    self.minutes += 1
+                    if self.minutes >= FPS:
+                        self.minutes = 0
+                        self.hours += 1
