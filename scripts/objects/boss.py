@@ -4,7 +4,7 @@ import random
 import pygame
 
 from scripts.engine.shared import joysticks, controller
-from scripts.engine.utils import resource_path, HealthBar
+from scripts.engine.utils import resource_path, HealthBar, colour
 from scripts.objects.proj import Projectile, StoneProjectile
 from scripts.objects.shockwave import Shockwave
 from scripts.system.constants import *
