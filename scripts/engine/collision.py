@@ -338,7 +338,7 @@ def check_collision(game, local):
         if getattr(projectile, "nuke", False):
             game.events.nuke_event(projectile.rect.center, game)
             projectile.kill()
-        elif getattr(projectile, "explosive", False):
+        elif getattr(projectile, "explosive", False) and getattr(projectile, "distance_traveled", 0) >= 500:
             game.events.torpedo_event(projectile.rect.center, 
                                     getattr(projectile, "explosion_radius", 100), 
                                     game)

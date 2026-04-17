@@ -7,6 +7,9 @@ SHIPS = None
 CURSOR = None
 LOGO = None
 ICON = None
+STATUS = None
+GUNS = None
+GUNS_2 = None
 EXPLOSION_SHEET = None
 MEGAEXPLOSION_SHEET = None
 OVERLAY_CONTROLLER = None
@@ -14,7 +17,7 @@ OVERLAY_KEYBOARD = None
 
 def load_assets():
     global ASTEROID_SPRITES, SHIPS
-    global CURSOR, LOGO, ICON
+    global CURSOR, LOGO, ICON, STATUS, GUNS, GUNS_2
     global EXPLOSION_SHEET, MEGAEXPLOSION_SHEET
     global OVERLAY_CONTROLLER, OVERLAY_KEYBOARD
 
@@ -36,6 +39,9 @@ def load_assets():
     CURSOR = pygame.image.load(resource_path("assets/ui/crosshair.png")).convert_alpha()
     LOGO = pygame.image.load(resource_path("assets/ui/logo.png")).convert_alpha()
     ICON = pygame.image.load(resource_path("assets/ui/icon.png")).convert_alpha()
+    STATUS = SpriteSheet(resource_path("assets/ui/status.png"))
+    GUNS = SpriteSheet(resource_path("assets/ui/guns.png"))
+    GUNS_2 = SpriteSheet(resource_path("assets/ui/guns_2.png"))
 
     EXPLOSION_SHEET = SpriteSheet(resource_path("assets/explosion.png"))
     MEGAEXPLOSION_SHEET = SpriteSheet(resource_path("assets/explosion_charge.png"))

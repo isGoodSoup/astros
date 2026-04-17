@@ -319,7 +319,8 @@ class Ship(AnimatedEntity):
                 direction=(dir_x, dir_y), speed=12,
                 damage=SHIP_TORPEDO_DAMAGE,
                 explosive=True,
-                explosion_radius=SHIP_TORPEDO_RADIUS))
+                explosion_radius=SHIP_TORPEDO_RADIUS,
+                is_torpedo=True, game=game))
 
             if not TOGGLE_UNLIMITED_AMMO:
                 self.secondary_guns_ammo['torpedo'] -= cost

@@ -1,5 +1,6 @@
 import pygame
 
+import scripts.system.assets as assets
 from scripts.engine.render import render_skills_tab, render_stats_tab, \
     render_settings_tab
 from scripts.system.constants import *
@@ -31,7 +32,7 @@ def value_to_frame(value, max_value, frame_count, reverse=False):
 
 
 class Interface(pygame.sprite.Sprite):
-    def __init__(self, path, frame, width, height, hud_ratio, hud_pos,
+    def __init__(self, path_or_sheet, frame, width, height, hud_ratio, hud_pos,
                  columns=29, offset=(0, 0), scale=4):
         super().__init__()
         if width <= 0 or height <= 0:
@@ -41,7 +42,10 @@ class Interface(pygame.sprite.Sprite):
         if scale <= 0:
             raise ValueError("Scale must be > 0")
 
-        self.sprite_sheet = SpriteSheet(path)
+        if isinstance(path_or_sheet, SpriteSheet):
+            self.sprite_sheet = path_or_sheet
+        else:
+            self.sprite_sheet = SpriteSheet(path_or_sheet)
         self.frames = [
             self.sprite_sheet.get_image(i, width, height, scale, columns)
             for i in range(columns)
@@ -178,13 +182,13 @@ class XPBar(Bar):
 class HUD:
     def __init__(self, game, screen_size, hud_ratio, game_font):
         self.hitpoints = Interface(
-            resource_path("assets/ui/status.png"),
+            assets.STATUS,
             0,
             *INTERFACE_HITPOINTS,
             hud_ratio, ['right', 'bottom'])
 
         self.guns = Interface(
-            resource_path("assets/ui/guns.png"),
+            assets.GUNS,
             0,
             INTERFACE_GUNS[0],
             INTERFACE_GUNS[1],
@@ -193,7 +197,7 @@ class HUD:
             GUNS_HUD_NUDGE)
 
         self.secondary_guns = Interface(
-            resource_path("assets/ui/guns_2.png"),
+            assets.GUNS_2,
             0,
             INTERFACE_GUNS[0],
             INTERFACE_GUNS[1],

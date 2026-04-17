@@ -1,17 +1,23 @@
-import pygame
 import math
+import random
 
-from scripts.system.constants import COLOR_LIGHT_RED
+import pygame
+
 from scripts.engine.utils import resource_path
+from scripts.objects.particle import Particle
+from scripts.system.constants import COLOR_LIGHT_RED
+from scripts.system.constants import COLOR_SMOKE
 
 
 class Projectile(pygame.sprite.Sprite):
     def __init__(self, pos, color, direction=(0, -1), speed=16,
                  damage=1, range_limit=900,
                  homing=False, screen=None, target=None,
-                 explosive=False, explosion_radius=0):
+                 explosive=False, explosion_radius=0,
+                 is_torpedo=False, game=None):
         super().__init__()
         self.screen = screen
+        self.game = game
         self.speed = speed
         self.damage = damage
         self.direction = pygame.Vector2(direction).normalize()
@@ -23,8 +29,17 @@ class Projectile(pygame.sprite.Sprite):
         self.explosive = explosive
         self.explosion_radius = explosion_radius
         self.nuke = False
+        self.is_torpedo = is_torpedo
 
-        if self.homing:
+        if self.is_torpedo:
+            width, height = 6, 28
+            self.image = pygame.Surface((width, height), pygame.SRCALPHA)
+            self.image.fill((*color, 255))
+
+            angle = -math.degrees(
+                math.atan2(self.direction.y, self.direction.x)) - 90
+            self.image = pygame.transform.rotate(self.image, angle)
+        elif self.homing:
             radius = 6
             proj_color = COLOR_LIGHT_RED
             self.image = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
@@ -55,6 +70,14 @@ class Projectile(pygame.sprite.Sprite):
         self.rect.y += dy
         self.distance_traveled += math.hypot(dx, dy)
 
+        if self.is_torpedo and self.game:
+            trail_pos = self.rect.center
+            velocity = -self.direction * 1.5 + pygame.Vector2(random.uniform(-0.5, 0.5),
+                                                           random.uniform(-0.5, 0.5))
+            particle = Particle(trail_pos, velocity, timer=random.randint(20, 40),
+                                color=COLOR_SMOKE, radius=random.uniform(2, 6))
+            self.game.sprites.particles.append(particle)
+
         if self.distance_traveled >= self.range_limit:
             self.kill()
 
@@ -75,7 +98,7 @@ class StoneProjectile(pygame.sprite.Sprite):
         try:
             self.image = pygame.image.load(resource_path("assets/asteroids/asteroid_small.png")).convert_alpha()
             self.image = pygame.transform.scale(self.image, (24, 24))
-        except:
+        except FileNotFoundError:
             self.image = pygame.Surface((20, 20), pygame.SRCALPHA)
             pygame.draw.circle(self.image, (150, 150, 150), (10, 10), 10)
 
