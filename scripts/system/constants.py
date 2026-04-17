@@ -114,6 +114,7 @@ ENTITY_HITBOX = -0.6
 SHIP_OFFSETS = (-25, 200)
 
 SHIP_GUNS = ["beam", "shotgun", "auto", "nuke"]
+SHIP_SECONDARY_GUN = ["torpedo", "torpedo", "torpedo", "torpedo"]
 SHIP_TAGS = {
     gun: f"game.gun.{gun}"
     for gun in SHIP_GUNS
@@ -126,11 +127,19 @@ SHIP_GUNS_RATES = {
     "nuke": 900
 }
 
+SHIP_SECONDARY_RATES = {
+    "torpedo": 1000
+}
+
 SHIP_AMMO = {
     "beam": -1,
     "shotgun": 200,
     "auto": 400,
     "nuke": 2
+}
+
+SHIP_SECONDARY_AMMO = {
+    "torpedo": 8
 }
 
 SHIP_CRIT_CHANCE_SIZE = 36
@@ -175,9 +184,6 @@ ALIEN_WIDTH = 44
 ALIEN_HEIGHT = 32
 ALIEN_ADVANTAGE = 10
 ALIEN_DAMAGE = 10
-
-ALIEN_FORMATION = ['block', 'line', 'clutch']
-ALIEN_MOVES = ['sideways', 'chaotic']
 
 ELITE_HP_MULT = 2.0
 ELITE_DAMAGE_MULT = 1.5
