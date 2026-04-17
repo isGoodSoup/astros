@@ -114,7 +114,7 @@ ENTITY_HITBOX = -0.6
 SHIP_OFFSETS = (-25, 200)
 
 SHIP_GUNS = ["beam", "shotgun", "auto", "nuke"]
-SHIP_SECONDARY_GUNS = ["torpedo", "torpedo", "torpedo", "torpedo"]
+SHIP_SECONDARY_GUNS = ["torpedo"]
 SHIP_TAGS = {
     gun: f"game.gun.{gun}"
     for gun in SHIP_GUNS
