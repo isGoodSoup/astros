@@ -1,10 +1,10 @@
 import random
+
 import pygame
 
-from scripts.system.constants import COLOR_LIGHT_ORANGE, COLOR_WHITE
+from scripts.system.constants import (COLOR_LIGHT_ORANGE, COLOR_WHITE,
+                                      MARKET_ITEM_SCALE)
 
-MARKET_ITEM_SCALE = 4
-MARKET_ITEM_SIZE = 64
 
 class MarketNode(pygame.sprite.Sprite):
     def __init__(self, item, pos):
@@ -28,7 +28,7 @@ class MarketNode(pygame.sprite.Sprite):
 class Market:
     def __init__(self, game, items):
         self.nodes = pygame.sprite.Group()
-        self.items = random.sample(items, k=min(2, len(items)))
+        self.items = random.sample(items, k=min(3, len(items)))
 
         while len(self.items) < 3:
             self.items.append(random.choice(items))
@@ -58,12 +58,24 @@ class Market:
         self.nodes.draw(screen)
 
         for node in self.nodes:
-            name_surf = self.font.render(game.local.t(node.item.type.upper()), True, COLOR_WHITE)
-            price_surf = self.font.render(f"${node.item.price}", True, COLOR_LIGHT_ORANGE)
-            name_rect = name_surf.get_rect(centerx=node.rect.centerx,
-                                           top=node.rect.bottom + 10)
-            price_rect = price_surf.get_rect(centerx=node.rect.centerx,
-                                             top=name_rect.bottom + 6)
+            name_surf = self.font.render(
+                game.local.t(f"game.buy.{node.item.type}"
+                .upper()),
+                True,
+                COLOR_WHITE)
+
+            price_surf = self.font.render(f"${node.item.price}",
+                True,
+                COLOR_LIGHT_ORANGE)
+
+            name_rect = name_surf.get_rect(
+                centerx=node.rect.centerx,
+                top=node.rect.bottom + 10)
+
+            price_rect = price_surf.get_rect(
+                centerx=node.rect.centerx,
+                top=name_rect.bottom + 6)
+
             screen.blit(name_surf, name_rect)
             screen.blit(price_surf, price_rect)
 
