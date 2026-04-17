@@ -47,6 +47,7 @@
   "game.gun.shotgun": "PS-76",
   "game.gun.auto": "PA-90",
   "game.gun.nuke": "BIG-BOY",
+  "game.gun.torpedo": "TS-56",
   "game.lost_mult": "NO MULT!",
   "game.miss": "MISS!",
   "game.tutorial.move": "Move your ship WASD or Arrow Keys",

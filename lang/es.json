@@ -47,6 +47,7 @@
   "game.gun.shotgun": "PS-76",
   "game.gun.auto": "PA-90",
   "game.gun.nuke": "BIG-BOY",
+  "game.gun.torpedo": "TS-56",
   "game.lost_mult": "¡SIN MULTIPLICADOR!",
   "game.miss": "¡EVASIÓN!",
   "game.tutorial.move": "Mueve tu nave WASD o las flechas del teclado",
