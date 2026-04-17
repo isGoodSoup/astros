@@ -30,8 +30,7 @@ class CRT:
                 fragment_shader=open(resource_path('assets/shaders/FRAGMENT_SHADER.glsl')).read())
             self.prog['mode'] = self.style
 
-            self.screen_texture = self.ctx.texture(self.virtual_resolution, 4,
-                pygame.image.tostring(screen,"RGBA",False))
+            self.screen_texture = self.ctx.texture(self.virtual_resolution, 4)
             self.screen_texture.repeat_x = False
             self.screen_texture.repeat_y = False
 
