@@ -55,5 +55,6 @@ def load_assets():
     OVERLAY_KEYBOARD = pygame.image.load(resource_path(
         "assets/ui/overlay_keyboard.png")).convert_alpha()
 
-    MARKET_AMMO = resource_path("assets/obj/bullet.png")
-    MARKET_REPAIRS = resource_path("assets/obj/repairs.png")
+    MARKET_AMMO = pygame.image.load(resource_path(
+        "assets/obj/bullet.png")).convert_alpha()
+    MARKET_REPAIRS = pygame.image.load(resource_path("assets/obj/repairs.png")).convert_alpha()

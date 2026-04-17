@@ -25,6 +25,8 @@ from scripts.system.constants import *
 
 __all__ = ['Updater']
 
+from scripts.system.prices import build_market
+
 market = None
 
 class Updater:
@@ -40,12 +42,15 @@ class Updater:
             if market:
                 market.update(game)
                 purchase = market.check_purchase(game)
+
                 if purchase:
                     market.purchase(purchase, game)
                     market = None
                     game.state.market_active = False
             else:
-                market = Market(game)
+                game.state.pause = False
+                items = build_market()
+                market = Market(game, items)
             return
 
         if not game.state.pause and not game.state.game_over:

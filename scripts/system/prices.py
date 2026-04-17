@@ -8,7 +8,8 @@ class MarketItem:
         self.stock = stock
         self.image = image
 
-MARKET_ITEMS = [
-    MarketItem("ammo", 50, 200, assets.MARKET_AMMO),
-    MarketItem("repairs", 2000, 2, assets.MARKET_REPAIRS),
-]
+def build_market():
+    return [
+        MarketItem("ammo", 50, 200, assets.MARKET_AMMO),
+        MarketItem("repairs", 2000, 2, assets.MARKET_REPAIRS),
+    ]

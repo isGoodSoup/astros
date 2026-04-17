@@ -1,6 +1,5 @@
 import random
 import pygame
-from scripts.system.prices import MARKET_ITEMS
 
 class MarketNode(pygame.sprite.Sprite):
     def __init__(self, item, pos):
@@ -16,12 +15,12 @@ class MarketNode(pygame.sprite.Sprite):
 
 
 class Market:
-    def __init__(self, game):
+    def __init__(self, game, items):
         self.nodes = pygame.sprite.Group()
-        self.items = random.sample(MARKET_ITEMS, k=min(3, len(MARKET_ITEMS)))
+        self.items = random.sample(items, k=min(2, len(items)))
 
         while len(self.items) < 3:
-            self.items.append(random.choice(MARKET_ITEMS))
+            self.items.append(random.choice(items))
 
         for item in self.items:
             pos = pygame.Vector2(
