@@ -1,13 +1,24 @@
 import random
 import pygame
 
+from scripts.system.constants import COLOR_LIGHT_ORANGE, COLOR_WHITE
+
+MARKET_ITEM_SCALE = 4
+MARKET_ITEM_SIZE = 64
+
 class MarketNode(pygame.sprite.Sprite):
     def __init__(self, item, pos):
         super().__init__()
         self.item = item
-        self.image = item.image
+        raw = item.image
+        scaled = pygame.transform.scale(
+            raw,
+            (raw.get_width() * MARKET_ITEM_SCALE,
+             raw.get_height() * MARKET_ITEM_SCALE)
+        )
+        self.image = scaled
         self.rect = self.image.get_rect(center=pos)
-        self.hitbox = self.rect.copy()
+        self.hitbox = self.rect.inflate(20, 20)
         self.active = True
 
     def apply(self, game):
@@ -22,25 +33,45 @@ class Market:
         while len(self.items) < 3:
             self.items.append(random.choice(items))
 
-        for item in self.items:
-            pos = pygame.Vector2(
-                random.randint(200, game.screen_size[0] - 200),
-                random.randint(200, game.screen_size[1] - 200)
-            )
-            self.nodes.add(MarketNode(item, pos)) # type: ignore
+        sw, sh = game.screen_size
+        count = len(self.items)
+        spacing = sw // (count + 1)
+        y = sh // 2
+
+        for i, item in enumerate(self.items):
+            x = spacing * (i + 1)
+            self.nodes.add(MarketNode(item, (x, y)))  # type: ignore
+
+        self.font = game.font.get_font()
 
     def update(self, game):
         self.nodes.update()
 
-    def check_purchase(self, game):
-        hits = pygame.sprite.spritecollide(
-            game.ship,
-            self.nodes,
-            False,
-            collided=lambda s, u: s.hitbox.colliderect(u.rect)
-        )
+    def draw(self, screen, game):
+        sw, sh = game.screen_size
 
-        return hits[0] if hits else None
+        dim = pygame.Surface((sw, sh))
+        dim.fill((0, 0, 0))
+        dim.set_alpha(160)
+        screen.blit(dim, (0, 0))
+
+        self.nodes.draw(screen)
+
+        for node in self.nodes:
+            name_surf = self.font.render(game.local.t(node.item.type.upper()), True, COLOR_WHITE)
+            price_surf = self.font.render(f"${node.item.price}", True, COLOR_LIGHT_ORANGE)
+            name_rect = name_surf.get_rect(centerx=node.rect.centerx,
+                                           top=node.rect.bottom + 10)
+            price_rect = price_surf.get_rect(centerx=node.rect.centerx,
+                                             top=name_rect.bottom + 6)
+            screen.blit(name_surf, name_rect)
+            screen.blit(price_surf, price_rect)
+
+    def check_click(self, pos):
+        for node in self.nodes:
+            if node.rect.collidepoint(pos):
+                return node
+        return None
 
     def purchase(self, node, game):
         if not node.active:

@@ -211,7 +211,7 @@ class Input:
                     take_screenshot(game)
 
                 if event.key == pygame.K_ESCAPE:
-                    if not game.hud.skill_tab.active:
+                    if not game.hud.skill_tab.active and not game.state.market_active:
                         game.state.pause = not game.state.pause
 
                 if event.key == pygame.K_q:

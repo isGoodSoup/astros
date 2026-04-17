@@ -40,17 +40,20 @@ class Updater:
         if game.state.market_active:
             if market:
                 market.update(game)
-                purchase = market.check_purchase(game)
+                market.draw(game.screen, game)
 
-                if purchase:
-                    market.purchase(purchase, game)
-                    market = None
-                    game.state.market_active = False
+                for node in market.nodes:
+                    if node.active and game.ship.hitbox.colliderect(
+                            node.hitbox):
+                        market.purchase(node, game)
+                        exit_market(game)
+                        break
+
+                if pygame.key.get_pressed()[pygame.K_ESCAPE]:
+                    exit_market(game)
             else:
-                game.state.pause = False
                 items = build_market()
                 market = Market(game, items)
-            return
 
         if not game.state.pause and not game.state.game_over:
             update_game(game, game.delta, game.screen_size, game.hud_padding)
@@ -68,6 +71,9 @@ def set_hud(screen_size):
 
 def spawner(game):
     now = pygame.time.get_ticks()
+
+    if game.state.market_active:
+        return
 
     if game.state.phase_state != PHASE_ACTIVE:
         return
@@ -165,7 +171,7 @@ def run_transition(game):
     game.state.phase_state = PHASE_ACTIVE
     game.spawns.boss_spawned = False
     game.ship.spawnpoint(game.screen_size, game.sprites.framew)
-    game.state.market_active = True
+    trigger_market(game)
 
 def spawn_fleet(game):
     now = pygame.time.get_ticks()
@@ -495,3 +501,13 @@ def update_game(game, delta, screen_size, hud_padding):
         game.events.black_hole_event(game)
 
     update_phase(game)
+
+def trigger_market(game):
+    global market
+    game.state.market_active = True
+    market = None
+
+def exit_market(game):
+    global market
+    market = None
+    game.state.market_active = False

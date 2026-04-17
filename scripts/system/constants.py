@@ -248,13 +248,11 @@ PHASE_CLEANUP = 1
 PHASE_TRANSITION = 2
 
 PHASE_START = 0
-PHASE_LENGTH = 120_000
+PHASE_LENGTH = 15_000
 PHASE_BUFFER_TIME = 5000
 PHASES_TOTAL = 6
 
 PHASES = [f"wave_{i+1}" for i in range(PHASES_TOTAL)]
-PHASE_COLORS = ['red', 'green', 'yellow', 'purple', 'pink', 'orange']
-
 PHASE_FADE = 5000
 
 STAR_COUNT = 100

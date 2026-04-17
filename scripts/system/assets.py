@@ -16,13 +16,15 @@ OVERLAY_CONTROLLER = None
 OVERLAY_KEYBOARD = None
 MARKET_AMMO = None
 MARKET_REPAIRS = None
+MARKET_DAMAGE_BOOST = None
+
 
 def load_assets():
     global ASTEROID_SPRITES, SHIPS
     global CURSOR, LOGO, ICON, STATUS, GUNS, GUNS_2
     global EXPLOSION_SHEET, MEGAEXPLOSION_SHEET
     global OVERLAY_CONTROLLER, OVERLAY_KEYBOARD
-    global MARKET_AMMO, MARKET_REPAIRS
+    global MARKET_AMMO, MARKET_REPAIRS, MARKET_DAMAGE_BOOST
 
     ASTEROID_SPRITES = [
         pygame.image.load(
@@ -39,22 +41,40 @@ def load_assets():
         SpriteSheet(resource_path("assets/ship_v5.png")),
     ])
 
-    CURSOR = pygame.image.load(resource_path("assets/ui/crosshair.png")).convert_alpha()
-    LOGO = pygame.image.load(resource_path("assets/ui/logo.png")).convert_alpha()
-    ICON = pygame.image.load(resource_path("assets/ui/icon.png")).convert_alpha()
-    STATUS = SpriteSheet(resource_path("assets/ui/status.png"))
-    GUNS = SpriteSheet(resource_path("assets/ui/guns.png"))
-    GUNS_2 = SpriteSheet(resource_path("assets/ui/guns_2.png"))
+    CURSOR = pygame.image.load(
+        resource_path("assets/ui/crosshair.png")
+    ).convert_alpha()
+    LOGO = pygame.image.load(
+        resource_path("assets/ui/logo.png")
+    ).convert_alpha()
+    ICON = pygame.image.load(
+        resource_path("assets/ui/icon.png")
+    ).convert_alpha()
+    STATUS = SpriteSheet(
+        resource_path("assets/ui/status.png"))
+    GUNS = SpriteSheet(
+        resource_path("assets/ui/guns.png"))
+    GUNS_2 = SpriteSheet(
+        resource_path("assets/ui/guns_2.png"))
+    EXPLOSION_SHEET = SpriteSheet(
+        resource_path("assets/explosion.png"))
+    MEGAEXPLOSION_SHEET = SpriteSheet(
+        resource_path("assets/explosion_charge.png"))
 
-    EXPLOSION_SHEET = SpriteSheet(resource_path("assets/explosion.png"))
-    MEGAEXPLOSION_SHEET = SpriteSheet(resource_path("assets/explosion_charge.png"))
+    OVERLAY_CONTROLLER = pygame.image.load(
+        resource_path("assets/ui/overlay_controller.png")
+    ).convert_alpha()
 
-    OVERLAY_CONTROLLER = pygame.image.load(resource_path(
-        "assets/ui/overlay_controller.png")).convert_alpha()
+    OVERLAY_KEYBOARD = pygame.image.load(
+        resource_path("assets/ui/overlay_keyboard.png")
+    ).convert_alpha()
 
-    OVERLAY_KEYBOARD = pygame.image.load(resource_path(
-        "assets/ui/overlay_keyboard.png")).convert_alpha()
-
-    MARKET_AMMO = pygame.image.load(resource_path(
-        "assets/obj/bullet.png")).convert_alpha()
-    MARKET_REPAIRS = pygame.image.load(resource_path("assets/obj/repairs.png")).convert_alpha()
+    MARKET_AMMO = pygame.image.load(
+        resource_path("assets/obj/bullet.png")
+    ).convert_alpha()
+    MARKET_REPAIRS = pygame.image.load(
+        resource_path("assets/obj/repairs.png")
+    ).convert_alpha()
+    MARKET_DAMAGE_BOOST = pygame.image.load(
+        resource_path("assets/obj/dupgrade.png")
+    ).convert_alpha()

@@ -99,7 +99,7 @@ def render_frame(game, screen, font, hud_padding):
     if TOGGLE_TUTORIAL:
         game.tutorial.render(game, screen, font)
 
-    if game.state.pause and (not game.hud.skill_tab.active or not
+    if game.state.pause and not game.state.market_active and (not game.hud.skill_tab.active or not
             game.hud.stats_tab.active):
         pause_text = game.local.t('game.pause')
         pause = game.font.render(pause_text, True, COLOR_WHITE)
