@@ -11,6 +11,7 @@ def save_config(game):
         "rumble": game.state.can_rumble,
         "show_controls": game.state.can_show_controls,
         "show_hud": game.state.can_show_hud,
+        "show_subtitles": game.state.show_subtitles,
         "high_score": game.state.high_score,
         "language": game.state.current_lang,
         "difficulty": game.state.difficulty.name,
@@ -34,6 +35,7 @@ def load_config(game):
         game.state.can_rumble = config_data.get("rumble", True)
         game.state.can_show_controls = config_data.get("show_controls", True)
         game.state.can_show_hud = config_data.get("show_hud", True)
+        game.state.show_subtitles = config_data.get("show_subtitles", False)
         game.state.high_score = config_data.get("high_score", 0)
         game.state.current_lang = config_data.get("language", "en")
         from scripts.engine.difficulty import Difficulty

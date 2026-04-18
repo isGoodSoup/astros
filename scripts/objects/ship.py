@@ -333,6 +333,8 @@ class Ship(AnimatedEntity):
 
         if game.state.play_sound:
             game.mixer.play(0)
+            if game.state.show_subtitles:
+                game.subtitles.add(game.local.t('game.subtitle.alien_shot'))
 
         if gun_type == "shotgun" and self.guns_ammo['shotgun'] > 0:
             if game.state.screen_shake_amount > 0:
@@ -399,6 +401,8 @@ class Ship(AnimatedEntity):
         self.shield = self.max_shield
         self.xp_to_next_level = int(self.xp_to_next_level * self.xp_growth)
         self.game.mixer.play(3)
+        if self.game.state.show_subtitles:
+            self.game.subtitles.add(self.game.local.t('game.subtitle.level_up'))
 
     def get_stats(self):
         return {

@@ -3,6 +3,7 @@ import pygame
 import scripts.system.assets as assets
 from scripts.engine import runtime
 from scripts.engine.clock import Clock
+from scripts.engine.subtitle import SubtitleManager
 from scripts.system.config import load_config
 from scripts.system.events import Events
 from scripts.system.fonts import FontManager
@@ -57,9 +58,10 @@ class Game:
         self.sprites = SpriteManager(self)
         self.ship = self.sprites.ship
         self.hud = HUD(self, screen_size, hud_ratio, self.font.get_font())
-        self.mixer = Mixer()
+        self.mixer = Mixer(self)
         self.events = Events()
         self.spawns = SpawnManager()
+        self.subtitles = SubtitleManager(self)
         self.skills = SkillManager(self)
         self.traits = traits
         self.apply_traits()

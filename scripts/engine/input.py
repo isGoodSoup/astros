@@ -94,6 +94,8 @@ class Input:
 
             if game.ship.guns_ammo[game.ship.gun] <= 0 and game.ship.gun != "beam":
                 game.mixer.play(4)
+                if game.state.show_subtitles:
+                    game.subtitles.add(game.local.t('game.subtitle.no_ammo'))
 
         secondary_input = ((controller_secondary or mouse[2])
                            and not game.state.pause)
@@ -160,10 +162,14 @@ class Input:
                     elif event.key == pygame.K_RETURN and setting["type"] == "toggle":
                         toggle_setting(game, self.selected_setting_index)
                         game.mixer.play(4)
+                        if game.state.show_subtitles:
+                            game.subtitles.add(game.local.t('game.subtitle.toggle'))
 
                     elif event.key == pygame.K_RETURN and setting["type"] == "lang":
                         rotate_language(game)
                         game.mixer.play(4)
+                        if game.state.show_subtitles:
+                            game.subtitles.add(game.local.t('game.subtitle.toggle'))
 
                     elif event.key in (pygame.K_BACKSPACE, pygame.K_ESCAPE):
                         game.hud.settings_tab.close()
@@ -240,10 +246,14 @@ class Input:
                     elif game.hud.settings_tab.active and setting["type"] == "toggle":
                         toggle_setting(game, self.selected_setting_index)
                         game.mixer.play(4)
+                        if game.state.show_subtitles:
+                            game.subtitles.add(game.local.t('game.subtitle.toggle'))
 
                     elif game.hud.settings_tab.active and setting["type"] == "lang":
                         rotate_language(game)
                         game.mixer.play(4)
+                        if game.state.show_subtitles:
+                            game.subtitles.add(game.local.t('game.subtitle.toggle'))
 
                 if event.button == 1:
                     if game.hud.settings_tab.active:

@@ -300,6 +300,7 @@ def spawn_boss(game):
                          random.choice(color)))
 
         game.mixer.play_music('flight')
+        game.subtitles.add(game.local.t('game.subtitle.boss_fight'))
         game.spawns.phase_spawned = True
         game.spawns.boss_alive = True
 
@@ -455,6 +456,9 @@ def update_game(game, delta, screen_size, hud_padding):
                 if joysticks and game.state.can_rumble:
                     controller.rumble(frequency, 3, BASE_RUMBLE_MS * 2)
                 game.mixer.play(6)
+                if game.state.show_subtitles:
+                    game.subtitles.add(game.local.t('game.subtitle.critical'))
+
                 frequency += 0.1
 
         game.ship.update_position(game.ship.rect.x, game.ship.rect.y)

@@ -2,12 +2,12 @@ import random
 
 import pygame
 
+from scripts.engine.utils import add_multiplier, formulize, update_screenshake
 from scripts.objects.explode import Explosion
 from scripts.objects.floaty import FloatingNumber
 from scripts.objects.impact import ImpactFrame
 from scripts.objects.particle import Particle
 from scripts.system.constants import *
-from scripts.engine.utils import add_multiplier, formulize, update_screenshake
 
 
 def check_collision(game, local):
@@ -105,6 +105,8 @@ def check_collision(game, local):
 
             if game.state.play_sound:
                 game.mixer.play(1)
+                if game.state.show_subtitles:
+                    game.subtitles.add(local.t('game.subtitle.explosion'))
 
             damage_per_frame = 0
             boss_damage = 0
@@ -126,7 +128,7 @@ def check_collision(game, local):
                     if hasattr(game.ship, "fortified_cap"):
                         shield_gain = min(shield_gain, game.ship.fortified_cap)
                     game.ship.shield += shield_gain
-            
+
             if game.state.screen_shake_amount > 0:
                 update_screenshake(game, time=40,
                                    strength=game.state.screen_shake_amount * 8)
@@ -137,6 +139,8 @@ def check_collision(game, local):
                     game.ship.bod_used = True
                     if game.state.play_sound:
                         game.mixer.play(2)
+                        if game.state.show_subtitles:
+                            game.subtitles.add(local.t('game.subtitle.brush_of_death'))
                 else:
                     game.state.game_over = True
                     game.ship.kill()
@@ -204,6 +208,9 @@ def check_collision(game, local):
                 game.sprites.explosions.add(explosion)
                 if game.state.play_sound:
                     game.mixer.play(1)
+                    if game.state.show_subtitles:
+                        game.subtitles.add(local.t('game.subtitle.explosion'))
+
                 game.state.score_multiplier = game.ship.combo_multiplier
                 game.state.score += (game.ship.level * SCORE_SCALING *
                                 game.state.score_multiplier)
@@ -266,6 +273,9 @@ def check_collision(game, local):
                 game.sprites.explosions.add(explosion)
                 if game.state.play_sound:
                     game.mixer.play(1)
+                    if game.state.show_subtitles:
+                        game.subtitles.add(game.local.t('game.subtitle.explosion'))
+
                 game.state.score_multiplier = game.ship.combo_multiplier
                 game.state.score += (game.ship.level * SCORE_SCALING * game.state.score_multiplier)
                 game.ship.gain_xp(formulize(game, game.ship.level), game.mixer.sounds)
@@ -331,6 +341,9 @@ def check_collision(game, local):
                 game.sprites.explosions.add(explosion)
                 if game.state.play_sound:
                     game.mixer.play(1)
+                    if game.state.show_subtitles:
+                        game.subtitles.add(game.local.t('game.subtitle.explosion'))
+
                 game.state.score_multiplier = game.ship.combo_multiplier
                 game.state.score += game.ship.level * SCORE_SCALING * game.state.score_multiplier
                 game.ship.gain_xp(formulize(game, game.ship.level), game.mixer.sounds)
@@ -340,9 +353,10 @@ def check_collision(game, local):
             game.events.nuke_event(projectile.rect.center, game)
             projectile.kill()
         elif getattr(projectile, "explosive", False) and getattr(projectile, "distance_traveled", 0) >= 500:
-            game.events.torpedo_event(projectile.rect.center, 
-                                    getattr(projectile, "explosion_radius", 100), 
-                                    game)
+            game.events.torpedo_event(
+                projectile.rect.center,
+                getattr(projectile, "explosion_radius", 100),
+                game)
             projectile.kill()
 
     upgrade_hit = pygame.sprite.spritecollide(game.ship, game.sprites.upgrades,False, # type: ignore
@@ -352,4 +366,7 @@ def check_collision(game, local):
             upgrade.kill()
             if game.state.play_sound:
                 game.mixer.play(2)
+                if game.state.show_subtitles:
+                    game.subtitles.add(local.t('game.subtitle.upgrade'))
+
                 upgrade.apply(game.ship, game)

@@ -3,19 +3,19 @@ import json
 from pygame.constants import *
 
 import scripts.system.assets as assets
-from scripts.engine.difficulty import Difficulty
-from scripts.objects.celestial import *
-from scripts.system.context import AppContext
 from scripts.engine.crt import CRT
-from scripts.system.fonts import FontManager
-from scripts.engine.game import Game
-from scripts.system.mixer import Mixer
-from scripts.engine.mods import Mods
-from scripts.system.constants import *
+from scripts.engine.difficulty import Difficulty
 from scripts.engine.fade import fade
+from scripts.engine.game import Game
+from scripts.engine.mods import Mods
+from scripts.engine.shared import controller
 from scripts.engine.update import set_hud
 from scripts.engine.utils import render_fade
-from scripts.engine.shared import controller
+from scripts.objects.celestial import *
+from scripts.system.constants import *
+from scripts.system.context import AppContext
+from scripts.system.fonts import FontManager
+from scripts.system.mixer import Mixer
 
 
 class Menu:

@@ -42,6 +42,7 @@ class Events:
 
         if shots_this_frame > 0 and game.state.play_sound:
             game.mixer.play(0)
+            game.subtitles.add(game.local.t('game.subtitle.alien_shot'))
 
     def nuke_event(self, center, game):
         game.sprites.shockwaves.append(Shockwave(center, max_radius=SHOCKWAVE_RADIUS,
@@ -55,6 +56,7 @@ class Events:
 
             if joysticks and game.state.can_rumble:
                 controller.rumble(1, 1, HIGH_RUMBLE_MS)
+            game.subtitles.add(game.local.t('game.subtitle.nuke'))
 
     def torpedo_event(self, center, radius, game):
         game.sprites.shockwaves.append(Shockwave(center, max_radius=radius,
@@ -68,8 +70,10 @@ class Events:
 
             if joysticks and game.state.can_rumble:
                 controller.rumble(0.5, 0.5, HIGH_RUMBLE_MS // 2)
+            game.subtitles.add(game.local.t('game.subtitle.torpedo'))
 
     def black_hole_event(self, game):
         x = random.randint(100, game.screen_size[0] - 100)
         y = -200
         game.sprites.celestials.add(BlackHole(game, x, y))
+        game.subtitles.add(game.local.t('game.subtitle.black_hole'))

@@ -7,7 +7,8 @@ from scripts.engine.utils import _get_setting_target
 from scripts.system.config import save_config
 
 class Mixer:
-    def __init__(self):
+    def __init__(self, game=None):
+        self.game = game
         self.sounds = load_sounds()
         self.ost = load_ost()
         self.music_volume = MUSIC_VOLUME
@@ -33,6 +34,9 @@ class Mixer:
         pygame.mixer.music.fadeout(fade_ms)
         pygame.mixer.music.load(self.ost[track_name])
         pygame.mixer.music.play(-1 if loop else 0, fade_ms=fade_ms)
+
+        if self.game.state.show_subtitles:
+            self.game.subtitle.add_subtitle(f"♪ {track_name}")
 
         self.current_track = track_name
         self.playlist = []
