@@ -69,10 +69,16 @@
   "game.skill.fortified": "Refuerza tus defensas para mitigar el daño recibido. Sin embargo, las pesadas fortificaciones ralentizan la recuperación de escudos.",
   "game.skill.bod": "Engaña a la muerte. Tu casco se convierte en 80% de vida si tu casco se destruye. Este efecto solo puede desencadenarse una vez por partida.",
   "game.skill.savant": "Conoce tus armas, conoce a tus enemigos. Cuanto más las uses, menos se sobrecalientan",
-  "game.subtitle.alien_shot": "Disparo alien",
+  "game.subtitle.alien_shot": "Sonido de disparo",
   "game.subtitle.torpedo": "Disparo de torpedo",
   "game.subtitle.nuke": "Disparo de bomba",
   "game.subtitle.black_hole": "Spawn de agujero negro (evento)",
   "game.subtitle.boss_fight": "¿Eso es música de jefe?",
-  "game.subtitle.level_up": "Sonido de subir de nivel"
+  "game.subtitle.no_ammo": "Sin munición",
+  "game.subtitle.explosion": "Sonido de explosión",
+  "game.subtitle.level_up": "Sonido de subir de nivel",
+  "game.subtitle.upgrade": "Sonido de power up",
+  "game.subtitle.critical": "Sonido de estado crítico",
+  "game.subtitle.brush_of_death": "Sonido de engañando a la muerte",
+  "game.subtitle.toggle": "Sonido de toggle"
 }

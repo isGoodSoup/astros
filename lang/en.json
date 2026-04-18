@@ -69,10 +69,16 @@
   "game.skill.fortified": "Reinforce your defenses to mitigate incoming damage. However, the heavy fortifications slow shield recovery.",
   "game.skill.bod": "Cheat death once. If your hull would be destroyed, you are instead restored to 80% health. This effect can only trigger once per game.",
   "game.skill.savant": "Know your weapons, know your enemies. The more you use them, the less they overheat",
-  "game.subtitle.alien_shot": "Alien shooting",
+  "game.subtitle.alien_shot": "Shooting sound",
   "game.subtitle.torpedo": "Torpedo launch",
   "game.subtitle.nuke": "Nuke launch",
   "game.subtitle.black_hole": "Black hole spawn (event)",
   "game.subtitle.boss_fight": "Do I hear boss music?",
-  "game.subtitle.level_up": "Level up sound"
+  "game.subtitle.no_ammo": "Out of ammo",
+  "game.subtitle.explosion": "Explosion sound",
+  "game.subtitle.level_up": "Level up sound",
+  "game.subtitle.upgrade": "Upgrade sound",
+  "game.subtitle.critical": "Critical alarm sound",
+  "game.subtitle.brush_of_death": "Brush of death sound",
+  "game.subtitle.toggle": "Toggle sound"
 }
