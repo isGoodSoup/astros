@@ -72,7 +72,8 @@ def take_screenshot(game):
     surface = pygame.image.fromstring(data, game.screen_size, "RGBA", True)
     pygame.image.save(surface, save_path)
     game.mixer.play(4)
-
+    if game.state.show_subtitles:
+        game.subtitles.add(game.local.t('game.subtitle.screenshot'))
 
 def toggle_setting(game, index):
     setting = SETTINGS_DEFINITION[index]

@@ -80,5 +80,6 @@
   "game.subtitle.upgrade": "Sonido de power up",
   "game.subtitle.critical": "Sonido de estado crítico",
   "game.subtitle.brush_of_death": "Sonido de engañando a la muerte",
-  "game.subtitle.toggle": "Sonido de toggle"
+  "game.subtitle.toggle": "Sonido de toggle",
+  "game.subtitle.screenshot": "Captura de pantalla tomada"
 }

@@ -80,5 +80,6 @@
   "game.subtitle.upgrade": "Upgrade sound",
   "game.subtitle.critical": "Critical alarm sound",
   "game.subtitle.brush_of_death": "Brush of death sound",
-  "game.subtitle.toggle": "Toggle sound"
+  "game.subtitle.toggle": "Toggle sound",
+  "game.subtitle.screenshot": "Screenshot taken"
 }
