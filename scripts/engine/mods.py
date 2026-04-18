@@ -380,6 +380,7 @@ class Difficulties:
 
             if event.hat == 0 and event.value == (1, 0):
                 self.index = (self.index + 1) % len(self.options)
+                mixer.play(5)
 
         if event.type == pygame.JOYBUTTONDOWN:
             if event.button == 0:
