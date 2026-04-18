@@ -68,5 +68,11 @@
   "game.skill.tower": "Become an immovable bastion. Remaining stationary significantly boosts shield capacity, but structural reinforcements hinder mobility.",
   "game.skill.fortified": "Reinforce your defenses to mitigate incoming damage. However, the heavy fortifications slow shield recovery.",
   "game.skill.bod": "Cheat death once. If your hull would be destroyed, you are instead restored to 80% health. This effect can only trigger once per game.",
-  "game.skill.savant": "Know your weapons, know your enemies. The more you use them, the less they overheat"
+  "game.skill.savant": "Know your weapons, know your enemies. The more you use them, the less they overheat",
+  "game.subtitle.alien_shot": "Alien shooting",
+  "game.subtitle.torpedo": "Torpedo launch",
+  "game.subtitle.nuke": "Nuke launch",
+  "game.subtitle.black_hole": "Black hole spawn (event)",
+  "game.subtitle.boss_fight": "Do I hear boss music?",
+  "game.subtitle.level_up": "Level up sound"
 }
