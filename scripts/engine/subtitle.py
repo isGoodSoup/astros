@@ -20,6 +20,8 @@ class SubtitleManager:
             return
 
         self.active.append(Subtitle(text, duration, color))
+        if len(self.active) > 4:
+            self.active.pop(0)
 
     def update(self):
         now = pygame.time.get_ticks()

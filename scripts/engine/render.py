@@ -254,6 +254,7 @@ def render_waves(game, screen):
 class RenderScreen:
     def draw(self, game):
         render_frame(game, game.screen, game.font, game.hud_padding)
+        game.subtitles.draw()
 
         if not game.state.game_over and game.state.can_show_hud:
             game.hud.update(game, game.font, game.screen, game.hud_ratio,

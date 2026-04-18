@@ -504,6 +504,7 @@ def update_game(game, delta, screen_size, hud_padding):
         game.spawns.last_hole_spawn = now
         game.events.black_hole_event(game)
 
+    game.subtitles.update()
     update_phase(game)
 
 def trigger_market(game):
