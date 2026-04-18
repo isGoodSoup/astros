@@ -2,6 +2,5 @@
 build
 dist
 main.spec
-pye.py
 features.md
 dev/
