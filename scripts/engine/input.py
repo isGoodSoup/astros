@@ -389,21 +389,24 @@ class Input:
 
     def update_axis(self, game):
         if joysticks:
+            lx = controller.get_axis(0)
+            ly = controller.get_axis(1)
+
+            lx = 0 if abs(lx) < self.deadzone else lx
+            ly = 0 if abs(ly) < self.deadzone else ly
+
+            self.left_joystick[0] = lx
+            self.left_joystick[1] = ly
+
             rx = controller.get_axis(2)
             ry = controller.get_axis(3)
 
-            rx = 0 if abs(rx) < game.input.deadzone else rx
-            ry = 0 if abs(ry) < game.input.deadzone else ry
+            rx = 0 if abs(rx) < self.deadzone else rx
+            ry = 0 if abs(ry) < self.deadzone else ry
 
-            game.input.right_joystick[0] = rx
-            game.input.right_joystick[1] = ry
-
-            lx = controller.get_axis(0)
-            ly = controller.get_axis(1)
-            lx = 0 if abs(lx) < game.input.deadzone else lx
-            ly = 0 if abs(ly) < game.input.deadzone else ly
-            self.actions["move"] = tuple(self.left_joystick)
-            lx, ly = game.input.actions["move"]
+            self.right_joystick[0] = rx
+            self.right_joystick[1] = ry
+            self.actions["move"] = (lx, ly)
 
     def update_cursor(self, game, delta, screen_size):
         rx, ry = game.input.right_joystick

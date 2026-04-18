@@ -31,9 +31,9 @@ def update_movement(game, delta, screen_size):
         if key_pressed[K_DOWN] or key_pressed[K_s]:
             iy += 1
 
-    ix += game.input.left_joystick[0]
+    ix += game.input.actions["move"][0]
     if not lock_y:
-        iy += game.input.left_joystick[1]
+        iy += game.input.actions["move"][1]
 
     length = (ix * ix + iy * iy) ** 0.5
     if length > 1e-6:
