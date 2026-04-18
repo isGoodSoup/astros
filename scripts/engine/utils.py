@@ -71,6 +71,7 @@ def take_screenshot(game):
     data = game.crt.ctx.screen.read(components=4)
     surface = pygame.image.fromstring(data, game.screen_size, "RGBA", True)
     pygame.image.save(surface, save_path)
+    game.mixer.play(4)
 
 
 def toggle_setting(game, index):
