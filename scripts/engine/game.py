@@ -84,7 +84,9 @@ class Game:
         self.mixer.queue([
             'odyssey',
             'unknown',
-            'starfield'],
+            'starfield'
+            'journey'
+            ],
             loop=True)
 
     def run(self, clock, screen, screen_size, hud_ratio, crt):

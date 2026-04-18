@@ -26,6 +26,7 @@ def load_ost():
         "flight": resource_path("assets/fx/flight.ogg"),
         "unknown": resource_path("assets/fx/unknown.ogg"),
         "starfield": resource_path("assets/fx/starfield.ogg"),
+        "journey": resource_path("assets/fx/journey.ogg"),
     }
 
 def _music_volume_up(game, step=0.1):
