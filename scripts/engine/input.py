@@ -11,10 +11,12 @@ from scripts.system.constants import (BOSS_PHASES_INDEX, ONE_SECOND,
                                       BASE_RUMBLE_MS, SETTINGS_DEFINITION)
 from scripts.system.lang import rotate_language
 from scripts.system.mixer import adjust_setting
+from scripts.engine.actions import create_actions
 
 
 class Input:
     def __init__(self, screen_size):
+        self.actions = create_actions()
         self.left_joystick = [0.0, 0.0]
         self.right_joystick = [0.0, 0.0]
         self.deadzone = 0.2
@@ -60,6 +62,7 @@ class Input:
             self.cursor_visible = (now - self.last_move_time <= self.cursor_hide_delay)
 
     def act(self, game, events):
+        self.reset_actions()
         self.moving_hud = False
         adjusting_hud = False
         now = pygame.time.get_ticks()
@@ -77,7 +80,9 @@ class Input:
 
         shooting_input = ((controller_shoot or keys[pygame.K_SPACE] or mouse[0])
                           and not game.state.pause)
-        if ((shooting_input and now - game.spawns.last_shot_time >=
+        self.actions["shoot"] = shooting_input
+
+        if ((self.actions["shoot"] and now - game.spawns.last_shot_time >=
                 game.ship.shot_cooldown) and game.ship.can_shoot()):
             if is_boss_phase:
                 enemies = list(game.sprites.bosses)
@@ -97,9 +102,10 @@ class Input:
                 if game.state.show_subtitles:
                     game.subtitles.add(game.local.t('game.subtitle.no_ammo'))
 
-        secondary_input = ((controller_secondary or mouse[2])
+        self.actions["secondary"] = ((controller_secondary or mouse[2])
                            and not game.state.pause)
-        if (secondary_input and now - game.ship.last_secondary_shot >=
+
+        if (self.actions["secondary"] and now - game.ship.last_secondary_shot >=
                 game.ship.secondary_guns['torpedo']):
             new_projectiles = game.ship.shoot(game, gun_type="torpedo")
             game.sprites.projectiles.add(*new_projectiles)
@@ -381,36 +387,46 @@ class Input:
                 game.state.phase_state = PHASE_TRANSITION
                 game.state.pause = False
 
-def update_axis(game):
-    if joysticks:
-        rx = controller.get_axis(2)
-        ry = controller.get_axis(3)
+    def update_axis(self, game):
+        if joysticks:
+            rx = controller.get_axis(2)
+            ry = controller.get_axis(3)
 
-        rx = 0 if abs(rx) < game.input.deadzone else rx
-        ry = 0 if abs(ry) < game.input.deadzone else ry
+            rx = 0 if abs(rx) < game.input.deadzone else rx
+            ry = 0 if abs(ry) < game.input.deadzone else ry
 
-        game.input.right_joystick[0] = rx
-        game.input.right_joystick[1] = ry
+            game.input.right_joystick[0] = rx
+            game.input.right_joystick[1] = ry
 
-        lx = controller.get_axis(0)
-        ly = controller.get_axis(1)
-        lx = 0 if abs(lx) < game.input.deadzone else lx
-        ly = 0 if abs(ly) < game.input.deadzone else ly
-        game.input.left_joystick[0] = lx
-        game.input.left_joystick[1] = ly
+            lx = controller.get_axis(0)
+            ly = controller.get_axis(1)
+            lx = 0 if abs(lx) < game.input.deadzone else lx
+            ly = 0 if abs(ly) < game.input.deadzone else ly
+            self.actions["move"] = tuple(self.left_joystick)
+            lx, ly = game.input.actions["move"]
 
-def update_cursor(game, delta, screen_size):
-    rx, ry = game.input.right_joystick
-    deadzone = game.input.deadzone
+    def update_cursor(self, game, delta, screen_size):
+        rx, ry = game.input.right_joystick
+        deadzone = game.input.deadzone
 
-    if abs(rx) > deadzone or abs(ry) > deadzone:
-        game.input.cursor_pos[0] += rx * game.input.cursor_speed * delta
-        game.input.cursor_pos[1] += ry * game.input.cursor_speed * delta
+        if abs(rx) > deadzone or abs(ry) > deadzone:
+            game.input.cursor_pos[0] += rx * game.input.cursor_speed * delta
+            game.input.cursor_pos[1] += ry * game.input.cursor_speed * delta
 
-        game.input.cursor_pos[0] = max(0, min(screen_size[0],
-                                              game.input.cursor_pos[0]))
-        game.input.cursor_pos[1] = max(0, min(screen_size[1],
-                                              game.input.cursor_pos[1]))
+            game.input.cursor_pos[0] = max(0, min(screen_size[0],
+                                                  game.input.cursor_pos[0]))
+            game.input.cursor_pos[1] = max(0, min(screen_size[1],
+                                                  game.input.cursor_pos[1]))
 
-        game.input.mode = INPUT_CONTROLLER
-        game.input.last_move_time = pygame.time.get_ticks()
+            game.input.mode = INPUT_CONTROLLER
+            game.input.last_move_time = pygame.time.get_ticks()
+
+    def reset_actions(self):
+        self.actions["shoot"] = False
+        self.actions["secondary"] = False
+        self.actions["pause"] = False
+        self.actions["switch_weapon"] = False
+
+        self.actions["ui_next"] = False
+        self.actions["ui_prev"] = False
+        self.actions["ui_confirm"] = False

@@ -5,7 +5,6 @@ import pygame
 from scripts.engine import upgd
 from scripts.engine.collision import check_collision
 from scripts.engine.difficulty import Difficulty
-from scripts.engine.input import update_cursor, update_axis
 from scripts.engine.market import Market
 from scripts.engine.movement import update_movement
 from scripts.engine.runtime import (get_boss_pos, get_upgrade_position, \
@@ -31,11 +30,11 @@ market = None
 class Updater:
     def update(self, game):
         global market
-        update_axis(game)
+        game.input.update_axis(game)
         if not game.state.pause or game.hud.skill_tab.active:
             if not game.hud.skill_tab.active:
                 update_movement(game, game.delta, game.screen_size)
-                update_cursor(game, game.delta, game.screen_size)
+                game.input.update_cursor(game, game.delta, game.screen_size)
 
         if game.state.market_active:
             if market:
