@@ -335,4 +335,10 @@ SETTINGS_DEFINITION = [
         "type": "lang",
         "target": "state"
     },
+    {
+        "key": "show_subtitles",
+        "label": "game.settings.subtitles",
+        "type": "toggle",
+        "target": "state"
+    }
 ]

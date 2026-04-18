@@ -13,7 +13,7 @@ class GameState:
         self.can_rumble = True
         self.can_show_controls = True
         self.can_show_hud = True
-        self.show_subtitles = True
+        self.show_subtitles = False
         self.current_lang = 'en'
         self.difficulty = Difficulty.EXPLORER
 
