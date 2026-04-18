@@ -11,12 +11,10 @@ from scripts.system.constants import (BOSS_PHASES_INDEX, ONE_SECOND,
                                       BASE_RUMBLE_MS, SETTINGS_DEFINITION)
 from scripts.system.lang import rotate_language
 from scripts.system.mixer import adjust_setting
-from scripts.engine.actions import create_actions
 
 
 class Input:
     def __init__(self, screen_size):
-        self.actions = create_actions()
         self.left_joystick = [0.0, 0.0]
         self.right_joystick = [0.0, 0.0]
         self.deadzone = 0.2
@@ -62,7 +60,6 @@ class Input:
             self.cursor_visible = (now - self.last_move_time <= self.cursor_hide_delay)
 
     def act(self, game, events):
-        self.reset_actions()
         self.moving_hud = False
         adjusting_hud = False
         now = pygame.time.get_ticks()
@@ -80,9 +77,7 @@ class Input:
 
         shooting_input = ((controller_shoot or keys[pygame.K_SPACE] or mouse[0])
                           and not game.state.pause)
-        self.actions["shoot"] = shooting_input
-
-        if ((self.actions["shoot"] and now - game.spawns.last_shot_time >=
+        if ((shooting_input and now - game.spawns.last_shot_time >=
                 game.ship.shot_cooldown) and game.ship.can_shoot()):
             if is_boss_phase:
                 enemies = list(game.sprites.bosses)
@@ -102,10 +97,9 @@ class Input:
                 if game.state.show_subtitles:
                     game.subtitles.add(game.local.t('game.subtitle.no_ammo'))
 
-        self.actions["secondary"] = ((controller_secondary or mouse[2])
+        secondary_input = ((controller_secondary or mouse[2])
                            and not game.state.pause)
-
-        if (self.actions["secondary"] and now - game.ship.last_secondary_shot >=
+        if (secondary_input and now - game.ship.last_secondary_shot >=
                 game.ship.secondary_guns['torpedo']):
             new_projectiles = game.ship.shoot(game, gun_type="torpedo")
             game.sprites.projectiles.add(*new_projectiles)
@@ -389,24 +383,21 @@ class Input:
 
     def update_axis(self, game):
         if joysticks:
-            lx = controller.get_axis(0)
-            ly = controller.get_axis(1)
-
-            lx = 0 if abs(lx) < self.deadzone else lx
-            ly = 0 if abs(ly) < self.deadzone else ly
-
-            self.left_joystick[0] = lx
-            self.left_joystick[1] = ly
-
             rx = controller.get_axis(2)
             ry = controller.get_axis(3)
 
-            rx = 0 if abs(rx) < self.deadzone else rx
-            ry = 0 if abs(ry) < self.deadzone else ry
+            rx = 0 if abs(rx) < game.input.deadzone else rx
+            ry = 0 if abs(ry) < game.input.deadzone else ry
 
-            self.right_joystick[0] = rx
-            self.right_joystick[1] = ry
-            self.actions["move"] = (lx, ly)
+            game.input.right_joystick[0] = rx
+            game.input.right_joystick[1] = ry
+
+            lx = controller.get_axis(0)
+            ly = controller.get_axis(1)
+            lx = 0 if abs(lx) < game.input.deadzone else lx
+            ly = 0 if abs(ly) < game.input.deadzone else ly
+            game.input.left_joystick[0] = lx
+            game.input.left_joystick[1] = ly
 
     def update_cursor(self, game, delta, screen_size):
         rx, ry = game.input.right_joystick
@@ -423,13 +414,3 @@ class Input:
 
             game.input.mode = INPUT_CONTROLLER
             game.input.last_move_time = pygame.time.get_ticks()
-
-    def reset_actions(self):
-        self.actions["shoot"] = False
-        self.actions["secondary"] = False
-        self.actions["pause"] = False
-        self.actions["switch_weapon"] = False
-
-        self.actions["ui_next"] = False
-        self.actions["ui_prev"] = False
-        self.actions["ui_confirm"] = False
