@@ -46,13 +46,13 @@ class Input:
                 self.mode = INPUT_MOUSE
                 self.cursor_pos = list(pygame.mouse.get_pos())
                 self.last_move_time = pygame.time.get_ticks()
-                self.cursor_visible = True
+                self.cursor_visible = not game.hud.settings_tab.active
 
             elif event.type in (pygame.JOYAXISMOTION, pygame.JOYBUTTONDOWN,
                                 pygame.JOYBUTTONUP, pygame.JOYHATMOTION):
                 self.mode = INPUT_CONTROLLER
                 self.last_move_time = pygame.time.get_ticks()
-                self.cursor_visible = True
+                self.cursor_visible = not game.hud.settings_tab.active
 
         if game.hud.skill_tab.active or (game.state.current_phase == game.state.phases[-1]):
             self.cursor_visible = True
