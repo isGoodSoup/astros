@@ -36,7 +36,7 @@
   "game.buy.ammo": "AMMO",
   "game.buy.damage": "DAMAGE",
   "game.buy.repairs": "REPAIRS",
-  "game.defeat": "GAME OVER",
+  "game.defeat": "GAME OVER - Press R to restart",
   "game.score": "SCORE",
   "game.hud.wave": "Wave {wave}",
   "game.hud.perks": "Perks: {perks}",

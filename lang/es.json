@@ -36,7 +36,7 @@
   "game.buy.ammo": "MUNICIÓN",
   "game.buy.damage": "DAÑO",
   "game.buy.repairs": "REPARACIONES",
-  "game.defeat": "DERROTA",
+  "game.defeat": "DERROTA - Presiona R para reiniciar",
   "game.score": "PUNTUACIÓN",
   "game.hud.wave": "Ola/Fase {wave}",
   "game.hud.perks": "Puntos: {perks}",
