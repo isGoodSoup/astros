@@ -61,7 +61,7 @@ class Boss(pygame.sprite.Sprite):
         self.phase2_change_time = pygame.time.get_ticks()
         self.phase2_change_interval = ONE_SECOND
 
-        self.orbit_radius = random.randint(300, 500)
+        self.orbit_radius = random.randint(600, 900)
         self.orbit_angle = random.uniform(0, 2 * math.pi)
         self.orbit_speed = random.uniform(0.1, 0.4)
 
@@ -153,7 +153,14 @@ class Boss(pygame.sprite.Sprite):
             direction = (target_pos - pos)
 
             if direction.length() > 2:
-                lerp_factor = min(1.0, (self.step * speed_mult) / direction.length())
+                distance = direction.length()
+                min_distance = 350
+
+                if distance < min_distance:
+                    direction.scale_to_length(min_distance)
+                    target_pos = pos + direction
+
+                lerp_factor = min(0.05, (self.step * speed_mult) / max(distance, 1))
                 new_pos = pos.lerp(target_pos, lerp_factor)
                 self.rect.center = (int(new_pos.x), int(new_pos.y))
 
