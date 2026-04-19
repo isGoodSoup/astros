@@ -58,10 +58,11 @@ class Menu:
                     if event.mod & KMOD_CTRL and event.key == K_s:
                         self.skip = True
 
-                    if any(pygame.key.get_pressed()) and not self.transitioning:
+                    if not self.transitioning:
                         self.mixer.play(4)
                         fade.start('out')
                         self.transitioning = True
+
                 elif event.type == pygame.JOYBUTTONDOWN:
                     if controller.get_button(8) and controller.get_button(9):
                         self.skip = True
